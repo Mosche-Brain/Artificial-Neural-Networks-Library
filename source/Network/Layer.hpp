@@ -25,5 +25,5 @@ public:
     void train(MatrixXd data, VectorXd expected, int iter, double rate);
 
     VirtualNeuron neuron(int index);
-
+    std::vector<VirtualNeuron> getLayer();
 };

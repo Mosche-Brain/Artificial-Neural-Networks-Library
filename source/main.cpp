@@ -1,20 +1,16 @@
 #include <iostream>
-#include <vector>
-#include <cmath>
-#include <algorithm>
-#include <utility>
 #include <fstream>
-#include <map>
+#include <utility>
+#include <vector>
 #include <random>
-#include <ctime>
-#include <bits/stl_pair.h>
+#include <cmath>
 
 #include <nlohmann/json.hpp>
 
 #include "Network/Perceptron.hpp"
 #include "Network/NeuralNet.hpp"
 #include "containers/MNISTDataSet.hpp"
-
+#include "NNVisualiser.hpp"
 
 using json = nlohmann::json;
 
@@ -29,7 +25,7 @@ int main()
     {
         new Layer(2, 1, linear_standard),
         new Layer(2, 2, RELu),
-        new Layer(2, 2, linear_standard)
+        new Layer(2, 1, linear_standard)
     };
 
     NeuralNet network(layers);
@@ -38,8 +34,14 @@ int main()
                      {0.0, 1.0},
                      {1.0, 0.0},
                      {1.0, 1.0}};
-    
+
     VectorXd truth{{0.0, 1.0, 1.0, 0.0}};
+
+    NNVisualiser visualiser(&network);
+    visualiser.Render();
+
+
+    return 0;
 
     network.train(inputs, truth, 15, 0.1f);
 

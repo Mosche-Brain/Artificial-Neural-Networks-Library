@@ -22,14 +22,11 @@ VectorXd Layer::forward(MatrixXd input, bool override_output)
 
     if (input.cols() == this->input_size && input.rows() == 1)
     {
-        // Pojedynczy input jako 1 x N (np. 1 próbka)
         output_vector = (this->weights * input.transpose()).col(0) + this->biases;
     }
     else if (input.cols() == this->input_size && input.rows() > 1)
     {
-        // Batch - każda próbka w osobnym wierszu
         MatrixXd result = (this->weights * input.transpose()).colwise() + this->biases;
-        // result: (layer_size x batch_size)
         output_vector = result.rowwise().mean(); 
     }
     else
@@ -48,58 +45,6 @@ VectorXd Layer::forward(MatrixXd input, bool override_output)
         this->outputs = output_vector;
 
     return output_vector;
-
-    // if (input.cols() == 1) 
-    // {
-    //     input.transposeInPlace();
-    // }
-
-    // std::cout << "Size: " << input.cols() << '\n';
-    // std::cout << "cols: " << input.cols() << '\n';
-    // std::cout << "rows: " << input.rows() << '\n';
-
-    // // //if(input.cols() == 1)
-    // //if(input.rows() == 1)
-    // {
-    //     //input = input.transpose().replicate(this->layer_size, input.cols());
-    //     std::cout << "replicated\n";
-    //     input = input.replicate(this->layer_size, 1);
-    // }
-
-    // // if(input.cols() != this->input_size)
-    // // {
-    // //     std::cout << "Size of previous layer output vector doesn't match with neuron input size\n";
-    // // }
-
-    // // if (input.rows() != this->input_size) 
-    // // {
-    // //     std::cout << "Incorrect input size!";
-    // //     std::cout << '\n';
-    // //     //std::cout << "Input: " << input.row(0) << '\n';
-    // //     std::cout << "Size: " << input.cols() << '\n';
-    // //     std::cout << "cols: " << input.cols() << '\n';
-    // //     std::cout << "rows: " << input.rows() << '\n';
-    // //     std::cout << "Input size: " << this->input_size << '\n';
-    // //     std::cout << "Layer size: " << this->layer_size << '\n';
-    // //     return VectorXd::Zero(this->layer_size);
-    // // }
-
-
-    // VectorXd output_vector(this->layer_size);
-    // for(int i = 0 ; i < this->layer_size ; i++)
-    // {
-    //     double weighted_sum = input.row(i).dot(this->weights.row(i)) + this->biases[i];
-    //     double output = this->activation_function(weighted_sum);
-
-    //     output_vector[i] = output;
-    // }
-   
-    // if(override_output)
-    //     this->outputs = output_vector;
-
-    // std::cout << "Layer output size: " << output_vector.size() << '\n';
-
-    //return output_vector;
 }
 
 void Layer::train(MatrixXd data, VectorXd expected, int n, double rate)
@@ -149,8 +94,19 @@ VirtualNeuron Layer::neuron(int index)
 {
     VirtualNeuron neuronObj;
 
-    // neuronObj.weights = &this->weights.row(index);
-    // neuronObj.bias    = &this->biases[index];
+    neuronObj.weights = &this->weights.row(index).data();
+    neuronObj.bias    = &this->biases[index];
 
     return neuronObj;
+}
+
+std::vector<VirtualNeuron> Layer::getLayer()
+{
+    std::vector<VirtualNeuron> buff;
+    for(int i = 0 ; i < this->layer_size ; i++)
+    {
+        buff.push_back(this->neuron(i));
+    }
+
+    return buff;
 }

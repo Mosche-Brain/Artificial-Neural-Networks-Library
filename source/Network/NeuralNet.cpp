@@ -47,13 +47,13 @@ void NeuralNet::train(MatrixXd train_data, VectorXd expected, uint n_iter, float
     std::cout << "Training ok\n";
 }
 
-VectorXd NeuralNet::forward(VectorXd input)
-{
-    for(int i = 0 ; i < this->layers.size() ; i++)
-    {
-        //layers
-    }
-}
+// VectorXd NeuralNet::forward(VectorXd input)
+// {
+//     for(int i = 0 ; i < this->layers.size() ; i++)
+//     {
+//         //layers
+//     }
+// }
 
 VectorXd NeuralNet::forward(MatrixXd input)
 {
@@ -105,7 +105,7 @@ void NeuralNet::backpropagate(VectorXd expected, double rate)
         Layer* prev = i > 0 ? this->layers[i - 1] : nullptr;
         Layer* curr = this->layers[  i  ];
         //Layer* next = this->layers[i + 1];
-        Layer* next = this->layer_size < i ? this->layers[i + 1] : nullptr;
+        Layer* next = this->layers.size() < i ? this->layers[i + 1] : nullptr;
 
         //VectorXd errors(curr->outputs.size());
         //std::vector<double> errors(curr->outputs.size());

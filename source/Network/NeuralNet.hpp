@@ -33,8 +33,9 @@ public:
     
     json export_to_json();
 
-protected:
+
     std::vector<Layer*> layers;
+protected:
     int layer_size;
 
     VectorXd forward(int currentIndex, int nextIndex);
