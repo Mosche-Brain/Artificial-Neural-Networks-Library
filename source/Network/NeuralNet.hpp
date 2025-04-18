@@ -6,8 +6,6 @@
 
 #include <nlohmann/json.hpp>
 
-using namespace Eigen;
-
 using json = nlohmann::json;
 
 class NeuralNet
@@ -17,26 +15,26 @@ public:
     NeuralNet(std::vector<Layer*> _layers_);
 
 
+    void setLossFunction(std::function<double(VectorXd)> func);
     void addLayer(Layer* layer);
     void train(MatrixXd train_data, VectorXd expected, uint n_iter, float rate);
     void backpropagate(VectorXd expected, double rate);
     void update_weights(float rate);
     void feedforward();
 
-    double transfer_derivative(double x);
+    //double transfer_derivative(double x);
 
     VectorXd forward(MatrixXd input);
-    VectorXd forward(VectorXd input);
+    //VectorXd forward(VectorXd input);
 
     Layer* inputLayer();
     Layer* outputLayer();
     
     json export_to_json();
 
-
     std::vector<Layer*> layers;
 protected:
-    int layer_size;
+    std::function<double(VectorXd)> loss_function;
 
-    VectorXd forward(int currentIndex, int nextIndex);
+    int layer_size;
 };

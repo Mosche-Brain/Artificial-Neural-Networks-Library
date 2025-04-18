@@ -23,34 +23,71 @@ int main()
 {
     std::vector<Layer*> layers = 
     {
-        new Layer(2, 1, linear_standard),
+        new Layer(2, 1, pass),
         new Layer(2, 2, RELu),
-        new Layer(2, 1, linear_standard)
+        new Layer(2, 2, pass)
     };
 
+    // std::vector<Layer*> layers = 
+    // {
+    //     new Layer(3, 1, linear_standard),
+    //     new Layer(5, 3, RELu),
+    //     new Layer(7, 5, RELu),
+    //     new Layer(7, 7, RELu),
+    //     new Layer(5, 7, RELu),
+    //     new Layer(3, 5, RELu),
+    //     new Layer(1, 3, linear_standard)
+    // };
+
     NeuralNet network(layers);
+
+    // MatrixXd inputs {{0.0, 0.0},
+    //                  {0.0, 1.0},
+    //                  {1.0, 0.0},
+    //                  {1.0, 1.0}};
 
     MatrixXd inputs {{0.0, 0.0},
                      {0.0, 1.0},
                      {1.0, 0.0},
                      {1.0, 1.0}};
 
-    VectorXd truth{{0.0, 1.0, 1.0, 0.0}};
+    // MatrixXd inputs {{0.0, 0.0},
+    //                  {0.0, 1.0},
+    //                  {1.0, 0.0},
+    //                  {1.0, 1.0}};
+
+    // VectorXd truth{{0.0, 1.0, 1.0, 0.0}};
+
+    MatrixXd target{{1, 0},
+                    {0, 1},
+                    {0, 1},
+                    {1, 0}};
+
+    try
+    {
+        network.train(inputs, target, 1, 0.1);
+        //network.forward(inputs.row(1));
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
 
     NNVisualiser visualiser(&network);
-    visualiser.Render();
+    visualiser.display();
 
 
     return 0;
 
-    network.train(inputs, truth, 15, 0.1f);
+    // network.train(inputs, truth, 15, 0.1f);
 
-    VectorXd out = network.forward(inputs); 
+    // VectorXd out = network.forward(inputs); 
 
-    for(int i = 0 ; i < out.size() ; i++)
-    {
-        std::cout << "Output: " << out[i] << "\t expected: " << truth[i] << '\n';
-    }
+    // for(int i = 0 ; i < out.size() ; i++)
+    // {
+    //     std::cout << "Output: " << out[i] << "\t expected: " << truth[i] << '\n';
+    // }
 
     return 0;
 }

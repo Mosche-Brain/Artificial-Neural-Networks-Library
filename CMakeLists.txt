@@ -5,17 +5,50 @@ set(CMAKE_CXX_STANDARD 17)
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 find_package(nlohmann_json 3.2.0 REQUIRED)
-find_package(SFML 3.0 COMPONENTS system window graphics REQUIRED)
-include_directories("./source/")
-include_directories("./source/Network")
-include_directories("./source/containers")
+find_package(OpenGL REQUIRED)
+find_package(glfw3 3.3 REQUIRED)
+find_package(GLEW REQUIRED)
 
-# Znajdź wszystkie pliki .cpp w katalogu source
+
+# include_directories("./source/")
+# include_directories("./source/Network")
+# include_directories("./source/containers")
+# .external/imgui
+# .external/imgui/backends
+
+include_directories(
+    ./source/
+    ./source/Network
+    ./source/containers
+    .external/imgui
+    .external/imgui/backends
+)
+
+
+
 file(GLOB_RECURSE SOURCES "source/*.cpp")
 
-# Dodaj pliki źródłowe
-add_executable(${PROJECT_NAME} ${SOURCES})
+file(GLOB IMGUI_SOURCES
+    .external/imgui/*.cpp
+    .external/imgui/backends/imgui_impl_glfw.cpp
+    .external/imgui/backends/imgui_impl_opengl3.cpp
+)
 
-target_link_libraries(${PROJECT_NAME} Eigen3::Eigen)
-target_link_libraries(${PROJECT_NAME} nlohmann_json::nlohmann_json)
-target_link_libraries(${PROJECT_NAME} sfml-system sfml-window sfml-graphics)
+add_executable(${PROJECT_NAME} ${SOURCES} ${IMGUI_SOURCES})
+
+target_link_libraries(${PROJECT_NAME}
+    Eigen3::Eigen
+    nlohmann_json::nlohmann_json
+    OpenGL::GL
+    glfw
+    GLEW::GLEW
+    ${CMAKE_DL_LIBS}
+)
+
+target_include_directories(${PROJECT_NAME} PRIVATE 
+    .external/
+    .external/imgui 
+    .external/imgui/backends
+)
+
+target_sources(${PROJECT_NAME} PRIVATE ${IMGUI_SOURCES})

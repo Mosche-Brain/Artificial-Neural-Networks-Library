@@ -1,6 +1,7 @@
 #include <Eigen/Dense>
 
-using namespace Eigen;
+using Eigen::RowVectorXd;
+
 
 class VirtualNeuron
 {

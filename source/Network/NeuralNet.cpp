@@ -5,7 +5,7 @@ NeuralNet::NeuralNet(int layers_n, VectorXi layers_size)
     if(layers_n != layers_size.size())
         return;
 
-    this->layers.push_back(new Layer(layers_size[0], 1, linear_standard));
+    this->layers.push_back(new Layer(layers_size[0], 1, pass));
     //this->layers[0]->weights = MatrixXd::Ones();
 
     for(int i = 1 ; i < layers_n ; i++)
@@ -27,17 +27,23 @@ NeuralNet::NeuralNet(std::vector<Layer*> _layers_)
     this->layers = _layers_;
 }
 
+void NeuralNet::setLossFunction(std::function<double(VectorXd)> func)
+{
+    this->loss_function = func;
+}
+
 void NeuralNet::train(MatrixXd train_data, VectorXd expected, uint n_iter, float rate)
 {
     for(int epoch = 0 ; epoch < n_iter ; epoch++)
     {
+        std::cout << epoch << " epoch\n";
         int error_sum = 0;
 
         for(int i = 0 ; i < train_data.rows() ; i++)
         {
             RowVectorXd row = train_data.row(i);
 
-            VectorXd outputs = this->forward(row);
+            VectorXd outputs = this->forward(row.transpose());
 
             this->backpropagate(expected, rate);
             this->update_weights(rate);
@@ -47,13 +53,6 @@ void NeuralNet::train(MatrixXd train_data, VectorXd expected, uint n_iter, float
     std::cout << "Training ok\n";
 }
 
-// VectorXd NeuralNet::forward(VectorXd input)
-// {
-//     for(int i = 0 ; i < this->layers.size() ; i++)
-//     {
-//         //layers
-//     }
-// }
 
 VectorXd NeuralNet::forward(MatrixXd input)
 {
@@ -76,7 +75,7 @@ VectorXd NeuralNet::forward(MatrixXd input)
     return this->layers.back()->outputs;
 }
 
-VectorXd NeuralNet::forward(int currentIndex, int nextIndex)
+/*VectorXd NeuralNet::forward(int currentIndex, int nextIndex)
 {
 
     Layer* currentLayer = this->layers[currentIndex];
@@ -88,27 +87,30 @@ VectorXd NeuralNet::forward(int currentIndex, int nextIndex)
     if(nextIndex >= this->layers.size() - 1)
         return output;
 
+
     return this->forward(currentIndex + 1, nextIndex + 1);
-}
+}*/
 
 void NeuralNet::backpropagate(VectorXd expected, double rate)
 {
+    VectorXd network_output = this->layers.back()->outputs;
+
+
+    
+    /*
     VectorXd output =  this->layers.back()->outputs;
     //VectorXd output(this->layers.back()->layer_size);
     //output << this->layers.back()->outputs;
-
+    
     VectorXd delta  = expected - output;
-
+    
     for(int i = layers.size() - 1 ; i > 0 ; i--)
     {
         // Layer* prev = this->layers[i - 1];
         Layer* prev = i > 0 ? this->layers[i - 1] : nullptr;
         Layer* curr = this->layers[  i  ];
-        //Layer* next = this->layers[i + 1];
         Layer* next = this->layers.size() < i ? this->layers[i + 1] : nullptr;
 
-        //VectorXd errors(curr->outputs.size());
-        //std::vector<double> errors(curr->outputs.size());
         VectorXd errors = VectorXd::Zero(curr->outputs.size());
 
         if(i != layers.size() - 1)
@@ -128,10 +130,6 @@ void NeuralNet::backpropagate(VectorXd expected, double rate)
         }
         else
         {
-            // for(int j = 0 ; j < curr->outputs.size() ; j++)
-            // {
-            //     //errors.push_back(curr->outputs[j] - expected[j]);
-            // }
             errors = curr->outputs - expected;
         }
 
@@ -140,40 +138,8 @@ void NeuralNet::backpropagate(VectorXd expected, double rate)
             //curr->delta[j] = errors[j] * (curr->outputs[j] * (1 - curr->outputs[j]));
             curr->delta[j] = errors[j] * curr->activation_function(curr->outputs[j]);
         }
-
-        /*
-        std::cout << "okej1\n";
-        curr->biases += delta * -rate;
-        std::cout << "okej2\n";
-        //prev->weights += -rate * (delta * prev->outputs.transpose());
-
-        
-        std::cout << "Weight Cols " << prev->weights.cols() << '\n';
-        std::cout << "Weight Rows " << prev->weights.rows() << '\n';
-        std::cout << "Output Cols " << prev->outputs.cols() << '\n';
-        std::cout << "Output Rows " << prev->outputs.rows() << '\n';
-        std::cout << "Delta Cols " << delta.cols() << '\n';
-        std::cout << "Delta Rows " << delta.rows() << '\n';
-        //std::cout << "Outputs " << prev->outputs.size();
-        
-        std::cout << "okej69\n";
-        prev->weights += -rate * (delta * prev->outputs);
-        std::cout << "okej3\n";
-        //std::cout << -rate * (delta * prev->outputs.transpose()) << '\n';
-        std::cout << "okej4\n";
-
-        //delta = (curr->weights.transpose() * delta).array() * (prev->outputs.array() * (1 - prev->outputs.array()));
-        // MatrixXd mat = MatrixXd::Ones(prev->outputs.rows(), prev->outputs.cols());
-        // MatrixXd sigmatrix = prev->outputs * (mat - prev->outputs);
-
-
-        std::cout << "okej\n";
-        VectorXd vec = VectorXd::Ones(prev->outputs.size());
-        VectorXd sigmatrix = prev->outputs * (vec - prev->outputs);
-
-        delta = delta.array() * sigmatrix.array();
-        */
     }
+    */
 }
 
 void NeuralNet::update_weights(float rate)
