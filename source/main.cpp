@@ -21,11 +21,12 @@ void train(NeuralNet* net, MNISTDataSet& dataset, int epochs, double rate);
 
 int main()
 {
-    std::vector<Layer*> layers = 
+    std::vector<Layer*> topology = 
     {
-        new Layer(2, 1, pass),
-        new Layer(2, 2, RELu),
-        new Layer(2, 2, pass)
+        new Layer(2, 1, pass, pass_prim, true),
+        new Layer(3, 2, RELu, RELu_prim),
+        new Layer(3, 3, RELu, RELu_prim),
+        new Layer(1, 3, sigmoid, sigmoid_prim)
     };
 
     // std::vector<Layer*> layers = 
@@ -39,7 +40,9 @@ int main()
     //     new Layer(1, 3, linear_standard)
     // };
 
-    NeuralNet network(layers);
+    NeuralNet network(topology);
+
+    network.setLossFunction(MSE);
 
     // MatrixXd inputs {{0.0, 0.0},
     //                  {0.0, 1.0},
@@ -58,21 +61,31 @@ int main()
 
     // VectorXd truth{{0.0, 1.0, 1.0, 0.0}};
 
-    MatrixXd target{{1, 0},
-                    {0, 1},
-                    {0, 1},
-                    {1, 0}};
+    // MatrixXd target{{1, 0},
+    //                 {0, 1},
+    //                 {0, 1},
+    //                 {1, 0}};
 
-    try
-    {
-        network.train(inputs, target, 1, 0.1);
-        //network.forward(inputs.row(1));
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-    }
     
+    MatrixXd target{{0},
+                    {1},
+                    {1},
+                    {0}};
+
+                        
+
+    // try
+    // {
+    //     network.train(inputs, target, 1, 0.1);
+    //     //network.forward(inputs.row(1));
+    // }
+    // catch(std::exception& e)
+    // {
+    //     std::cerr << e.what() << '\n';
+    //     std::cout << "skibidi boop booop yes yes\n";
+    // }
+    
+    network.forward(inputs.row(2));
 
     NNVisualiser visualiser(&network);
     visualiser.display();

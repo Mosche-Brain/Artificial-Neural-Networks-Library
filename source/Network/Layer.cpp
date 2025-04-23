@@ -4,15 +4,16 @@
  * Wektorem wag dla każdego neuronu i jest wiersz i macierzy wag.
 */
 
-Layer::Layer(int layer_size, int input_size, std::function<double(double)> func, std::function<double(double)> derivative, bool passive_layer=false)
+Layer::Layer(int layer_size, int input_size, std::function<double(double)> func, std::function<double(double)> derivative, bool passive_layer)
 {
     if(passive_layer)
         this->weights = MatrixXd::Ones(layer_size, input_size);
     else
-        this->weights = MatrixXd::Random(layer_size, input_size);
+        this->weights = MatrixXd::Random(layer_size, input_size) * 0.1;
 
     this->biases             = VectorXd::Zero(layer_size);
     this->outputs            = VectorXd::Zero(layer_size);
+    this->outputs_raw        = VectorXd::Zero(layer_size);
     this->derivative_outputs = VectorXd::Zero(layer_size);
 
     this->layer_size = layer_size;
@@ -22,29 +23,38 @@ Layer::Layer(int layer_size, int input_size, std::function<double(double)> func,
     this->activation_derivative = derivative;
 }
 
-VectorXd Layer::forward(MatrixXd input, bool override_output)
+Layer::Layer(int layer_size, int input_size, const char* func, bool passive_layer)
 {
+    /* Not yet finished */
+}
+
+VectorXd Layer::forward(VectorXd x, bool override_output)
+{
+    input = x;
+
     VectorXd output_vector;
 
-    if (input.cols() == this->input_size && input.rows() == 1)
-    {
-        output_vector = (this->weights * input.transpose()).col(0) + this->biases;
-    }
-    else if (input.cols() == this->input_size && input.rows() > 1)
-    {
-        MatrixXd result = (this->weights * input.transpose()).colwise() + this->biases;
-        output_vector = result.rowwise().mean(); 
-    }
-    else
-    {
-        std::cerr << "Invalid input size for layer forward. Input: " 
-                  << input.rows() << "x" << input.cols() 
-                  << ", expected cols: " << this->input_size << "\n";
-        return VectorXd::Zero(this->layer_size);
-    }
+    // if (x.cols() == this->input_size && x.rows() == 1)
+    // {
+    //     output_vector = (this->weights * x.transpose()).col(0) + this->biases;
+    // }
+    // else if (x.cols() == this->input_size && x.rows() > 1)
+    // {
+    //     MatrixXd result = (this->weights * x.transpose()).colwise() + this->biases;
+    //     output_vector = result.rowwise().mean(); 
+    // }
+    // else
+    // {
+    //     std::cerr << "Invalid input size for layer forward. Input: " 
+    //               << x.rows() << "x" << x.cols() 
+    //               << ", expected cols: " << this->input_size << "\n";
+    //     return VectorXd::Zero(this->layer_size);
+    // }
     
     for (int i = 0; i < output_vector.size(); ++i)
     {
+        outputs_raw[i] = output_vector[i];
+
         derivative_outputs[i] = this->activation_derivative(output_vector[i]);
         output_vector[i]     = this->activation_function(output_vector[i]);
     }
@@ -55,22 +65,38 @@ VectorXd Layer::forward(MatrixXd input, bool override_output)
     return output_vector;
 }
 
-VectorXd Layer::compute_delta(VectorXd target, bool output_layer)
+VectorXd Layer::compute_delta(VectorXd target, bool output_layer, const Layer* next)
 {
     VectorXd δ(layer_size);
 
     if(output_layer)
     {
-        δ = (outputs - target) * derivative_outputs;
+        δ = (outputs - target).cwiseProduct(derivative_outputs);
     }
     else
     {
-        δ = weights.transpose().dot(target) * derivative_outputs;
+        // δ = (next->weights.transpose() * target).cwiseProduct(derivative_outputs);
+        δ = (next->weights.transpose() * target).cwiseProduct(derivative_outputs);
     }
 
     this->delta = δ;
 
     return δ;
+}
+
+VectorXd Layer::backprop(VectorXd δ, double rate)
+{
+    // weights_grad = derivative_outputs.dot(input.transpose());
+    weights_grad = δ * input.transpose();
+    biases_grad = δ;
+    
+    VectorXd input_grad = δ * weights.transpose();
+
+
+    this->weights -= weights_grad * rate;
+    this->biases -= biases_grad * rate;
+
+    return input_grad;
 }
 
 void Layer::train(MatrixXd data, VectorXd expected, int n, double rate) /* basic training algorithm for one-layer networks */

@@ -5,12 +5,12 @@ NeuralNet::NeuralNet(int layers_n, VectorXi layers_size)
     if(layers_n != layers_size.size())
         return;
 
-    this->layers.push_back(new Layer(layers_size[0], 1, pass));
+    this->layers.push_back(new Layer(layers_size[0], 1, pass, pass_prim));
     //this->layers[0]->weights = MatrixXd::Ones();
 
     for(int i = 1 ; i < layers_n ; i++)
     {
-        this->layers.push_back(new Layer(layers_size[i], layers_size[i - 1], sigmoid));
+        this->layers.push_back(new Layer(layers_size[i], layers_size[i - 1], sigmoid, sigmoid_prim));
     }
 
 
@@ -22,32 +22,41 @@ NeuralNet::NeuralNet(int layers_n, VectorXi layers_size)
     
 }
 
-NeuralNet::NeuralNet(std::vector<Layer*> _layers_)
+NeuralNet::NeuralNet(std::vector<Layer*> topology)
 {
-    this->layers = _layers_;
+    this->layers = topology;
 }
 
-void NeuralNet::setLossFunction(std::function<double(VectorXd)> func)
+void NeuralNet::setLossFunction(std::function<double(VectorXd, VectorXd)> func)
 {
     this->loss_function = func;
 }
 
-void NeuralNet::train(MatrixXd train_data, VectorXd expected, uint n_iter, float rate)
+void NeuralNet::train(MatrixXd train_x, MatrixXd train_y, uint n_iter, float rate)
 {
     for(int epoch = 0 ; epoch < n_iter ; epoch++)
     {
-        std::cout << epoch << " epoch\n";
-        int error_sum = 0;
-
-        for(int i = 0 ; i < train_data.rows() ; i++)
+        std::cout << "Epoch " << epoch << " started\n";
+        for(int i = 0 ; i < train_x.rows() ; i++)
         {
-            RowVectorXd row = train_data.row(i);
+            std::cout << "Transposinging...\n";
+            VectorXd x = train_x.row(i).transpose();
+            VectorXd y = train_y.row(i).transpose();
 
-            VectorXd outputs = this->forward(row.transpose());
+            std::cout << "Forwarding...\n";
+            VectorXd predicted = this->forward(x);
 
-            this->backpropagate(expected, rate);
-            this->update_weights(rate);
+            std::cout << "Compute loss...\n";
+            std::cout << "Predicted:" << predicted.size() << "\n";
+            std::cout << "target:" << y.size() << '\n';
+            double loss = loss_function(predicted, y);
+            
+            std::cout << "Backprop...\n";
+            this->backpropagate(train_y, rate);
+
+            std::cout << "loss " << loss << "\n";
         }
+        std::cout << "Epoch " << epoch << " ended" << "\n";
     }
 
     std::cout << "Training ok\n";
@@ -60,16 +69,21 @@ VectorXd NeuralNet::forward(MatrixXd input)
     std::cout << "cols: " << input.cols() << '\n';
     std::cout << "rows: " << input.rows() << '\n';
 
-    layers[0]->outputs = input.transpose();
+    if(input.rows() == 1 && input.cols() > 1)
+        input.transposeInPlace();
+
+    layers[0]->outputs = input;
 
     std::cout << "ok\n";
-    for(int i = 0 ; i < this->layers.size() - 1 ; i++)
+    for(int i = 1 ; i < this->layers.size() ; i++)
     {
         std::cout << i << " Iteration\n";
         //input = layers[i]->outputs;
-
+        
         //layers[i + 1]->outputs = layers[i + 1]->forward(layers[i]->outputs);
-        this->layers[i + 1]->forward(layers[i]->outputs.transpose());
+        //this->layers[i + 1]->forward(layers[i]->outputs.transpose());
+        this->layers[i]->forward(layers[i - 1]->outputs);
+        std::cout << "oki\n";
     }
     
     return this->layers.back()->outputs;
@@ -91,11 +105,14 @@ VectorXd NeuralNet::forward(MatrixXd input)
     return this->forward(currentIndex + 1, nextIndex + 1);
 }*/
 
-void NeuralNet::backpropagate(VectorXd expected, double rate)
+void NeuralNet::backpropagate(VectorXd delta, double rate)
 {
     VectorXd network_output = this->layers.back()->outputs;
 
-
+    for(int i = layers.size() - 1 ; i > 0 ; i--)
+    {
+        delta = layers[i]->backprop(delta, rate);
+    }
     
     /*
     VectorXd output =  this->layers.back()->outputs;
@@ -142,7 +159,7 @@ void NeuralNet::backpropagate(VectorXd expected, double rate)
     */
 }
 
-void NeuralNet::update_weights(float rate)
+/* void NeuralNet::update_weights(float rate)
 {
     for(int i = 0 ; i < layers.size() ; i++)
     {
@@ -159,7 +176,7 @@ void NeuralNet::update_weights(float rate)
             layers[i]->weights(j, -1) -= rate * layers[i]->delta[j];
         }
     }
-}
+} */
 
 json NeuralNet::export_to_json()
 {

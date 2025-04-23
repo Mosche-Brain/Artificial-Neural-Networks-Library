@@ -15,26 +15,21 @@ public:
     NeuralNet(std::vector<Layer*> _layers_);
 
 
-    void setLossFunction(std::function<double(VectorXd)> func);
+    void setLossFunction(std::function<double(VectorXd, VectorXd)> func);
     void addLayer(Layer* layer);
-    void train(MatrixXd train_data, VectorXd expected, uint n_iter, float rate);
+    void train(MatrixXd train_data, MatrixXd expected, uint n_iter, float rate);
     void backpropagate(VectorXd expected, double rate);
     void update_weights(float rate);
     void feedforward();
 
-    //double transfer_derivative(double x);
-
     VectorXd forward(MatrixXd input);
-    //VectorXd forward(VectorXd input);
 
-    Layer* inputLayer();
-    Layer* outputLayer();
-    
     json export_to_json();
 
+    VectorXd input;
     std::vector<Layer*> layers;
 protected:
-    std::function<double(VectorXd)> loss_function;
+    std::function<double(VectorXd, VectorXd)> loss_function;
 
     int layer_size;
 };

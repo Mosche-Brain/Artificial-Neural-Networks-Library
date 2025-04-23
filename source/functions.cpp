@@ -50,14 +50,12 @@ double pass_prim(double x)
     return 1;
 }
 
-double MSE(double x, double y)
+//double MSE(double x, double y)
+
+
+double MSE(Eigen::VectorXd expected, Eigen::VectorXd predicted)
 {
+    Eigen::VectorXd delta = expected - predicted;
 
-}
-
-double MSE(Eigen::VectorXd x, Eigen::VectorXd y)
-{
-    Eigen::VectorXd loss = x - y;
-
-    return loss.sum() / y.size();
+    return delta.squaredNorm() / predicted.size();
 }

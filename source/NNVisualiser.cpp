@@ -25,7 +25,7 @@ void NNVisualiser::display()
     int windowWidth = 1400;
     int windowHeight = 960;
 
-    window = glfwCreateWindow(windowWidth, windowHeight, "Neural Network Visualizer", nullptr, nullptr);
+    window = glfwCreateWindow(windowWidth, windowHeight, "Neural Graph", nullptr, nullptr);
     if (!window)
     {
         std::cerr << "Failed to create GLFW window\n";
@@ -69,6 +69,56 @@ void NNVisualiser::display()
         ImGui::Begin("Info");
         ImGui::Text("Neural Network");
         ImGui::End();
+
+        if(ImGui::TreeNode("Layers"))
+        {
+            for(int i = 0 ; i < this->network->layers.size() ; i++)
+            {
+                std::string label = "Layer " + std::to_string(i);
+                if(ImGui::TreeNode(label.c_str()))
+                {
+                    // std::string size_label = "size: " + std::to_string(this->network->layers[i]->layer_size);
+                    // ImGui::Text(size_label.c_str());
+                    ImGui::Text("size: %d", this->network->layers[i]->layer_size);
+                    
+                    if(ImGui::TreeNode("Weights"))
+                    {
+                        for(int j = 0 ; j < network->layers[i]->layer_size ; j++)
+                        {
+                            std::string weights_label = "Row " + std::to_string(j);
+                            if(ImGui::TreeNode(weights_label.c_str()))
+                            {
+                                for(int k = 0 ; k < network->layers[i]->weights.row(j).size() ; k++)
+                                {
+                                    double weight = network->layers[i]->weights.row(j)[k];
+                                    ImGui::Text("%.8f", weight);
+                                }
+
+                                ImGui::TreePop();
+                            }
+                        }
+
+
+                        ImGui::TreePop();
+                    }
+
+
+                    if(ImGui::TreeNode("output"))
+                    {
+                        for(int j = 0 ; j < this->network->layers[i]->layer_size ; j++)
+                        {
+                            ImGui::Text("%.8f", network->layers[i]->outputs[j]);
+                        }
+
+                        ImGui::TreePop();
+                    }
+
+                    ImGui::TreePop();
+                }
+            }
+
+            ImGui::TreePop();
+        }
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

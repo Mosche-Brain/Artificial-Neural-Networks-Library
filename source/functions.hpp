@@ -21,6 +21,6 @@ double linear_prim(double x, double a=1, double b=0);
 double pass(double x);
 double pass_prim(double x);
 
-double MSE(double x, double y);
+//double MSE(double x, double y);
 
 double MSE(Eigen::VectorXd x, Eigen::VectorXd y);
