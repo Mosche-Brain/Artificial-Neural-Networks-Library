@@ -105,30 +105,30 @@ VectorXd Layer::compute_delta(VectorXd target, bool output_layer, const Layer* n
     return δ;
 }
 
-VectorXd Layer::backprop(VectorXd δ, double rate)
-{
-    // weights_grad = derivative_outputs.dot(input.transpose());
-    weights_grad = δ * input.transpose();
-    biases_grad = δ;
+// VectorXd Layer::backprop(VectorXd δ, double rate)
+// {
+//     // weights_grad = derivative_outputs.dot(input.transpose());
+//     weights_grad = δ * input.transpose();
+//     biases_grad = δ;
 
-    std::cout << "grads\n";
-    std::cout << "delta " << δ <<'\n';
-    std::cout << "weigths " << weights <<'\n';
+//     std::cout << "grads\n";
+//     std::cout << "delta " << δ <<'\n';
+//     std::cout << "weigths " << weights <<'\n';
 
-    if(δ.size() == layer_size)
-    {
-        throw std::invalid_argument("invalid δ size");
-    }
+//     if(δ.size() == layer_size)
+//     {
+//         throw std::invalid_argument("invalid δ size");
+//     }
 
-    VectorXd input_grad = weights.transpose() * δ;
+//     VectorXd input_grad = weights.transpose() * δ;
     
-    std::cout << "weights\n";
+//     std::cout << "weights\n";
 
-    this->weights -= weights_grad * rate;
-    this->biases -= biases_grad * rate;
+//     this->weights -= weights_grad * rate;
+//     this->biases -= biases_grad * rate;
 
-    return input_grad;
-}
+//     return input_grad;
+// }
 
 void Layer::train(MatrixXd data, VectorXd expected, int n, double rate) /* basic training algorithm for one-layer networks */
 {

@@ -33,7 +33,7 @@ public:
     std::function<double(double)> activation_function;
     std::function<double(double)> activation_derivative;
 
-    VectorXd backprop(VectorXd d, double rate);
+    //VectorXd backprop(VectorXd d, double rate);
     VectorXd compute_delta(VectorXd target, bool output_layer=false, const Layer* next=nullptr);
     VectorXd forward(VectorXd input, bool override_output=true);
     void train(MatrixXd data, VectorXd expected, int iter, double rate);
