@@ -1,7 +1,7 @@
 #include "Network/Layer.hpp"
 
 /*
- * Wektorem wag dla każdego neuronu i jest wiersz i macierzy wag.
+ * Wektorem wag dla każdego neuronu [i] jest wiersz [i] macierzy wag.
 */
 
 Layer::Layer(int layer_size, int input_size, std::function<double(double)> func, std::function<double(double)> derivative, bool passive_layer)
@@ -25,14 +25,25 @@ Layer::Layer(int layer_size, int input_size, std::function<double(double)> func,
 
 Layer::Layer(int layer_size, int input_size, const char* func, bool passive_layer)
 {
+    // std::map<std::string, std::function<double(double)>> funcions =
+    // {
+    //     {"linear", pass},
+    //     {"sigmoid", sigmoid},
+    //     {"relu", RELu},
+    //     {"tanh", tanh}
+    // };
+
     /* Not yet finished */
 }
 
-VectorXd Layer::forward(VectorXd x, bool override_output)
+VectorXd Layer::forward(VectorXd x, bool derivatives)
 {
     input = x;
 
-    VectorXd output_vector;
+    if(x.size() != weights.cols())
+    {
+        std::cout << "input size doesn't match with weights\n";
+    }
 
     // if (x.cols() == this->input_size && x.rows() == 1)
     // {
@@ -49,20 +60,30 @@ VectorXd Layer::forward(VectorXd x, bool override_output)
     //               << x.rows() << "x" << x.cols() 
     //               << ", expected cols: " << this->input_size << "\n";
     //     return VectorXd::Zero(this->layer_size);
-    // }
-    
-    for (int i = 0; i < output_vector.size(); ++i)
-    {
-        outputs_raw[i] = output_vector[i];
+    // }    
 
-        derivative_outputs[i] = this->activation_derivative(output_vector[i]);
-        output_vector[i]     = this->activation_function(output_vector[i]);
+    for (int i = 0; i < outputs.size(); ++i)
+    {
+        outputs_raw[i] = x.dot(weights.row(i).transpose()) + biases[i];
+        
+        if(derivatives)
+        {
+            derivative_outputs[i] = activation_derivative(outputs_raw[i]);
+        }
+        else
+        {
+            outputs[i] = activation_function(outputs_raw[i]);
+        }
     }
 
-    if (override_output)
-        this->outputs = output_vector;
-
-    return output_vector;
+    if(derivatives)
+    {
+        return derivative_outputs;
+    }
+    else
+    {
+        return outputs;
+    }
 }
 
 VectorXd Layer::compute_delta(VectorXd target, bool output_layer, const Layer* next)
@@ -89,9 +110,19 @@ VectorXd Layer::backprop(VectorXd δ, double rate)
     // weights_grad = derivative_outputs.dot(input.transpose());
     weights_grad = δ * input.transpose();
     biases_grad = δ;
-    
-    VectorXd input_grad = δ * weights.transpose();
 
+    std::cout << "grads\n";
+    std::cout << "delta " << δ <<'\n';
+    std::cout << "weigths " << weights <<'\n';
+
+    if(δ.size() == layer_size)
+    {
+        throw std::invalid_argument("invalid δ size");
+    }
+
+    VectorXd input_grad = weights.transpose() * δ;
+    
+    std::cout << "weights\n";
 
     this->weights -= weights_grad * rate;
     this->biases -= biases_grad * rate;

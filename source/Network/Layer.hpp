@@ -2,8 +2,10 @@
 #include <iostream>
 #include <algorithm>
 #include <functional>
+#include <map>
 
 #include "Network/Neuron.hpp"
+#include "functions.hpp"
 
 using namespace Eigen;
 

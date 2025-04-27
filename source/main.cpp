@@ -25,10 +25,9 @@ int main()
     {
         new Layer(2, 1, pass, pass_prim, true),
         new Layer(3, 2, RELu, RELu_prim),
-        new Layer(3, 3, RELu, RELu_prim),
         new Layer(1, 3, sigmoid, sigmoid_prim)
     };
-
+    
     // std::vector<Layer*> layers = 
     // {
     //     new Layer(3, 1, linear_standard),
@@ -67,23 +66,23 @@ int main()
     //                 {1, 0}};
 
     
-    MatrixXd target{{0},
+    MatrixXd targets{{0},
                     {1},
                     {1},
                     {0}};
 
                         
 
-    // try
-    // {
-    //     network.train(inputs, target, 1, 0.1);
-    //     //network.forward(inputs.row(1));
-    // }
-    // catch(std::exception& e)
-    // {
-    //     std::cerr << e.what() << '\n';
-    //     std::cout << "skibidi boop booop yes yes\n";
-    // }
+    try
+    {
+        network.train(inputs, targets, 1, 0.1);
+        //network.forward(inputs.row(1));
+    }
+    catch(std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+        std::cout << "skibidi boop booop yes yes\n";
+    }
     
     network.forward(inputs.row(2));
 

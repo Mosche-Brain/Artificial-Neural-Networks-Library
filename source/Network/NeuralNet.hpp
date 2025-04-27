@@ -22,7 +22,8 @@ public:
     void update_weights(float rate);
     void feedforward();
 
-    VectorXd forward(MatrixXd input);
+    VectorXd forward(MatrixXd input, bool derivatives=false);
+    MatrixXd predict(MatrixXd input);
 
     json export_to_json();
 
@@ -30,6 +31,8 @@ public:
     std::vector<Layer*> layers;
 protected:
     std::function<double(VectorXd, VectorXd)> loss_function;
+
+    
 
     int layer_size;
 };
