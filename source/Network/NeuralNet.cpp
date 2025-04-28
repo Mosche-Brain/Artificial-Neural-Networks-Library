@@ -126,7 +126,7 @@ void NeuralNet::backpropagate(VectorXd expected, double rate)
 
     //VectorXd network_error = (output_layer->outputs - expected) * output_layer->derivative_outputs;
 
-    for(int i = layer_size - 1 ; i > 0 ; i--)
+    for(int i = layers.size() - 1 ; i > 0 ; i--)
     {
         std::cout << "Layer: " << i << '\n';
         Layer* curr = layers[  i  ];
@@ -146,9 +146,10 @@ void NeuralNet::backpropagate(VectorXd expected, double rate)
             
             for(int j = 0 ; j < curr->layer_size ; j++)
             {
+                std::cout << "brrrr\n";
                 std::cout << "errors size:" << errors.size() << '\n';
-                std::cout << "output size:" << curr->outputs.size() << '\n';
-                std::cout << "target size:" << expected.size() << '\n';
+                std::cout << "delta size:" << curr->delta.size() << '\n';
+                std::cout << "derivatives size:" << curr->derivative_outputs.size() << '\n';
                 curr->delta[j] = errors[j] * curr->derivative_outputs[j];
             }
 
@@ -170,7 +171,7 @@ void NeuralNet::backpropagate(VectorXd expected, double rate)
                 std::cout << "row: " << next->weights.row(j).size() << '\n';
                 std::cout << "delta: " << next->delta.size() << '\n';
                 // error += next->weights(j, k) * next->delta[k];
-                error += next->weights.row(j)[k] * next->delta[k];
+                error += next->weights.row(k)[j] * next->delta[k];
             }
             
             std::cout << "bahbah\n";

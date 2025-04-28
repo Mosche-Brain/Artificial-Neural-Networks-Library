@@ -13,6 +13,7 @@ Layer::Layer(int layer_size, int input_size, std::function<double(double)> func,
 
     this->biases             = VectorXd::Zero(layer_size);
     this->outputs            = VectorXd::Zero(layer_size);
+    this->delta              = VectorXd::Zero(layer_size);
     this->outputs_raw        = VectorXd::Zero(layer_size);
     this->derivative_outputs = VectorXd::Zero(layer_size);
 
