@@ -18,7 +18,7 @@ public:
     void setLossFunction(std::function<double(VectorXd, VectorXd)> func);
     void addLayer(Layer* layer);
     void train(MatrixXd train_data, MatrixXd expected, uint n_iter, float rate);
-    void backpropagate(VectorXd expected, double rate);
+    void backpropagate(VectorXd expected);
     void update_weights(float rate);
     void feedforward();
 

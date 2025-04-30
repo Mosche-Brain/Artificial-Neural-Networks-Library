@@ -28,16 +28,6 @@ int main()
         new Layer(1, 3, sigmoid, sigmoid_prim)
     };
     
-    // std::vector<Layer*> layers = 
-    // {
-    //     new Layer(3, 1, linear_standard),
-    //     new Layer(5, 3, RELu),
-    //     new Layer(7, 5, RELu),
-    //     new Layer(7, 7, RELu),
-    //     new Layer(5, 7, RELu),
-    //     new Layer(3, 5, RELu),
-    //     new Layer(1, 3, linear_standard)
-    // };
 
     NeuralNet network(topology);
 
@@ -75,7 +65,7 @@ int main()
 
     try
     {
-        network.train(inputs, targets, 1, 0.1);
+        network.train(inputs, targets, 100, 0.1);
         //network.forward(inputs.row(1));
     }
     catch(std::exception& e)
@@ -84,13 +74,12 @@ int main()
         std::cout << "skibidi boop booop yes yes\n";
     }
     
-    network.forward(inputs.row(2));
+    network.forward(inputs.row(3));
 
     NNVisualiser visualiser(&network);
     visualiser.display();
 
 
-    return 0;
 
     // network.train(inputs, truth, 15, 0.1f);
 
@@ -104,21 +93,21 @@ int main()
     return 0;
 }
 
-void train(NeuralNet* net, MNISTDataSet& dataset, int epochs, double rate)
-{
-    for(int _ = 0 ; _ < epochs ; _++)
-    {
-        for(int i = 0 ; i < dataset.labels()->size() ; i++)
-        {
-            RowVectorXd image = dataset.getImage(i);
-            VectorXd expected = VectorXd::Zero(10); 
-            expected[dataset.getLabel(i)] = 1;
+// void train(NeuralNet* net, MNISTDataSet& dataset, int epochs, double rate)
+// {
+//     for(int _ = 0 ; _ < epochs ; _++)
+//     {
+//         for(int i = 0 ; i < dataset.labels()->size() ; i++)
+//         {
+//             RowVectorXd image = dataset.getImage(i);
+//             VectorXd expected = VectorXd::Zero(10); 
+//             expected[dataset.getLabel(i)] = 1;
 
-            //VectorXd output = net->forward(image);
-            net->backpropagate(expected, rate);
-        }
-    }
-}
+//             //VectorXd output = net->forward(image);
+//             net->backpropagate(expected, rate);
+//         }
+//     }
+// }
 
 
 MatrixXd loadIrisData(const std::string& filename)
