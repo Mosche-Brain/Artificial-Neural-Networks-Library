@@ -59,3 +59,12 @@ double MSE(Eigen::VectorXd expected, Eigen::VectorXd predicted)
 
     return delta.squaredNorm() / predicted.size();
 }
+
+double cross_entropy(Eigen::VectorXd expected, Eigen::VectorXd predicted)
+{
+    double loss = 0.0;
+    for (int i = 0; i < predicted.size(); ++i) {
+        loss -= expected[i] * std::log(predicted[i]) + (1 - expected[i]) * std::log(1 - predicted[i]);
+    }
+    return loss / predicted.size();
+}

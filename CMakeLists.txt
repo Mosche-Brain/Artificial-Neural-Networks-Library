@@ -9,12 +9,7 @@ find_package(OpenGL REQUIRED)
 find_package(glfw3 3.3 REQUIRED)
 find_package(GLEW REQUIRED)
 
-
-# include_directories("./source/")
-# include_directories("./source/Network")
-# include_directories("./source/containers")
-# .external/imgui
-# .external/imgui/backends
+option(BUILD_SHARED_LIBS "Build project as shared library")
 
 include_directories(
     ./source/
@@ -24,9 +19,8 @@ include_directories(
     .external/imgui/backends
 )
 
-
-
-file(GLOB_RECURSE SOURCES "source/*.cpp")
+file(GLOB_RECURSE PROJECT_SOURCES "source/*.cpp")
+file(GLOB_RECURSE NN_LIB_SOURCES "source/Network/*.cpp")
 
 file(GLOB IMGUI_SOURCES
     .external/imgui/*.cpp
@@ -34,7 +28,15 @@ file(GLOB IMGUI_SOURCES
     .external/imgui/backends/imgui_impl_opengl3.cpp
 )
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${IMGUI_SOURCES})
+
+if(BUILD_SHARED_LIBS)
+    add_library(NetworkLib ${NN_LIB_SOURCES})
+    set_target_properties(NetworkLib PROPERTIES POSITION_INDEPENDENT_CODE ON SOVERSION 1)
+    target_link_libraries(NetworkLib PUBLIC Eigen3::Eigen nlohmann_json::nlohmann_json ${CMAKE_DL_LIBS})
+endif()
+
+
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${IMGUI_SOURCES})
 
 target_link_libraries(${PROJECT_NAME}
     Eigen3::Eigen

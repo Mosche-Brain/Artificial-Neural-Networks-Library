@@ -21,6 +21,22 @@ public:
     void Render();
     void display();
     
+    float inputs[2] = {0.0f, 0.0f};
+    float training_epochs = 1000.0f;
+    float learning_rate = 0.1f;
+    std::string forward_result = "N/A";
+    std::string training_status = "Untrained";
+
+    MatrixXd train_x = (MatrixXd(4, 2) << 0.0, 0.0,
+                                        0.0, 1.0,
+                                        1.0, 0.0,
+                                        1.0, 1.0).finished();
+    MatrixXd train_y = (MatrixXd(4, 1) << 0.0,
+                                        1.0,
+                                        1.0,
+                                        0.0).finished();
+
+
 protected:
     void drawNeuron(glm::vec2 pos, float radius);
     void drawConnection(glm::vec2 from, glm::vec2 to, float weight);

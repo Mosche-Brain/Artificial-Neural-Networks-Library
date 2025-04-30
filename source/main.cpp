@@ -28,45 +28,33 @@ int main()
         new Layer(1, 3, sigmoid, sigmoid_prim)
     };
     
+    std::cout << "meow\n";
 
     NeuralNet network(topology);
+    NNVisualiser visualiser(&network);
 
-    network.setLossFunction(MSE);
-
-    // MatrixXd inputs {{0.0, 0.0},
-    //                  {0.0, 1.0},
-    //                  {1.0, 0.0},
-    //                  {1.0, 1.0}};
+    network.setLossFunction(cross_entropy);
 
     MatrixXd inputs {{0.0, 0.0},
                      {0.0, 1.0},
                      {1.0, 0.0},
                      {1.0, 1.0}};
-
-    // MatrixXd inputs {{0.0, 0.0},
-    //                  {0.0, 1.0},
-    //                  {1.0, 0.0},
-    //                  {1.0, 1.0}};
-
-    // VectorXd truth{{0.0, 1.0, 1.0, 0.0}};
-
-    // MatrixXd target{{1, 0},
-    //                 {0, 1},
-    //                 {0, 1},
-    //                 {1, 0}};
-
     
     MatrixXd targets{{0},
-                    {1},
-                    {1},
-                    {0}};
-
-                        
-
+                     {1},
+                     {1},
+                     {0}};
+                    
+                    
+    
+    for(int i = 0 ; i < inputs.rows() ; i++)
+    {
+        std::cout << '[' << inputs.row(i) << ']' << " -> " << network.forward(inputs.row(i)) << '\n';
+    }
+                    
     try
     {
-        network.train(inputs, targets, 100, 0.1);
-        //network.forward(inputs.row(1));
+        network.train(inputs, targets, 1000, 0.1);
     }
     catch(std::exception& e)
     {
@@ -74,21 +62,14 @@ int main()
         std::cout << "skibidi boop booop yes yes\n";
     }
     
-    network.forward(inputs.row(3));
 
-    NNVisualiser visualiser(&network);
+    std::cout << ".\n";
+    for(int i = 0 ; i < inputs.rows() ; i++)
+    {
+        std::cout << '[' << inputs.row(i) << ']' << " -> " << network.forward(inputs.row(i)) << '\n';
+    }    
+
     visualiser.display();
-
-
-
-    // network.train(inputs, truth, 15, 0.1f);
-
-    // VectorXd out = network.forward(inputs); 
-
-    // for(int i = 0 ; i < out.size() ; i++)
-    // {
-    //     std::cout << "Output: " << out[i] << "\t expected: " << truth[i] << '\n';
-    // }
 
     return 0;
 }

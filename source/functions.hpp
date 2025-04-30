@@ -24,3 +24,5 @@ double pass_prim(double x);
 //double MSE(double x, double y);
 
 double MSE(Eigen::VectorXd x, Eigen::VectorXd y);
+
+double cross_entropy(Eigen::VectorXd expected, Eigen::VectorXd predicted);

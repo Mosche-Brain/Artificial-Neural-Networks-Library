@@ -9,8 +9,6 @@
 
 using namespace Eigen;
 
-enum LAYER_FLAG { INPUT, HIDDEN, OUTPUT };
-
 class Layer
 {
 public:
@@ -18,26 +16,22 @@ public:
     Layer(int layer_size, int input_size, const char* func, bool passive_layer=false);
 
     MatrixXd weights;
-    MatrixXd weights_grad;
     VectorXd biases;
-    VectorXd biases_grad;
     VectorXd delta;
-    VectorXd input;
     VectorXd outputs;
-    VectorXd outputs_raw;
     VectorXd derivative_outputs;
-
-    int layer_size;
-    int input_size;
-
+    
+    int size() const;
+    int inputWidth() const;
+    
     std::function<double(double)> activation_function;
     std::function<double(double)> activation_derivative;
-
-    //VectorXd backprop(VectorXd d, double rate);
-    VectorXd compute_delta(VectorXd target, bool output_layer=false, const Layer* next=nullptr);
-    VectorXd forward(VectorXd input, bool override_output=true);
+    
+    VectorXd forward(VectorXd x, bool derivatives=false);
     void train(MatrixXd data, VectorXd expected, int iter, double rate);
-
+    
 protected:
-    LAYER_FLAG layerType;
+    VectorXd outputs_raw;
+    int layer_size;
+    int input_size;
 };

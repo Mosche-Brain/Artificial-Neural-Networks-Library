@@ -66,9 +66,26 @@ void NNVisualiser::display()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("Info");
-        ImGui::Text("Neural Network");
+
+        ImGui::Begin("Control Panel");
+        ImGui::Text("Neural Network Control");
+
+        // Pola do ustawiania wejść
+        ImGui::Text("Network Inputs (XOR)");
+        ImGui::InputFloat("Input 1", &inputs[0], 0.0f, 1.0f, "%.1f");
+        ImGui::InputFloat("Input 2", &inputs[1], 0.0f, 1.0f, "%.1f");
+
+        // Przycisk do propagacji w przód
+        if (ImGui::Button("Run Forward")) 
+        {
+            VectorXd input_vec(2);
+            input_vec << inputs[0], inputs[1];
+            VectorXd output = network->forward(input_vec);
+            forward_result = std::to_string(output[0]);
+        }
+        ImGui::Text("Forward Result: %s", forward_result.c_str());
         ImGui::End();
+
 
         if(ImGui::TreeNode("Layers"))
         {
@@ -79,11 +96,11 @@ void NNVisualiser::display()
                 {
                     // std::string size_label = "size: " + std::to_string(this->network->layers[i]->layer_size);
                     // ImGui::Text(size_label.c_str());
-                    ImGui::Text("size: %d", this->network->layers[i]->layer_size);
+                    ImGui::Text("size: %d", this->network->layers[i]->size());
                     
                     if(ImGui::TreeNode("Weights"))
                     {
-                        for(int j = 0 ; j < network->layers[i]->layer_size ; j++)
+                        for(int j = 0 ; j < network->layers[i]->size() ; j++)
                         {
                             std::string weights_label = "Row " + std::to_string(j);
                             if(ImGui::TreeNode(weights_label.c_str()))
@@ -105,7 +122,7 @@ void NNVisualiser::display()
 
                     if(ImGui::TreeNode("output"))
                     {
-                        for(int j = 0 ; j < this->network->layers[i]->layer_size ; j++)
+                        for(int j = 0 ; j < this->network->layers[i]->size() ; j++)
                         {
                             ImGui::Text("%.8f", network->layers[i]->outputs[j]);
                         }
@@ -142,10 +159,10 @@ void NNVisualiser::Render()
         Layer* layer = network->layers[i];
         std::vector<glm::vec2> layer_positions;
 
-        float total_height = layer->layer_size * (radius * 2 + y_spacing);
+        float total_height = layer->size() * (radius * 2 + y_spacing);
         float y_offset = (600 - total_height) / 2;
 
-        for (int j = 0; j < layer->layer_size; ++j)
+        for (int j = 0; j < layer->size(); ++j)
         {
             glm::vec2 pos = {
                 100.0f + i * x_spacing,
@@ -200,9 +217,9 @@ void NNVisualiser::Render()
         Layer* from_layer = network->layers[i];
         Layer* to_layer   = network->layers[i + 1];
 
-        for (int from_idx = 0; from_idx < from_layer->layer_size; ++from_idx)
+        for (int from_idx = 0; from_idx < from_layer->size(); ++from_idx)
         {
-            for (int to_idx = 0; to_idx < to_layer->layer_size; ++to_idx)
+            for (int to_idx = 0; to_idx < to_layer->size(); ++to_idx)
             {
                 float weight = to_layer->weights(to_idx, from_idx);
                 drawConnection(
