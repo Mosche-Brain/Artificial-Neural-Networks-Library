@@ -20,6 +20,7 @@ public:
 
     void Render();
     void display();
+    void playGraph();
     
     float inputs[2] = {0.0f, 0.0f};
     float training_epochs = 1000.0f;

@@ -35,8 +35,8 @@ if(BUILD_SHARED_LIBS)
     target_link_libraries(NetworkLib PUBLIC Eigen3::Eigen nlohmann_json::nlohmann_json ${CMAKE_DL_LIBS})
 endif()
 
-
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${IMGUI_SOURCES})
+target_compile_options(${PROJECT_NAME} PRIVATE -O3 -ffast-math -fopenmp -march=native)
 
 target_link_libraries(${PROJECT_NAME}
     Eigen3::Eigen

@@ -67,28 +67,27 @@ VectorXd Layer::forward(VectorXd x, bool derivatives)
     //     return VectorXd::Zero(this->layer_size);
     // }    
 
-    for (int i = 0; i < outputs.size(); ++i)
-    {
-        outputs_raw[i] = x.dot(weights.row(i).transpose()) + biases[i];
-        
-        if(derivatives)
-        {
-            derivative_outputs[i] = activation_derivative(outputs_raw[i]);
-        }
-        else
-        {
-            outputs[i] = activation_function(outputs_raw[i]);
-        }
-    }
+    // for (int i = 0; i < outputs.size(); ++i)
+    // {
+    //     outputs_raw[i] = x.dot(weights.row(i).transpose()) + biases[i];
+    //     // if(derivatives)
+    //     // {
+    //     //     // derivative_outputs[i] = activation_derivative(outputs_raw[i]);
+    //     // }
+    //     //outputs[i] = activation_function(outputs_raw[i]);
+    // }
+
+    // outputs_raw = (x * weights) + biases;
+    outputs_raw = (weights * x) + biases;
 
     if(derivatives)
     {
-        return derivative_outputs;
+        derivative_outputs = outputs_raw.unaryExpr(activation_derivative);
     }
-    else
-    {
-        return outputs;
-    }
+
+    outputs = outputs_raw.unaryExpr(activation_function);
+
+    return outputs;    
 }
 
 void Layer::train(MatrixXd data, VectorXd expected, int n, double rate) /* basic training algorithm for one-layer perceptron networks */

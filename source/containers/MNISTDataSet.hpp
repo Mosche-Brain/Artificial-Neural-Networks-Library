@@ -8,11 +8,13 @@
 class MNISTDataSet 
 {
 public:
+    MNISTDataSet();
+
     Eigen::VectorXd getImage(int index);
     double          getLabel(int index);
 
-    Eigen::MatrixXd* images();
-    Eigen::VectorXd* labels();
+    Eigen::MatrixXd& images();
+    Eigen::VectorXd& labels();
 
     void loadImages(const std::string& filepath);
     void loadLabels(const std::string& filepath);

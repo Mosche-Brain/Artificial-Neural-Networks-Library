@@ -17,7 +17,18 @@ NeuralNet::NeuralNet(int layers_n, VectorXi layers_size)
 NeuralNet::NeuralNet(std::vector<Layer*> topology)
 {
     this->layers = topology;
-    this->layer_size = topology.size();
+    //this->layer_size = topology.size();
+}
+
+NeuralNet::NeuralNet(std::vector<INIT_PARAMS> topology)
+{
+    this->layers.push_back( new Layer(topology[0].size, 1, topology[0].activation, topology[0].derivative));
+    int input_width = topology[0].size;
+
+    for(int i = 1 ; i < topology.size() ; i++)
+    {
+        this->layers.push_back( new Layer(topology[i].size, input_width, topology[i].activation, topology[i].derivative));
+    }
 }
 
 void NeuralNet::setLossFunction(std::function<double(VectorXd, VectorXd)> func)
@@ -35,18 +46,21 @@ void NeuralNet::train(MatrixXd train_x, MatrixXd train_y, uint n_iter, float rat
             VectorXd x = train_x.row(i).transpose();
             VectorXd y = train_y.row(i).transpose();
 
-            VectorXd predicted = this->forward(x);
-                                 this->forward(x, true);
-
-
-            double loss = loss_function(predicted, y);
+            // std::cout << "forward\n";
+            VectorXd predicted = this->forward(x, true);            
             
+            // std::cout << "loss\n";
+            //double loss = loss_function(predicted, y);
+            
+            // std::cout << "backrprop\n";
             this->backpropagate(y);
+            // std::cout << "weigths\n";
             this->update_weights(rate);
 
-            std::cout << "loss " << loss << "\n";
+            //std::cout << "loss " << loss << "\n";
+            std::cout << "Row " << i << "proced\n";
         }
-        std::cout << "Epoch " << epoch << " ended" << "\n";
+        // std::cout << "Epoch " << epoch << " ended" << "\n";
     }
 
     std::cout << "Training ok\n";
@@ -103,15 +117,18 @@ void NeuralNet::backpropagate(VectorXd expected)
     }
 
     //VectorXd network_error = (output_layer->outputs - expected) * output_layer->derivative_outputs;
-    for(int j = 0 ; j < output_layer->size() ; j++)
-    {
-        // std::cout << "errors size:" << errors.size() << '\n';
-        //std::cout << "output size:" << output_layer->outputs.size() << '\n';
-        //std::cout << "target size:" << expected.size() << '\n';                
-        // errors[j] = curr->outputs[j] - expected[j];
-        double error = output_layer->outputs[j] - expected[j];
-        output_layer->delta[j] = error * output_layer->derivative_outputs[j];
-    }
+    // for(int j = 0 ; j < output_layer->size() ; j++)
+    // {
+    //     // std::cout << "errors size:" << errors.size() << '\n';
+    //     //std::cout << "output size:" << output_layer->outputs.size() << '\n';
+    //     //std::cout << "target size:" << expected.size() << '\n';                
+    //     // errors[j] = curr->outputs[j] - expected[j];
+    //     double error = output_layer->outputs[j] - expected[j];
+    //     output_layer->delta[j] = error * output_layer->derivative_outputs[j];
+    // }
+
+    VectorXd errors = output_layer->outputs - expected;
+    output_layer->delta = output_layer->derivative_outputs.cwiseProduct(errors);
    
     for(int i = layers.size() - 2 ; i > 0 ; i--) /* hidden layers */
     {
@@ -121,27 +138,23 @@ void NeuralNet::backpropagate(VectorXd expected)
 
         VectorXd errors = VectorXd::Zero(curr->size());
       
-        for(int j = 0 ; j < curr->size() ; j++)
-        {
-            double error = 0.0;
-            for(int k = 0 ; k < next->size() ; k++)
-            {
+        // for(int j = 0 ; j < curr->size() ; j++)
+        // {
+        //     errors[j] = next->weights.col(j).cwiseProduct(next->delta).sum();
+        // }
+    
+        errors = (next->weights.array().colwise() * next->delta.array()).colwise().sum();
 
-                // std::cout << "row: " << next->weights.row(j).size() << '\n';
-                // std::cout << "delta: " << next->delta.size() << '\n';
-                // error += next->weights(j, k) * next->delta[k];
-                error += next->weights(k, j) * next->delta[k];
-            }
-            
-            errors[j] = error;
-        }
-    
-    
-        for(int j = 0 ; j < curr->size() ; j++)
-        {
-            curr->delta[j] = errors[j] * curr->derivative_outputs[j];
-        }
-    
+        // for(int j = 0 ; j < curr->size() ; j++)
+        // {
+        //     curr->delta[j] = errors[j] * curr->derivative_outputs[j];
+        // }
+
+        // std::cout << ".\n";
+        // curr->delta = errors * curr->derivative_outputs;
+        curr->delta = curr->derivative_outputs.cwiseProduct(errors);
+        // std::cout << ".\n";
+        
     }
 }
 
@@ -157,7 +170,7 @@ void NeuralNet::update_weights(float rate)
     }
 }
 
-json NeuralNet::export_to_json()
+void NeuralNet::export_to_json(const char* filename)
 {
     json obj;
 
@@ -194,5 +207,65 @@ json NeuralNet::export_to_json()
         }
     }
 
-    return obj;
+
+    std::ofstream file(filename);
+    if(file.is_open())
+    {
+        file << obj.dump(4);
+        file.close();
+    }
+}
+
+void NeuralNet::load_from_json(const char* filename)
+{
+    json obj;
+
+    std::ifstream file(filename);
+    if(file.is_open())
+    {
+        obj = json::parse(file);
+        file.close();
+    }
+
+    std::vector<Layer*> topology;
+    
+    for (uint i = 0 ; i < obj.contains("Layer" + std::to_string(i)) ; ++i)
+    {
+        auto layer_data = obj["Layer" + std::to_string(i)];
+        int layer_size = layer_data.size(); // Liczba neuronów w warstwie
+        int input_size = 0;
+
+
+        // Utwórz warstwę
+        Layer* layer;
+        if (i == 0)
+        {
+            // Warstwa wejściowa (pass-through)
+            layer = new Layer(layer_size, input_size, pass, pass_prim, true);
+        }
+        else
+        {
+            layer = new Layer(layer_size, input_size, sigmoid, sigmoid_prim);
+        }
+
+        // Ustaw wagi i biasy dla każdego neuronu
+        for (int j = 0; j < layer_size; ++j) {
+            auto neuron_data = layer_data["Neuron" + std::to_string(j)];
+            double bias = neuron_data["bias"].get<double>();
+            std::vector<double> weights_vec = neuron_data["weights"].get<std::vector<double>>();
+
+            // Ustaw bias
+            layer->biases(j) = bias;
+            
+            // Ustaw wagi
+            for (size_t k = 0; k < weights_vec.size(); ++k) {
+                layer->weights(j, k) = weights_vec[k];
+            }
+        }
+        
+        topology.push_back(layer);
+    }
+    
+    this->layers.clear();
+    this->layers = topology;
 }

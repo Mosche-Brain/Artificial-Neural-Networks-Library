@@ -14,6 +14,11 @@ NNVisualiser::~NNVisualiser()
     ImGui::DestroyContext();
 }
 
+void NNVisualiser::playGraph()
+{
+
+}
+
 void NNVisualiser::display()
 {
     if (!glfwInit())
@@ -54,91 +59,108 @@ void NNVisualiser::display()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
+    uint view_mode = 0;
+
     while (!glfwWindowShouldClose(window))
     {
         //glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
         glClearColor(0.f, 0.f, 0.f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        Render();
-    
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-
-        ImGui::Begin("Control Panel");
-        ImGui::Text("Neural Network Control");
-
-        // Pola do ustawiania wejść
-        ImGui::Text("Network Inputs (XOR)");
-        ImGui::InputFloat("Input 1", &inputs[0], 0.0f, 1.0f, "%.1f");
-        ImGui::InputFloat("Input 2", &inputs[1], 0.0f, 1.0f, "%.1f");
-
-        // Przycisk do propagacji w przód
-        if (ImGui::Button("Run Forward")) 
+        switch (view_mode)
         {
-            VectorXd input_vec(2);
-            input_vec << inputs[0], inputs[1];
-            VectorXd output = network->forward(input_vec);
-            forward_result = std::to_string(output[0]);
-        }
-        ImGui::Text("Forward Result: %s", forward_result.c_str());
-        ImGui::End();
-
-
-        if(ImGui::TreeNode("Layers"))
-        {
-            for(int i = 0 ; i < this->network->layers.size() ; i++)
+            case 0:
             {
-                std::string label = "Layer " + std::to_string(i);
-                if(ImGui::TreeNode(label.c_str()))
-                {
-                    // std::string size_label = "size: " + std::to_string(this->network->layers[i]->layer_size);
-                    // ImGui::Text(size_label.c_str());
-                    ImGui::Text("size: %d", this->network->layers[i]->size());
-                    
-                    if(ImGui::TreeNode("Weights"))
-                    {
-                        for(int j = 0 ; j < network->layers[i]->size() ; j++)
-                        {
-                            std::string weights_label = "Row " + std::to_string(j);
-                            if(ImGui::TreeNode(weights_label.c_str()))
-                            {
-                                for(int k = 0 ; k < network->layers[i]->weights.row(j).size() ; k++)
-                                {
-                                    double weight = network->layers[i]->weights.row(j)[k];
-                                    ImGui::Text("%.8f", weight);
-                                }
 
+                Render();
+            
+                ImGui_ImplOpenGL3_NewFrame();
+                ImGui_ImplGlfw_NewFrame();
+                ImGui::NewFrame();
+    
+    
+                ImGui::Begin("Control Panel");
+                ImGui::Text("Neural Network Control");
+    
+                // Pola do ustawiania wejść
+                ImGui::Text("Network Inputs (XOR)");
+                ImGui::InputFloat("Input 1", &inputs[0], 0.0f, 1.0f, "%.1f");
+                ImGui::InputFloat("Input 2", &inputs[1], 0.0f, 1.0f, "%.1f");
+    
+                // Przycisk do propagacji w przód
+                if (ImGui::Button("Run Forward")) 
+                {
+                    VectorXd input_vec(2);
+                    input_vec << inputs[0], inputs[1];
+                    VectorXd output = network->forward(input_vec);
+                    forward_result = std::to_string(output[0]);
+                }
+                ImGui::Text("Forward Result: %s", forward_result.c_str());
+                ImGui::End();
+    
+    
+                if(ImGui::TreeNode("Layers"))
+                {
+                    for(int i = 0 ; i < this->network->layers.size() ; i++)
+                    {
+                        std::string label = "Layer " + std::to_string(i);
+                        if(ImGui::TreeNode(label.c_str()))
+                        {
+                            // std::string size_label = "size: " + std::to_string(this->network->layers[i]->layer_size);
+                            // ImGui::Text(size_label.c_str());
+                            ImGui::Text("size: %d", this->network->layers[i]->size());
+                            
+                            if(ImGui::TreeNode("Weights"))
+                            {
+                                for(int j = 0 ; j < network->layers[i]->size() ; j++)
+                                {
+                                    std::string weights_label = "Row " + std::to_string(j);
+                                    if(ImGui::TreeNode(weights_label.c_str()))
+                                    {
+                                        for(int k = 0 ; k < network->layers[i]->weights.row(j).size() ; k++)
+                                        {
+                                            double weight = network->layers[i]->weights.row(j)[k];
+                                            ImGui::Text("%.8f", weight);
+                                        }
+    
+                                        ImGui::TreePop();
+                                    }
+                                }
+    
+    
                                 ImGui::TreePop();
                             }
+    
+    
+                            if(ImGui::TreeNode("output"))
+                            {
+                                for(int j = 0 ; j < this->network->layers[i]->size() ; j++)
+                                {
+                                    ImGui::Text("%.8f", network->layers[i]->outputs[j]);
+                                }
+    
+                                ImGui::TreePop();
+                            }
+    
+                            ImGui::TreePop();
                         }
-
-
-                        ImGui::TreePop();
                     }
-
-
-                    if(ImGui::TreeNode("output"))
-                    {
-                        for(int j = 0 ; j < this->network->layers[i]->size() ; j++)
-                        {
-                            ImGui::Text("%.8f", network->layers[i]->outputs[j]);
-                        }
-
-                        ImGui::TreePop();
-                    }
-
+    
                     ImGui::TreePop();
                 }
+    
+                ImGui::Render();
+                ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+                break;
             }
-
-            ImGui::TreePop();
+        
+            case 1:
+            {
+                
+            }
+            default: break;
         }
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
         glfwPollEvents();

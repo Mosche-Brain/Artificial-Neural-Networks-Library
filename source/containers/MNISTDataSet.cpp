@@ -1,5 +1,10 @@
 #include "containers/MNISTDataSet.hpp"
 
+MNISTDataSet::MNISTDataSet()
+{
+
+}
+
 Eigen::VectorXd MNISTDataSet::getImage(int index)
 {
     return this->__images__.row(index).transpose();
@@ -10,14 +15,14 @@ double MNISTDataSet::getLabel(int index)
     return this->__labels__[index];
 }
 
-Eigen::MatrixXd* MNISTDataSet::images()
+Eigen::MatrixXd& MNISTDataSet::images()
 {
-    return &this->__images__;
+    return this->__images__;
 }
 
-Eigen::VectorXd* MNISTDataSet::labels()
+Eigen::VectorXd& MNISTDataSet::labels()
 {
-    return &this->__labels__;
+    return this->__labels__;
 }
 
 void MNISTDataSet::loadImages(const std::string& filepath)
