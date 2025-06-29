@@ -4,6 +4,7 @@
 
 #define Σ(x) x.sum()
 
+// double tanh(double x);
 double tanh_prim(double x);
 
 double sigmoid(double x);

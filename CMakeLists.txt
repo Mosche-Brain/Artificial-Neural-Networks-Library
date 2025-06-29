@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(NeuralNet)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 find_package(nlohmann_json 3.2.0 REQUIRED)
@@ -15,8 +15,11 @@ include_directories(
     ./source/
     ./source/Network
     ./source/containers
-    .external/imgui
-    .external/imgui/backends
+    ./.external/
+    ./.external/imgui
+    ./.external/OpenGLPlotLive
+    ./.external/imgui/backends
+    /usr/include/freetype2
 )
 
 file(GLOB_RECURSE PROJECT_SOURCES "source/*.cpp")
@@ -47,10 +50,4 @@ target_link_libraries(${PROJECT_NAME}
     ${CMAKE_DL_LIBS}
 )
 
-target_include_directories(${PROJECT_NAME} PRIVATE 
-    .external/
-    .external/imgui 
-    .external/imgui/backends
-)
-
-target_sources(${PROJECT_NAME} PRIVATE ${IMGUI_SOURCES})
+ 

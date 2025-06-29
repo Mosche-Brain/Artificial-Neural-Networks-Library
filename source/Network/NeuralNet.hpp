@@ -15,7 +15,7 @@ class NeuralNet
 {
 public:
     NeuralNet(int layers_n, VectorXi layers_size);
-    NeuralNet(std::vector<Layer*> _layers_);
+    NeuralNet(std::vector<Layer*> _layers_) ;
     NeuralNet(std::vector<INIT_PARAMS> topology);
 
 

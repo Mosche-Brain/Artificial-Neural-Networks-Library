@@ -13,7 +13,7 @@ namespace Layers
 {
 
     INIT_PARAMS Flatten(int height, int width);
-    INIT_PARAMS Tanh(int size);
+    // INIT_PARAMS Tanh(int size);
     INIT_PARAMS Linear(int size);
     INIT_PARAMS Sigmoid(int size);
     INIT_PARAMS RELunit(int size);

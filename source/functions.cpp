@@ -1,5 +1,10 @@
 #include "functions.hpp"
 
+// double tanh(double x)
+// {
+//     return std::tanh(x);
+// }
+
 double tanh_prim(double x)
 {
     return 1 - std::pow(tanh(x), 2);

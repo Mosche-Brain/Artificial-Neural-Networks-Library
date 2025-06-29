@@ -7,6 +7,13 @@
 
 #include <nlohmann/json.hpp>
 
+// #include "openGLPlotLive/plot/plot.h"
+// #include "openGLPlotLive/window/window.h"
+// #include "openGLPlotLive/lines/Line2DVecfVecGLMV3.h"
+// #include "openGLPlotLive/scatterPlot/"
+// [abdul@abdul-manjaro datasets]$ youtube-dl -f bestvideo+bestaudio --merge-output-format mp4 --postprocessor-args "-ss 00:18:56 -t 00:19:36" "https://www.youtube.com/watch?v=RsDoUUnV4ls"
+
+
 #include "Network/Perceptron.hpp"
 #include "Network/NeuralNet.hpp"
 #include "containers/MNISTDataSet.hpp"
@@ -24,13 +31,17 @@ void train(NeuralNet* net, MNISTDataSet& dataset, int epochs, double rate);
 int main()
 {
     NeuralNet network({ Layers::Linear(1),
-                        Layers::Sigmoid(50),
+                        Layers::Sigmoid(32),
                         Layers::Sigmoid(1) });
 
-    network.setLossFunction(MSE);
+    // network.setLossFunction(MSE);
+    //xor_example();
 
+    VectorXd input(1);
+    input << 1.0f;
+    network.forward(input);
+    
     NNVisualiser visualiser(&network);
-
     visualiser.display();
 
     return 0;

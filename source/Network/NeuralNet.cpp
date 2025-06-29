@@ -27,6 +27,7 @@ NeuralNet::NeuralNet(std::vector<INIT_PARAMS> topology)
 
     for(int i = 1 ; i < topology.size() ; i++)
     {
+        input_width = layers[i - 1]->size();
         this->layers.push_back( new Layer(topology[i].size, input_width, topology[i].activation, topology[i].derivative));
     }
 }
@@ -52,13 +53,12 @@ void NeuralNet::train(MatrixXd train_x, MatrixXd train_y, uint n_iter, float rat
             // std::cout << "loss\n";
             //double loss = loss_function(predicted, y);
             
-            // std::cout << "backrprop\n";
             this->backpropagate(y);
             // std::cout << "weigths\n";
             this->update_weights(rate);
 
             //std::cout << "loss " << loss << "\n";
-            std::cout << "Row " << i << "proced\n";
+            std::cout << "Row " << i << " processed\n";
         }
         // std::cout << "Epoch " << epoch << " ended" << "\n";
     }
@@ -86,6 +86,7 @@ VectorXd NeuralNet::forward(MatrixXd input, bool derivatives)
         //layers[i + 1]->outputs = layers[i + 1]->forward(layers[i]->outputs);
         //this->layers[i + 1]->forward(layers[i]->outputs.transpose());
 
+        std::cout << "Forwarding layer: " << i << '\n';
         this->layers[i]->forward(layers[i - 1]->outputs, derivatives);
         // std::cout << "oki  size: " << this->layers[i]->outputs.size() << '\n';
     }

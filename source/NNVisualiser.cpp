@@ -16,7 +16,102 @@ NNVisualiser::~NNVisualiser()
 
 void NNVisualiser::playGraph()
 {
+    static float min_range_x = -10.0f;
+    static float max_range_x = 10.0f;
+    static float min_range_y = -10.0f;
+    static float max_range_y = 10.0f;
+    static float step = 0.1f;
+    static bool show_grid = true;
+    static bool show_data_points = true;
+    static int output_index = 0;
 
+    int input_size = network->layers[0]->inputWidth();
+    int output_size = network->layers.back()->size();
+    
+    ImGui::Begin("Graph Controls");
+    ImGui::SliderFloat("Min X", &min_range_x, -50.0f, 0.0f);
+    ImGui::SliderFloat("Max X", &max_range_x, 0.0f, 50.0f);
+    ImGui::SliderFloat("Min Y", &min_range_y, -50.0f, 50.0f);
+    ImGui::SliderFloat("Max Y", &max_range_y, -50.0f, 50.0f);
+    ImGui::SliderFloat("Step", &step, 0.01f, 1.0f);
+    ImGui::Checkbox("Show Grid", &show_grid);
+    if (output_size > 1) 
+    {
+        ImGui::SliderInt("Output Index", &output_index, 0, output_size - 1);
+    }
+    ImGui::End();
+    
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(min_range_x, max_range_x, min_range_y, max_range_y, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    
+    if (show_grid) 
+    {
+        glColor3f(0.2f, 0.2f, 0.2f);
+        glLineWidth(1.0f);
+        glBegin(GL_LINES);
+        for (float x = std::ceil(min_range_x); x <= max_range_x; x += 1.0f) 
+        {
+            glVertex2f(x, min_range_y);
+            glVertex2f(x, max_range_y);
+        }
+        for (float y = std::ceil(min_range_y); y <= max_range_y; y += 1.0f) 
+        {
+            glVertex2f(min_range_x, y);
+            glVertex2f(max_range_x, y);
+        }
+        glEnd();
+    }
+    
+    glColor3f(0.5f, 0.5f, 0.5f);
+    glLineWidth(2.0f);
+    glBegin(GL_LINES);
+    glVertex2f(min_range_x, 0.0f);
+    glVertex2f(max_range_x, 0.0f);
+    glVertex2f(0.0f, min_range_y);
+    glVertex2f(0.0f, max_range_y);
+    glEnd();
+    
+    if (input_size == 1) 
+    {
+        glColor3f(0.0f, 1.0f, 0.0f);
+        glLineWidth(2.0f);
+        glBegin(GL_LINE_STRIP);
+        for (float x = min_range_x; x <= max_range_x; x += step) {
+            MatrixXd input(1, 1);
+            input << x;
+            VectorXd output = network->forward(input);
+            float y = output_size == 1 ? output[0] : output[output_index];
+            glVertex2f(x, y);
+        }
+        glEnd();
+    } 
+    else if (input_size == 2) 
+    {
+        glPointSize(step * (max_range_x - min_range_x) * 10);
+        glBegin(GL_POINTS);
+        for (float x = min_range_x; x <= max_range_x; x += step) {
+            for (float y = min_range_y; y <= max_range_y; y += step) {
+                MatrixXd input(1, 2);
+                input << x, y;
+                VectorXd output = network->forward(input);
+                float value = output_size == 1 ? output[0] : output[output_index];
+                float normalized = std::tanh(value);
+                float strength = std::abs(normalized);
+                glColor3f(normalized > 0 ? 0.2f : strength, normalized > 0 ? strength : 0.2f, 0.2f);
+                glVertex2f(x, y);
+            }
+        }
+        glEnd();
+    } 
+    else 
+    {
+        ImGui::Begin("Warning");
+        ImGui::Text("Visualization supports only 1D or 2D inputs.");
+        ImGui::End();
+    }
 }
 
 void NNVisualiser::display()
@@ -52,42 +147,44 @@ void NNVisualiser::display()
         return;
     }
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, windowWidth, windowHeight, 0, -1, 1);  // 2D
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+    // Add window size callback
+    glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int width, int height) {
+        glViewport(0, 0, width, height);
+    });
 
     uint view_mode = 0;
 
     while (!glfwWindowShouldClose(window))
     {
-        //glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
         glClearColor(0.f, 0.f, 0.f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        // Get current window size for proper rendering
+        int width, height;
+        glfwGetFramebufferSize(window, &width, &height);
 
         switch (view_mode)
         {
             case 0:
             {
+                // Update projection matrix for neural network visualization
+                glMatrixMode(GL_PROJECTION);
+                glLoadIdentity();
+                glOrtho(0, width, height, 0, -1, 1);
+                glMatrixMode(GL_MODELVIEW);
+                glLoadIdentity();
 
                 Render();
             
-                ImGui_ImplOpenGL3_NewFrame();
-                ImGui_ImplGlfw_NewFrame();
-                ImGui::NewFrame();
-    
-    
                 ImGui::Begin("Control Panel");
                 ImGui::Text("Neural Network Control");
-    
-                // Pola do ustawiania wejść
-                ImGui::Text("Network Inputs (XOR)");
                 ImGui::InputFloat("Input 1", &inputs[0], 0.0f, 1.0f, "%.1f");
                 ImGui::InputFloat("Input 2", &inputs[1], 0.0f, 1.0f, "%.1f");
     
-                // Przycisk do propagacji w przód
                 if (ImGui::Button("Run Forward")) 
                 {
                     VectorXd input_vec(2);
@@ -98,7 +195,6 @@ void NNVisualiser::display()
                 ImGui::Text("Forward Result: %s", forward_result.c_str());
                 ImGui::End();
     
-    
                 if(ImGui::TreeNode("Layers"))
                 {
                     for(int i = 0 ; i < this->network->layers.size() ; i++)
@@ -106,8 +202,6 @@ void NNVisualiser::display()
                         std::string label = "Layer " + std::to_string(i);
                         if(ImGui::TreeNode(label.c_str()))
                         {
-                            // std::string size_label = "size: " + std::to_string(this->network->layers[i]->layer_size);
-                            // ImGui::Text(size_label.c_str());
                             ImGui::Text("size: %d", this->network->layers[i]->size());
                             
                             if(ImGui::TreeNode("Weights"))
@@ -127,10 +221,8 @@ void NNVisualiser::display()
                                     }
                                 }
     
-    
                                 ImGui::TreePop();
                             }
-    
     
                             if(ImGui::TreeNode("output"))
                             {
@@ -148,20 +240,25 @@ void NNVisualiser::display()
     
                     ImGui::TreePop();
                 }
-    
-                ImGui::Render();
-                ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
                 break;
             }
         
             case 1:
             {
+                // Update projection matrix for graph visualization
+                glMatrixMode(GL_PROJECTION);
+                glLoadIdentity();
+                glOrtho(min_range_x, max_range_x, min_range_y, max_range_y, -1, 1);
+                glMatrixMode(GL_MODELVIEW);
+                glLoadIdentity();
                 
+                playGraph();
             }
             default: break;
         }
-
+        
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -171,9 +268,13 @@ void NNVisualiser::display()
 
 void NNVisualiser::Render()
 {
-    float x_spacing = 150.0f;
-    float y_spacing = 60.0f;
-    float radius = 20.0f;
+    // Get current window size
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    
+    float x_spacing = width * 0.1f;  // Scale with window width (10% of width)
+    float y_spacing = height * 0.06f; // Scale with window height (6% of height)
+    float radius = std::min(width, height) * 0.02f; // Scale radius (2% of min dimension)
 
     std::vector<std::vector<glm::vec2>> positions;
     for (size_t i = 0; i < network->layers.size(); ++i)
@@ -182,40 +283,17 @@ void NNVisualiser::Render()
         std::vector<glm::vec2> layer_positions;
 
         float total_height = layer->size() * (radius * 2 + y_spacing);
-        float y_offset = (600 - total_height) / 2;
+        float y_offset = (height - total_height) / 2;
 
         for (int j = 0; j < layer->size(); ++j)
         {
-            glm::vec2 pos = {
-                100.0f + i * x_spacing,
+            glm::vec2 pos = 
+            {
+                width * 0.1f + i * x_spacing,
                 y_offset + j * (radius * 2 + y_spacing)
             };
             
-            
-            // float minOutputValue = -1;
-            // float maxOutputValue = -1;
-            
-            // float x = std::max((float)minOutputValue, std::min((float)layer->outputs[j],  maxOutputValue));
-            
-            // float t, r, g, b;
-            
-            // if(x <= 0)
-            // {
-            //     t = (x + 1) / 1;      
-            //     r = t;                
-            //     g = 1.0;              
-            // }
-            // else
-            // {
-            //     t = x / 1;            
-            //     r = 1.0;
-            //     g = 1.0 - t;
-            // }
-            
-            // glColor4f(r/4, g/4, 0, 0.5f);
-
-
-            float normalized = std::tanh(layer->outputs[j]); // normalize weights to [-1,1]
+            float normalized = std::tanh(layer->outputs[j]);
             float strength = std::abs(normalized);
                         
             glm::vec3 color = normalized > 0 ? glm::vec3(0.2f, strength, 0.2f) : glm::vec3(strength, 0.2f, 0.2f);
@@ -232,8 +310,6 @@ void NNVisualiser::Render()
         positions.push_back(layer_positions);
     }
     
-    
-    // Draw connections
     for (size_t i = 0; i < positions.size() - 1; ++i)
     {
         Layer* from_layer = network->layers[i];
@@ -252,12 +328,10 @@ void NNVisualiser::Render()
             }
         }
     }
-        
 }
 
 void NNVisualiser::drawNeuron(glm::vec2 pos, float radius)
 {
-    //glColor3f(0.8f, 0.8f, 0.9f);
     glBegin(GL_TRIANGLE_FAN);
     glVertex2f(pos.x, pos.y);
     for (int i = 0; i <= 20; ++i)
@@ -268,20 +342,17 @@ void NNVisualiser::drawNeuron(glm::vec2 pos, float radius)
         glVertex2f(x, y);
     }
     glEnd();
-
-
-
 }
 
 void NNVisualiser::drawConnection(glm::vec2 from, glm::vec2 to, float weight)
 {
-    float normalized = std::tanh(weight); // normalize weights to [-1,1]
+    float normalized = std::tanh(weight);
     float strength = std::abs(normalized);
 
     if (normalized > 0)
-        glColor3f(0.2f, strength, 0.2f); // green
+        glColor3f(0.2f, strength, 0.2f);
     else
-        glColor3f(strength, 0.2f, 0.2f); // red
+        glColor3f(strength, 0.2f, 0.2f);
 
     glLineWidth(1.0f + 2.0f * strength);
 
@@ -291,41 +362,24 @@ void NNVisualiser::drawConnection(glm::vec2 from, glm::vec2 to, float weight)
     glEnd();
 }
 
-
-
-
 void NNVisualiser::drawCircle(float cx, float cy, float r, int num_segments)
 {
-    float theta = 3.1415926 * 2 / float(num_segments);
-    float tangetial_factor = tanf(theta);//calculate the tangential factor 
-
-    float radial_factor = cosf(theta);//calculate the radial factor 
-
-    float x = r;//we start at angle = 0 
-
+    float theta = 3.14 * 2 / float(num_segments);
+    float tangetial_factor = tanf(theta);
+    float radial_factor = cosf(theta);
+    float x = r;
     float y = 0;
     glLineWidth(2);
     glBegin(GL_LINE_LOOP);
     for (int ii = 0; ii < num_segments; ii++)
     {
-        glVertex2f(x + cx, y + cy);//output vertex 
-
-        //calculate the tangential vector 
-        //remember, the radial vector is (x, y) 
-        //to get the tangential vector we flip those coordinates and negate one of them 
-
+        glVertex2f(x + cx, y + cy);
         float tx = -y;
         float ty = x;
-
-        //add the tangential vector 
-
         x += tx * tangetial_factor;
         y += ty * tangetial_factor;
-
-        //correct using the radial factor 
-
         x *= radial_factor;
         y *= radial_factor;
     }
     glEnd();
-}
+} 

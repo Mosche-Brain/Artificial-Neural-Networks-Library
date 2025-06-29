@@ -4,9 +4,10 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-#include "imgui/imgui.h"
-#include "imgui/backends/imgui_impl_glfw.h"
-#include "imgui/backends/imgui_impl_opengl3.h"
+#include "./imgui/imgui.h"
+#include "./imgui/backends/imgui_impl_glfw.h"
+#include "./imgui/backends/imgui_impl_opengl3.h"
+
 
 #include <thread>
 
@@ -37,7 +38,6 @@ public:
                                         1.0,
                                         0.0).finished();
 
-
 protected:
     void drawNeuron(glm::vec2 pos, float radius);
     void drawConnection(glm::vec2 from, glm::vec2 to, float weight);
@@ -46,4 +46,18 @@ protected:
     GLFWwindow* window;
     std::thread thread;
     NeuralNet* network;
+
+    float min_range_x = -10.0f;
+    float max_range_x = 10.0f;
+    float min_range_y = -10.0f;
+    float max_range_y = 10.0f;
+    float step = 0.1f;
+    bool show_grid = true;
+    bool show_data_points = true;
+    int output_index = 0;
+    // Dodane zmienne do zarządzania rozmiarem okna
+    int windowWidth = 1400;
+    int windowHeight = 960;
+
+    float scale_factor = 1.0f;
 };
