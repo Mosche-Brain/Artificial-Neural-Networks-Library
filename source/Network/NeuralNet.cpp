@@ -100,7 +100,8 @@ MatrixXd NeuralNet::predict(MatrixXd input)
 
     for(int i = 0 ; i < input.rows() ; i++)
     {
-        output << forward(input.row(i).transpose()).transpose();
+        // output << forward(input.row(i).transpose()).transpose();
+        output << forward(input.row(i).transpose())  ;
     }
 
     return output;

@@ -29,6 +29,7 @@ file(GLOB IMGUI_SOURCES
     .external/imgui/*.cpp
     .external/imgui/backends/imgui_impl_glfw.cpp
     .external/imgui/backends/imgui_impl_opengl3.cpp
+    .external/implot/*.cpp
 )
 
 

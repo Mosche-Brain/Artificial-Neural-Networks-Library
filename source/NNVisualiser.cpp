@@ -14,6 +14,35 @@ NNVisualiser::~NNVisualiser()
     ImGui::DestroyContext();
 }
 
+void NNVisualiser::startTraining(int _iter_, float _rate_) 
+{
+    // Uruchamiamy trenowanie w osobnym wątku
+    is_training = true;
+    std::thread training_thread([=]() 
+    {
+        {
+            // Blokujemy dostęp do sieci podczas aktualizacji
+            std::lock_guard<std::mutex> lock(network_mutex);
+            network->train(train_x, train_y, _iter_, _rate_); // Metoda trenowania (propagacja wsteczna)
+            this->stopTraining();
+        }
+        // while (is_training) 
+        // {
+        //     // Przygotowanie danych treningowych (przykładowe)
+
+
+        //     // Opcjonalne: krótka przerwa, aby nie obciążać procesora
+        //     // std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        // }
+    });
+    training_thread.detach(); // Odłączamy wątek (lub możemy go przechować do późniejszego dołączenia)
+}
+
+void NNVisualiser::stopTraining() 
+{
+    is_training = false;
+}
+
 void NNVisualiser::playGraph()
 {
     static float min_range_x = -10.0f;
@@ -40,6 +69,21 @@ void NNVisualiser::playGraph()
         ImGui::SliderInt("Output Index", &output_index, 0, output_size - 1);
     }
     ImGui::End();
+    
+    // ImGui::Begin("Network Control");
+
+    // static int n_iter = 200;
+    // static float rate = 0.1;
+
+    // ImGui::SliderInt("Iter", &n_iter, 0, 2000);
+    // ImGui::SliderFloat("rate", &rate, 0.0f, 1.0f);
+
+    // if (ImGui::Button("Train") && !is_training) {
+    //     startTraining(n_iter, rate);
+    // }
+ 
+    // ImGui::End();
+
     
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -73,6 +117,31 @@ void NNVisualiser::playGraph()
     glVertex2f(0.0f, min_range_y);
     glVertex2f(0.0f, max_range_y);
     glEnd();
+
+    // Draw numeric labels on X and Y axes using ImGui
+    // Get window size for projection
+    int win_width, win_height;
+    glfwGetFramebufferSize(window, &win_width, &win_height);
+
+    // Project world coordinates to screen coordinates
+    auto worldToScreen = [&](float x, float y) -> ImVec2 {
+        float sx = (x - min_range_x) / (max_range_x - min_range_x) * win_width;
+        float sy = win_height - (y - min_range_y) / (max_range_y - min_range_y) * win_height;
+        return ImVec2(sx, sy);
+    };
+
+    // X axis labels
+    for (float x = std::ceil(min_range_x); x <= max_range_x; x += 1.0f)
+    {
+        ImVec2 pos = worldToScreen(x, 0.0f);
+        ImGui::GetBackgroundDrawList()->AddText(ImVec2(pos.x - 10, pos.y + 2), IM_COL32(200,200,200,255), std::to_string((int)x).c_str());
+    }
+    // Y axis labels
+    for (float y = std::ceil(min_range_y); y <= max_range_y; y += 1.0f)
+    {
+        ImVec2 pos = worldToScreen(0.0f, y);
+        ImGui::GetBackgroundDrawList()->AddText(ImVec2(pos.x + 4, pos.y - 7), IM_COL32(200,200,200,255), std::to_string((int)y).c_str());
+    }
     
     if (input_size == 1) 
     {
@@ -82,7 +151,8 @@ void NNVisualiser::playGraph()
         for (float x = min_range_x; x <= max_range_x; x += step) {
             MatrixXd input(1, 1);
             input << x;
-            VectorXd output = network->forward(input);
+            // VectorXd output = network->forward(input);
+            VectorXd output = network->layers.back()->outputs;
             float y = output_size == 1 ? output[0] : output[output_index];
             glVertex2f(x, y);
         }
@@ -152,7 +222,7 @@ void NNVisualiser::display()
         glViewport(0, 0, width, height);
     });
 
-    uint view_mode = 0;
+    uint view_mode = 0    ;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -167,6 +237,41 @@ void NNVisualiser::display()
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
 
+        
+        ImGui::Begin("Control Panel");
+        static int n_iter = 200;
+        static float rate = 0.1;
+        static VectorXd input(network->input.size());
+
+        ImGui::Text("Neural Network Control");
+        
+        ImGui::SliderInt("Iter", &n_iter, 0, 2000);
+        ImGui::SliderFloat("rate", &rate, 0.0f, 1.0f);
+         
+        if (ImGui::Button("Train") && !is_training) 
+        {
+            startTraining(n_iter, rate);
+        }
+
+
+        float inputs[input.size()];
+        for(int i = 0 ; i < input.size() ; i++)
+        {
+            std::string label = "input " + i;
+            ImGui::InputFloat(label.c_str(), &inputs[0], 0.0f, 1.0f, "%.1f");
+        }
+
+        // ImGui::InputFloat("Input 2", &inputs[1], 0.0f, 1.0f, "%.1f");
+        
+        if (ImGui::Button("Run Forward")) 
+        {
+            VectorXd network_output = network->forward(input);
+            forward_result = std::to_string(network_output[0]);
+        }
+        ImGui::Text("Forward Result: %s", forward_result.c_str());
+        ImGui::End();
+    
+
         switch (view_mode)
         {
             case 0:
@@ -180,20 +285,6 @@ void NNVisualiser::display()
 
                 Render();
             
-                ImGui::Begin("Control Panel");
-                ImGui::Text("Neural Network Control");
-                ImGui::InputFloat("Input 1", &inputs[0], 0.0f, 1.0f, "%.1f");
-                ImGui::InputFloat("Input 2", &inputs[1], 0.0f, 1.0f, "%.1f");
-    
-                if (ImGui::Button("Run Forward")) 
-                {
-                    VectorXd input_vec(2);
-                    input_vec << inputs[0], inputs[1];
-                    VectorXd output = network->forward(input_vec);
-                    forward_result = std::to_string(output[0]);
-                }
-                ImGui::Text("Forward Result: %s", forward_result.c_str());
-                ImGui::End();
     
                 if(ImGui::TreeNode("Layers"))
                 {
@@ -241,7 +332,7 @@ void NNVisualiser::display()
                     ImGui::TreePop();
                 }
                 break;
-            }
+            } 
         
             case 1:
             {

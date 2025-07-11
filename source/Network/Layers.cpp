@@ -5,15 +5,15 @@ INIT_PARAMS Layers::Flatten(int height, int width)
 
 }
 
-// INIT_PARAMS Layers::Tanh(int size)
-// {
-//     INIT_PARAMS params;
-//     params.size = size;
-//     params.activation = tanh;
-//     params.derivative = tanh_prim;
+INIT_PARAMS Layers::Tanh(int size)
+{
+    INIT_PARAMS params;
+    params.size = size;
+    params.activation = tanhf;
+    params.derivative = tanh_prim;
 
-//     return params;
-// }
+    return params;
+}
 
 INIT_PARAMS Layers::Linear(int size)
 {
