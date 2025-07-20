@@ -17,7 +17,6 @@ NeuralNet::NeuralNet(int layers_n, VectorXi layers_size)
 NeuralNet::NeuralNet(std::vector<Layer*> topology)
 {
     this->layers = topology;
-    //this->layer_size = topology.size();
 }
 
 NeuralNet::NeuralNet(std::vector<INIT_PARAMS> topology)
@@ -37,42 +36,35 @@ void NeuralNet::setLossFunction(std::function<double(VectorXd, VectorXd)> func)
     this->loss_function = func;
 }
 
-void NeuralNet::train(MatrixXd train_x, MatrixXd train_y, uint n_iter, float rate)
+void NeuralNet::train(MatrixXd train_x, VectorXd train_y, uint n_iter, float rate)
 {
     for(int epoch = 0 ; epoch < n_iter ; epoch++)
     {
-        std::cout << "Epoch " << epoch << " started\n";
+        // std::cout << "Epoch " << epoch << " started\n";
+        
+        std::println("Epoch {}", epoch);
+
         for(int i = 0 ; i < train_x.rows() ; i++)
         {
             VectorXd x = train_x.row(i).transpose();
             VectorXd y = train_y.row(i).transpose();
 
-            // std::cout << "forward\n";
-            VectorXd predicted = this->forward(x, true);            
-            
-            // std::cout << "loss\n";
-            //double loss = loss_function(predicted, y);
+            VectorXd predicted = this->forward(x, true);                        
             
             this->backpropagate(y);
-            // std::cout << "weigths\n";
             this->update_weights(rate);
 
-            //std::cout << "loss " << loss << "\n";
-            std::cout << "Row " << i << " processed\n";
+            // std::cout << "Row " << i << " processed\n";
         }
-        // std::cout << "Epoch " << epoch << " ended" << "\n";
     }
 
-    std::cout << "Training ok\n";
-}
+    // std::cout << "Training ok\n";
+    std::println("Training succes")
+; }
 
 
 VectorXd NeuralNet::forward(MatrixXd input, bool derivatives)
 {
-    // std::cout << "Size: " << input.cols() << '\n';
-    // std::cout << "cols: " << input.cols() << '\n';
-    // std::cout << "rows: " << input.rows() << '\n';
-
     if(input.rows() == 1 && input.cols() > 1)
         input.transposeInPlace();
 
@@ -80,15 +72,7 @@ VectorXd NeuralNet::forward(MatrixXd input, bool derivatives)
 
     for(int i = 1 ; i < this->layers.size() ; i++)
     {
-        // std::cout << i << " Iteration\n";
-        //input = layers[i]->outputs;
-        
-        //layers[i + 1]->outputs = layers[i + 1]->forward(layers[i]->outputs);
-        //this->layers[i + 1]->forward(layers[i]->outputs.transpose());
-
-        std::cout << "Forwarding layer: " << i << '\n';
         this->layers[i]->forward(layers[i - 1]->outputs, derivatives);
-        // std::cout << "oki  size: " << this->layers[i]->outputs.size() << '\n';
     }
     
     return this->layers.back()->outputs;
@@ -96,12 +80,11 @@ VectorXd NeuralNet::forward(MatrixXd input, bool derivatives)
 
 MatrixXd NeuralNet::predict(MatrixXd input)
 {
-    MatrixXd output;
+    MatrixXd output(input.rows(), layers.back()->size());
 
     for(int i = 0 ; i < input.rows() ; i++)
     {
-        // output << forward(input.row(i).transpose()).transpose();
-        output << forward(input.row(i).transpose())  ;
+        output.row(i) = forward(input.row(i));
     }
 
     return output;
@@ -114,49 +97,23 @@ void NeuralNet::backpropagate(VectorXd expected)
     
     if(expected.size() != output_layer->outputs.size())
     {
-        std::cout << "Output layer size doesn't match with train target\n";
+        // std::cout << "Output layer size doesn't match with train target\n";
+        std::println("Output layer size doesn't match with train target");
         return;
     }
-
-    //VectorXd network_error = (output_layer->outputs - expected) * output_layer->derivative_outputs;
-    // for(int j = 0 ; j < output_layer->size() ; j++)
-    // {
-    //     // std::cout << "errors size:" << errors.size() << '\n';
-    //     //std::cout << "output size:" << output_layer->outputs.size() << '\n';
-    //     //std::cout << "target size:" << expected.size() << '\n';                
-    //     // errors[j] = curr->outputs[j] - expected[j];
-    //     double error = output_layer->outputs[j] - expected[j];
-    //     output_layer->delta[j] = error * output_layer->derivative_outputs[j];
-    // }
 
     VectorXd errors = output_layer->outputs - expected;
     output_layer->delta = output_layer->derivative_outputs.cwiseProduct(errors);
    
     for(int i = layers.size() - 2 ; i > 0 ; i--) /* hidden layers */
     {
-        //std::cout << "Layer: " << i << '\n';
         Layer* curr = layers[  i  ];
         Layer* next = layers[i + 1];
 
         VectorXd errors = VectorXd::Zero(curr->size());
       
-        // for(int j = 0 ; j < curr->size() ; j++)
-        // {
-        //     errors[j] = next->weights.col(j).cwiseProduct(next->delta).sum();
-        // }
-    
         errors = (next->weights.array().colwise() * next->delta.array()).colwise().sum();
-
-        // for(int j = 0 ; j < curr->size() ; j++)
-        // {
-        //     curr->delta[j] = errors[j] * curr->derivative_outputs[j];
-        // }
-
-        // std::cout << ".\n";
-        // curr->delta = errors * curr->derivative_outputs;
-        curr->delta = curr->derivative_outputs.cwiseProduct(errors);
-        // std::cout << ".\n";
-        
+        curr->delta = curr->derivative_outputs.cwiseProduct(errors);  
     }
 }
 

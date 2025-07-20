@@ -14,28 +14,60 @@ NNVisualiser::~NNVisualiser()
     ImGui::DestroyContext();
 }
 
-void NNVisualiser::startTraining(int _iter_, float _rate_) 
+void NNVisualiser::startTraining(int iterations, float learning_rate) 
 {
-    // Uruchamiamy trenowanie w osobnym wątku
-    is_training = true;
-    std::thread training_thread([=]() 
+    if (is_training) {
+        std::cerr << "Training already in progress!" << std::endl;
+        return;
+    }
+
+    // Walidacja parametrów
+    if (iterations <= 0 || learning_rate <= 0.0f) 
     {
+        std::cerr << "Invalid training parameters: iterations must be > 0, learning_rate must be > 0" << std::endl;
+        return;
+    }
+
+    // if (train_x. || train_y.empty()) {
+    //     std::cerr << "Training data (train_x or train_y) is empty!" << std::endl;
+    //     return;
+    // }
+
+    is_training = true;
+    training_thread = std::thread([this, iterations, learning_rate]() 
+    {
+        try 
         {
-            // Blokujemy dostęp do sieci podczas aktualizacji
+            int batch_size = 100; // Liczba iteracji w jednej partii
+            int remaining_iterations = iterations;
+
+            while (is_training && remaining_iterations > 0) 
+            {
+                std::unique_lock<std::mutex> lock(network_mutex);
+                int current_batch = std::min(batch_size, remaining_iterations);
+                network->train(train_x, train_y, current_batch, learning_rate);
+                lock.unlock();
+
+                remaining_iterations -= current_batch;
+
+                // Krótka przerwa, aby umożliwić sprawdzenie flagi is_training
+                std::unique_lock<std::mutex> cv_lock(network_mutex); 
+                cv.wait_for(cv_lock, std::chrono::milliseconds(10), [this]() { return !is_training; });
+            }
+
+            // Po zakończeniu treningu ustawiamy flagę
+            {
+                std::lock_guard<std::mutex> lock(network_mutex);
+                is_training = false;
+            }
+            cv.notify_all();
+        } catch (const std::exception& e) {
+            std::cerr << "Training failed: " << e.what() << std::endl;
             std::lock_guard<std::mutex> lock(network_mutex);
-            network->train(train_x, train_y, _iter_, _rate_); // Metoda trenowania (propagacja wsteczna)
-            this->stopTraining();
+            is_training = false;
+            cv.notify_all();
         }
-        // while (is_training) 
-        // {
-        //     // Przygotowanie danych treningowych (przykładowe)
-
-
-        //     // Opcjonalne: krótka przerwa, aby nie obciążać procesora
-        //     // std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        // }
     });
-    training_thread.detach(); // Odłączamy wątek (lub możemy go przechować do późniejszego dołączenia)
 }
 
 void NNVisualiser::stopTraining() 
@@ -217,12 +249,11 @@ void NNVisualiser::display()
         return;
     }
 
-    // Add window size callback
     glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int width, int height) {
         glViewport(0, 0, width, height);
     });
 
-    uint view_mode = 0    ;
+    uint view_mode = 1; //fixed
 
     while (!glfwWindowShouldClose(window))
     {
@@ -271,6 +302,37 @@ void NNVisualiser::display()
         ImGui::Text("Forward Result: %s", forward_result.c_str());
         ImGui::End();
     
+        // ImGui::Begin("Function Plot");
+        // ImGui::CreateContext();
+        // ImPlot::CreateContext();
+
+
+        // if(ImPlot::BeginPlot("Plot"))
+        // {
+        //     float min = -10;
+        //     float max = 10;
+        //     float step = 0.01;
+        //     int size = (max - min) / step + 1;
+
+        //     float X[size];
+        //     float Y[size];
+
+        //     for(int i = 0 ; i < size ; i++)
+        //     {
+        //         X[i] = min + (i * step);
+        //         Matrix<double, 1, 1> x;
+        //         x << X[i];
+        //         Y[i] = this->network->forward(x)[0];
+        //     }
+
+        //     ImPlot::PlotLine("Network output", X, Y, size);
+        // }
+
+        // ImPlot::DestroyContext();
+        // ImGui::DestroyContext();
+
+        // ImGui::End();
+
 
         switch (view_mode)
         {

@@ -6,10 +6,13 @@
 #include <Eigen/Dense>
 
 #include <fstream>
+#include <print>
 
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
+
+// import std;
 
 class NeuralNet
 {
@@ -21,7 +24,7 @@ public:
 
     void setLossFunction(std::function<double(VectorXd, VectorXd)> func);
     void addLayer(Layer* layer);
-    void train(MatrixXd train_data, MatrixXd expected, uint n_iter, float rate);
+    void train(MatrixXd train_data, VectorXd expected, uint n_iter, float rate);
     void backpropagate(VectorXd expected);
     void update_weights(float rate);
     void feedforward();

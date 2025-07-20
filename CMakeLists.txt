@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 23)
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 find_package(nlohmann_json 3.2.0 REQUIRED)
+find_package(Matplot++ REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(glfw3 3.3 REQUIRED)
 find_package(GLEW REQUIRED)
@@ -48,6 +49,7 @@ target_link_libraries(${PROJECT_NAME}
     OpenGL::GL
     glfw
     GLEW::GLEW
+    Matplot++::matplot
     ${CMAKE_DL_LIBS}
 )
 

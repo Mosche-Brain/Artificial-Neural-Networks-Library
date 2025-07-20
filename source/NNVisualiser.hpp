@@ -13,6 +13,7 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <condition_variable>
 
 #include "Network/NeuralNet.hpp"
 
@@ -50,6 +51,8 @@ protected:
 
     std::mutex network_mutex;
     std::atomic<bool> is_training{false};
+    std::condition_variable cv;
+    std::thread training_thread;
 
     float min_range_x = -10.0f;
     float max_range_x = 10.0f;

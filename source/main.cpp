@@ -7,10 +7,8 @@
 
 #include <nlohmann/json.hpp>
 
-// #include "openGLPlotLive/plot/plot.h"
-// #include "openGLPlotLive/window/window.h"
-// #include "openGLPlotLive/lines/Line2DVecfVecGLMV3.h"
-// #include "openGLPlotLive/scatterPlot/"
+#include <matplot/matplot.h>
+
 // [abdul@abdul-manjaro datasets]$ youtube-dl -f bestvideo+bestaudio --merge-output-format mp4 --postprocessor-args "-ss 00:18:56 -t 00:19:36" "https://www.youtube.com/watch?v=RsDoUUnV4ls"
 
 
@@ -22,6 +20,7 @@
 #include "examples/xor.hpp"
 
 using json = nlohmann::json;
+// using plt = matplot; // matplot is a namespace, use matplot:: directly
 
 MatrixXd getTestSample(const MatrixXd& data, int sampleSize);
 MatrixXd loadIrisData(const std::string& filename);
@@ -30,53 +29,56 @@ void train(NeuralNet* net, MNISTDataSet& dataset, int epochs, double rate);
 
 int main()
 {
-    NeuralNet network({ Layers::Linear(1),
-                        Layers::Tanh(7),
-                        Layers::Tanh(7),
-                        Layers::Tanh(5),
-                        Layers::Tanh(3),
-                        Layers::Tanh(1) });
-
-    // network.setLossFunction(MSE);
-    // xor_example();
+    NeuralNet network({ Layers::Linear(2),
+                        Layers::Tanh(256),
+                        Layers::Tanh(1),
+                        Layers::Linear(1) });
 
 
-    //VectorXd input;
-    int n = 200;
-    MatrixXd input(n , 1);
-    float max = 4*M_PI;
-    float step = max / n * 2;
-    float j = -max;
-    for(int i = 0 ; i < n ; i++)
+    // Matrix<double, 300, 2> inputs(300, 2);
+    // MatrixXd inputs(300, 2) = MatrixXd::;
+    MatrixXd inputs = MatrixXd::Random(300, 2);
+    
+    
+    auto f = [&network](double x, double y) -> double
     {
-        input(i, 0) = j;
-        j += step;
-    }
+        Vector2d vec(2);
+        vec << x, y;
+        
+        // return network.forward(vec).sum();
+        return std::sin(std::sqrt(std::pow(vec.x() + vec.y(), 2)));
+    };
     
-    std::cout << input(0, 0) << "\n";
-    std::cout << input(199, 0) << "\n";
-    std::cout << "brrrrr\n";
-    VectorXd target(n);
-    for(int i = 0 ; i < input.rows() ; i++)
+    MatrixXd targets(300, 1);
+    for(int i = 0 ; i < inputs.rows() ; i++)
     {
-        // target << tanh(input[i]); // tanh activation function
-        // target << input[i] * input[i]; // quadratic function
-        // target << 1 / (1 + exp(-input[i])); // sigmoid activation function
-        // target << input[i] > 0 ? 1 : 0; // step function
-        // target << input[i] < 0 ? -1 : 1; // sign function
-        target[i] = sinf(input.row(i)[0]); // sine function;
-        // target[i] = input.row(i)[0] * 3;
-    }
-                       
-    NNVisualiser visualiser(&network);
-    
-    visualiser.train_x = input;
-    visualiser.train_y = target;
-    
-    visualiser.display();
+        // targets.row(i)[0] = inputs.row(i).sum();
+        targets.row(i)[0] = f(inputs.row(i)[0], inputs.row(i)[1]);
+    }    
 
-    
-    // network.train(input, target, 500, 0.1);
+    network.train(inputs, targets, 500, 0.05);
+
+    // VectorXd results = network.predict(inputs);
+
+    auto n = [&network](double x, double y) -> double
+    {
+        Vector2d vec(2);
+        vec << x, y;
+
+        return network.forward(vec)[0];
+    };
+
+
+    // matplot::fsurf(f);
+    matplot::fmesh(n);
+
+    matplot::xlabel("x");
+    matplot::ylabel("y");
+    matplot::zlabel("z");
+    matplot::view(90, 30, 30);
+
+
+    matplot::show();
 
     return 0;
 }
