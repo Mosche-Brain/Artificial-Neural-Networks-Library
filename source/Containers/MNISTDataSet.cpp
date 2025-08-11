@@ -1,4 +1,4 @@
-#include "containers/MNISTDataSet.hpp"
+#include "Containers/MNISTDataSet.hpp"
 
 MNISTDataSet::MNISTDataSet()
 {

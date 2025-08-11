@@ -5,7 +5,6 @@
 #include <cmath>
 #include <Eigen/Dense>
 
-#include "utils.hpp"
 
 using namespace Eigen;
 

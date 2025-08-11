@@ -14,10 +14,10 @@
 
 #include "Network/Perceptron.hpp"
 #include "Network/NeuralNet.hpp"
-#include "containers/MNISTDataSet.hpp"
-#include "NNVisualiser.hpp"
+#include "Containers/MNISTDataSet.hpp"
+// #include "NNVisualiser.hpp"
 
-#include "examples/xor.hpp"
+// #i nclude "examples/xor.hpp"
 
 using json = nlohmann::json;
 // using plt = matplot; // matplot is a namespace, use matplot:: directly
@@ -30,55 +30,73 @@ void train(NeuralNet* net, MNISTDataSet& dataset, int epochs, double rate);
 int main()
 {
     NeuralNet network({ Layers::Linear(2),
-                        Layers::Tanh(256),
-                        Layers::Tanh(1),
-                        Layers::Linear(1) });
+                        Layers::Sigmoid(5),
+                        Layers::Sigmoid(3),
+                        Layers::Sigmoid(2),
+                        Layers::Sigmoid(1)
+                        });
 
 
-    // Matrix<double, 300, 2> inputs(300, 2);
-    // MatrixXd inputs(300, 2) = MatrixXd::;
-    MatrixXd inputs = MatrixXd::Random(300, 2);
+    // MNISTDataSet dataset;
+    // dataset.loadImages("./Data/MNIST/train-images-idx3-ubyte");
+    // dataset.loadLabels("./Data/MNIST/train-labels-idx1-ubyte");
+    // dataset.loadImages("./Data/MNIST/t10k-images.idx3-ubyte");
+    // dataset.loadLabels("./Data/MNIST/t10k-labels.idx1-ubyte");
+    // network.train(dataset.images(), dataset.labels(), 50, 0.1);
     
     
-    auto f = [&network](double x, double y) -> double
-    {
-        Vector2d vec(2);
-        vec << x, y;
-        
-        // return network.forward(vec).sum();
-        return std::sin(std::sqrt(std::pow(vec.x() + vec.y(), 2)));
-    };
-    
-    MatrixXd targets(300, 1);
-    for(int i = 0 ; i < inputs.rows() ; i++)
-    {
-        // targets.row(i)[0] = inputs.row(i).sum();
-        targets.row(i)[0] = f(inputs.row(i)[0], inputs.row(i)[1]);
-    }    
+    Matrix<double, 4, 2> truth_table;
+    truth_table <<  0, 0,
+                    0, 1,
+                    1, 0,
+                    1, 1;
 
-    network.train(inputs, targets, 500, 0.05);
+    Vector<double, 4> target;
+    target << 0, 1, 1, 0;
 
-    // VectorXd results = network.predict(inputs);
-
-    auto n = [&network](double x, double y) -> double
-    {
-        Vector2d vec(2);
-        vec << x, y;
-
-        return network.forward(vec)[0];
-    };
-
+    network.train(truth_table, target, 50, 0.1);
 
     // matplot::fsurf(f);
-    matplot::fmesh(n);
+    // matplot::fmesh(n);
 
-    matplot::xlabel("x");
-    matplot::ylabel("y");
-    matplot::zlabel("z");
-    matplot::view(90, 30, 30);
+    // matplot::xlabel("x");
+    // matplot::ylabel("y");
+    // matplot::zlabel("z");
+    // matplot::view(90, 30, 30);
 
 
-    matplot::show();
+    std::function<double(double, double)> f = [&network](double x, double y) 
+    {
+        RowVectorXd v(2);
+        v << x, y; 
+        return network.forward(v)[0];
+    };
+
+
+    // matplot::fplot(f, std::array<double, 2>{-20, 20});
+
+    // matplot::fmesh(f);
+
+    // matplot::grid(matplot::on);
+    // matplot::title("Network Output");
+    // matplot::xlabel("x");
+    // matplot::ylabel("y");
+
+    // auto ax = matplot::gca();
+    // ax->x_axis().tick_values(matplot::iota(-2 * M_PI, M_PI / 2, 2 * M_PI));
+    // ax->x_axis().ticklabels(
+    //     {"-2π", "-3π/2", "-π", "-π/2", "0", "π/2", "π", "3π/2", "2π"});
+
+
+
+    // matplot::show();
+
+    for(int i = 0 ; i < 4 ; i++)
+    {
+        RowVectorXd v = truth_table.row(i); 
+        double y = network.forward(v)[0];
+        std::println("[{},{}] -> {}", truth_table.row(i)[0], truth_table.row(i)[1], y);
+    }
 
     return 0;
 }

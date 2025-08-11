@@ -5,8 +5,8 @@
 #include <functional>
 #include <map>
 
-#include "Network/Neuron.hpp"
-#include "functions.hpp"
+#include "Models/Neuron.hpp"
+#include "Utils/functions.hpp"
 
 using namespace Eigen;
 

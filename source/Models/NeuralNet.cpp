@@ -1,4 +1,4 @@
-#include "Network/NeuralNet.hpp"
+#include "Models/NeuralNet.hpp"
 
 NeuralNet::NeuralNet(int layers_n, VectorXi layers_size)
 {
@@ -19,7 +19,7 @@ NeuralNet::NeuralNet(std::vector<Layer*> topology)
     this->layers = topology;
 }
 
-NeuralNet::NeuralNet(std::vector<INIT_PARAMS> topology)
+NeuralNet::NeuralNet(std::vector<Layers::INIT_PARAMS> topology)
 {
     this->layers.push_back( new Layer(topology[0].size, 1, topology[0].activation, topology[0].derivative));
     int input_width = topology[0].size;
@@ -36,13 +36,14 @@ void NeuralNet::setLossFunction(std::function<double(VectorXd, VectorXd)> func)
     this->loss_function = func;
 }
 
-void NeuralNet::train(MatrixXd train_x, VectorXd train_y, uint n_iter, float rate)
+void NeuralNet::train(MatrixXd train_x, VectorXd train_y, uint n_iter, float rate, bool print_output)
 {
     for(int epoch = 0 ; epoch < n_iter ; epoch++)
     {
-        // std::cout << "Epoch " << epoch << " started\n";
-        
-        std::println("Epoch {}", epoch);
+        if(print_output)
+        {
+            std::println("Epoch {}/{}", epoch, n_iter);
+        }
 
         for(int i = 0 ; i < train_x.rows() ; i++)
         {

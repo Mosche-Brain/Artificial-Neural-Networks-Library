@@ -1,4 +1,4 @@
-#include "Network/Layer.hpp"
+#include "Models/Layer.hpp"
 
 /*
  * Wektorem wag dla każdego neuronu [i] jest wiersz [i] macierzy wag.

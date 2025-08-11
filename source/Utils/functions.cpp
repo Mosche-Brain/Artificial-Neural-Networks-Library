@@ -1,4 +1,4 @@
-#include "functions.hpp"
+#include "Utils/functions.hpp"
 
 // double tanh(double x)
 // {
@@ -55,8 +55,17 @@ double pass_prim(double x)
     return 1;
 }
 
-//double MSE(double x, double y)
+// Eigen::VectorXd softmax(Eigen::VetorXd x)
+// {
+//     return Eigen::exp(x - Eigen::max)
+// }
 
+double derivative(std::function<double(double)> f, double x)
+{
+    double h = std::numeric_limits<double>::epsilon();
+
+    return f(x + h) - f(x) / h;
+}
 
 double MSE(Eigen::VectorXd expected, Eigen::VectorXd predicted)
 {
