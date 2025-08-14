@@ -192,15 +192,13 @@ void NeuralNet::load_from_json(const char* filename)
     for (uint i = 0 ; i < obj.contains("Layer" + std::to_string(i)) ; ++i)
     {
         auto layer_data = obj["Layer" + std::to_string(i)];
-        int layer_size = layer_data.size(); // Liczba neuronów w warstwie
+        int layer_size = layer_data.size();
         int input_size = 0;
 
 
-        // Utwórz warstwę
         Layer* layer;
         if (i == 0)
         {
-            // Warstwa wejściowa (pass-through)
             layer = new Layer(layer_size, input_size, pass, pass_prim, true);
         }
         else
@@ -208,16 +206,13 @@ void NeuralNet::load_from_json(const char* filename)
             layer = new Layer(layer_size, input_size, sigmoid, sigmoid_prim);
         }
 
-        // Ustaw wagi i biasy dla każdego neuronu
         for (int j = 0; j < layer_size; ++j) {
             auto neuron_data = layer_data["Neuron" + std::to_string(j)];
             double bias = neuron_data["bias"].get<double>();
             std::vector<double> weights_vec = neuron_data["weights"].get<std::vector<double>>();
 
-            // Ustaw bias
             layer->biases(j) = bias;
             
-            // Ustaw wagi
             for (size_t k = 0; k < weights_vec.size(); ++k) {
                 layer->weights(j, k) = weights_vec[k];
             }

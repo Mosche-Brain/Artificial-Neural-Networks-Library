@@ -1,0 +1,19 @@
+#pragma once
+
+#include "Eigen/Dense"
+#include <fstream>
+#include <vector>
+#include <string>
+
+class CSVLoader
+{
+public:
+    CSVLoader();
+
+    Eigen::MatrixXd loadFile(const char* path);
+
+protected:
+    std::string readFile(const char* path);
+    std::vector<std::vector<std::string>> split_data(std::string raw);
+    char limiter=',';
+};
