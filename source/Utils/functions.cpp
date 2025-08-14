@@ -20,14 +20,24 @@ double sigmoid_prim(double x)
     return sigmoid(x) * (1 - sigmoid(x));
 }
 
-double RELu(double x)
+double ReLU(double x)
 {
     return x > 0 ? x : 0;
 }
 
-double RELu_prim(double x)
+double ReLU_prim(double x)
 {
     return x > 0 ? 1 : 0;
+}
+
+double GELU(double x)
+{
+    return 0.5*(1 + tanh(sqrt(2/M_PI)*std::pow(0.044715*x, 3)));
+}
+
+double GELU_prim(double x)
+{
+
 }
 
 double square(double x)

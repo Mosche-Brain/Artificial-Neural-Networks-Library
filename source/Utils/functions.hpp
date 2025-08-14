@@ -11,8 +11,11 @@ double tanh_prim(double x);
 double sigmoid(double x);
 double sigmoid_prim(double x);
 
-double RELu(double x);
-double RELu_prim(double x);
+double ReLU(double x);
+double ReLU_prim(double x);
+
+double GELU(double x);
+double GELU_prim(double x);
 
 double square(double x);
 double square_prim(double x);

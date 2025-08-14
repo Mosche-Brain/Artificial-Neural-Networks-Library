@@ -5,29 +5,31 @@ NeuralNet::NeuralNet(int layers_n, VectorXi layers_size)
     if(layers_n != layers_size.size())
         return;
 
-    this->layers.push_back(new Layer(layers_size[0], 1, pass, pass_prim));
+    this->layers.push_back(std::unique_ptr<Layer>(new Layer(layers_size[0], 1, pass, pass_prim)));
     //this->layers[0]->weights = MatrixXd::Ones();
 
     for(int i = 1 ; i < layers_n ; i++)
     {
-        this->layers.push_back(new Layer(layers_size[i], layers_size[i - 1], sigmoid, sigmoid_prim));
+        // this->layers.push_back(new Layer(layers_size[i], layers_size[i - 1], sigmoid, sigmoid_prim));
+        this->layers.push_back(std::unique_ptr<Layer>(new Layer(layers_size[i], layers_size[i - 1], sigmoid, sigmoid_prim)));
     }
 }
 
-NeuralNet::NeuralNet(std::vector<Layer*> topology)
+NeuralNet::NeuralNet(std::vector<std::unique_ptr<Layer>> topology)
 {
-    this->layers = topology;
+    // this->layers = topology;
+    this->layers = std::move(topology);
 }
 
 NeuralNet::NeuralNet(std::vector<Layers::INIT_PARAMS> topology)
 {
-    this->layers.push_back( new Layer(topology[0].size, 1, topology[0].activation, topology[0].derivative));
+    this->layers.push_back(std::unique_ptr<Layer>(new Layer(topology[0].size, 1, topology[0].activation, topology[0].derivative)));
     int input_width = topology[0].size;
 
     for(int i = 1 ; i < topology.size() ; i++)
     {
         input_width = layers[i - 1]->size();
-        this->layers.push_back( new Layer(topology[i].size, input_width, topology[i].activation, topology[i].derivative));
+        this->layers.push_back(std::unique_ptr<Layer>(new Layer(topology[i].size, input_width, topology[i].activation, topology[i].derivative)));
     }
 }
 
@@ -54,15 +56,11 @@ void NeuralNet::train(MatrixXd train_x, VectorXd train_y, uint n_iter, float rat
             
             this->backpropagate(y);
             this->update_weights(rate);
-
-            // std::cout << "Row " << i << " processed\n";
         }
     }
 
-    // std::cout << "Training ok\n";
-    std::println("Training succes")
-; }
-
+    std::println("Training succes"); 
+}
 
 VectorXd NeuralNet::forward(MatrixXd input, bool derivatives)
 {
@@ -94,11 +92,10 @@ MatrixXd NeuralNet::predict(MatrixXd input)
 
 void NeuralNet::backpropagate(VectorXd expected)
 {
-    Layer* output_layer = layers.back();
+    Layer* output_layer = layers.back().get();
     
     if(expected.size() != output_layer->outputs.size())
     {
-        // std::cout << "Output layer size doesn't match with train target\n";
         std::println("Output layer size doesn't match with train target");
         return;
     }
@@ -108,8 +105,8 @@ void NeuralNet::backpropagate(VectorXd expected)
    
     for(int i = layers.size() - 2 ; i > 0 ; i--) /* hidden layers */
     {
-        Layer* curr = layers[  i  ];
-        Layer* next = layers[i + 1];
+        Layer* curr = layers[  i  ].get();
+        Layer* next = layers[i + 1].get();
 
         VectorXd errors = VectorXd::Zero(curr->size());
       
@@ -122,8 +119,8 @@ void NeuralNet::update_weights(float rate)
 {
     for(int i = 1 ; i < layers.size() ; i++)
     {
-        Layer* curr = layers[  i  ];
-        Layer* prev = layers[i - 1];
+        Layer* curr = layers[  i  ].get();
+        Layer* prev = layers[i - 1].get();
     
         curr->weights -= rate * curr->delta * prev->outputs.transpose();
         curr->biases -= rate * curr->delta;
@@ -187,40 +184,46 @@ void NeuralNet::load_from_json(const char* filename)
         file.close();
     }
 
-    std::vector<Layer*> topology;
+    std::vector<std::unique_ptr<Layer>> topology;
     
-    for (uint i = 0 ; i < obj.contains("Layer" + std::to_string(i)) ; ++i)
+    for(size_t i = 0 ; i < obj.contains("Layer" + std::to_string(i)) ; ++i)
     {
         auto layer_data = obj["Layer" + std::to_string(i)];
         int layer_size = layer_data.size();
         int input_size = 0;
 
 
-        Layer* layer;
+        // Layer* layer;
+        std::unique_ptr<Layer> layer;
         if (i == 0)
         {
-            layer = new Layer(layer_size, input_size, pass, pass_prim, true);
+            // layer = new Layer(layer_size, input_size, pass, pass_prim, true);
+            layer = std::unique_ptr<Layer>(new Layer(layer_size, input_size, pass, pass_prim, true));
         }
         else
         {
-            layer = new Layer(layer_size, input_size, sigmoid, sigmoid_prim);
+            layer = std::unique_ptr<Layer>(new Layer(layer_size, input_size, sigmoid, sigmoid_prim));
         }
 
-        for (int j = 0; j < layer_size; ++j) {
+        for (int j = 0; j < layer_size; ++j) 
+        {
             auto neuron_data = layer_data["Neuron" + std::to_string(j)];
             double bias = neuron_data["bias"].get<double>();
             std::vector<double> weights_vec = neuron_data["weights"].get<std::vector<double>>();
-
+                                                                                                                                                       
             layer->biases(j) = bias;
             
-            for (size_t k = 0; k < weights_vec.size(); ++k) {
+            for (size_t k = 0; k < weights_vec.size(); ++k) 
+            {
                 layer->weights(j, k) = weights_vec[k];
             }
         }
         
-        topology.push_back(layer);
+        topology.push_back(std::move(layer));
     }
     
     this->layers.clear();
-    this->layers = topology;
+
+    // this->layers = topology;
+    this->layers = std::move(topology);
 }

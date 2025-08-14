@@ -1,4 +1,4 @@
-#include "Models/Layer.hpp"
+#include "Models/Layers/Layer.hpp"
 
 /*
  * Wektorem wag dla każdego neuronu [i] jest wiersz [i] macierzy wag.
@@ -32,14 +32,7 @@ Layer::Layer(int layer_size, int input_size, std::function<double(double)> func,
 
 Layer::Layer(int layer_size, int input_size, const char* func, bool passive_layer)
 {
-    // std::map<std::string, std::function<double(double)>> funcions =
-    // {
-    //     {"linear", pass},
-    //     {"sigmoid", sigmoid},
-    //     {"relu", RELu},
-    //     {"tanh", tanh}
-    // };
-
+    auto activation = activation_map.find(func);
     /* Not yet finished */
 }
 
