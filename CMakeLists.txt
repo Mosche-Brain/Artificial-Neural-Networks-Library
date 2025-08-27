@@ -39,6 +39,7 @@ endforeach()
 # file(COPY "${CMAKE_SOURCE_DIR}/source/NeuralNetworksAll.hpp" DESTINATION "${CMAKE_BINARY_DIR}/include")
 # file(COPY ${CMAKE_SOURCE_DIR}/source/NeuralNetworksAll.hpp DESTINATION ${CMAKE_BINARY_DIR}/include)
 
+
 # Define the library target
 add_library(${PROJECT_NAME} ${PROJECT_SOURCES})
 

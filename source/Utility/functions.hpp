@@ -1,12 +1,17 @@
 #pragma once
 
-#include <cmath>
-
 #include <Eigen/Dense>
+
+#include <cmath>
+#include <limits>
 
 namespace SNN::Utils
 {
-    float_t tanhf_derivative(float_t x);
+    float_t linear(float_t x);
+    float_t linear_derivative (float_t x);
+
+    float_t tanh(float_t x);
+    float_t tanh_derivative(float_t x);
 
     float_t sigmoid(float_t x);
     float_t sigmoid_derivative(float_t x);
@@ -14,7 +19,9 @@ namespace SNN::Utils
     float_t ReLU(float_t x);
     float_t ReLU_derivative(float_t x);
 
-    Eigen::VectorXf softmax(Eigen::VectorXd x);
-    Eigen::VectorXf softmax_derivative(Eigen::VectorXd x);
+    float_t GELU(float_t x);
+    float_t GELU_derivative(float_t x);
 
+    Eigen::MatrixXf softmax(const Eigen::MatrixXf& x);
+    Eigen::MatrixXf softmax_derivative(const Eigen::MatrixXf& x);
 }
