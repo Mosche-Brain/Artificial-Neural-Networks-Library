@@ -2,6 +2,8 @@
 
 #include <Eigen/Dense>
 
+#include <memory>
+
 #include "Utility/Activation.hpp"
 
 namespace SNN::Models::Layers
@@ -9,13 +11,25 @@ namespace SNN::Models::Layers
     class LayerBase
     {
     public:
-        // LayerBase();
-
+        virtual void initParameters(int layerSize, int inputLenght);
+        
+        virtual Eigen::MatrixXf forward(const Eigen::MatrixXf& input) = 0;
+        
+        virtual std::unique_ptr<LayerBase> getUnique() = 0;
+        
+        bool initialized();
+        virtual int size();
+        virtual Eigen::MatrixXf Outputs();
+        virtual Eigen::MatrixXf Weights();
+        virtual Eigen::MatrixXf Biases();
+        Utils::Activation activation;
+        
+    protected:
         Eigen::MatrixXf weights;
         Eigen::VectorXf biases;
+        Eigen::MatrixXf outputs;
 
-        Utils::Activation activation;
-
-        virtual Eigen::MatrixXf forward(Eigen::MatrixXf input) = 0;
+        int _layerSize_;
+        bool _initialized_ = false;
     };
 }   

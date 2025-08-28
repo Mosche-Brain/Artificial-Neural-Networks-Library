@@ -3,16 +3,26 @@
 namespace SNN::Models::Layers
 {
     // Dense::Dense(int layerSize, int inputWidth, const char* func) : LayerBase()
-    Dense::Dense(int layerSize, int inputWidth, const char* func)
+    Dense::Dense(int layerSize, const char* func)
     {
-        activation = Utils::Activation(func);
+        activation  = Utils::Activation(func);
+        _layerSize_ = layerSize;
+        // if(inputWidth > 0)
+        // {
+        //     initParameters(layerSize, inputWidth);
+        // }
+    }
+    
+    Eigen::MatrixXf Dense::forward(const Eigen::MatrixXf& input)
+    {
+        Eigen::MatrixXf result = activation.matrixFunction((weights * input) + biases);
+        outputs = result;
 
-        weights = Eigen::MatrixXf::Random(layerSize, inputWidth);
-        biases  = Eigen::VectorXf::Random(layerSize);
+        return result;
     }
 
-    Eigen::MatrixXf Dense::forward(Eigen::MatrixXf input)
+    std::unique_ptr<LayerBase> Dense::getUnique()
     {
-        return activation.matrixFunction((weights * input) + biases);
+        return std::make_unique<Dense>(*this);
     }
 }

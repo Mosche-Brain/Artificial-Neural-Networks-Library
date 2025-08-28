@@ -4,14 +4,13 @@
 
 namespace SNN::Models::Layers
 {
-    class Dense : public LayerBase
+    class Input : LayerBase
     {
     public:
-        // Dense(int layerSize, int inputWidth, const char* func);
-        Dense(int layerSize, const char* func);
+        Input(int layerSize);
 
         Eigen::MatrixXf forward(const Eigen::MatrixXf& input) override;
-
+        
         std::unique_ptr<LayerBase> getUnique() override;
     };
 }
