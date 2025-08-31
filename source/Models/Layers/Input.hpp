@@ -4,13 +4,15 @@
 
 namespace SNN::Models::Layers
 {
-    class Input : LayerBase
+    class Input : public LayerBase
     {
     public:
         Input(int layerSize);
 
         Eigen::MatrixXf forward(const Eigen::MatrixXf& input) override;
-        
-        std::unique_ptr<LayerBase> getUnique() override;
+        Eigen::MatrixXf backward(const Eigen::MatrixXf& deltaOutput);
+        void update_weights(float_t rate);
+
+        static std::unique_ptr<LayerBase> createUnique(int layerSize);
     };
 }

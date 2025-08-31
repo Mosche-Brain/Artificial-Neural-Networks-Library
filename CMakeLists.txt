@@ -56,6 +56,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
     -ffast-math
     -fopenmp
     -march=native
+    -Wall
 )
 
 # Link libraries

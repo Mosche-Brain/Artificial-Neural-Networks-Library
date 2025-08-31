@@ -11,11 +11,15 @@ namespace SNN::Models::Layers
     class LayerBase
     {
     public:
+        virtual ~LayerBase() = default;
+
         virtual void initParameters(int layerSize, int inputLenght);
         
         virtual Eigen::MatrixXf forward(const Eigen::MatrixXf& input) = 0;
+        virtual Eigen::MatrixXf backward(const Eigen::MatrixXf& deltaOutput) = 0;
+        virtual void update_weights(float_t rate) = 0;
         
-        virtual std::unique_ptr<LayerBase> getUnique() = 0;
+        // virtual std::unique_ptr<LayerBase> getUnique() = 0;
         
         bool initialized();
         virtual int size();

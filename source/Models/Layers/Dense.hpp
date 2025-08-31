@@ -11,7 +11,14 @@ namespace SNN::Models::Layers
         Dense(int layerSize, const char* func);
 
         Eigen::MatrixXf forward(const Eigen::MatrixXf& input) override;
+        Eigen::MatrixXf backward(const Eigen::MatrixXf& deltaOutput);
+        void update_weights(float_t rate);
 
-        std::unique_ptr<LayerBase> getUnique() override;
+        static std::unique_ptr<LayerBase> createUnique(int layerSize, const char* func);
+
+        Eigen::VectorXf input;
+    protected:
+        Eigen::MatrixXf d_weights;
+        Eigen::VectorXf d_biases; 
     };
 }
