@@ -64,7 +64,7 @@ namespace SNN::Models
     {
         topology[0]->forward(input);
 
-        for(size_t i = 1 ; i < topology.size() ; ++i)
+        for(int i = 1 ; i < topology.size() ; ++i)
         {
             std::cout << "bach\n";
             topology[i]->forward(topology[i - 1]->Outputs());
@@ -76,22 +76,39 @@ namespace SNN::Models
     void Sequential::backward(const Eigen::MatrixXf& d_output)
     {
         Eigen::MatrixXf curr_gradient = d_output;
-        for(int i = topology.size() ; i >= 0 ; --i)
+        for(int i = topology.size() - 1 ; i >= 1 ; --i)
         {
+            std::cout << "brrr\n";
             curr_gradient = topology[i]->backward(curr_gradient);
-        }
+        }        
     }
 
     void Sequential::fit(const Eigen::MatrixXf& X, const Eigen::MatrixXf& Y, float_t rate, int epochs)
     {
-        for(int i = 0 ; i < X.rows() ; i++)
+        for(int epoch = 0 ; epoch < epochs ; epoch++)
         {
-            Eigen::VectorXf x = X.row(i).transpose();
-            Eigen::VectorXf y = Y.row(i).transpose();
+            float_t epoch_loss = 0;
+            for(int i = 0 ; i < X.rows() ; i++)
+            {
+                Eigen::VectorXf x = X.row(i).transpose();
+                Eigen::VectorXf y = Y.row(i).transpose();
 
-            Eigen::VectorXf result = this->forward(x);
+                Eigen::VectorXf result = this->forward(x);
 
-            Utils::loss::LossType loss = Utils::loss::computeLoss()
+                Utils::loss::LossType loss = Utils::loss::computeLoss(result, y, this->loss_function);
+
+                Eigen::MatrixXf gradient = loss.gradient;
+
+                this->backward(gradient);
+                    std::cout << "back" << '\n';
+                this->updateParams(rate);
+                    std::cout << "update" << '\n';
+                
+                epoch_loss += loss.loss;
+            }
+            epoch_loss /= X.rows();
+
+            std::cout << "Loss: " << epoch_loss << '\n';
         }
     }
 

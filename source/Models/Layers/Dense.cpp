@@ -47,20 +47,28 @@ namespace SNN::Models::Layers
 
     Eigen::MatrixXf Dense::backward(const Eigen::MatrixXf& deltaOutput)
     {
-        Eigen::MatrixXf d_pre_activation = deltaOutput.cwiseProduct(outputs.unaryExpr(activation.derivative));
+        std::cout << "d_output " << deltaOutput.rows() << "x" << deltaOutput.cols() << "\n";
+        std::cout << "outputs  " << outputs.rows() << "x" << outputs.cols() << "\n";
 
+        Eigen::MatrixXf d_pre_activation = deltaOutput.cwiseProduct(outputs.unaryExpr(activation.derivative));
+        std::cout << "1\n";
         // Compute gradients for weights and biases
         d_weights = d_pre_activation * input.transpose();
+        std::cout << "2\n";
         d_biases = d_pre_activation.rowwise().sum();
-
+        std::cout << "3\n";
+        
         // Compute gradient w.r.t. input for backpropagation
         Eigen::MatrixXf d_input = weights.transpose() * d_pre_activation;       
+        std::cout << "4\n";
         
         return d_input;
     }
 
     void Dense::update_weights(float_t rate)
     {
+        std::cout << "weights " << weights.rows() << "x" << weights.cols() << '\n';
+        std::cout << "weights grad" << d_weights.rows() << "x" << d_weights.cols() << '\n';
         this->weights -= this->d_weights * rate;
         this->biases  -= this->d_biases  * rate;
     }
