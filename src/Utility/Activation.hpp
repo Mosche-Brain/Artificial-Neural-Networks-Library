@@ -7,7 +7,7 @@
 
 #include "functions.hpp"
 
-namespace SNN::Utils
+namespace ANN::Utils
 {
     class Activation
     {

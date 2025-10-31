@@ -6,7 +6,7 @@
 
 #include "Utility/Activation.hpp"
 
-namespace SNN::Models::Layers
+namespace ANN::Models::Layers
 {
     class LayerBase
     {

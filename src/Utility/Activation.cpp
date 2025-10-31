@@ -1,6 +1,6 @@
 #include "Activation.hpp"
 
-namespace SNN::Utils
+namespace ANN::Utils
 {
     Activation::Activation()
     {

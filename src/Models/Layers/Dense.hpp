@@ -2,7 +2,7 @@
 
 #include "LayerBase.hpp"
 
-namespace SNN::Models::Layers
+namespace ANN::Models::Layers
 {
     class Dense : public LayerBase
     {

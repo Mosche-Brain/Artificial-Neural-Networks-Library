@@ -1,6 +1,6 @@
 #include "Input.hpp"
 
-namespace SNN::Models::Layers
+namespace ANN::Models::Layers
 {
     Input::Input(int layerSize)
     {

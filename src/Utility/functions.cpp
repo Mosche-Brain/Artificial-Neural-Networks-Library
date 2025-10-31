@@ -1,6 +1,6 @@
 #include "functions.hpp"
 
-namespace SNN::Utils
+namespace ANN::Utils
 {
     float_t linear(float_t x)
     {

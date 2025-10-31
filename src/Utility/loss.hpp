@@ -4,7 +4,7 @@
 
 #include <stdexcept>
 
-namespace SNN::Utils::loss
+namespace ANN::Utils::loss
 {
     typedef struct { float_t loss ; Eigen::MatrixXf gradient; } LossType;
     

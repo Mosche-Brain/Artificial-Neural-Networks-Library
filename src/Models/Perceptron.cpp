@@ -2,10 +2,10 @@
 
 #include "Utility/stlCompatibility.hpp"
 
-namespace SNN::Models
+namespace ANN::Models
 {
     Perceptron::Perceptron(int inputLenght, std::function<float_t(float_t)> func) : _inputWidth_(inputLenght)
-    {
+    {  
         activation = std::move(func);
 
         init();
@@ -19,12 +19,12 @@ namespace SNN::Models
 
     float_t Perceptron::predict(const std::vector<float_t>& input)
     {
-        Eigen::VectorXf newInput = SNN::Utils::stlCompatibility::toEigenVector<float_t, std::vector<float_t>>(input);
+        Eigen::VectorXf newInput = ANN::Utils::stlCompatibility::toEigenVector<float_t, std::vector<float_t>>(input);
 
         return predict(newInput);
     }
 
-    void Perceptron::train(const Eigen::MatrixXf& input, const Eigen::VectorXf& target, int epochs, float rate)
+    void Perceptron::fit(const Eigen::MatrixXf& input, const Eigen::VectorXf& target, float rate, int epochs)
     {
         for(int epoch = 0 ; epoch < epochs ; epoch++)
         {
@@ -40,7 +40,7 @@ namespace SNN::Models
         }
     }
 
-    void Perceptron::train(const std::vector<std::vector<float_t>>& input, const std::vector<float_t>& target, int epochs, float rate)
+    void Perceptron::fit(const std::vector<std::vector<float_t>>& input, const std::vector<float_t>& target, float rate, int epochs)
     {
         // Eigen::MatrixXf newInput  = Utils::stlCompatibility::toEigenMatrix<float_t, Utils::stlCompatibility::STLMatrix<float_t>>(input);
         // Eigen::VectorXf newTarget = Utils::stlCompatibility::toEigenMatrix<float_t, std::vector<float_t>>(target);

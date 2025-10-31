@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-namespace SNN::Models
+namespace ANN::Models
 {
     Sequential::Sequential()
     {
@@ -66,7 +66,7 @@ namespace SNN::Models
 
         for(int i = 1 ; i < topology.size() ; ++i)
         {
-            std::cout << "bach\n";
+            // std::cout << "bach\n";
             topology[i]->forward(topology[i - 1]->Outputs());
         }
 
@@ -76,11 +76,12 @@ namespace SNN::Models
     void Sequential::backward(const Eigen::MatrixXf& d_output)
     {
         Eigen::MatrixXf curr_gradient = d_output;
-        for(int i = topology.size() - 1 ; i >= 1 ; --i)
+        for(int i = topology.size() - 1 ; i >= 0 ; --i)
         {
-            std::cout << "brrr\n";
+            std::cout << "layer " << i << "gradient:\n" << curr_gradient << '\n';
             curr_gradient = topology[i]->backward(curr_gradient);
         }        
+        std::cout << "layer 0 gradient:\n" << curr_gradient << '\n';
     }
 
     void Sequential::fit(const Eigen::MatrixXf& X, const Eigen::MatrixXf& Y, float_t rate, int epochs)
@@ -88,27 +89,38 @@ namespace SNN::Models
         for(int epoch = 0 ; epoch < epochs ; epoch++)
         {
             float_t epoch_loss = 0;
+            // std::cout << "epoch " << epoch << " started\n"; 
+            std::cout << "================Epoch " << epoch << "================\n";
             for(int i = 0 ; i < X.rows() ; i++)
             {
+                std::cout << "================Sample " << i << "================\n";
                 Eigen::VectorXf x = X.row(i).transpose();
                 Eigen::VectorXf y = Y.row(i).transpose();
 
+                std::cout << "input: "  << x << '\n';
+                std::cout << "target: " << y.transpose() << '\n';
+
                 Eigen::VectorXf result = this->forward(x);
+                std::cout << "resutl: " << result.transpose() << '\n';
 
-                Utils::loss::LossType loss = Utils::loss::computeLoss(result, y, this->loss_function);
-
-                Eigen::MatrixXf gradient = loss.gradient;
-
-                this->backward(gradient);
-                    std::cout << "back" << '\n';
-                this->updateParams(rate);
-                    std::cout << "update" << '\n';
+                std::cout << "=============Computing Loss=============\n";
+                Utils::loss::LossType error = Utils::loss::computeLoss(result, y, this->loss_function);
                 
-                epoch_loss += loss.loss;
+                Eigen::MatrixXf gradient = error.gradient;
+                
+                std::cout << "gradient:\n" << gradient << '\n';
+                std::cout << "loss: " << error.loss << '\n';
+                
+                std::cout << "=============Backpropagation=============\n";
+                this->backward(gradient);
+                std::cout << "=============Updating Params=============\n";
+                this->updateParams(rate);
+                
+                epoch_loss += error.loss;
             }
             epoch_loss /= X.rows();
 
-            std::cout << "Loss: " << epoch_loss << '\n';
+            std::cout << "Avarage epoch loss: " << epoch_loss << '\n';
         }
     }
 
@@ -119,4 +131,10 @@ namespace SNN::Models
             topology[i]->update_weights(rate);
         }
     }
+
+    Eigen::MatrixXf Sequential::getWeights(int layer_idx)
+    {
+        return topology[layer_idx]->Weights();
+    }
+
 }

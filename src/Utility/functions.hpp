@@ -5,7 +5,7 @@
 #include <cmath>
 #include <limits>
 
-namespace SNN::Utils
+namespace ANN::Utils
 {
     float_t linear(float_t x);
     float_t linear_derivative (float_t x);

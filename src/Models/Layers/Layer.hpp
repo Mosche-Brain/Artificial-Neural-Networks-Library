@@ -2,7 +2,7 @@
 
 #include "LayerBase.hpp"
 
-// namespace SNN::Models::Layers
+// namespace ANN::Models::Layers
 // {
 //     template<typename LayerType>
 // }
