@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "Utility/Activation.hpp"
+#include "Models/Layers/LayerType.hpp"
 
 namespace ANN::Models::Layers
 {
@@ -28,12 +29,14 @@ namespace ANN::Models::Layers
         virtual Eigen::MatrixXf Biases();
         Utils::Activation activation;
         
+        LAYER_TYPE layerType();
     protected:
         Eigen::MatrixXf weights;
         Eigen::VectorXf biases;
         Eigen::MatrixXf outputs;
-
+           
         int _layerSize_;
         bool _initialized_ = false;
+        LAYER_TYPE _layerType_;
     };
 }   

@@ -76,18 +76,27 @@ namespace ANN::Models
     void Sequential::backward(const Eigen::MatrixXf& d_output)
     {
         Eigen::MatrixXf curr_gradient = d_output;
+        // std::cout << "layer " <<  << " gradient:\n" << curr_gradient << '\n';
+        std::cout << "layer output gradient:\n" << curr_gradient << '\n';
         for(int i = topology.size() - 1 ; i >= 0 ; --i)
         {
-            std::cout << "layer " << i << "gradient:\n" << curr_gradient << '\n';
             curr_gradient = topology[i]->backward(curr_gradient);
+            std::cout << "layer " << i << " gradient:\n" << curr_gradient << '\n';
         }        
-        std::cout << "layer 0 gradient:\n" << curr_gradient << '\n';
+        // std::cout << "layer 0 gradient:\n" << curr_gradient << '\n';
     }
 
     void Sequential::fit(const Eigen::MatrixXf& X, const Eigen::MatrixXf& Y, float_t rate, int epochs)
     {
         for(int epoch = 0 ; epoch < epochs ; epoch++)
         {
+            Eigen::PermutationMatrix<Eigen::Dynamic> perm(X.rows());
+            perm.setIdentity();
+            std::random_shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size());
+
+            Eigen::MatrixXf X_shuffled = perm * X;
+            Eigen::MatrixXf Y_shuffled = perm * Y;
+            
             float_t epoch_loss = 0;
             // std::cout << "epoch " << epoch << " started\n"; 
             std::cout << "================Epoch " << epoch << "================\n";
@@ -106,7 +115,7 @@ namespace ANN::Models
                 std::cout << "=============Computing Loss=============\n";
                 Utils::loss::LossType error = Utils::loss::computeLoss(result, y, this->loss_function);
                 
-                Eigen::MatrixXf gradient = error.gradient;
+                Eigen::VectorXf gradient = error.gradient;
                 
                 std::cout << "gradient:\n" << gradient << '\n';
                 std::cout << "loss: " << error.loss << '\n';
@@ -128,7 +137,8 @@ namespace ANN::Models
     {
         for(int i = 0 ; i < topology.size() ; i++)
         {
-            topology[i]->update_weights(rate);
+            if(topology[i]->layerType() != Layers::LAYER_TYPE::INPUT)
+                topology[i]->update_weights(rate);
         }
     }
 

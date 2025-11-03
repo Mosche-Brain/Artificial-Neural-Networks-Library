@@ -19,6 +19,9 @@ namespace ANN::Utils
     float_t ReLU(float_t x);
     float_t ReLU_derivative(float_t x);
 
+    float_t leaky_ReLU(float_t x);
+    float_t leaky_ReLU_derivative(float_t x);
+
     float_t GELU(float_t x);
     float_t GELU_derivative(float_t x);
 

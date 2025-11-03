@@ -7,83 +7,61 @@ namespace ANN::Utils
         
     }
 
-    Activation::Activation(const char* func)
+    Activation::Activation(const char* func_name)
     {
-        // std::map<const char*, Activation> map = 
-        // {
-        //     {"tanh", {Utils::tanh, Utils::tanh_derivative }},
-        //     {"sigmoid", {Utils::sigmoid, Utils::sigmoid_derivative }},
-        //     {"relu", {Utils::ReLU, Utils::ReLU_derivative }},
-        // };
-
-        if(strcmp(func, "tanh"))
+        if (std::strcmp(func_name, "linear") == 0)
+        {
+            function = linear;
+            derivative = linear_derivative;
+            matrixFunction = [this](const Eigen::MatrixXf& X) { return X.unaryExpr(&linear); };
+            matrixDerivative = [this](const Eigen::MatrixXf& X) { return X.unaryExpr(&linear_derivative); };
+        }
+        else if (std::strcmp(func_name, "tanh") == 0)
         {
             function = tanh;
             derivative = tanh_derivative;
-
-            matrixFunction = [this](Eigen::MatrixXf X) -> Eigen::MatrixXf 
-            {
-                return X.unaryExpr(function);
-            };
-
-            matrixDerivative = [this](Eigen::MatrixXf X) -> Eigen::MatrixXf 
-            {
-                return X.unaryExpr(derivative);
-            };
+            matrixFunction = [this](const Eigen::MatrixXf& X) { return X.unaryExpr(function); };
+            matrixDerivative = [this](const Eigen::MatrixXf& X) { return X.unaryExpr(derivative); };
         }
-        else if(strcmp(func, "sigmoid"))
+        else if (std::strcmp(func_name, "sigmoid") == 0)
         {
             function = sigmoid;
             derivative = sigmoid_derivative;
-    
-            matrixFunction = [this](Eigen::MatrixXf X) -> Eigen::MatrixXf 
-            {
-                return X.unaryExpr(function);
-            };
-    
-            matrixDerivative = [this](Eigen::MatrixXf X) -> Eigen::MatrixXf 
-            {
-                return X.unaryExpr(derivative);
-            };
+            matrixFunction = [this](const Eigen::MatrixXf& X) { return X.unaryExpr(&sigmoid); };
+            matrixDerivative = [this](const Eigen::MatrixXf& X) { return X.unaryExpr(&sigmoid_derivative); };
         }
-        else if(strcmp(func, "relu"))
+        else if (std::strcmp(func_name, "relu") == 0)
         {
             function = ReLU;
             derivative = ReLU_derivative;
-    
-            matrixFunction = [this](Eigen::MatrixXf X) -> Eigen::MatrixXf 
-            {
-                return X.unaryExpr(function);
-            };
-    
-            matrixDerivative = [this](Eigen::MatrixXf X) -> Eigen::MatrixXf 
-            {
-                return X.unaryExpr(derivative);
-            };
+            matrixFunction = [this](const Eigen::MatrixXf& X) { return X.unaryExpr(function); };
+            matrixDerivative = [this](const Eigen::MatrixXf& X) { return X.unaryExpr(derivative); };
         }
-        else if(strcmp(func, "gelu"))
+        else if (std::strcmp(func_name, "leaky_relu") == 0)
+        {
+            function = leaky_ReLU;
+            derivative = leaky_ReLU_derivative;
+            matrixFunction = [this](const Eigen::MatrixXf& X) { return X.unaryExpr(&leaky_ReLU); };
+            matrixDerivative = [this](const Eigen::MatrixXf& X) { return X.unaryExpr(&leaky_ReLU_derivative); };
+        }
+        else if (std::strcmp(func_name, "gelu") == 0)
         {
             function = GELU;
             derivative = GELU_derivative;
-    
-            matrixFunction = [this](Eigen::MatrixXf X) -> Eigen::MatrixXf 
-            {
-                return X.unaryExpr(function);
-            };
-    
-            matrixDerivative = [this](Eigen::MatrixXf X) -> Eigen::MatrixXf 
-            {
-                return X.unaryExpr(derivative);
-            };
+            matrixFunction = [this](const Eigen::MatrixXf& X) { return X.unaryExpr(function); };
+            matrixDerivative = [this](const Eigen::MatrixXf& X) { return X.unaryExpr(derivative); };
         }
-        else if(strcmp(func, "relu"))
+        else if (std::strcmp(func_name, "softmax") == 0)
         {
-            // function = ReLU;
-            // derivative = ReLU_derivative;
-    
             matrixFunction = softmax;
-    
             matrixDerivative = softmax_derivative;
+
+            function = nullptr;
+            derivative = nullptr;
+        }
+        else
+        {
+            throw std::invalid_argument(std::string("Unknown activation function: ") + func_name);
         }
     }
 }

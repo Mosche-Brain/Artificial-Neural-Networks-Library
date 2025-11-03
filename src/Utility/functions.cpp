@@ -7,7 +7,7 @@ namespace ANN::Utils
         return x;
     }
 
-    float_t linear_derivative (float_t x)
+    float_t linear_derivative(float_t x)
     {
         return 1;
     }
@@ -41,6 +41,17 @@ namespace ANN::Utils
     float_t ReLU_derivative(float_t x)
     {
         return x < 0 ? 0 : 1;
+    }
+    
+    #define leaky_a 0.01f
+    float_t leaky_ReLU(float_t x)
+    {
+        return x < 0 ? x*leaky_a : x;
+    }
+
+    float_t leaky_ReLU_derivative(float_t x)
+    {
+        return x < 0 ? leaky_a : 1;
     }
 
     float_t GELU(float_t x) 

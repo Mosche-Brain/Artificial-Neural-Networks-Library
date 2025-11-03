@@ -4,7 +4,7 @@ namespace ANN::Models::Layers
 {
     void LayerBase::initParameters(int layerSize, int inputLenght)
     {
-        this->weights = Eigen::MatrixXf::Random(layerSize, inputLenght) * 1.0f;
+        this->weights = Eigen::MatrixXf::Random(layerSize, inputLenght) * 0.01f;
         // this->biases  = Eigen::MatrixXf::Zero(layerSize, 1)             ;
         this->biases  = Eigen::MatrixXf::Random(layerSize, 1) * 0.1f;
         this->outputs = Eigen::MatrixXf::Zero(layerSize, 1);
@@ -35,5 +35,10 @@ namespace ANN::Models::Layers
     Eigen::MatrixXf LayerBase::Biases()
     {
         return this->biases;
+    }
+
+    LAYER_TYPE LayerBase::layerType()
+    {
+        return _layerType_;
     }
 }

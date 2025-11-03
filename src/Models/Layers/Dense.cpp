@@ -15,6 +15,7 @@ namespace ANN::Models::Layers
         // {
         //     initParameters(layerSize, inputWidth);
         // }
+        this->_layerType_   = LAYER_TYPE::DENSE;
     }
     
     Eigen::MatrixXf Dense::forward(const Eigen::MatrixXf& input)
@@ -34,8 +35,10 @@ namespace ANN::Models::Layers
 
         this->input = input;
  
-        outputs = (weights * input).colwise() + biases;
-        outputs = outputs.unaryExpr(activation.function);
+        // outputs = (weights * input).colwise() + biases;
+        Eigen::MatrixXf weightedSums = (weights * input).colwise() + biases;
+        // outputs = outputs.unaryExpr(activation.function);
+        outputs = activation.matrixFunction(weightedSums);
         // Eigen::VectorXf results(_layerSize_);
         // for(int i = 0 ; i < results.rows() ; i++)
         // {
@@ -55,19 +58,23 @@ namespace ANN::Models::Layers
     //     std::cout << "outputs  " << outputs.rows() << "x" << outputs.cols() << "\n";
 
 
-        Eigen::MatrixXf d_pre_activation = deltaOutput.cwiseProduct(outputs.unaryExpr(activation.derivative));
-        // std::cout << "1\n";
+        // Eigen::MatrixXf d_pre_activation = deltaOutput.cwiseProduct(outputs.unaryExpr(activation.derivative));
+        Eigen::MatrixXf d_pre_activation = deltaOutput.cwiseProduct(activation.matrixDerivative(outputs));
+        std::cout << "d_pre_activation:\n" << d_pre_activation << '\n';
         // Compute gradients for weights and biases
         // std::cout << "d_pre " << Utils::logs::show_matrix_dimensions(d_pre_activation) << '\n';
         // std::cout << "input " << Utils::logs::show_matrix_dimensions(input) << '\n';
         d_weights = d_pre_activation * input.transpose();
+        std::cout << "d_weights:\n" << d_weights << '\n';
         // std::cout << "2\n";
         d_biases = d_pre_activation.rowwise().sum();
+        std::cout << "d_biases:\n" << d_biases << '\n';
         // std::cout << "3\n";
-
+        
         
         // Compute gradient w.r.t. input for backpropagation
         Eigen::MatrixXf d_input = weights.transpose() * d_pre_activation;       
+        std::cout << "d_input:\n" << d_biases << '\n';
         // std::cout << "4\n"; 
         
         return d_input;

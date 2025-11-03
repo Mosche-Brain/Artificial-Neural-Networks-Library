@@ -20,7 +20,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src/Models
     ${CMAKE_SOURCE_DIR}/src/Containers
     ${CMAKE_SOURCE_DIR}/src/Utils
-    /usr/includ/Eigen3
+    /usr/include/Eigen3
     ./src/
 )
 
@@ -34,11 +34,6 @@ foreach(HEADER ${HEADER_FILES})
     get_filename_component(REL_DIR "${REL_PATH}" DIRECTORY)
     file(COPY "${HEADER}" DESTINATION "${CMAKE_BINARY_DIR}/include/${PROJECT_NAME}/${REL_DIR}")
 endforeach()
-
-# Copy NeuralNetworksAll.hpp specifically to build/include
-# file(COPY "${CMAKE_SOURCE_DIR}/src/NeuralNetworksAll.hpp" DESTINATION "${CMAKE_BINARY_DIR}/include")
-# file(COPY ${CMAKE_SOURCE_DIR}/src/NeuralNetworksAll.hpp DESTINATION ${CMAKE_BINARY_DIR}/include)
-
 # Define the library target
 add_library(${PROJECT_NAME} ${PROJECT_SOURCES})
 

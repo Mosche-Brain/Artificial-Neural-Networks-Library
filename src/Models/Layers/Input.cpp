@@ -10,6 +10,7 @@ namespace ANN::Models::Layers
         this->biases  = Eigen::VectorXf::Zero(layerSize);
 
         this->_layerSize_   = layerSize;
+        this->_layerType_   = LAYER_TYPE::INPUT;
         this->_initialized_ = true;
     }
 
