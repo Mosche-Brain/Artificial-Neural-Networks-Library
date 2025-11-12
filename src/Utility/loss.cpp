@@ -22,8 +22,12 @@ namespace ANN::Utils::loss
             {
                 return cross_entropy(result, target);
             }
-            default:
+            case LossFunction::binary_cross_entropy:
             {
+                return binary_cross_entropy(result, target);
+            }
+            default:
+            {  
                 break;
             }
         }
@@ -56,37 +60,18 @@ namespace ANN::Utils::loss
 
         return { loss, grad };
 
-        /*
-        // Ograniczenie wartości w diff, aby uniknąć underflow/overflow
-        const float max_value = 1e6f;
-        const float min_value = 1e-20f;
-        diff = diff.cwiseMax(-max_value).cwiseMin(max_value); // Ograniczenie dużych wartości
-        diff = diff.cwiseMax(-min_value).cwiseMin(min_value); // Ograniczenie małych wartości
 
-        // Sprawdzenie NaN w diff
-        if (!diff.allFinite()) {
-            throw std::runtime_error("NaN or inf in diff matrix");
-        }
+    }
 
-        // Obliczenie straty
-        float squared_norm = diff.squaredNorm();
-        if (squared_norm < 1e-30f) {
-            squared_norm = 1e-30f; // Zapobieganie underflow
-        }
-        float loss = squared_norm / (2.0f * result.cols());
-        if (std::isnan(loss) || std::isinf(loss)) {
-            throw std::runtime_error("NaN or inf in loss");
-        }
+    LossType binary_cross_entropy(const Eigen::MatrixXf& result, const Eigen::MatrixXf& target)
+    {
 
-        // Obliczenie gradientu
-        Eigen::MatrixXf d_result = diff / static_cast<float>(result.cols());
-        if (!d_result.allFinite()) {
-            throw std::runtime_error("NaN or inf in d_result");
-        }
-
-        return { loss, d_result };
-        */
-
+        float_t epsilon = std::numeric_limits<float_t>::epsilon();
+        Eigen::ArrayXf p = result.array().max(epsilon).min(1.0f - epsilon);  // clamping
+        float_t loss = -(target.array() * p.log() + (1.0f - target.array()) * (1.0f - p).log()).mean();
+        Eigen::MatrixXf grad = ((p - target.array()) / (p * (1.0f - p)).max(epsilon)).matrix();
+    
+        return { loss, grad };
     }
 
     LossType cross_entropy(const Eigen::MatrixXf& result, const Eigen::MatrixXf& target)

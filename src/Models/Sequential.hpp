@@ -28,9 +28,9 @@ namespace ANN::Models
         void updateParams(float_t rate);
 
         Eigen::MatrixXf getWeights(int layer_idx);
-        
+              
         std::vector<std::unique_ptr<Layers::LayerBase>> topology;
     protected:
-        Utils::loss::LossFunction loss_function = Utils::loss::LossFunction::mse;
+        Utils::loss::LossFunction loss_function = Utils::loss::LossFunction::binary_cross_entropy;
     };
 }

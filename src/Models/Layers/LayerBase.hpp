@@ -25,6 +25,7 @@ namespace ANN::Models::Layers
         bool initialized();
         virtual int size();
         virtual Eigen::MatrixXf Outputs();
+        virtual Eigen::MatrixXf Inputs();
         virtual Eigen::MatrixXf Weights();
         virtual Eigen::MatrixXf Biases();
         Utils::Activation activation;
@@ -34,6 +35,7 @@ namespace ANN::Models::Layers
         Eigen::MatrixXf weights;
         Eigen::VectorXf biases;
         Eigen::MatrixXf outputs;
+        Eigen::MatrixXf inputs;
            
         int _layerSize_;
         bool _initialized_ = false;

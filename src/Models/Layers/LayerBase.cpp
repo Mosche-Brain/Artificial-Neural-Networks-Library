@@ -8,6 +8,7 @@ namespace ANN::Models::Layers
         // this->biases  = Eigen::MatrixXf::Zero(layerSize, 1)             ;
         this->biases  = Eigen::MatrixXf::Random(layerSize, 1) * 0.1f;
         this->outputs = Eigen::MatrixXf::Zero(layerSize, 1);
+        this->inputs  = Eigen::MatrixXf::Zero(layerSize, inputLenght);
 
         this->_initialized_ = true;
     }
@@ -25,6 +26,11 @@ namespace ANN::Models::Layers
     Eigen::MatrixXf LayerBase::Outputs()
     {
         return this->outputs;
+    }
+    
+    Eigen::MatrixXf LayerBase::Inputs()
+    {
+        return this->inputs;
     }
     
     Eigen::MatrixXf LayerBase::Weights()

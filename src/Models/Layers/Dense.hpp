@@ -16,9 +16,8 @@ namespace ANN::Models::Layers
 
         static std::unique_ptr<LayerBase> createUnique(int layerSize, const char* func);
 
-        Eigen::VectorXf input;
     protected:
-        Eigen::MatrixXf d_weights;
-        Eigen::VectorXf d_biases; 
+        Eigen::MatrixXf deltaWeights;
+        Eigen::VectorXf deltaBiases; 
     };
 }

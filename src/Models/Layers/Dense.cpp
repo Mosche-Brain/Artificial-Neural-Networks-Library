@@ -1,4 +1,4 @@
-#include "Dense.hpp"
+   #include "Dense.hpp"
 
 #include <iostream>
 
@@ -33,7 +33,7 @@ namespace ANN::Models::Layers
         //           << "=============================================\n";
         // Eigen::VectorXf result = (weights * input) + biases;
 
-        this->input = input;
+        this->inputs = input;
  
         // outputs = (weights * input).colwise() + biases;
         Eigen::MatrixXf weightedSums = (weights * input).colwise() + biases;
@@ -64,20 +64,20 @@ namespace ANN::Models::Layers
         // Compute gradients for weights and biases
         // std::cout << "d_pre " << Utils::logs::show_matrix_dimensions(d_pre_activation) << '\n';
         // std::cout << "input " << Utils::logs::show_matrix_dimensions(input) << '\n';
-        d_weights = d_pre_activation * input.transpose();
-        std::cout << "d_weights:\n" << d_weights << '\n';
+        deltaWeights = d_pre_activation * inputs.transpose();
+        std::cout << "d_weights:\n" << deltaWeights << '\n';
         // std::cout << "2\n";
-        d_biases = d_pre_activation.rowwise().sum();
-        std::cout << "d_biases:\n" << d_biases << '\n';
+        deltaBiases = d_pre_activation.rowwise().sum();
+        std::cout << "d_biases:\n" << deltaBiases << '\n';
         // std::cout << "3\n";
         
         
         // Compute gradient w.r.t. input for backpropagation
-        Eigen::MatrixXf d_input = weights.transpose() * d_pre_activation;       
-        std::cout << "d_input:\n" << d_biases << '\n';
+        Eigen::MatrixXf deltaInput = weights.transpose() * d_pre_activation;       
+        std::cout << "d_input:\n" << deltaBiases << '\n';
         // std::cout << "4\n"; 
         
-        return d_input;
+        return deltaInput;
     }
 
     void Dense::update_weights(float_t rate)
@@ -85,13 +85,16 @@ namespace ANN::Models::Layers
         // std::cout << "weights " << Utils::logs::show_matrix_dimensions(weights) << '\n';
         std::cout << "weights\n" << weights << '\n';
         // std::cout << "weights grad" << Utils::logs::show_matrix_dimensions(d_weights) << '\n';
-        std::cout << "weights grad\n" << d_weights << '\n';
-        this->weights -= this->d_weights * rate;
+        std::cout << "weights grad\n" << deltaWeights << '\n';
+        this->weights -= this->deltaWeights * rate;
         // std::cout << "biases " << Utils::logs::show_matrix_dimensions(biases) << '\n';
         std::cout << "biases\n" << biases << '\n';
         // std::cout << "biases grad\n" << Utils::logs::show_matrix_dimensions(d_biases) << '\n';
-        std::cout << "biases grad\n" << d_biases << '\n';
-        this->biases  -= this->d_biases  * rate;
+        std::cout << "biases grad\n" << deltaBiases << '\n';
+        this->biases  -= this->deltaBiases  * rate;
+
+        this->deltaWeights = Eigen::MatrixXf::Zero(deltaWeights.rows(), deltaWeights.cols());
+        this->deltaBiases = Eigen::VectorXf::Zero(deltaBiases.size());
     }
 
     std::unique_ptr<LayerBase> Dense::createUnique(int layerSize, const char* func)

@@ -29,8 +29,8 @@ namespace ANN::Utils
 
     float_t sigmoid_derivative(float_t x)
     {
-        float_t sigma_x = sigmoid(x);
-        return sigma_x * (1 - sigma_x);
+        float_t sigmoid_x = sigmoid(x);
+        return sigmoid_x * (1 - sigmoid_x);
     }
 
     float_t ReLU(float_t x)

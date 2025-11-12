@@ -17,7 +17,7 @@ namespace ANN::Models
             topology.push_back(std::move(const_cast<std::unique_ptr<Layers::LayerBase>&>(ptr)));
         }
 
-        // topology[0]->initParameters(topology[0]->size(), 1);
+        topology[0]->initParameters(topology[0]->size(), 1);
         for(size_t i = 1 ; i < topology.size() ; i++)
         {
             int previous_layer_size = topology[i - 1]->size();
@@ -97,7 +97,7 @@ namespace ANN::Models
             Eigen::MatrixXf X_shuffled = perm * X;
             Eigen::MatrixXf Y_shuffled = perm * Y;
             
-            float_t epoch_loss = 0;
+            float_t totalLoss = 0;
             // std::cout << "epoch " << epoch << " started\n"; 
             std::cout << "================Epoch " << epoch << "================\n";
             for(int i = 0 ; i < X.rows() ; i++)
@@ -123,13 +123,15 @@ namespace ANN::Models
                 std::cout << "=============Backpropagation=============\n";
                 this->backward(gradient);
                 std::cout << "=============Updating Params=============\n";
-                this->updateParams(rate);
                 
-                epoch_loss += error.loss;
+                this->updateParams(rate);
+                totalLoss += error.loss;
             }
-            epoch_loss /= X.rows();
-
-            std::cout << "Avarage epoch loss: " << epoch_loss << '\n';
+            // totalLoss /= X.rows();
+            float_t avarageLoss = totalLoss / X.rows();
+            
+            std::cout << "Avarage epoch loss: " << avarageLoss << '\n';
+            std::cout << "Total epoch loss: " << totalLoss << '\n';
         }
     }
 

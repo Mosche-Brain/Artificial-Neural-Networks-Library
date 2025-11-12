@@ -20,8 +20,8 @@ namespace ANN::Utils
         {
             function = tanh;
             derivative = tanh_derivative;
-            matrixFunction = [this](const Eigen::MatrixXf& X) { return X.unaryExpr(function); };
-            matrixDerivative = [this](const Eigen::MatrixXf& X) { return X.unaryExpr(derivative); };
+            matrixFunction = [this](const Eigen::MatrixXf& X) { return X.unaryExpr(&tanh); };
+            matrixDerivative = [this](const Eigen::MatrixXf& X) { return X.unaryExpr(&tanh_derivative); };
         }
         else if (std::strcmp(func_name, "sigmoid") == 0)
         {
