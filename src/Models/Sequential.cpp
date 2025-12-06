@@ -1,6 +1,8 @@
 #include "Sequential.hpp"
 
 #include <iostream>
+#include <algorithm>
+#include <random>
 
 namespace ANN::Models
 {
@@ -92,8 +94,10 @@ namespace ANN::Models
         {
             Eigen::PermutationMatrix<Eigen::Dynamic> perm(X.rows());
             perm.setIdentity();
-            std::random_shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size());
-
+            // std::random_shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size());
+            std::shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size(), 
+                        std::mt19937(std::random_device{}()));
+            
             Eigen::MatrixXf X_shuffled = perm * X;
             Eigen::MatrixXf Y_shuffled = perm * Y;
             

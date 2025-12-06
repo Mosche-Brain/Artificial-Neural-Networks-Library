@@ -9,7 +9,7 @@ int main()
     ANN::Models::Sequential model
     ({
         ANN::Models::Layers::Input::createUnique(2),
-        ANN::Models::Layers::Dense::createUnique(4, "relu"),
+        ANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
         ANN::Models::Layers::Dense::createUnique(1, "sigmoid"),
     });
 
@@ -44,11 +44,11 @@ int main()
                   << result << " → " << (result > 0.5 ? 1 : 0) << '\n';
     }
 
-    // matplot::fmesh([&](float x, float y) { 
-    //     Eigen::Vector2f vec{x, y};
-    //     return model.forward(vec)(0,0); 
-    // });
-    // matplot::show();
+    matplot::fmesh([&](float x, float y) { 
+        Eigen::Vector2f vec{x, y};
+        return model.forward(vec)(0,0); 
+    });
+    matplot::show();
 
 
     return 0;

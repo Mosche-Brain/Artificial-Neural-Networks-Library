@@ -37,6 +37,7 @@ namespace ANN::Models::Layers
  
         // outputs = (weights * input).colwise() + biases;
         Eigen::MatrixXf weightedSums = (weights * input).colwise() + biases;
+        preactivations = weightedSums;
         // outputs = outputs.unaryExpr(activation.function);
         outputs = activation.matrixFunction(weightedSums);
         // Eigen::VectorXf results(_layerSize_);
@@ -59,7 +60,7 @@ namespace ANN::Models::Layers
 
 
         // Eigen::MatrixXf d_pre_activation = deltaOutput.cwiseProduct(outputs.unaryExpr(activation.derivative));
-        Eigen::MatrixXf d_pre_activation = deltaOutput.cwiseProduct(activation.matrixDerivative(outputs));
+        Eigen::MatrixXf d_pre_activation = deltaOutput.cwiseProduct(activation.matrixDerivative(preactivations));
         std::cout << "d_pre_activation:\n" << d_pre_activation << '\n';
         // Compute gradients for weights and biases
         // std::cout << "d_pre " << Utils::logs::show_matrix_dimensions(d_pre_activation) << '\n';

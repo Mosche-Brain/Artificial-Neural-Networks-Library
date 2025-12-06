@@ -35,6 +35,7 @@ namespace ANN::Models::Layers
         Eigen::MatrixXf weights;
         Eigen::VectorXf biases;
         Eigen::MatrixXf outputs;
+        Eigen::MatrixXf preactivations;
         Eigen::MatrixXf inputs;
            
         int _layerSize_;

@@ -11,7 +11,7 @@ namespace ANN::Models::Layers
         Dense(int layerSize, const char* func);
 
         Eigen::MatrixXf forward(const Eigen::MatrixXf& input) override;
-        Eigen::MatrixXf backward(const Eigen::MatrixXf& deltaOutput);
+        Eigen::MatrixXf backward(const Eigen::MatrixXf& deltaOutput) override;
         void update_weights(float_t rate);
 
         static std::unique_ptr<LayerBase> createUnique(int layerSize, const char* func);

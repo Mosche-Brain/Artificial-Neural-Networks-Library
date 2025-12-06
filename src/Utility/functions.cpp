@@ -19,7 +19,8 @@ namespace ANN::Utils
 
     float_t tanh_derivative(float_t x)
     {
-        return std::powf(acoshf(1.0 / x), 2.0f);
+        float_t tanh_x = tanhf(x);
+        return 1.0f - tanh_x * tanh_x;          
     }
 
     float_t sigmoid(float_t x)
