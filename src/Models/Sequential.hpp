@@ -31,6 +31,6 @@ namespace ANN::Models
               
         std::vector<std::unique_ptr<Layers::LayerBase>> topology;
     protected:
-        Utils::loss::LossFunction loss_function = Utils::loss::LossFunction::binary_cross_entropy;
+        Utils::loss::LossFunction loss_function = Utils::loss::LossFunction::mse;
     };
 }

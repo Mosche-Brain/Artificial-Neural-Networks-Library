@@ -28,10 +28,10 @@ namespace ANN::Models
             topology[i]->initParameters(current_layer_size, previous_layer_size);
         }
 
-        for(size_t i = 0 ; i < topology.size() ; i++)
-        {
-            std::cout << "layer " << i << ": " << "weights " << topology[i]->Weights().rows() << "x" << topology[i]->Weights().cols() << " biases " << topology[i]->Biases().size() << '\n';
-        }
+        // for(size_t i = 0 ; i < topology.size() ; i++)
+        // {
+        //     std::cout << "layer " << i << ": " << "weights " << topology[i]->Weights().rows() << "x" << topology[i]->Weights().cols() << " biases " << topology[i]->Biases().size() << '\n';
+        // }
     }
 
     // Sequential::Sequential(std::vector<std::unique_ptr<Layers::LayerBase>> newTopology)
@@ -79,11 +79,11 @@ namespace ANN::Models
     {
         Eigen::MatrixXf curr_gradient = d_output;
         // std::cout << "layer " <<  << " gradient:\n" << curr_gradient << '\n';
-        std::cout << "layer output gradient:\n" << curr_gradient << '\n';
+        // std::cout << "layer output gradient:\n" << curr_gradient << '\n';
         for(int i = topology.size() - 1 ; i >= 0 ; --i)
         {
             curr_gradient = topology[i]->backward(curr_gradient);
-            std::cout << "layer " << i << " gradient:\n" << curr_gradient << '\n';
+            // std::cout << "layer " << i << " gradient:\n" << curr_gradient << '\n';
         }        
         // std::cout << "layer 0 gradient:\n" << curr_gradient << '\n';
     }
@@ -102,7 +102,6 @@ namespace ANN::Models
             Eigen::MatrixXf Y_shuffled = perm * Y;
             
             float_t totalLoss = 0;
-            // std::cout << "epoch " << epoch << " started\n"; 
             std::cout << "================Epoch " << epoch << "================\n";
             for(int i = 0 ; i < X.rows() ; i++)
             {
@@ -135,7 +134,7 @@ namespace ANN::Models
             float_t avarageLoss = totalLoss / X.rows();
             
             std::cout << "Avarage epoch loss: " << avarageLoss << '\n';
-            std::cout << "Total epoch loss: " << totalLoss << '\n';
+            // std::cout << "Total epoch loss: " << totalLoss << '\n';
         }
     }
 

@@ -10,7 +10,7 @@ int main()
     ({
         ANN::Models::Layers::Input::createUnique(2),
         ANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
-        ANN::Models::Layers::Dense::createUnique(1, "sigmoid"),
+        ANN::Models::Layers::Dense::createUnique(1, "tanh"),
     });
 
 	Eigen::MatrixXf X(4, 2); 

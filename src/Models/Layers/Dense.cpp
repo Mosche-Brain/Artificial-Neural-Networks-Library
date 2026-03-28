@@ -22,9 +22,9 @@ namespace ANN::Models::Layers
     {
         if(input.size() != weights.cols())
         {
-            std::cout << "\x1B[31minput size doesn't match with weights\x1B[37m\n";
-            std::cout << "input " << Utils::logs::show_matrix_dimensions(input) << ", "
-                      << "weights " << Utils::logs::show_matrix_dimensions(weights) << '\n';
+            // std::cout << "\x1B[31minput size doesn't match with weights\x1B[37m\n";
+            // std::cout << "input " << Utils::logs::show_matrix_dimensions(input) << ", "
+                    //   << "weights " << Utils::logs::show_matrix_dimensions(weights) << '\n';
         }
 
         // std::cout << "input "   << input.rows()   << "x" << input.cols()   << '\n'
@@ -61,21 +61,21 @@ namespace ANN::Models::Layers
 
         // Eigen::MatrixXf d_pre_activation = deltaOutput.cwiseProduct(outputs.unaryExpr(activation.derivative));
         Eigen::MatrixXf d_pre_activation = deltaOutput.cwiseProduct(activation.matrixDerivative(preactivations));
-        std::cout << "d_pre_activation:\n" << d_pre_activation << '\n';
+        // std::cout << "d_pre_activation:\n" << d_pre_activation << '\n';
         // Compute gradients for weights and biases
         // std::cout << "d_pre " << Utils::logs::show_matrix_dimensions(d_pre_activation) << '\n';
         // std::cout << "input " << Utils::logs::show_matrix_dimensions(input) << '\n';
         deltaWeights = d_pre_activation * inputs.transpose();
-        std::cout << "d_weights:\n" << deltaWeights << '\n';
+        // std::cout << "d_weights:\n" << deltaWeights << '\n';
         // std::cout << "2\n";
         deltaBiases = d_pre_activation.rowwise().sum();
-        std::cout << "d_biases:\n" << deltaBiases << '\n';
+        // std::cout << "d_biases:\n" << deltaBiases << '\n';
         // std::cout << "3\n";
         
         
         // Compute gradient w.r.t. input for backpropagation
         Eigen::MatrixXf deltaInput = weights.transpose() * d_pre_activation;       
-        std::cout << "d_input:\n" << deltaBiases << '\n';
+        // std::cout << "d_input:\n" << deltaBiases << '\n';
         // std::cout << "4\n"; 
         
         return deltaInput;
@@ -84,14 +84,14 @@ namespace ANN::Models::Layers
     void Dense::update_weights(float_t rate)
     {
         // std::cout << "weights " << Utils::logs::show_matrix_dimensions(weights) << '\n';
-        std::cout << "weights\n" << weights << '\n';
+        // std::cout << "weights\n" << weights << '\n';
         // std::cout << "weights grad" << Utils::logs::show_matrix_dimensions(d_weights) << '\n';
-        std::cout << "weights grad\n" << deltaWeights << '\n';
+        // std::cout << "weights grad\n" << deltaWeights << '\n';
         this->weights -= this->deltaWeights * rate;
         // std::cout << "biases " << Utils::logs::show_matrix_dimensions(biases) << '\n';
-        std::cout << "biases\n" << biases << '\n';
+        // std::cout << "biases\n" << biases << '\n';
         // std::cout << "biases grad\n" << Utils::logs::show_matrix_dimensions(d_biases) << '\n';
-        std::cout << "biases grad\n" << deltaBiases << '\n';
+        // std::cout << "biases grad\n" << deltaBiases << '\n';
         this->biases  -= this->deltaBiases  * rate;
 
         this->deltaWeights = Eigen::MatrixXf::Zero(deltaWeights.rows(), deltaWeights.cols());

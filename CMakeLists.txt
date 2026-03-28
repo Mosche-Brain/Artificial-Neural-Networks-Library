@@ -63,8 +63,8 @@ target_compile_options(${PROJECT_NAME} PRIVATE
     -fopenmp
     -march=native
     -Wall
-    # -O3
-    # -ffast-math
+    -O3
+    -ffast-math
 )
 
 # Link libraries
@@ -140,6 +140,8 @@ if(BUILD_EXAMPLES)
             -fopenmp
             -march=native
             -Wall
+            -O3
+            -ffast-math
         )
 
         # Optional: install example binaries
