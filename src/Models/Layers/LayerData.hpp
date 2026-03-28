@@ -1,6 +1,6 @@
 #pragma once
 
-namespace ANN::Models::Layers
+namespace YANN::Models::Layers
 {
     
 }

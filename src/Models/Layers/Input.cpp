@@ -1,31 +1,31 @@
 #include "Input.hpp"
 
-namespace ANN::Models::Layers
+namespace YANN::Models::Layers
 {
     Input::Input(int layerSize)
     {
         this->activation = Utils::Activation("linear");
 
-        this->weights = Eigen::MatrixXf::Ones(layerSize, 1);
-        this->biases  = Eigen::VectorXf::Zero(layerSize);
+        this->weights = matrix_t::Ones(layerSize, 1);
+        this->biases  = vector_t::Zero(layerSize);
 
         this->_layerSize_   = layerSize;
         this->_layerType_   = LAYER_TYPE::INPUT;
         this->_initialized_ = true;
     }
 
-    Eigen::MatrixXf Input::forward(const Eigen::MatrixXf& input)
+    matrix_t Input::forward(const matrix_t& input)
     {
         this->outputs = input;
         return input;
     }
 
-    Eigen::MatrixXf Input::backward(const Eigen::MatrixXf& deltaOutput)
+    matrix_t Input::backward(const matrix_t& deltaOutput)
     {
-        return Eigen::MatrixXf::Zero(_layerSize_, 1);
+        return matrix_t::Zero(_layerSize_, 1);
     }
 
-    void Input::update_weights(float_t rate)
+    void Input::update_weights(numeric_t rate)
     {
 
     }

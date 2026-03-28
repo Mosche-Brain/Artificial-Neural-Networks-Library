@@ -14,7 +14,7 @@ int main()
 
 
 
-    ANN::Models::NGram model;
+    YANN::Models::NGram model;
     model.fit(data);
 
     std::string token = "Dlatego";

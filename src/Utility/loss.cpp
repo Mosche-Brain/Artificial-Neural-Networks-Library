@@ -3,9 +3,9 @@
 #include <stdexcept>
 #include <iostream>
 
-namespace ANN::Utils::loss
+namespace YANN::Utils::loss
 {
-    LossType computeLoss(const Eigen::MatrixXf& result, const Eigen::MatrixXf& target, LossFunction loss_function)
+    LossType computeLoss(const matrix_t& result, const matrix_t& target, LossFunction loss_function)
     {
         if(result.size() != target.size())
         {
@@ -28,15 +28,13 @@ namespace ANN::Utils::loss
             }
             default:
             {  
-                break;
+                throw std::invalid_argument("Unknown loss function");
             }
         }
-
-        // return {0.0f, Eigen::MatrixXf::Zero()};
     }
 
 
-    LossType mse(const Eigen::MatrixXf& result, const Eigen::MatrixXf& target)
+    LossType mse(const matrix_t& result, const matrix_t& target)
     {
         if (result.rows() != target.rows() || result.cols() != target.cols()) {
             throw std::runtime_error("Matrix dimensions do not match: result(" + 
@@ -53,39 +51,39 @@ namespace ANN::Utils::loss
         }
 
         // Obliczenie różnicy
-        Eigen::MatrixXf diff = result - target;
+        matrix_t diff = result - target;
 
-        float loss = diff.squaredNorm() / result.cols();
-        Eigen::MatrixXf grad = diff / result.cols();
+        f_type loss = diff.squaredNorm() / result.cols();
+        matrix_t grad = diff / result.cols();
 
         return { loss, grad };
 
 
     }
 
-    LossType binary_cross_entropy(const Eigen::MatrixXf& result, const Eigen::MatrixXf& target)
+    LossType binary_cross_entropy(const matrix_t& result, const matrix_t& target)
     {
 
-        float_t epsilon = std::numeric_limits<float_t>::epsilon();
-        Eigen::ArrayXf p = result.array().max(epsilon).min(1.0f - epsilon);  // clamping
-        float_t loss = -(target.array() * p.log() + (1.0f - target.array()) * (1.0f - p).log()).mean();
-        Eigen::MatrixXf grad = ((p - target.array()) / (p * (1.0f - p)).max(epsilon)).matrix();
+        f_type epsilon = std::numeric_limits<f_type>::epsilon();
+        Eigen::Array<f_type, Eigen::Dynamic, Eigen::Dynamic> p = result.array().max(epsilon).min(static_cast<f_type>(1.0f) - epsilon);  // clamping
+        f_type loss = -(target.array() * p.log() + (static_cast<f_type>(1.0f) - target.array()) * (static_cast<f_type>(1.0f) - p).log()).mean();
+        matrix_t grad = ((p - target.array()) / (p * (static_cast<f_type>(1.0f) - p)).max(epsilon)).matrix();
     
         return { loss, grad };
     }
 
-    LossType cross_entropy(const Eigen::MatrixXf& result, const Eigen::MatrixXf& target)
+    LossType cross_entropy(const matrix_t& result, const matrix_t& target)
     {
-        Eigen::MatrixXf softmax_output = result.colwise().normalized().array().exp();
+        matrix_t softmax_output = result.colwise().normalized().array().exp();
         softmax_output = softmax_output.array().rowwise() / softmax_output.array().colwise().sum();
 
         // Compute loss: -sum(targets * log(softmax_output)) / n_samples
-        float_t loss = 0.0f;
+        f_type loss = static_cast<f_type>(0.0f);
         for (int j = 0; j < result.cols(); ++j) 
         {
             for (int i = 0; i < result.rows(); ++i) 
             {
-                loss -= target(i, j) * std::log(std::max(softmax_output(i, j), 1e-10f)); // Avoid log(0)
+                loss -= target(i, j) * std::log(std::max(softmax_output(i, j), static_cast<f_type>(1e-10f))); // Avoid log(0)
             }
         }
         
@@ -93,8 +91,8 @@ namespace ANN::Utils::loss
         loss /= result.cols();
 
         // Gradient: softmax_output - targets
-        Eigen::MatrixXf d_result = softmax_output - target;
-        d_result /= static_cast<float>(result.cols()); // Average over samples
+        matrix_t d_result = softmax_output - target;
+        d_result /= static_cast<f_type>(result.cols()); // Average over samples
         return { loss, d_result };
     }
 }

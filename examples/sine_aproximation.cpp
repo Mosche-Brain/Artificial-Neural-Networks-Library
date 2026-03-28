@@ -1,4 +1,5 @@
 #include <ANN/Models/Sequential.hpp>
+#include "../src/build_config.hpp"
 
 #include <iostream>
 
@@ -6,27 +7,25 @@
 
 int main()
 {
-    ANN::Models::Sequential model
+    YANN::Models::Sequential model
     ({
-        ANN::Models::Layers::Input::createUnique(1),
-        ANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
-        ANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
-        ANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
-        ANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
-        ANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
-        ANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
-        ANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
-        ANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
-        ANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
-        ANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
-        ANN::Models::Layers::Dense::createUnique(1, "tanh"),
+        YANN::Models::Layers::Input::createUnique(1),
+        YANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
+        YANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
+        YANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
+        YANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
+        YANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
+        YANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
+        YANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
+        YANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
+        YANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
+        YANN::Models::Layers::Dense::createUnique(3, "leaky_relu"),
+        YANN::Models::Layers::Dense::createUnique(1, "tanh"),
     });
 
-	Eigen::VectorXf X(200);
-    //setup linespace betwen -2pi to 2pi using built in eigen functions
-    X = Eigen::VectorXf::LinSpaced(200, -2 * M_PI, 2 * M_PI);
+	vector_t X = vector_t::LinSpaced(200, static_cast<f_type>(-2 * M_PI), static_cast<f_type>(2 * M_PI));
 
-	Eigen::VectorXf Y(200);
+	vector_t Y(200);
 	for(int i = 0; i < 200; ++i)
     {
         Y(i) = std::sin(X(i));
@@ -34,7 +33,7 @@ int main()
 
 	// std::cout << "train data:\n" << X << '\n'; 
 	
-	model.fit(X, Y, 0.1f, 50);
+	model.fit(X, Y, static_cast<f_type>(0.1f), 50);
 
     // for(int i = 0 ; i < 3 ; i++)
     // {
@@ -42,7 +41,7 @@ int main()
     // }
 
     // plot model predictions vs true sine function
-    Eigen::VectorXf Y_pred = model.forward(X);
+    vector_t Y_pred = model.forward(X);
     std::vector<double> x_data, y_data, y_pred_data;
     for(int i = 0; i < X.rows(); ++i)
     {

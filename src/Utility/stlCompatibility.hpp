@@ -9,7 +9,7 @@
 /*  this code is stoled from here: 
     https://gist.github.com/ialhashim/14db82926cdab2575508 */
 
-namespace ANN::Utils::stlCompatibility
+namespace YANN::Utils::stlCompatibility
 {
     /*
     template<typename T>

@@ -1,6 +1,6 @@
 #include "OneHot.hpp"
 
-namespace ANN::Utils
+namespace YANN::Utils
 {
     size_t OneHotDecode(const Eigen::VectorXf& vector)
     {

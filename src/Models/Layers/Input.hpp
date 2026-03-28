@@ -1,17 +1,18 @@
 #pragma once
 
+#include "build_config.hpp"
 #include "LayerBase.hpp"
 
-namespace ANN::Models::Layers
+namespace YANN::Models::Layers
 {
     class Input : public LayerBase
     {
     public:
         Input(int layerSize);
 
-        Eigen::MatrixXf forward(const Eigen::MatrixXf& input) override;
-        Eigen::MatrixXf backward(const Eigen::MatrixXf& deltaOutput);
-        void update_weights(float_t rate);
+        matrix_t forward(const matrix_t& input) override;
+        matrix_t backward(const matrix_t& deltaOutput);
+        void update_weights(numeric_t rate);
 
         static std::unique_ptr<LayerBase> createUnique(int layerSize);
     };

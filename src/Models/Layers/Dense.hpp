@@ -1,8 +1,9 @@
 #pragma once
 
+#include "build_config.hpp"
 #include "LayerBase.hpp"
 
-namespace ANN::Models::Layers
+namespace YANN::Models::Layers
 {
     class Dense : public LayerBase
     {
@@ -10,14 +11,14 @@ namespace ANN::Models::Layers
         // Dense(int layerSize, int inputWidth, const char* func);
         Dense(int layerSize, const char* func);
 
-        Eigen::MatrixXf forward(const Eigen::MatrixXf& input) override;
-        Eigen::MatrixXf backward(const Eigen::MatrixXf& deltaOutput) override;
-        void update_weights(float_t rate);
+        matrix_t forward(const matrix_t& input) override;
+        matrix_t backward(const matrix_t& deltaOutput) override;
+        void update_weights(numeric_t rate);
 
         static std::unique_ptr<LayerBase> createUnique(int layerSize, const char* func);
 
     protected:
-        Eigen::MatrixXf deltaWeights;
-        Eigen::VectorXf deltaBiases; 
+        matrix_t deltaWeights;
+        vector_t deltaBiases; 
     };
 }

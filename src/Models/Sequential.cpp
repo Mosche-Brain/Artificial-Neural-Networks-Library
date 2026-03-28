@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <random>
 
-namespace ANN::Models
+namespace YANN::Models
 {
     Sequential::Sequential()
     {
@@ -62,7 +62,7 @@ namespace ANN::Models
         }
     }
 
-    Eigen::MatrixXf Sequential::forward(Eigen::MatrixXf input)
+    matrix_t Sequential::forward(matrix_t input)
     {
         topology[0]->forward(input);
 
@@ -75,9 +75,9 @@ namespace ANN::Models
         return topology.back()->Outputs();
     }
 
-    void Sequential::backward(const Eigen::MatrixXf& d_output)
+    void Sequential::backward(const matrix_t& d_output)
     {
-        Eigen::MatrixXf curr_gradient = d_output;
+        matrix_t curr_gradient = d_output;
         // std::cout << "layer " <<  << " gradient:\n" << curr_gradient << '\n';
         // std::cout << "layer output gradient:\n" << curr_gradient << '\n';
         for(int i = topology.size() - 1 ; i >= 0 ; --i)
@@ -88,7 +88,7 @@ namespace ANN::Models
         // std::cout << "layer 0 gradient:\n" << curr_gradient << '\n';
     }
 
-    void Sequential::fit(const Eigen::MatrixXf& X, const Eigen::MatrixXf& Y, float_t rate, int epochs)
+    void Sequential::fit(const matrix_t& X, const matrix_t& Y, numeric_t rate, int epochs)
     {
         for(int epoch = 0 ; epoch < epochs ; epoch++)
         {
@@ -98,27 +98,27 @@ namespace ANN::Models
             std::shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size(), 
                         std::mt19937(std::random_device{}()));
             
-            Eigen::MatrixXf X_shuffled = perm * X;
-            Eigen::MatrixXf Y_shuffled = perm * Y;
+            matrix_t X_shuffled = perm * X;
+            matrix_t Y_shuffled = perm * Y;
             
-            float_t totalLoss = 0;
+            numeric_t totalLoss = 0;
             std::cout << "================Epoch " << epoch << "================\n";
             for(int i = 0 ; i < X.rows() ; i++)
             {
                 std::cout << "================Sample " << i << "================\n";
-                Eigen::VectorXf x = X.row(i).transpose();
-                Eigen::VectorXf y = Y.row(i).transpose();
+                vector_t x = X.row(i).transpose();
+                vector_t y = Y.row(i).transpose();
 
                 std::cout << "input: "  << x << '\n';
                 std::cout << "target: " << y.transpose() << '\n';
 
-                Eigen::VectorXf result = this->forward(x);
+                vector_t result = this->forward(x);
                 std::cout << "resutl: " << result.transpose() << '\n';
 
                 std::cout << "=============Computing Loss=============\n";
                 Utils::loss::LossType error = Utils::loss::computeLoss(result, y, this->loss_function);
                 
-                Eigen::VectorXf gradient = error.gradient;
+                vector_t gradient = error.gradient;
                 
                 std::cout << "gradient:\n" << gradient << '\n';
                 std::cout << "loss: " << error.loss << '\n';
@@ -131,14 +131,14 @@ namespace ANN::Models
                 totalLoss += error.loss;
             }
             // totalLoss /= X.rows();
-            float_t avarageLoss = totalLoss / X.rows();
+            numeric_t avarageLoss = totalLoss / X.rows();
             
             std::cout << "Avarage epoch loss: " << avarageLoss << '\n';
             // std::cout << "Total epoch loss: " << totalLoss << '\n';
         }
     }
 
-    void Sequential::updateParams(float_t rate)
+    void Sequential::updateParams(numeric_t rate)
     {
         for(int i = 0 ; i < topology.size() ; i++)
         {
@@ -147,7 +147,7 @@ namespace ANN::Models
         }
     }
 
-    Eigen::MatrixXf Sequential::getWeights(int layer_idx)
+    matrix_t Sequential::getWeights(int layer_idx)
     {
         return topology[layer_idx]->Weights();
     }

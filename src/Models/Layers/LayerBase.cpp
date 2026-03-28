@@ -1,14 +1,14 @@
 #include "LayerBase.hpp"
 
-namespace ANN::Models::Layers
+namespace YANN::Models::Layers
 {
     void LayerBase::initParameters(int layerSize, int inputLenght)
     {
-        this->weights = Eigen::MatrixXf::Random(layerSize, inputLenght) * 0.01f;
-        // this->biases  = Eigen::MatrixXf::Zero(layerSize, 1)             ;
-        this->biases  = Eigen::MatrixXf::Random(layerSize, 1) * 0.1f;
-        this->outputs = Eigen::MatrixXf::Zero(layerSize, 1);
-        this->inputs  = Eigen::MatrixXf::Zero(layerSize, inputLenght);
+        this->weights = matrix_t::Random(layerSize, inputLenght) * static_cast<numeric_t>(0.01f);
+        // this->biases  = matrix_t::Zero(layerSize, 1)             ;
+        this->biases  = vector_t::Random(layerSize, 1) * static_cast<numeric_t>(0.1f);
+        this->outputs = matrix_t::Zero(layerSize, 1);
+        this->inputs  = matrix_t::Zero(layerSize, inputLenght);
 
         this->_initialized_ = true;
     }
@@ -23,22 +23,22 @@ namespace ANN::Models::Layers
         return this->_layerSize_;
     }
 
-    Eigen::MatrixXf LayerBase::Outputs()
+    matrix_t LayerBase::Outputs()
     {
         return this->outputs;
     }
     
-    Eigen::MatrixXf LayerBase::Inputs()
+    matrix_t LayerBase::Inputs()
     {
         return this->inputs;
     }
     
-    Eigen::MatrixXf LayerBase::Weights()
+    matrix_t LayerBase::Weights()
     {
         return this->weights;
     }
 
-    Eigen::MatrixXf LayerBase::Biases()
+    matrix_t LayerBase::Biases()
     {
         return this->biases;
     }

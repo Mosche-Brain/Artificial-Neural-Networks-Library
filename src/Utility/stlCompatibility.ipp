@@ -1,6 +1,6 @@
 #include "stlCompatibility.hpp"
 
-namespace ANN::Utils::stlCompatibility
+namespace YANN::Utils::stlCompatibility
 {
     template<typename Scalar, typename Container>
     Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> toEigenMatrix(const Container& vectors)

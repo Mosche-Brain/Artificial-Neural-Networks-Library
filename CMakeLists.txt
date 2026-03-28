@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(ANN LANGUAGES CXX)
+project(YANN LANGUAGES CXX)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 23)
@@ -129,7 +129,7 @@ if(BUILD_EXAMPLES)
             /usr/include/eigen3
         )
 
-        # Link with ANN library
+        # Link with YANN library
         target_link_libraries(${EXAMPLE_NAME} PRIVATE ${PROJECT_NAME}    
                                                     OpenMP::OpenMP_CXX
                                                     sciplot::sciplot

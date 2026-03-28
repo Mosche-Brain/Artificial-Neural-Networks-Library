@@ -1,10 +1,10 @@
-   #include "Dense.hpp"
+#include "Dense.hpp"
 
 #include <iostream>
 
 #include "Utility/logs.hpp"
 
-namespace ANN::Models::Layers
+namespace YANN::Models::Layers
 {
     // Dense::Dense(int layerSize, int inputWidth, const char* func) : LayerBase()
     Dense::Dense(int layerSize, const char* func)
@@ -18,7 +18,7 @@ namespace ANN::Models::Layers
         this->_layerType_   = LAYER_TYPE::DENSE;
     }
     
-    Eigen::MatrixXf Dense::forward(const Eigen::MatrixXf& input)
+    matrix_t Dense::forward(const matrix_t& input)
     {
         if(input.size() != weights.cols())
         {
@@ -31,36 +31,27 @@ namespace ANN::Models::Layers
         //           << "weights " << weights.rows() << "x" << weights.cols() << '\n'
         //           << "outputs " << outputs.rows() << "x" << outputs.cols() << '\n'
         //           << "=============================================\n";
-        // Eigen::VectorXf result = (weights * input) + biases;
+        // vector_t result = (weights * input) + biases;
 
         this->inputs = input;
  
         // outputs = (weights * input).colwise() + biases;
-        Eigen::MatrixXf weightedSums = (weights * input).colwise() + biases;
-        preactivations = weightedSums;
-        // outputs = outputs.unaryExpr(activation.function);
+        matrix_t weightedSums = (weights * input).colwise() + biases;
+        preactivatedOutputs = weightedSums;
         outputs = activation.matrixFunction(weightedSums);
-        // Eigen::VectorXf results(_layerSize_);
-        // for(int i = 0 ; i < results.rows() ; i++)
-        // {
-        //     results[i] = (input.cwiseProduct(weights.row(i).transpose())).sum() + biases[i];
-        // }
 
-        // results = results.unaryExpr(activation.function);
-        
-        // outputs = results;
 
         return outputs;
     }
 
-    Eigen::MatrixXf Dense::backward(const Eigen::MatrixXf& deltaOutput)
+    matrix_t Dense::backward(const matrix_t& deltaOutput)
     {
     //     std::cout << "d_output " << deltaOutput.rows() << "x" << deltaOutput.cols() << "\n";
     //     std::cout << "outputs  " << outputs.rows() << "x" << outputs.cols() << "\n";
 
 
         // Eigen::MatrixXf d_pre_activation = deltaOutput.cwiseProduct(outputs.unaryExpr(activation.derivative));
-        Eigen::MatrixXf d_pre_activation = deltaOutput.cwiseProduct(activation.matrixDerivative(preactivations));
+        matrix_t d_pre_activation = deltaOutput.cwiseProduct(activation.matrixDerivative(preactivatedOutputs));
         // std::cout << "d_pre_activation:\n" << d_pre_activation << '\n';
         // Compute gradients for weights and biases
         // std::cout << "d_pre " << Utils::logs::show_matrix_dimensions(d_pre_activation) << '\n';
@@ -74,14 +65,14 @@ namespace ANN::Models::Layers
         
         
         // Compute gradient w.r.t. input for backpropagation
-        Eigen::MatrixXf deltaInput = weights.transpose() * d_pre_activation;       
+        matrix_t deltaInput = weights.transpose() * d_pre_activation;       
         // std::cout << "d_input:\n" << deltaBiases << '\n';
         // std::cout << "4\n"; 
         
         return deltaInput;
     }
 
-    void Dense::update_weights(float_t rate)
+    void Dense::update_weights(numeric_t rate)
     {
         // std::cout << "weights " << Utils::logs::show_matrix_dimensions(weights) << '\n';
         // std::cout << "weights\n" << weights << '\n';
@@ -94,8 +85,8 @@ namespace ANN::Models::Layers
         // std::cout << "biases grad\n" << deltaBiases << '\n';
         this->biases  -= this->deltaBiases  * rate;
 
-        this->deltaWeights = Eigen::MatrixXf::Zero(deltaWeights.rows(), deltaWeights.cols());
-        this->deltaBiases = Eigen::VectorXf::Zero(deltaBiases.size());
+        this->deltaWeights = matrix_t::Zero(deltaWeights.rows(), deltaWeights.cols());
+        this->deltaBiases = vector_t::Zero(deltaBiases.size());
     }
 
     std::unique_ptr<LayerBase> Dense::createUnique(int layerSize, const char* func)

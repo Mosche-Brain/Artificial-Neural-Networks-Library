@@ -1,7 +1,7 @@
 #pragma once
 
+#include "build_config.hpp"
 #include <Eigen/Dense>
-
 #include <initializer_list>
 #include <memory>
 #include <vector>
@@ -9,7 +9,7 @@
 #include "Layers/Layers.hpp"
 #include "Utility/loss.hpp"
 
-namespace ANN::Models
+namespace YANN::Models
 {
     using Topology = std::vector<std::unique_ptr<Layers::LayerBase>>;
     class Sequential
@@ -21,13 +21,13 @@ namespace ANN::Models
 
         void addLayer(std::unique_ptr<Layers::LayerBase> layer);
 
-        Eigen::MatrixXf forward(Eigen::MatrixXf input);
-        void backward(const Eigen::MatrixXf& d_output);
+        matrix_t forward(matrix_t input);
+        void backward(const matrix_t& d_output);
 
-        void fit(const Eigen::MatrixXf& X, const Eigen::MatrixXf& Y, float_t rate, int epochs);
-        void updateParams(float_t rate);
+        void fit(const matrix_t& X, const matrix_t& Y, f_type rate, int epochs);
+        void updateParams(f_type rate);
 
-        Eigen::MatrixXf getWeights(int layer_idx);
+        matrix_t getWeights(int layer_idx);
               
         std::vector<std::unique_ptr<Layers::LayerBase>> topology;
     protected:

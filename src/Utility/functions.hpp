@@ -1,30 +1,30 @@
 #pragma once
 
+#include "build_config.hpp"
 #include <Eigen/Dense>
-
 #include <cmath>
 #include <limits>
 
-namespace ANN::Utils
+namespace YANN::Utils
 {
-    float_t linear(float_t x);
-    float_t linear_derivative (float_t x);
+    numeric_t linear(numeric_t x);
+    numeric_t linear_derivative (numeric_t x);
 
-    float_t tanh(float_t x);
-    float_t tanh_derivative(float_t x);
+    numeric_t tanh(numeric_t x);
+    numeric_t tanh_derivative(numeric_t x);
 
-    float_t sigmoid(float_t x);
-    float_t sigmoid_derivative(float_t x);
+    numeric_t sigmoid(numeric_t x);
+    numeric_t sigmoid_derivative(numeric_t x);
 
-    float_t ReLU(float_t x);
-    float_t ReLU_derivative(float_t x);
+    numeric_t ReLU(numeric_t x);
+    numeric_t ReLU_derivative(numeric_t x);
 
-    float_t leaky_ReLU(float_t x);
-    float_t leaky_ReLU_derivative(float_t x);
+    numeric_t leaky_ReLU(numeric_t x);
+    numeric_t leaky_ReLU_derivative(numeric_t x);
 
-    float_t GELU(float_t x);
-    float_t GELU_derivative(float_t x);
+    numeric_t GELU(numeric_t x);
+    numeric_t GELU_derivative(numeric_t x);
 
-    Eigen::MatrixXf softmax(const Eigen::MatrixXf& x);
-    Eigen::MatrixXf softmax_derivative(const Eigen::MatrixXf& x);
+    matrix_t softmax(const matrix_t& x);
+    matrix_t softmax_derivative(const matrix_t& x);
 }

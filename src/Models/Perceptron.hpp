@@ -1,5 +1,6 @@
 #pragma once
 
+#include "build_config.hpp"
 #include <Eigen/Dense>
 #include <functional>
 
@@ -8,19 +9,19 @@
 #include "Utility/stlCompatibility.hpp"
 
 
-namespace ANN::Models
+namespace YANN::Models
 {
     class Perceptron
     {
     public:
         Perceptron(int inputLenght, const char* func);
-        Perceptron(int inputLenght, std::function<float_t(float_t)> func);
+        Perceptron(int inputLenght, std::function<f_type(f_type)> func);
 
-        void fit(const Eigen::MatrixXf& input, const Eigen::VectorXf& target, float rate, int epochs);
-        void fit(const std::vector<std::vector<float_t>>& input, const std::vector<float_t>& target, float rate, int epochs);
+        void fit(const matrix_t& input, const vector_t& target, float rate, int epochs);
+        void fit(const std::vector<std::vector<f_type>>& input, const std::vector<f_type>& target, float rate, int epochs);
         
-        float_t predict(const Eigen::VectorXf& input);
-        float_t predict(const std::vector<float_t>& input);
+        f_type predict(const vector_t& input);
+        f_type predict(const std::vector<f_type>& input);
 
         int inputWidth() const { return _inputWidth_; }
 
@@ -28,8 +29,8 @@ namespace ANN::Models
         void init();
         int _inputWidth_;
 
-        float_t bias;
-        Eigen::VectorXf weights;
-        std::function<float_t(float_t)> activation;
+        f_type bias;
+        vector_t weights;
+        std::function<f_type(f_type)> activation;
     };
 }

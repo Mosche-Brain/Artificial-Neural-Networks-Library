@@ -2,55 +2,55 @@
 
 #include "Utility/stlCompatibility.hpp"
 
-namespace ANN::Models
+namespace YANN::Models
 {
-    Perceptron::Perceptron(int inputLenght, std::function<float_t(float_t)> func) : _inputWidth_(inputLenght)
+    Perceptron::Perceptron(int inputLenght, std::function<f_type(f_type)> func) : _inputWidth_(inputLenght)
     {  
         activation = std::move(func);
 
         init();
     }
 
-    float_t Perceptron::predict(const Eigen::VectorXf& input)
+    f_type Perceptron::predict(const vector_t& input)
     {
         return activation((input * weights).sum() + bias);
         // return (input * weights).sum() + bias;
     }
 
-    float_t Perceptron::predict(const std::vector<float_t>& input)
+    f_type Perceptron::predict(const std::vector<f_type>& input)
     {
-        Eigen::VectorXf newInput = ANN::Utils::stlCompatibility::toEigenVector<float_t, std::vector<float_t>>(input);
+        vector_t newInput = YANN::Utils::stlCompatibility::toEigenVector<f_type, std::vector<f_type>>(input);
 
         return predict(newInput);
     }
 
-    void Perceptron::fit(const Eigen::MatrixXf& input, const Eigen::VectorXf& target, float rate, int epochs)
+    void Perceptron::fit(const matrix_t& input, const vector_t& target, float rate, int epochs)
     {
         for(int epoch = 0 ; epoch < epochs ; epoch++)
         {
             for(int row = 0 ; row < input.rows() ; row++)
             {
-                float_t y = predict(input.row(row).transpose());
+                f_type y = predict(input.row(row).transpose());
 
-                float error = (target[row] - y) * rate;
+                f_type error = (target[row] - y) * rate;
 
-                weights += error * input.row(row);
+                weights += error * input.row(row).transpose();
                 bias += error;
             }
         }
     }
 
-    void Perceptron::fit(const std::vector<std::vector<float_t>>& input, const std::vector<float_t>& target, float rate, int epochs)
+    void Perceptron::fit(const std::vector<std::vector<f_type>>& input, const std::vector<f_type>& target, float rate, int epochs)
     {
-        // Eigen::MatrixXf newInput  = Utils::stlCompatibility::toEigenMatrix<float_t, Utils::stlCompatibility::STLMatrix<float_t>>(input);
-        // Eigen::VectorXf newTarget = Utils::stlCompatibility::toEigenMatrix<float_t, std::vector<float_t>>(target);
+        // Eigen::MatrixXf newInput  = Utils::stlCompatibility::toEigenMatrix<f_type, Utils::stlCompatibility::STLMatrix<f_type>>(input);
+        // Eigen::VectorXf newTarget = Utils::stlCompatibility::toEigenMatrix<f_type, std::vector<f_type>>(target);
     
         // train(newInput, newTarget, epochs, rate);
     }
 
     void Perceptron::init()
     {
-        this->weights = Eigen::VectorXf::Random(_inputWidth_) * 0.1f;
+        this->weights = vector_t::Random(_inputWidth_) * static_cast<f_type>(0.1f);
         this->bias = 0;
     }
 }

@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <random>
 
-namespace ANN::Models
+namespace YANN::Models
 {
 
     NGram::NGram(/* args */)
