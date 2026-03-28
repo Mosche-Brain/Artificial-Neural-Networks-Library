@@ -2,7 +2,7 @@
 
 namespace YANN::Utils
 {
-    size_t OneHotDecode(const Eigen::VectorXf& vector)
+    size_t OneHotDecode(const vector_t& vector)
     {
         for(size_t i = 0 ; i < vector.size() ; i++)
         {
@@ -13,9 +13,9 @@ namespace YANN::Utils
         }
     }
 
-    Eigen::VectorXf OneHotEncode(size_t label, size_t lenght)
+    vector_t OneHotEncode(size_t label, size_t lenght)
     {
-        Eigen::VectorXf vector = Eigen::VectorXf::Zero(lenght);
+        vector_t vector = vector_t::Zero(lenght);
         vector[label] = 1.0f;
 
         return vector;

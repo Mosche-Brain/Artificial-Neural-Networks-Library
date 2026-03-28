@@ -53,7 +53,7 @@ namespace YANN::Utils::loss
         // Obliczenie różnicy
         matrix_t diff = result - target;
 
-        f_type loss = diff.squaredNorm() / result.cols();
+        numeric_t loss = diff.squaredNorm() / result.cols();
         matrix_t grad = diff / result.cols();
 
         return { loss, grad };
@@ -64,10 +64,10 @@ namespace YANN::Utils::loss
     LossType binary_cross_entropy(const matrix_t& result, const matrix_t& target)
     {
 
-        f_type epsilon = std::numeric_limits<f_type>::epsilon();
-        Eigen::Array<f_type, Eigen::Dynamic, Eigen::Dynamic> p = result.array().max(epsilon).min(static_cast<f_type>(1.0f) - epsilon);  // clamping
-        f_type loss = -(target.array() * p.log() + (static_cast<f_type>(1.0f) - target.array()) * (static_cast<f_type>(1.0f) - p).log()).mean();
-        matrix_t grad = ((p - target.array()) / (p * (static_cast<f_type>(1.0f) - p)).max(epsilon)).matrix();
+        numeric_t epsilon = std::numeric_limits<numeric_t>::epsilon();
+        Eigen::Array<numeric_t, Eigen::Dynamic, Eigen::Dynamic> p = result.array().max(epsilon).min(static_cast<numeric_t>(1.0f) - epsilon);  // clamping
+        numeric_t loss = -(target.array() * p.log() + (static_cast<numeric_t>(1.0f) - target.array()) * (static_cast<numeric_t>(1.0f) - p).log()).mean();
+        matrix_t grad = ((p - target.array()) / (p * (static_cast<numeric_t>(1.0f) - p)).max(epsilon)).matrix();
     
         return { loss, grad };
     }
@@ -78,12 +78,12 @@ namespace YANN::Utils::loss
         softmax_output = softmax_output.array().rowwise() / softmax_output.array().colwise().sum();
 
         // Compute loss: -sum(targets * log(softmax_output)) / n_samples
-        f_type loss = static_cast<f_type>(0.0f);
+        numeric_t loss = static_cast<numeric_t>(0.0f);
         for (int j = 0; j < result.cols(); ++j) 
         {
             for (int i = 0; i < result.rows(); ++i) 
             {
-                loss -= target(i, j) * std::log(std::max(softmax_output(i, j), static_cast<f_type>(1e-10f))); // Avoid log(0)
+                loss -= target(i, j) * std::log(std::max(softmax_output(i, j), static_cast<numeric_t>(1e-10f))); // Avoid log(0)
             }
         }
         
@@ -92,7 +92,7 @@ namespace YANN::Utils::loss
 
         // Gradient: softmax_output - targets
         matrix_t d_result = softmax_output - target;
-        d_result /= static_cast<f_type>(result.cols()); // Average over samples
+        d_result /= static_cast<numeric_t>(result.cols()); // Average over samples
         return { loss, d_result };
     }
 }

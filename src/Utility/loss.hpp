@@ -6,7 +6,7 @@
 #include <limits>
 namespace YANN::Utils::loss
 {
-    typedef struct { f_type loss ; matrix_t gradient; } LossType;
+    typedef struct { numeric_t loss ; matrix_t gradient; } LossType;
     
     enum class LossFunction { mse, cross_entropy, binary_cross_entropy }     ;
 

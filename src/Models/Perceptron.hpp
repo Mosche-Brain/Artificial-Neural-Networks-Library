@@ -15,13 +15,13 @@ namespace YANN::Models
     {
     public:
         Perceptron(int inputLenght, const char* func);
-        Perceptron(int inputLenght, std::function<f_type(f_type)> func);
+        Perceptron(int inputLenght, std::function<numeric_t(numeric_t)> func);
 
         void fit(const matrix_t& input, const vector_t& target, float rate, int epochs);
-        void fit(const std::vector<std::vector<f_type>>& input, const std::vector<f_type>& target, float rate, int epochs);
+        void fit(const std::vector<std::vector<numeric_t>>& input, const std::vector<numeric_t>& target, numeric_t rate, int epochs);
         
-        f_type predict(const vector_t& input);
-        f_type predict(const std::vector<f_type>& input);
+        numeric_t predict(const vector_t& input);
+        numeric_t predict(const std::vector<numeric_t>& input);
 
         int inputWidth() const { return _inputWidth_; }
 
@@ -29,8 +29,8 @@ namespace YANN::Models
         void init();
         int _inputWidth_;
 
-        f_type bias;
+        numeric_t bias;
         vector_t weights;
-        std::function<f_type(f_type)> activation;
+        std::function<numeric_t(numeric_t)> activation;
     };
 }

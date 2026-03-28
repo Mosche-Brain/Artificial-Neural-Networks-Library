@@ -1,19 +1,32 @@
 # YANN - Yet Another Neural Networks library
-### Ligtweight, minimal and easy to use C++ library for machine learning
+A lightweight, modular minimalistic and easy to use C++ library for machine learning
+
+![C++17](https://img.shields.io/badge/C%2B%2B-17-blue)
+![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Czuowuek-SOS/Artificial-Neural-Networks-Library/graphs/commit-activity)
+
+
+## Table of content
+* [installation](#️-installaction-and-building-process)
+* [examples of usage](#-examples-of-usage)
+* [features](#-features)
+* [credits](#-credits-and-used-technologies)
+* [other](#-other-useless-informations)
 
 ## ⬇️ Installaction and building process
 
-### 🐧 Linux and GNU/Linux
 
-#### requirements
+### requirements
 * eigen3 devel
 * OpenMP
 * G++ compiler
 * CMake
 * CPU with at least one core
+
+### 🐧 Linux and GNU/Linux
+
 ```bash
-git clone [this repo]
-cd [this repo folder]
+git clone https://github.com/Czuowuek-SOS/Artificial-Neural-Networks-Library
+cd Artificial-Neural-Networks-Library
 mkdir build
 cd build
 cmake ..
@@ -35,13 +48,13 @@ int main()
 {
     int input_layer_size = 2;
     int hidden_layer_size = 69;
-    int outut_layer_size = 2;
+    int outut_layer_size = 1;
     Sequential model({Layers::Input::createUnique(input_layer_size),
-			          Layers::Dense::createUnique(hidden_layer_size, "relu")
+			          Layers::Dense::createUnique(hidden_layer_size, "relu"),
 			          Layers::Dense::createUnique(outut_layer_size, "sigmoid")}); 
                       /* you can also put tanh, gelu, softmax, etc */
 
-    int number_of_samples = 3;
+    int number_of_samples = 4;
 	YANN::matrix_t x_train(number_of_samples, input_layer_size);
 	YANN::matrix_t y_train(number_of_samples, input_layer_size);
 
@@ -49,7 +62,8 @@ int main()
     YANN::numeric_t learning_rate = 0.1;
     int epochs = 200;
 
-	model->fit(x_train, y_train, learning_rate, epochs);
+	model.fit(x_train, y_train, learning_rate, epochs);
+    return 0;
 }
 ```
 
@@ -64,13 +78,16 @@ int main()
     int perceptron_input_size = 2;
     Perceptron model(perceptron_input_size, "relu");
 
-    int number_of_samples = 800;
+    int number_of_samples = 2137;
 	YANN::matrix_t x_train(number_of_samples, perceptron_input_size);
 	YANN::vector_t y_train(number_of_samples);
 
     /* Filling training data */
+    YANN::numeric_t learning_rate = 0.1;
+    int epochs = 200;
 
-    model.fit(x_train, y_train,, learning_rate, epochs);
+    model.fit(x_train, y_train, learning_rate, epochs);
+    return 0;
 }
 ```
 
@@ -120,15 +137,16 @@ You can find full API documentation [there](www.amogus.org)
 * ❌ OneAPI support
 * ❌ CUDA support
 * ❌ ROCm support
+* ❌ Computational graphs
 * ❌ Recurent Neural Networks
 * ❌ Transformers
-* ❌ Build in telemetry
 * ❌ Outperform TensorFlow
+* ❌ Built in telemetry
 
 ## 🧷 Credits and used technologies
 * [Eigen3](https://eigen.tuxfamily.org/) - C++ Linear Algebra library
 * [OpenMP](https://www.openmp.org/) - Multiprocessing interface for C/C++
-* [Sarvel](https://sarvel.xyz/) - Literally Digital God and my friend who designs 16 bit CPU's
+* [Sarvel](https://sarvel.xyz/) - Literally Digital God
 * [Jakub Gładysz](https://sarvel.xyz/) - PhD at PWr
 
 

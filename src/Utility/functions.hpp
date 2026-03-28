@@ -5,10 +5,12 @@
 #include <cmath>
 #include <limits>
 
+#include "math_api.hpp"
+
 namespace YANN::Utils
 {
-    numeric_t linear(numeric_t x);
-    numeric_t linear_derivative (numeric_t x);
+    numeric_t linear(math_api::numeric_t x);
+    numeric_t linear_derivative (math_api::numeric_t x);
 
     numeric_t tanh(numeric_t x);
     numeric_t tanh_derivative(numeric_t x);

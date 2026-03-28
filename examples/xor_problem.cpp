@@ -1,4 +1,4 @@
-#include <ANN/Models/Sequential.hpp>
+#include <YANN/Models/Sequential.hpp>
 #include "../src/build_config.hpp"
 
 #include <iostream>
@@ -25,7 +25,7 @@ int main()
 
 	std::cout << "train data:\n" << X << '\n'; 
 	
-	model.fit(X, Y, static_cast<f_type>(0.1f), 2000);
+	model.fit(X, Y, static_cast<YANN::numeric_t>(0.1f), 2000);
 
     for(int i = 0 ; i < 3 ; i++)
     {
@@ -39,7 +39,7 @@ int main()
         sample << X(i, 0), X(i, 1);
 
         matrix_t pred = model.forward(sample);
-        f_type result = pred(0, 0);
+        YANN::numeric_t result = pred(0, 0);
 
         std::cout << "XOR(" << X(i, 0) << ", " << X(i, 1) << ") = "
                   << result << " → " << (result > 0.5 ? 1 : 0) << '\n';
@@ -47,8 +47,8 @@ int main()
 
     matplot::fmesh([&](float x, float y) { 
         vector_t vec(2);
-        vec(0) = static_cast<f_type>(x);
-        vec(1) = static_cast<f_type>(y);
+        vec(0) = static_cast<YANN::numeric_t>(x);
+        vec(1) = static_cast<YANN::numeric_t>(y);
         return static_cast<float>(model.forward(vec)(0,0)); 
     });
     matplot::show();

@@ -24,8 +24,8 @@ namespace YANN::Models
         matrix_t forward(matrix_t input);
         void backward(const matrix_t& d_output);
 
-        void fit(const matrix_t& X, const matrix_t& Y, f_type rate, int epochs);
-        void updateParams(f_type rate);
+        void fit(const matrix_t& X, const matrix_t& Y, numeric_t rate, int epochs);
+        void updateParams(numeric_t rate);
 
         matrix_t getWeights(int layer_idx);
               

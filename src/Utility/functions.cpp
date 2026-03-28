@@ -2,12 +2,12 @@
 
 namespace YANN::Utils
 {
-    numeric_t linear(numeric_t x)
+    numeric_t linear(math_api::numeric_t x)
     {
         return x;
     }
 
-    numeric_t linear_derivative(numeric_t x)
+    numeric_t linear_derivative(math_api::numeric_t x)
     {
         return 1;
     }
