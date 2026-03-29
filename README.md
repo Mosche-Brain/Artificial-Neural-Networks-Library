@@ -138,6 +138,7 @@ You can find full API documentation [there](www.amogus.org)
 * ❌ CUDA support
 * ❌ ROCm support
 * ❌ Computational graphs
+* ❌ Python API
 * ❌ Recurent Neural Networks
 * ❌ Transformers
 * ❌ Outperform TensorFlow

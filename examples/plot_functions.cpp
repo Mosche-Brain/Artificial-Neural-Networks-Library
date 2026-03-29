@@ -1,4 +1,4 @@
-#include <ANN/Utility/functions.hpp>
+#include <YANN/Utility/functions.hpp>
 #include "../src/build_config.hpp"
 
 #include <matplot/matplot.h>

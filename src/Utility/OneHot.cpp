@@ -6,7 +6,7 @@ namespace YANN::Utils
     {
         for(size_t i = 0 ; i < vector.size() ; i++)
         {
-            if(vector[i] == 1.0f)
+            if(vector[i] == (numeric_t)1.0)
             {
                 return i;
             }
@@ -16,7 +16,7 @@ namespace YANN::Utils
     vector_t OneHotEncode(size_t label, size_t lenght)
     {
         vector_t vector = vector_t::Zero(lenght);
-        vector[label] = 1.0f;
+        vector[label] = (numeric_t)1.0;
 
         return vector;
     }

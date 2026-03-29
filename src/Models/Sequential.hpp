@@ -1,13 +1,12 @@
 #pragma once
 
-#include "build_config.hpp"
-#include <Eigen/Dense>
 #include <initializer_list>
 #include <memory>
 #include <vector>
 
 #include "Layers/Layers.hpp"
 #include "Utility/loss.hpp"
+#include "math_api.hpp"
 
 namespace YANN::Models
 {
@@ -24,7 +23,7 @@ namespace YANN::Models
         matrix_t forward(matrix_t input);
         void backward(const matrix_t& d_output);
 
-        void fit(const matrix_t& X, const matrix_t& Y, numeric_t rate, int epochs);
+        void fit(const matrix_t& X, const matrix_t& Y, numeric_t rate, size_t epochs);
         void updateParams(numeric_t rate);
 
         matrix_t getWeights(int layer_idx);

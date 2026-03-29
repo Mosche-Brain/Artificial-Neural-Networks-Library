@@ -1,10 +1,9 @@
 #pragma once
 
-#include "build_config.hpp"
-#include <Eigen/Dense>
 #include <functional>
 #include <map>
 
+#include "math_api.hpp"
 #include "functions.hpp"
 
 namespace YANN::Utils

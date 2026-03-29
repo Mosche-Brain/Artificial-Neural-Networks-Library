@@ -1,9 +1,9 @@
-#include <ANN/Models/Sequential.hpp>
-#include "../src/build_config.hpp"
-
 #include <iostream>
 
+#include <YANN/Models/Sequential.hpp>
 #include <matplot/matplot.h>
+
+void plot(YANN::vector_t x, YANN::vector_t y_true, YANN::vector_t y_pred);
 
 int main()
 {
@@ -23,34 +23,38 @@ int main()
         YANN::Models::Layers::Dense::createUnique(1, "tanh"),
     });
 
-	vector_t X = vector_t::LinSpaced(200, static_cast<f_type>(-2 * M_PI), static_cast<f_type>(2 * M_PI));
+    size_t num_samples = 200;
+	YANN::vector_t X = YANN::vector_t::LinSpaced(num_samples, static_cast<YANN::numeric_t>(-2 * M_PI), static_cast<YANN::numeric_t>(2 * M_PI));
 
-	vector_t Y(200);
-	for(int i = 0; i < 200; ++i)
+	YANN::vector_t Y(num_samples);
+	for(size_t i = 0; i < num_samples; ++i)
     {
         Y(i) = std::sin(X(i));
     }
 
-	// std::cout << "train data:\n" << X << '\n'; 
-	
-	model.fit(X, Y, static_cast<f_type>(0.1f), 50);
+	size_t epochs = 50;
+    YANN::numeric_t learning_rate = (YANN::numeric_t)0.1f;
+	model.fit(X, Y, learning_rate, epochs);
 
-    // for(int i = 0 ; i < 3 ; i++)
-    // {
-    //     std::cout << i << " layer weights: "  << model.getWeights(i) << '\n';
-    // }
+  
+    YANN::vector_t Y_pred = model.forward(X);
+    
+    plot(X, Y, Y_pred);
 
-    // plot model predictions vs true sine function
-    vector_t Y_pred = model.forward(X);
-    std::vector<double> x_data, y_data, y_pred_data;
-    for(int i = 0; i < X.rows(); ++i)
+    return 0;
+}
+
+void plot(YANN::vector_t x, YANN::vector_t y_true, YANN::vector_t y_pred)
+{
+    std::vector<double> x_data, y_true_data, y_pred_data;
+    for(size_t i = 0; i < x.rows(); ++i)
     {
-        x_data.push_back(X[i]);
-        y_data.push_back(Y[i]);
-        y_pred_data.push_back(Y_pred[i]);
+        x_data.push_back(x[i]);
+        y_true_data.push_back(y_true[i]);
+        y_pred_data.push_back(y_pred[i]);
     }
     matplot::figure();
-    matplot::plot(x_data, y_data)->line_width(2).color("blue").display_name("True Sine");
+    matplot::plot(x_data, y_true_data)->line_width(2).color("blue").display_name("True Sine");
     matplot::hold(matplot::on);
     matplot::plot(x_data, y_pred_data)->line_width(2).color("red").display_name("Model Prediction");
     matplot::title("Sine Function Approximation using Neural Network");
@@ -58,7 +62,4 @@ int main()
     matplot::ylabel("sin(x)");
     matplot::legend();
     matplot::show();
-
-
-    return 0;
 }

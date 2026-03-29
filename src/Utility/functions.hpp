@@ -1,7 +1,5 @@
 #pragma once
 
-#include "build_config.hpp"
-#include <Eigen/Dense>
 #include <cmath>
 #include <limits>
 

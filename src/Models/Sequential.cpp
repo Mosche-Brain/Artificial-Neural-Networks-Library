@@ -80,7 +80,7 @@ namespace YANN::Models
         matrix_t curr_gradient = d_output;
         // std::cout << "layer " <<  << " gradient:\n" << curr_gradient << '\n';
         // std::cout << "layer output gradient:\n" << curr_gradient << '\n';
-        for(int i = topology.size() - 1 ; i >= 0 ; --i)
+        for(size_t i = topology.size() - 1 ; i >= 0 ; --i)
         {
             curr_gradient = topology[i]->backward(curr_gradient);
             // std::cout << "layer " << i << " gradient:\n" << curr_gradient << '\n';
@@ -88,9 +88,9 @@ namespace YANN::Models
         // std::cout << "layer 0 gradient:\n" << curr_gradient << '\n';
     }
 
-    void Sequential::fit(const matrix_t& X, const matrix_t& Y, numeric_t rate, int epochs)
+    void Sequential::fit(const matrix_t& X, const matrix_t& Y, numeric_t rate, size_t epochs)
     {
-        for(int epoch = 0 ; epoch < epochs ; epoch++)
+        for(size_t epoch = 0 ; epoch < epochs ; epoch++)
         {
             Eigen::PermutationMatrix<Eigen::Dynamic> perm(X.rows());
             perm.setIdentity();
@@ -103,7 +103,7 @@ namespace YANN::Models
             
             numeric_t totalLoss = 0;
             std::cout << "================Epoch " << epoch << "================\n";
-            for(int i = 0 ; i < X.rows() ; i++)
+            for(size_t i = 0 ; i < X.rows() ; i++)
             {
                 std::cout << "================Sample " << i << "================\n";
                 vector_t x = X.row(i).transpose();
@@ -140,7 +140,7 @@ namespace YANN::Models
 
     void Sequential::updateParams(numeric_t rate)
     {
-        for(int i = 0 ; i < topology.size() ; i++)
+        for(size_t i = 0 ; i < topology.size() ; i++)
         {
             if(topology[i]->layerType() != Layers::LAYER_TYPE::INPUT)
                 topology[i]->update_weights(rate);

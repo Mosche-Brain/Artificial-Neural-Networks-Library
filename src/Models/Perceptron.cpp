@@ -17,12 +17,12 @@ namespace YANN::Models
         // return (input * weights).sum() + bias;
     }
 
-    numeric_t Perceptron::predict(const std::vector<numeric_t>& input)
-    {
-        vector_t newInput = YANN::Utils::stlCompatibility::toEigenVector<numeric_t, std::vector<numeric_t>>(input);
+    // numeric_t Perceptron::predict(const std::vector<numeric_t>& input)
+    // {
+    //     vector_t newInput = YANN::Utils::stlCompatibility::toEigenVector<numeric_t, std::vector<numeric_t>>(input);
 
-        return predict(newInput);
-    }
+    //     return predict(newInput);
+    // }
 
     void Perceptron::fit(const matrix_t& input, const vector_t& target, float rate, int epochs)
     {
@@ -40,13 +40,13 @@ namespace YANN::Models
         }
     }
 
-    void Perceptron::fit(const std::vector<std::vector<numeric_t>>& input, const std::vector<numeric_t>& target, float rate, int epochs)
-    {
-        // Eigen::MatrixXf newInput  = Utils::stlCompatibility::toEigenMatrix<numeric_t, Utils::stlCompatibility::STLMatrix<numeric_t>>(input);
-        // Eigen::VectorXf newTarget = Utils::stlCompatibility::toEigenMatrix<numeric_t, std::vector<numeric_t>>(target);
+    // void Perceptron::fit(const std::vector<std::vector<numeric_t>>& input, const std::vector<numeric_t>& target, float rate, int epochs)
+    // {
+    //     // Eigen::MatrixXf newInput  = Utils::stlCompatibility::toEigenMatrix<numeric_t, Utils::stlCompatibility::STLMatrix<numeric_t>>(input);
+    //     // Eigen::VectorXf newTarget = Utils::stlCompatibility::toEigenMatrix<numeric_t, std::vector<numeric_t>>(target);
     
-        // train(newInput, newTarget, epochs, rate);
-    }
+    //     // train(newInput, newTarget, epochs, rate);
+    // }
 
     void Perceptron::init()
     {

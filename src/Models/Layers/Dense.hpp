@@ -1,6 +1,6 @@
 #pragma once
 
-#include "build_config.hpp"
+#include "math_api.hpp"
 #include "LayerBase.hpp"
 
 namespace YANN::Models::Layers

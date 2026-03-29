@@ -1,6 +1,6 @@
 #pragma once
 
-#include "build_config.hpp"
+#include "math_api.hpp"
 #include <Eigen/Dense>
 #include <memory>
 

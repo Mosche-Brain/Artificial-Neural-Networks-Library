@@ -1,8 +1,6 @@
 #pragma once
 
-#include <Eigen/Dense>
-
-#include <build_config.hpp>
+#include <math_api.hpp>
 
 namespace YANN::Utils
 {
