@@ -1,8 +1,13 @@
 #include "Sequential.hpp"
 
-#include <iostream>
 #include <algorithm>
 #include <random>
+
+#define ENABLE_DEBUG_OUTPUT
+
+#if defined(ENABLE_DEBUG_OUTPUT)
+    #include <iostream>
+#endif
 
 namespace YANN::Models
 {
@@ -50,14 +55,13 @@ namespace YANN::Models
 
         if(topology.size() == 1)
         {
-            int layerSize = topology.back()->size();
+            size_t layerSize = topology.back()->size();
             topology.back()->initParameters(layerSize, 1);
         }
         else
         {
-            int layerSize  = topology.back()->size();
-            int inputWidth = topology[topology.size() - 1]->size();
-            
+            size_t layerSize  = topology.back()->size();
+            size_t inputWidth = topology[topology.size() - 1]->size();
             topology.back()->initParameters(layerSize, inputWidth );
         }
     }
@@ -66,7 +70,7 @@ namespace YANN::Models
     {
         topology[0]->forward(input);
 
-        for(int i = 1 ; i < topology.size() ; ++i)
+        for(size_t i = 1 ; i < topology.size() ; ++i)
         {
             // std::cout << "bach\n";
             topology[i]->forward(topology[i - 1]->Outputs());
@@ -78,18 +82,20 @@ namespace YANN::Models
     void Sequential::backward(const matrix_t& d_output)
     {
         matrix_t curr_gradient = d_output;
-        // std::cout << "layer " <<  << " gradient:\n" << curr_gradient << '\n';
-        // std::cout << "layer output gradient:\n" << curr_gradient << '\n';
+        std::cout << "\t\t\t" << "layer output gradient: " << curr_gradient << '\n';
         for(size_t i = topology.size() - 1 ; i >= 0 ; --i)
         {
             curr_gradient = topology[i]->backward(curr_gradient);
-            // std::cout << "layer " << i << " gradient:\n" << curr_gradient << '\n';
+            std::cout << "\t\t\t" << "layer " << i << " gradient: " << curr_gradient << '\n';
         }        
-        // std::cout << "layer 0 gradient:\n" << curr_gradient << '\n';
+        std::cout << "\t\t\t" << "layer 0 gradient: " << curr_gradient << '\n';
     }
 
     void Sequential::fit(const matrix_t& X, const matrix_t& Y, numeric_t rate, size_t epochs)
     {
+        #if defined(ENABLE_DEBUG_OUTPUT)
+            std::cout << "Starting training for " << epochs << " epochs...\n";
+        #endif
         for(size_t epoch = 0 ; epoch < epochs ; epoch++)
         {
             Eigen::PermutationMatrix<Eigen::Dynamic> perm(X.rows());
@@ -102,39 +108,55 @@ namespace YANN::Models
             matrix_t Y_shuffled = perm * Y;
             
             numeric_t totalLoss = 0;
-            std::cout << "================Epoch " << epoch << "================\n";
+            #if defined(ENABLE_DEBUG_OUTPUT)
+                std::cout << "\t" << "Epoch " << epoch << "\n";
+            #endif
             for(size_t i = 0 ; i < X.rows() ; i++)
             {
-                std::cout << "================Sample " << i << "================\n";
-                vector_t x = X.row(i).transpose();
-                vector_t y = Y.row(i).transpose();
+                #if defined(ENABLE_DEBUG_OUTPUT)
+                    std::cout << "\t\t" << "Sample " << i << "\n";
+                #endif
 
-                std::cout << "input: "  << x << '\n';
-                std::cout << "target: " << y.transpose() << '\n';
+                vector_t x = math_api::matrixTranspose(math_api::matrixRow(X, i));
+                vector_t y = math_api::matrixTranspose(math_api::matrixRow(Y, i)); // Todo: check what is shuffling
+
+                #if defined(ENABLE_DEBUG_OUTPUT)
+                    std::cout << "\t\t" << "input: "  << x << '\n';
+                    std::cout << "\t\t" << "target: " << math_api::matrixTranspose(y) << '\n';
+                #endif
 
                 vector_t result = this->forward(x);
-                std::cout << "resutl: " << result.transpose() << '\n';
+                std::cout << "\t\t" << "resutl: " << math_api::matrixTranspose(result) << '\n';
 
-                std::cout << "=============Computing Loss=============\n";
+                #if defined(ENABLE_DEBUG_OUTPUT)
+                    std::cout << "\t\t" << "Computing loss and gradient...\n";
+                #endif
+                
                 Utils::loss::LossType error = Utils::loss::computeLoss(result, y, this->loss_function);
                 
                 vector_t gradient = error.gradient;
                 
-                std::cout << "gradient:\n" << gradient << '\n';
-                std::cout << "loss: " << error.loss << '\n';
-                
-                std::cout << "=============Backpropagation=============\n";
+                // std::cout << "gradient:\n" << gradient << '\n';
+                // std::cout << "loss: " << error.loss << '\n';
+
+                #if defined(ENABLE_DEBUG_OUTPUT)
+                    std::cout << "\t\t" << "Performing backpropagation...\n";
+                #endif
+
                 this->backward(gradient);
-                std::cout << "=============Updating Params=============\n";
-                
+
+                #if defined(ENABLE_DEBUG_OUTPUT)
+                    std::cout << "\t\t" << "Updating parameters...\n";
+                #endif              
+
                 this->updateParams(rate);
                 totalLoss += error.loss;
             }
             // totalLoss /= X.rows();
             numeric_t avarageLoss = totalLoss / X.rows();
             
-            std::cout << "Avarage epoch loss: " << avarageLoss << '\n';
-            // std::cout << "Total epoch loss: " << totalLoss << '\n';
+            std::cout << "\t" << "Avarage epoch loss: " << avarageLoss << '\n';
+            std::cout << "\t" << "Total epoch loss: " << totalLoss << '\n';
         }
     }
 

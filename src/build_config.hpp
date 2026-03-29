@@ -4,47 +4,18 @@
 #include <cfloat>
 #include <stdfloat>
 
-/* Define used precision */
-// #define _USE_DOUBLE_PRECISION
- #define _USE_SINGLE_PRECISION
-//#define _USE_HALF_PRECISION
-// #define _USE_QUARTER_PRECISION
-
-/* Define used math API */
-#define _USE_EIGEN
-// #define _USE_ONEAPI
-// #define _USE_CUDA
-// #define _USE_NATIVE_CPU
-
-#ifdef _USE_EIGEN
-    #include <eigen3/Eigen/Dense>
+/* Define single precision (32-bit floating point) if any precision is not defined */
+#if !defined(_USE_DOUBLE_PRECISION) && !defined(_USE_SINGLE_PRECISION) && !defined(_USE_HALF_PRECISION) && !defined(_USE_QUARTER_PRECISION)
+    #define _USE_SINGLE_PRECISION
 #endif
 
+/* Define _USE_EIGEN if any API is not defined */
+#if !defined(_USE_EIGEN) && !defined(_USE_ONEAPI) && !defined(_USE_CUDA) && !defined(_USE_NATIVE_CPU)
+    #define _USE_EIGEN
+#endif
 
 #include "math_api.hpp"
 namespace YANN
 {
-    // #ifdef _USE_DOUBLE_PRECISION
-    //     typedef double numeric_t;
-    // #elif defined(_USE_FULL_PRECISION)
-    //     typedef float numeric_t;
-    // #elif defined(_USE_HALF_PRECISION)
-    //     // typedef _Float16 numeric_t;
-    //     typedef std::float16_t numeric_t;
-    // #elif defined(_USE_QUARTER_PRECISION)
-    //     typedef int8_t numeric_t;
-    // #else
-    //     #error "No precision defined. Please define one of _USE_DOUBLE_PRECISION, _USE_FULL_PRECISION, _USE_HALF_PRECISION, or _USE_QUARTER_PRECISION."
-    // #endif
-    
-    // #ifdef _USE_EIGEN
-    //     typedef Eigen::Matrix<numeric_t, Eigen::Dynamic, Eigen::Dynamic> matrix_t;
-    //     typedef Eigen::Matrix<numeric_t, Eigen::Dynamic, 1> vector_t;
-    // #elif defined(_USE_ONEAPI)
-    //     // Define matrix_t and vector_t for oneAPI here
-    // #elif defined(_USE_CUDA)
-    //     // Define matrix_t and vector_t for CUDA here
-    // #elif defined(_USE_NATIVE_CPU)
-    //     // Define matrix_t and vector_t for native CPU here
-    // #endif
+
 }
