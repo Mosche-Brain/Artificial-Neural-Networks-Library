@@ -63,6 +63,8 @@ namespace YANN::math_api
     matrix_t createMatrix(size_t rows, size_t cols, numeric_t initialValue);
     matrix_t createMatrix(std::initializer_list<std::initializer_list<numeric_t>> values);
 
+    matrix_t createRandomMatrix(size_t rows, size_t cols, numeric_t minValue = static_cast<numeric_t>(-1), numeric_t maxValue = static_cast<numeric_t>(1));
+
     matrix_t matrixAdd(const matrix_t& a, const matrix_t& b);
     void matrixAddInPlace(matrix_t& a, const matrix_t& b);
 
@@ -92,6 +94,28 @@ namespace YANN::math_api
 
     matrix_t matrixTransform(const matrix_t& a, numeric_t (*func)(numeric_t));
     void matrixTransformInPlace(matrix_t& a, numeric_t (*func)(numeric_t));
+
+    // add matrixColwise and matrixRowwise operations now <------- do it
+    matrix_t matrixColwise(const matrix_t& a, numeric_t (*func)(const vector_t&));
+    matrix_t matrixRowwise(const matrix_t& a, numeric_t (*func)(const vector_t&));
+
+    matrix_t matrixColwiseSum(const matrix_t& a);
+    matrix_t matrixRowwiseSum(const matrix_t& a);
+
+    matrix_t matrixColwiseMean(const matrix_t& a);
+    matrix_t matrixRowwiseMean(const matrix_t& a);
+
+    matrix_t matrixColwiseMin(const matrix_t& a);
+    matrix_t matrixRowwiseMin(const matrix_t& a);
+
+    matrix_t matrixColwiseMax(const matrix_t& a);
+    matrix_t matrixRowwiseMax(const matrix_t& a);
+
+    matrix_t matrixColwiseAdd(const matrix_t& a, const vector_t& b);
+    void matrixColwiseAddInPlace(matrix_t& a, const vector_t& b);
+
+    matrix_t matrixRowwiseAdd(const matrix_t& a, const vector_t& b);
+    void matrixRowwiseAddInPlace(matrix_t& a, const vector_t& b);
 
     numeric_t matrixSum(const matrix_t& a);
     numeric_t matrixMean(const matrix_t& a);

@@ -71,6 +71,32 @@ namespace YANN::math_api
         #endif
     }
 
+    matrix_t createRandomMatrix(size_t rows, size_t cols, numeric_t minValue, numeric_t maxValue)
+    {
+        #ifdef _USE_EIGEN
+            return matrix_t::Random(rows, cols) * (maxValue - minValue) / 2 + (minValue + maxValue) / 2;
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI random matrix creation here
+            return matrix_t(); // Placeholder
+        #elif defined(_USE_CUDA)
+            // Implement CUDA random matrix creation here
+            return matrix_t(); // Placeholder
+        #elif defined(_USE_NATIVE_CPU)
+            matrix_t mat(rows, std::vector<numeric_t>(cols));
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_real_distribution<numeric_t> dis(minValue, maxValue);
+            for (size_t i = 0; i < rows; ++i) {
+                for (size_t j = 0; j < cols; ++j) {
+                    mat[i][j] = dis(gen);
+                }
+            }
+            return mat;
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, _USE_CUDA, or _USE_NATIVE_CPU."
+        #endif
+    }
+
     matrix_t matrixAdd(const matrix_t& a, const matrix_t& b)
     {
         #ifdef _USE_EIGEN
@@ -355,6 +381,216 @@ namespace YANN::math_api
             // Implement CUDA in-place matrix transform here
         #elif defined(_USE_NATIVE_CPU)
             // Implement native CPU in-place matrix transform here
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, or _USE_CUDA."
+        #endif
+    }
+
+    matrix_t matrixColwise(const matrix_t& a, numeric_t (*func)(const vector_t&))
+    {
+        #ifdef _USE_EIGEN
+            // implement column-wise operation using Eigen's colwise() and unaryExpr()
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI column-wise operation here
+            return matrix_t(); // Placeholder
+        #elif defined(_USE_CUDA)
+            // Implement CUDA column-wise operation here
+            return matrix_t(); // Placeholder
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, or _USE_CUDA."
+        #endif
+    }
+
+    matrix_t matrixRowwise(const matrix_t& a, numeric_t (*func)(const vector_t&))
+    {
+        #ifdef _USE_EIGEN
+            // implement row-wise operation using Eigen's rowwise() and unaryExpr()
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI row-wise operation here
+            return matrix_t(); // Placeholder
+        #elif defined(_USE_CUDA)
+            // Implement CUDA row-wise operation here
+            return matrix_t(); // Placeholder
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, or _USE_CUDA."
+        #endif
+    }
+
+    matrix_t matrixColwiseSum(const matrix_t& a)
+    {
+        #ifdef _USE_EIGEN
+            return a.colwise().sum();
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI column-wise sum here
+            return matrix_t(); // Placeholder
+        #elif defined(_USE_CUDA)
+            // Implement CUDA column-wise sum here
+            return matrix_t(); // Placeholder
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, or _USE_CUDA."
+        #endif
+    }
+
+    matrix_t matrixRowwiseSum(const matrix_t& a)
+    {
+        #ifdef _USE_EIGEN
+            return a.rowwise().sum();
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI row-wise sum here
+            return matrix_t(); // Placeholder
+        #elif defined(_USE_CUDA)
+            // Implement CUDA row-wise sum here
+            return matrix_t(); // Placeholder
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, or _USE_CUDA."
+        #endif
+    }
+
+    matrix_t matrixColwiseMean(const matrix_t& a)
+    {
+        #ifdef _USE_EIGEN
+            return a.colwise().mean();
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI column-wise mean here
+            return matrix_t(); // Placeholder
+        #elif defined(_USE_CUDA)
+            // Implement CUDA column-wise mean here
+            return matrix_t(); // Placeholder
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, or _USE_CUDA."
+        #endif
+    }
+
+    matrix_t matrixRowwiseMean(const matrix_t& a)
+    {
+        #ifdef _USE_EIGEN
+            return a.rowwise().mean();
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI row-wise mean here
+            return matrix_t(); // Placeholder
+        #elif defined(_USE_CUDA)
+            // Implement CUDA row-wise mean here
+            return matrix_t(); // Placeholder
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, or _USE_CUDA."
+        #endif
+    }
+
+    matrix_t matrixColwiseMin(const matrix_t& a)
+    {
+        #ifdef _USE_EIGEN
+            return a.colwise().minCoeff();
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI column-wise min here
+            return matrix_t(); // Placeholder
+        #elif defined(_USE_CUDA)
+            // Implement CUDA column-wise min here
+            return matrix_t(); // Placeholder
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, or _USE_CUDA."
+        #endif
+    }
+
+    matrix_t matrixRowwiseMin(const matrix_t& a)
+    {
+        #ifdef _USE_EIGEN
+            return a.rowwise().minCoeff();
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI row-wise min here
+            return matrix_t(); // Placeholder
+        #elif defined(_USE_CUDA)
+            // Implement CUDA row-wise min here
+            return matrix_t(); // Placeholder
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, or _USE_CUDA."
+        #endif
+    }
+
+    matrix_t matrixColwiseMax(const matrix_t& a)
+    {
+        #ifdef _USE_EIGEN
+            return a.colwise().maxCoeff();
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI column-wise max here
+            return matrix_t(); // Placeholder
+        #elif defined(_USE_CUDA)
+            // Implement CUDA column-wise max here
+            return matrix_t(); // Placeholder
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, or _USE_CUDA."
+        #endif
+    }
+
+    matrix_t matrixRowwiseMax(const matrix_t& a)
+    {
+        #ifdef _USE_EIGEN
+            return a.rowwise().maxCoeff();
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI row-wise max here
+            return matrix_t(); // Placeholder
+        #elif defined(_USE_CUDA)
+            // Implement CUDA row-wise max here
+            return matrix_t(); // Placeholder
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, or _USE_CUDA."
+        #endif
+    }
+
+    matrix_t matrixColwiseAdd(const matrix_t& a, const vector_t& b)
+    {
+        #ifdef _USE_EIGEN
+            return a.colwise() + b;
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI column-wise addition here
+            return matrix_t(); // Placeholder
+        #elif defined(_USE_CUDA)
+            // Implement CUDA column-wise addition here
+            return matrix_t(); // Placeholder
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, or _USE_CUDA."
+        #endif
+    }
+
+    void matrixColwiseAddInPlace(matrix_t& a, const vector_t& b)
+    {
+        #ifdef _USE_EIGEN
+            a.colwise() += b;
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI in-place column-wise addition here
+        #elif defined(_USE_CUDA)
+            // Implement CUDA in-place column-wise addition here
+        #elif defined(_USE_NATIVE_CPU)
+            // Implement native CPU in-place column-wise addition here
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, or _USE_CUDA."
+        #endif
+    }
+
+    matrix_t matrixRowwiseAdd(const matrix_t& a, const vector_t& b)
+    {
+        #ifdef _USE_EIGEN
+            return a.rowwise() + b.transpose();
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI row-wise addition here
+            return matrix_t(); // Placeholder
+        #elif defined(_USE_CUDA)
+            // Implement CUDA row-wise addition here
+            return matrix_t(); // Placeholder
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, or _USE_CUDA."
+        #endif
+    }
+
+    void matrixRowwiseAddInPlace(matrix_t& a, const vector_t& b)
+    {
+        #ifdef _USE_EIGEN
+            a.rowwise() += b.transpose();
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI in-place row-wise addition here
+        #elif defined(_USE_CUDA)
+            // Implement CUDA in-place row-wise addition here
+        #elif defined(_USE_NATIVE_CPU)
+            // Implement native CPU in-place row-wise addition here
         #else
             #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, or _USE_CUDA."
         #endif
