@@ -4,11 +4,16 @@ namespace YANN::Models::Layers
 {
     void LayerBase::initParameters(int layerSize, int inputLenght)
     {
-        this->weights = matrix_t::Random(layerSize, inputLenght) * static_cast<numeric_t>(0.01f);
+        // this->weights = matrix_t::Random(layerSize, inputLenght) * static_cast<numeric_t>(0.01f);
         // this->biases  = matrix_t::Zero(layerSize, 1)             ;
-        this->biases  = vector_t::Random(layerSize, 1) * static_cast<numeric_t>(0.1f);
-        this->outputs = matrix_t::Zero(layerSize, 1);
-        this->inputs  = matrix_t::Zero(layerSize, inputLenght);
+        // this->biases  = vector_t::Random(layerSize, 1) * static_cast<numeric_t>(0.1f);
+        // this->outputs = matrix_t::Zero(layerSize, 1);
+        // this->inputs  = matrix_t::Zero(layerSize, inputLenght);
+
+        this->weights = YANN::math_api::createRandomMatrix(layerSize, inputLenght, static_cast<numeric_t>(-0.01f), static_cast<numeric_t>(0.01f));
+        this->biases  = YANN::math_api::createMatrix(layerSize, 1, static_cast<numeric_t>(0));
+        this->outputs = YANN::math_api::createMatrix(layerSize, 1, static_cast<numeric_t>(0));
+        this->inputs  = YANN::math_api::createMatrix(layerSize, inputLenght, static_cast<numeric_t>(0));
 
         this->_initialized_ = true;
     }

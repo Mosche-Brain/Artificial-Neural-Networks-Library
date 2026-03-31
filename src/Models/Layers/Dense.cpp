@@ -1,8 +1,15 @@
 #include "Dense.hpp"
 
-#include <iostream>
 
-#include "Utility/logs.hpp"
+
+#define ENABLE_DEBUG_OUTPUT
+
+#if defined(ENABLE_DEBUG_OUTPUT)
+    #include <iostream>
+    #include "Utility/logs.hpp"
+#endif
+
+
 
 namespace YANN::Models::Layers
 {
@@ -35,10 +42,26 @@ namespace YANN::Models::Layers
 
     matrix_t Dense::backward(const matrix_t& deltaOutput)
     {
+        #if defined(ENABLE_DEBUG_OUTPUT)
+            std::cout << "\t\t\t\t" << "matrixElementwiseMultiply(deltaOutput, activation.matrixDerivative(preactivatedOutputs))\n";
+        #endif
         matrix_t d_pre_activation = math_api::matrixElementwiseMultiply(deltaOutput, activation.matrixDerivative(preactivatedOutputs));
+        
+        
+        #if defined(ENABLE_DEBUG_OUTPUT)
+            std::cout << "\t\t\t\t" << "deltaWeights = matrixMultiply(d_pre_activation, matrixTranspose(inputs))\n";
+        #endif
         deltaWeights = math_api::matrixMultiply(d_pre_activation, math_api::matrixTranspose(inputs));
+
+        #if defined(ENABLE_DEBUG_OUTPUT)
+            std::cout << "\t\t\t\t" << "deltaBiases = matrixRowwiseSum(d_pre_activation)\n";
+        #endif
         deltaBiases = math_api::matrixRowwiseSum(d_pre_activation);
            
+
+        #if defined(ENABLE_DEBUG_OUTPUT)
+            std::cout << "\t\t\t\t" << "deltaInput = matrixMultiply(matrixTranspose(weights), d_pre_activation)\n";
+        #endif
         matrix_t deltaInput = math_api::matrixMultiply(math_api::matrixTranspose(weights), d_pre_activation);       
         
         return deltaInput;

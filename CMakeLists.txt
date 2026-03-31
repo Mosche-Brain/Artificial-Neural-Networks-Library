@@ -65,6 +65,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
     -Wall
     -O3
     -ffast-math
+    # -D_USE_HALF_PRECISION
 )
 
 # Link libraries

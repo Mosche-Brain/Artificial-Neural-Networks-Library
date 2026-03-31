@@ -83,7 +83,7 @@ namespace YANN::Models
     {
         matrix_t curr_gradient = d_output;
         std::cout << "\t\t\t" << "layer output gradient: " << curr_gradient << '\n';
-        for(size_t i = topology.size() - 1 ; i >= 0 ; --i)
+        for(size_t i = topology.size() - 1 ; i > 0 ; --i)
         {
             curr_gradient = topology[i]->backward(curr_gradient);
             std::cout << "\t\t\t" << "layer " << i << " gradient: " << curr_gradient << '\n';

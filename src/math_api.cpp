@@ -42,14 +42,17 @@ namespace YANN::math_api
     {
         #ifdef _USE_EIGEN
             size_t rows = values.size();
-            size_t cols = values.begin()->size();
+            size_t cols = rows > 0 ? values.begin()->size() : 0;
             matrix_t mat(rows, cols);
+            
             size_t i = 0;
-            for (const auto& row : values) {
-                std::copy(row.begin(), row.end(), mat.row(i).data());
+            for (const auto& row : values) 
+            {
+                mat.row(i) = Eigen::Map<const vector_t>(row.begin(), row.size());
                 ++i;
             }
             return mat;
+
         #elif defined(_USE_ONEAPI)
             // Implement oneAPI matrix creation from initializer list here
             return matrix_t(); // Placeholder
@@ -58,7 +61,7 @@ namespace YANN::math_api
             return matrix_t(); // Placeholder
         #elif defined(_USE_NATIVE_CPU)
             size_t rows = values.size();
-            size_t cols = values.begin()->size();
+            size_t cols = rows > 0 ? values.begin()->size() : 0;
             matrix_t mat(rows, std::vector<numeric_t>(cols));
             size_t i = 0;
             for (const auto& row : values) {
@@ -74,7 +77,8 @@ namespace YANN::math_api
     matrix_t createRandomMatrix(size_t rows, size_t cols, numeric_t minValue, numeric_t maxValue)
     {
         #ifdef _USE_EIGEN
-            return matrix_t::Random(rows, cols) * (maxValue - minValue) / 2 + (minValue + maxValue) / 2;
+            return matrix_t::Random(rows, cols);
+            // return matrix_t::Random(rows, cols) * ((maxValue - minValue) / 2 + (minValue + maxValue) / 2);
         #elif defined(_USE_ONEAPI)
             // Implement oneAPI random matrix creation here
             return matrix_t(); // Placeholder
@@ -405,6 +409,7 @@ namespace YANN::math_api
     {
         #ifdef _USE_EIGEN
             // implement row-wise operation using Eigen's rowwise() and unaryExpr()
+            return matrix_t(); // Placeholder
         #elif defined(_USE_ONEAPI)
             // Implement oneAPI row-wise operation here
             return matrix_t(); // Placeholder

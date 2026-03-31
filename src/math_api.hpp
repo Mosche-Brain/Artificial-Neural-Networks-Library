@@ -64,7 +64,7 @@ namespace YANN::math_api
     matrix_t createMatrix(std::initializer_list<std::initializer_list<numeric_t>> values);
 
     matrix_t createRandomMatrix(size_t rows, size_t cols, numeric_t minValue = static_cast<numeric_t>(-1), numeric_t maxValue = static_cast<numeric_t>(1));
-
+\
     matrix_t matrixAdd(const matrix_t& a, const matrix_t& b);
     void matrixAddInPlace(matrix_t& a, const matrix_t& b);
 

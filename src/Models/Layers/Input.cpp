@@ -22,7 +22,8 @@ namespace YANN::Models::Layers
 
     matrix_t Input::backward(const matrix_t& deltaOutput)
     {
-        return matrix_t::Zero(_layerSize_, 1);
+        // return matrix_t::Zero(_layerSize_, 1);
+        return math_api::createMatrix(_layerSize_, 1, static_cast<numeric_t>(1));
     }
 
     void Input::update_weights(numeric_t rate)

@@ -124,7 +124,7 @@ std::unique_ptr<LayerBase> MyLayer::createUnique(int layerSize)
     return std::make_unique<MyLayer>(layerSize);
 }
 ```
-You can find full API documentation [there](www.amogus.org)
+You can find full API documentation [there (currently not avaible)](www.amogus.org)
 
 
 ## 🔨 Features
@@ -154,4 +154,5 @@ You can find full API documentation [there](www.amogus.org)
 ## 🥱 Other useless informations
 ### 🧼 Generative AI assistance in this project:
 * Name refactoring tasks
+* Generating boilerplate
 * Basic inline code autocompletion
