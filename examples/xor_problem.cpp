@@ -3,7 +3,6 @@
 
 #include <iostream>
 
-#include <matplot/matplot.h>
 
 int main()
 {
@@ -47,13 +46,13 @@ int main()
                   << result << " → " << (result > 0.5 ? 1 : 0) << '\n';
     }
 
-    matplot::fmesh([&](float x, float y) { 
-        YANN::vector_t vec(2);
-        vec(0) = static_cast<YANN::numeric_t>(x);
-        vec(1) = static_cast<YANN::numeric_t>(y);
-        return static_cast<float>(model.forward(vec)(0,0)); 
-    });
-    matplot::show();
+    // matplot::fmesh([&](float x, float y) { 
+    //     YANN::vector_t vec(2);
+    //     vec(0) = static_cast<YANN::numeric_t>(x);
+    //     vec(1) = static_cast<YANN::numeric_t>(y);
+    //     return static_cast<float>(model.forward(vec)(0,0)); 
+    // });
+    // matplot::show();
 
 
     return 0;

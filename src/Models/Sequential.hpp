@@ -27,10 +27,15 @@ namespace YANN::Models
         void fit(const matrix_t& X, const matrix_t& Y, numeric_t rate, size_t epochs);
         void updateParams(numeric_t rate);
 
-        matrix_t getWeights(int layer_idx);
-              
-        Topology topology;
+        matrix_t getWeights(size_t layer);
+        matrix_t getBiases(size_t layer);
+        Utils::activation_t getActivation(size_t layer);
+        Topology getTopology();
+        LayerPtr getLayer(size_t layer);
+        size_t getLayersCount();
+
     protected:
+        Topology topology;
         Utils::loss::LossFunction loss_function = Utils::loss::LossFunction::mse;
     };
 }

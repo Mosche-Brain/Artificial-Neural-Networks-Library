@@ -31,22 +31,8 @@ namespace YANN::Models
 
             topology[i]->initParameters(current_layer_size, previous_layer_size);
         }
-
-        // for(size_t i = 0 ; i < topology.size() ; i++)
-        // {
-        //     std::cout << "layer " << i << ": " << "weights " << topology[i]->Weights().rows() << "x" << topology[i]->Weights().cols() << " biases " << topology[i]->Biases().size() << '\n';
-        // }
     }
 
-    // Sequential::Sequential(std::vector<std::unique_ptr<Layers::LayerBase>> newTopology)
-    // {
-    //     topology = std::move(newTopology);
-
-    //     for(size_t i = 1 ; i < topology.size() ; i++)
-    //     {
-               
-    //     }
-    // }
 
     void Sequential::addLayer(LayerPtr layer)
     {
@@ -83,19 +69,14 @@ namespace YANN::Models
         matrix_t curr_gradient = d_output;
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::DEBUG_VEBOSITY >= 3)
-        {
             std::cout << "\t\t\t" << "layer output gradient: " << math_api::matrixTranspose(curr_gradient) << '\n';
-        }
         #endif
         for(size_t i = topology.size() - 1 ; i > 0 ; --i)
         {
             curr_gradient = topology[i]->backward(curr_gradient);
             #if defined(ENABLE_DEBUG_OUTPUT)
             if(runtime_config::DEBUG_VEBOSITY >= 3)
-            {
-
                 std::cout << "\t\t\t" << "layer " << i << " gradient: " << math_api::matrixTranspose(curr_gradient) << '\n';
-            }
             #endif
         }        
         #if defined(ENABLE_DEBUG_OUTPUT)
@@ -109,6 +90,7 @@ namespace YANN::Models
     void Sequential::fit(const matrix_t& X, const matrix_t& Y, numeric_t rate, size_t epochs)
     {
         #if defined(ENABLE_DEBUG_OUTPUT)
+        if(runtime_config::DEBUG_VEBOSITY >= 1)
             std::cout << "Starting training for " << epochs << " epochs...\n";
         #endif
         for(size_t epoch = 0 ; epoch < epochs ; epoch++)
@@ -141,8 +123,7 @@ namespace YANN::Models
                 vector_t y = math_api::matrixTranspose(math_api::matrixRow(Y, i)); // Todo: check what is shuffling
 
                 #if defined(ENABLE_DEBUG_OUTPUT)
-                if(runtime_config::DEBUG_VEBOSITY >= 2)
-                {
+                if(runtime_config::DEBUG_VEBOSITY >= 2) {
                     std::cout << "\t\t" << "input: "  << x << '\n';
                     std::cout << "\t\t" << "target: " << math_api::matrixTranspose(y) << '\n';
                 }
@@ -163,18 +144,14 @@ namespace YANN::Models
 
                 #if defined(ENABLE_DEBUG_OUTPUT)
                 if(runtime_config::DEBUG_VEBOSITY >= 2)
-                {
                     std::cout << "\t\t" << "Performing backpropagation...\n";
-                }
                 #endif
 
                 this->backward(gradient);
 
                 #if defined(ENABLE_DEBUG_OUTPUT)
                 if(runtime_config::DEBUG_VEBOSITY >= 2)
-                {
                     std::cout << "\t\t" << "Updating parameters...\n";
-                }
                 #endif              
 
                 this->updateParams(rate);
@@ -184,9 +161,7 @@ namespace YANN::Models
             numeric_t avarageLoss = totalLoss / X.rows();
             
             #if defined(ENABLE_DEBUG_OUTPUT)
-            if(runtime_config::DEBUG_VEBOSITY >= 1)
-            {
-
+            if(runtime_config::DEBUG_VEBOSITY >= 1) {
                 std::cout << "\t" << "Avarage epoch loss: " << avarageLoss << '\n';
                 std::cout << "\t" << "Total epoch loss: " << totalLoss << '\n';
             }
@@ -203,9 +178,33 @@ namespace YANN::Models
         }
     }
 
-    matrix_t Sequential::getWeights(int layer_idx)
+    matrix_t Sequential::getWeights(size_t layer)
     {
-        return topology[layer_idx]->Weights();
+        return topology[layer]->Weights();
     }
 
+    matrix_t Sequential::getBiases(size_t layer)
+    {
+        return topology[layer]->Biases();
+    }
+
+    Utils::activation_t Sequential::getActivation(size_t layer)
+    {
+        return topology[layer]->activation;
+    }
+
+    LayerPtr Sequential::getLayer(size_t layer)
+    {
+        return std::move(topology[layer]);
+    }
+
+    Topology Sequential::getTopology()
+    {
+        return topology;
+    }
+
+    size_t Sequential::getLayersCount()
+    {
+        return topology.size();
+    }
 }

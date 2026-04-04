@@ -1,10 +1,15 @@
 #include "FileIO.hpp"
 
-#include <fstream>
 #include <iostream>
+#include <fstream>
 #include <sstream>
+#include <vector>
+
+#include <nlohmann/json.hpp>
 
 #include "YANN/Models/Sequential.hpp"
+
+using json = nlohmann::json;
 
 namespace YANN::Utils
 {
@@ -92,13 +97,39 @@ namespace YANN::Utils
 
     void FileIO::saveSequentialModel(const Models::Sequential& model, const char* filename)
     {
-        /*
+        // model format: number of layers, for each layer: layer type, layer size, weights, biases
         std::ofstream file(filename, std::ios::binary);
         if(file.is_open())
-        {            model.serialize(file);
+        {
+            json j;
+            j["layers"] = json::array();
+
+            for(const auto& layer : model.getTopology())
+            {
+                json layer_json;
+                // layer_json["type"] = layer->getType();
+                // layer_json["size"] = layer->getSize();
+                
+                // Convert Eigen matrices to vectors for JSON serialization
+                auto weights = layer->Weights();
+                std::vector<std::vector<numeric_t>> weights_vec(weights.rows());
+                for(int i = 0; i < weights.rows(); ++i)
+                    weights_vec[i] = std::vector<numeric_t>(weights.row(i).data(), weights.row(i).data() + weights.cols());
+                layer_json["weights"] = weights_vec;
+                
+                auto biases = layer->Biases();
+                std::vector<numeric_t> biases_vec(biases.data(), biases.data() + biases.size());
+                layer_json["biases"] = biases_vec;
+                
+                layer_json["activation"] = layer->activation.name;
+                j["layers"].push_back(layer_json);
+            }
+
+
+        
             file.close();
         }
-        */
+        
     }
 
     void FileIO::loadSequentialModel(Models::Sequential& model, const char* filename)

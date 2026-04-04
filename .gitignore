@@ -1,6 +1,6 @@
 /.vscode/
 /.archive/
 /.datasets/
-/.external/*
+/.external/
 
 /build

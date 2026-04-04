@@ -13,10 +13,12 @@ option(BUILD_SHARED_LIBS "Build project as shared library" ON)
 option(BUILD_EXAMPLES "Build example programs" ON)
 
 # Find required packages
-find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+find_package(Eigen3 5.0 REQUIRED NO_MODULE)
 find_package(OpenMP)
-find_package(sciplot)
-find_package(Matplot++ REQUIRED)
+# find_package(sciplot)
+find_package(nlohmann_json 3.12.0 REQUIRED)
+
+# find_package(Matplot++ REQUIRED)
 
 # if (OPENMP_FOUND)
 #     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -75,6 +77,7 @@ target_link_libraries(${PROJECT_NAME}
         Eigen3::Eigen
         OpenMP::OpenMP_CXX
     PRIVATE
+        nlohmann_json::nlohmann_json
         ${CMAKE_DL_LIBS}
 )
 # nlohmann_json::nlohmann_json
@@ -135,9 +138,9 @@ if(BUILD_EXAMPLES)
 
         # Link with YANN library
         target_link_libraries(${EXAMPLE_NAME} PRIVATE ${PROJECT_NAME}    
-                                                    OpenMP::OpenMP_CXX
-                                                    sciplot::sciplot
-                                                    Matplot++::matplot)
+                                                    OpenMP::OpenMP_CXX)
+                                                    # sciplot::sciplot
+                                                    # Matplot++::matplot)
 
         # Compiler options (same as library)
         target_compile_options(${EXAMPLE_NAME} PRIVATE
