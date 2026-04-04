@@ -66,6 +66,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
     -O3
     -ffast-math
     # -D_USE_HALF_PRECISION
+    -DENABLE_DEBUG_OUTPUT
 )
 
 # Link libraries
@@ -127,6 +128,8 @@ if(BUILD_EXAMPLES)
         target_include_directories(${EXAMPLE_NAME} PRIVATE
             ${CMAKE_SOURCE_DIR}/src
             ${CMAKE_BINARY_DIR}/include
+            ${CMAKE_BINARY_DIR}/.datasets
+            ${CMAKE_BINARY_DIR}/.external
             /usr/include/eigen3
         )
 

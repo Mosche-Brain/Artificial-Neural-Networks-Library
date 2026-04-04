@@ -11,6 +11,7 @@
 namespace YANN::Models
 {
     using Topology = std::vector<std::unique_ptr<Layers::LayerBase>>;
+    using LayerPtr = std::unique_ptr<Layers::LayerBase>;
     class Sequential
     {
     public:
@@ -18,7 +19,7 @@ namespace YANN::Models
         // Sequential(std::vector<std::unique_ptr<Layers::LayerBase>> newTopology);
         Sequential(std::initializer_list<std::unique_ptr<Layers::LayerBase>> newTopology);
 
-        void addLayer(std::unique_ptr<Layers::LayerBase> layer);
+        void addLayer(LayerPtr layer);
 
         matrix_t forward(matrix_t input);
         void backward(const matrix_t& d_output);
@@ -28,7 +29,7 @@ namespace YANN::Models
 
         matrix_t getWeights(int layer_idx);
               
-        std::vector<std::unique_ptr<Layers::LayerBase>> topology;
+        Topology topology;
     protected:
         Utils::loss::LossFunction loss_function = Utils::loss::LossFunction::mse;
     };

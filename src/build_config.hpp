@@ -14,8 +14,4 @@
     #define _USE_EIGEN
 #endif
 
-#include "math_api.hpp"
-namespace YANN
-{
-
-}
+// #include "math_api.hpp"

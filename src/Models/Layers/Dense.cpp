@@ -1,22 +1,18 @@
 #include "Dense.hpp"
 
-
-
-#define ENABLE_DEBUG_OUTPUT
-
 #if defined(ENABLE_DEBUG_OUTPUT)
     #include <iostream>
     #include "Utility/logs.hpp"
 #endif
 
-
-
+#include "runtime_config.hpp"
 namespace YANN::Models::Layers
 {
     // Dense::Dense(int layerSize, int inputWidth, const char* func) : LayerBase()
     Dense::Dense(int layerSize, const char* func)
     {
-        activation  = Utils::Activation(func);
+        // activation  = Utils::Activation(func);
+        activation  = Utils::getActivationByName(func);
         _layerSize_ = layerSize;
 
         this->_layerType_   = LAYER_TYPE::DENSE;
@@ -34,8 +30,7 @@ namespace YANN::Models::Layers
         this->inputs = input;
  
         preactivatedOutputs = math_api::matrixColwiseAdd(math_api::matrixMultiply(weights, input), biases);
-        // outputs = math_api::matrixTransform(preactivatedOutputs, activation.function);
-        outputs = activation.matrixFunction(preactivatedOutputs);
+        outputs = math_api::matrixTransform(preactivatedOutputs, activation.function);
 
         return outputs;
     }
@@ -43,23 +38,29 @@ namespace YANN::Models::Layers
     matrix_t Dense::backward(const matrix_t& deltaOutput)
     {
         #if defined(ENABLE_DEBUG_OUTPUT)
+        if(runtime_config::DEBUG_VEBOSITY >= 4)
             std::cout << "\t\t\t\t" << "matrixElementwiseMultiply(deltaOutput, activation.matrixDerivative(preactivatedOutputs))\n";
         #endif
-        matrix_t d_pre_activation = math_api::matrixElementwiseMultiply(deltaOutput, activation.matrixDerivative(preactivatedOutputs));
+
+        matrix_t d_pre_activation = math_api::matrixElementwiseMultiply(deltaOutput, 
+                                                                        math_api::matrixTransform(preactivatedOutputs, activation.derivative));
         
         
         #if defined(ENABLE_DEBUG_OUTPUT)
+        if(runtime_config::DEBUG_VEBOSITY >= 4)
             std::cout << "\t\t\t\t" << "deltaWeights = matrixMultiply(d_pre_activation, matrixTranspose(inputs))\n";
         #endif
         deltaWeights = math_api::matrixMultiply(d_pre_activation, math_api::matrixTranspose(inputs));
 
         #if defined(ENABLE_DEBUG_OUTPUT)
+        if(runtime_config::DEBUG_VEBOSITY >= 4)
             std::cout << "\t\t\t\t" << "deltaBiases = matrixRowwiseSum(d_pre_activation)\n";
         #endif
         deltaBiases = math_api::matrixRowwiseSum(d_pre_activation);
            
 
         #if defined(ENABLE_DEBUG_OUTPUT)
+        if(runtime_config::DEBUG_VEBOSITY >= 4)
             std::cout << "\t\t\t\t" << "deltaInput = matrixMultiply(matrixTranspose(weights), d_pre_activation)\n";
         #endif
         matrix_t deltaInput = math_api::matrixMultiply(math_api::matrixTranspose(weights), d_pre_activation);       

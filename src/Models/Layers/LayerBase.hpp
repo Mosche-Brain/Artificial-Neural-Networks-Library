@@ -28,7 +28,8 @@ namespace YANN::Models::Layers
         virtual matrix_t Inputs();
         virtual matrix_t Weights();
         virtual matrix_t Biases();
-        Utils::Activation activation;
+        // Utils::Activation activation;
+        Utils::activation_t activation;
         
         LAYER_TYPE layerType();
     protected:

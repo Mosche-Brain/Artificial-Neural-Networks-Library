@@ -2,6 +2,57 @@
 
 namespace YANN::math_api 
 {
+    void setUsedThreadCount(size_t threadCount)
+    {
+        #ifdef _USE_EIGEN
+            Eigen::setNbThreads(threadCount);
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI thread count setting here
+        #elif defined(_USE_CUDA)
+            // Implement CUDA thread count setting here
+        #elif defined(_USE_NATIVE_CPU)
+            // Implement native CPU thread count setting here
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, _USE_CUDA, or _USE_NATIVE_CPU."
+        #endif
+    }
+
+    size_t getUsedThreadCount()
+    {
+        #ifdef _USE_EIGEN
+            return Eigen::nbThreads();
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI thread count retrieval here
+            return 0; // Placeholder
+        #elif defined(_USE_CUDA)
+            // Implement CUDA thread count retrieval here
+            return 0; // Placeholder
+        #elif defined(_USE_NATIVE_CPU)
+            // Implement native CPU thread count retrieval here
+            return 0; // Placeholder
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, _USE_CUDA, or _USE_NATIVE_CPU."
+        #endif
+    }
+
+    size_t getDeviceThreadCount() 
+    {
+        #ifdef _USE_EIGEN
+            return Eigen::nbThreads();
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI device thread count retrieval here
+            return 0; // Placeholder
+        #elif defined(_USE_CUDA)
+            // Implement CUDA device thread count retrieval here
+            return 0; // Placeholder
+        #elif defined(_USE_NATIVE_CPU)
+            // Implement native CPU device thread count retrieval here
+            return 0; // Placeholder
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, _USE_CUDA, or _USE_NATIVE_CPU."
+        #endif
+    }
+
     /* matrix operations */
 
     matrix_t createMatrix(size_t rows, size_t cols)
@@ -385,6 +436,36 @@ namespace YANN::math_api
             // Implement CUDA in-place matrix transform here
         #elif defined(_USE_NATIVE_CPU)
             // Implement native CPU in-place matrix transform here
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, or _USE_CUDA."
+        #endif
+    }
+
+    matrix_t matrixNormalize(const matrix_t& a)
+    {
+        #ifdef _USE_EIGEN
+            return (a.rowwise() - a.colwise().minCoeff()).array().rowwise() / (a.colwise().maxCoeff() - a.colwise().minCoeff()).array();
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI matrix normalization here
+            return matrix_t(); // Placeholder
+        #elif defined(_USE_CUDA)
+            // Implement CUDA matrix normalization here
+            return matrix_t(); // Placeholder
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, or _USE_CUDA."
+        #endif
+    }
+
+    void matrixNormalizeInPlace(matrix_t& a)
+    {
+        #ifdef _USE_EIGEN
+            a = (a.rowwise() - a.colwise().minCoeff()).array().rowwise() / (a.colwise().maxCoeff() - a.colwise().minCoeff()).array();
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI in-place matrix normalization here
+        #elif defined(_USE_CUDA)
+            // Implement CUDA in-place matrix normalization here
+        #elif defined(_USE_NATIVE_CPU)
+            // Implement native CPU in-place matrix normalization here
         #else
             #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, or _USE_CUDA."
         #endif

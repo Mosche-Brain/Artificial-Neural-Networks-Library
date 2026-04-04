@@ -1,7 +1,6 @@
 #pragma once 
 
-#include "build_config.hpp"
-#include <Eigen/Dense>
+#include "math_api.hpp"
 #include <stdexcept>
 #include <limits>
 namespace YANN::Utils::loss

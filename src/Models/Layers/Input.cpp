@@ -4,7 +4,8 @@ namespace YANN::Models::Layers
 {
     Input::Input(int layerSize)
     {
-        this->activation = Utils::Activation("linear");
+        // this->activation = Utils::Activation("linear");
+        this->activation = Utils::getActivationByName("linear");
 
         this->weights = matrix_t::Ones(layerSize, 1);
         this->biases  = vector_t::Zero(layerSize);

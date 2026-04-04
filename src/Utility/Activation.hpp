@@ -28,5 +28,17 @@ namespace YANN::Utils
         std::function<matrix_t(matrix_t)> matrixFunction;
         std::function<matrix_t(matrix_t)> matrixDerivative;
     };
+
+    struct activation_t
+    {
+        const char* name;
+        numeric_t (*function)(numeric_t);
+        numeric_t (*derivative)(numeric_t);
+
+        matrix_t (*matFunction)(matrix_t);
+        matrix_t (*matDerivative)(matrix_t);
+    };
+
+    activation_t getActivationByName(const char* name);
     
 }

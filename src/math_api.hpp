@@ -57,6 +57,10 @@ namespace YANN::math_api
         #error "No math API defined. Please define one of _USE_EIGEN_CPU, _USE_ONEAPI, or _USE_CUDA."
     #endif
 
+    void setUsedThreadCount(size_t threadCount);
+    size_t getUsedThreadCount();
+    size_t getDeviceThreadCount();
+
     /* matrix operations */
 
     matrix_t createMatrix(size_t rows, size_t cols);
@@ -64,7 +68,7 @@ namespace YANN::math_api
     matrix_t createMatrix(std::initializer_list<std::initializer_list<numeric_t>> values);
 
     matrix_t createRandomMatrix(size_t rows, size_t cols, numeric_t minValue = static_cast<numeric_t>(-1), numeric_t maxValue = static_cast<numeric_t>(1));
-\
+
     matrix_t matrixAdd(const matrix_t& a, const matrix_t& b);
     void matrixAddInPlace(matrix_t& a, const matrix_t& b);
 
@@ -94,6 +98,9 @@ namespace YANN::math_api
 
     matrix_t matrixTransform(const matrix_t& a, numeric_t (*func)(numeric_t));
     void matrixTransformInPlace(matrix_t& a, numeric_t (*func)(numeric_t));
+
+    matrix_t matrixNormalize(const matrix_t& a);
+    void matrixNormalizeInPlace(matrix_t& a);
 
     // add matrixColwise and matrixRowwise operations now <------- do it
     matrix_t matrixColwise(const matrix_t& a, numeric_t (*func)(const vector_t&));

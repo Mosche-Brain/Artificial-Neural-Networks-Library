@@ -3,12 +3,11 @@
 #include <algorithm>
 #include <random>
 
-#define ENABLE_DEBUG_OUTPUT
-
 #if defined(ENABLE_DEBUG_OUTPUT)
     #include <iostream>
 #endif
 
+#include "runtime_config.hpp"
 namespace YANN::Models
 {
     Sequential::Sequential()
@@ -49,7 +48,7 @@ namespace YANN::Models
     //     }
     // }
 
-    void Sequential::addLayer(std::unique_ptr<Layers::LayerBase> layer)
+    void Sequential::addLayer(LayerPtr layer)
     {
         topology.push_back(std::move(layer));
 
@@ -82,13 +81,29 @@ namespace YANN::Models
     void Sequential::backward(const matrix_t& d_output)
     {
         matrix_t curr_gradient = d_output;
-        std::cout << "\t\t\t" << "layer output gradient: " << curr_gradient << '\n';
+        #if defined(ENABLE_DEBUG_OUTPUT)
+        if(runtime_config::DEBUG_VEBOSITY >= 3)
+        {
+            std::cout << "\t\t\t" << "layer output gradient: " << math_api::matrixTranspose(curr_gradient) << '\n';
+        }
+        #endif
         for(size_t i = topology.size() - 1 ; i > 0 ; --i)
         {
             curr_gradient = topology[i]->backward(curr_gradient);
-            std::cout << "\t\t\t" << "layer " << i << " gradient: " << curr_gradient << '\n';
+            #if defined(ENABLE_DEBUG_OUTPUT)
+            if(runtime_config::DEBUG_VEBOSITY >= 3)
+            {
+
+                std::cout << "\t\t\t" << "layer " << i << " gradient: " << math_api::matrixTranspose(curr_gradient) << '\n';
+            }
+            #endif
         }        
-        std::cout << "\t\t\t" << "layer 0 gradient: " << curr_gradient << '\n';
+        #if defined(ENABLE_DEBUG_OUTPUT)
+        if(runtime_config::DEBUG_VEBOSITY >= 3)
+        {
+            std::cout << "\t\t\t" << "layer 0 gradient: " << math_api::matrixTranspose(curr_gradient) << '\n';
+        }
+        #endif
     }
 
     void Sequential::fit(const matrix_t& X, const matrix_t& Y, numeric_t rate, size_t epochs)
@@ -108,12 +123,17 @@ namespace YANN::Models
             matrix_t Y_shuffled = perm * Y;
             
             numeric_t totalLoss = 0;
+
+
+
             #if defined(ENABLE_DEBUG_OUTPUT)
+            if(runtime_config::DEBUG_VEBOSITY >= 1)
                 std::cout << "\t" << "Epoch " << epoch << "\n";
             #endif
             for(size_t i = 0 ; i < X.rows() ; i++)
             {
                 #if defined(ENABLE_DEBUG_OUTPUT)
+                if(runtime_config::DEBUG_VEBOSITY >= 2)
                     std::cout << "\t\t" << "Sample " << i << "\n";
                 #endif
 
@@ -121,32 +141,40 @@ namespace YANN::Models
                 vector_t y = math_api::matrixTranspose(math_api::matrixRow(Y, i)); // Todo: check what is shuffling
 
                 #if defined(ENABLE_DEBUG_OUTPUT)
+                if(runtime_config::DEBUG_VEBOSITY >= 2)
+                {
                     std::cout << "\t\t" << "input: "  << x << '\n';
                     std::cout << "\t\t" << "target: " << math_api::matrixTranspose(y) << '\n';
+                }
                 #endif
 
                 vector_t result = this->forward(x);
-                std::cout << "\t\t" << "resutl: " << math_api::matrixTranspose(result) << '\n';
-
                 #if defined(ENABLE_DEBUG_OUTPUT)
+                if(runtime_config::DEBUG_VEBOSITY >= 2)
+                {
+                    std::cout << "\t\t" << "resutl: " << math_api::matrixTranspose(result) << '\n';
+
                     std::cout << "\t\t" << "Computing loss and gradient...\n";
-                #endif
-                
+                }
+                #endif                
                 Utils::loss::LossType error = Utils::loss::computeLoss(result, y, this->loss_function);
-                
                 vector_t gradient = error.gradient;
                 
-                // std::cout << "gradient:\n" << gradient << '\n';
-                // std::cout << "loss: " << error.loss << '\n';
 
                 #if defined(ENABLE_DEBUG_OUTPUT)
+                if(runtime_config::DEBUG_VEBOSITY >= 2)
+                {
                     std::cout << "\t\t" << "Performing backpropagation...\n";
+                }
                 #endif
 
                 this->backward(gradient);
 
                 #if defined(ENABLE_DEBUG_OUTPUT)
+                if(runtime_config::DEBUG_VEBOSITY >= 2)
+                {
                     std::cout << "\t\t" << "Updating parameters...\n";
+                }
                 #endif              
 
                 this->updateParams(rate);
@@ -155,8 +183,14 @@ namespace YANN::Models
             // totalLoss /= X.rows();
             numeric_t avarageLoss = totalLoss / X.rows();
             
-            std::cout << "\t" << "Avarage epoch loss: " << avarageLoss << '\n';
-            std::cout << "\t" << "Total epoch loss: " << totalLoss << '\n';
+            #if defined(ENABLE_DEBUG_OUTPUT)
+            if(runtime_config::DEBUG_VEBOSITY >= 1)
+            {
+
+                std::cout << "\t" << "Avarage epoch loss: " << avarageLoss << '\n';
+                std::cout << "\t" << "Total epoch loss: " << totalLoss << '\n';
+            }
+            #endif
         }
     }
 

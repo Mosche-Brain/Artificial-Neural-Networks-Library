@@ -1,8 +1,7 @@
 #pragma once
 
-#include "build_config.hpp"
-#include <Eigen/Dense>
 #include <iostream>
+#include "math_api.hpp"
 
 namespace YANN::Utils::logs
 {
