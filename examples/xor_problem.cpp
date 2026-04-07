@@ -1,5 +1,4 @@
 #include <YANN/Models/Sequential.hpp>
-#include "../src/build_config.hpp"
 
 #include <iostream>
 

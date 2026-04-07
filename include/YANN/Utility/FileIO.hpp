@@ -2,8 +2,7 @@
 
 #include "math_api.hpp"
 
-// class YANN::Models::Sequential;
-#include "Models/Sequential.hpp"
+#include "Sequential.hpp"
 
 namespace YANN::Utils::FileIO
 {

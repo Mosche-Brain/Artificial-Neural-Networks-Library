@@ -819,6 +819,40 @@ namespace YANN::math_api
 
     /* vector operations */
 
+    vector_t createVector(size_t size, numeric_t initialValue)
+    {
+        #ifdef _USE_EIGEN
+            return vector_t::Constant(size, initialValue);
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI vector creation with initial value here
+            return vector_t(); // Placeholder
+        #elif defined(_USE_CUDA)
+            // Implement CUDA vector creation with initial value here
+            return vector_t(); // Placeholder
+        #elif defined(_USE_NATIVE_CPU)
+            return vector_t(size, initialValue);
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, _USE_CUDA, or _USE_NATIVE_CPU."
+        #endif
+    }
+
+    vector_t createVector(std::initializer_list<numeric_t> values)
+    {
+        #ifdef _USE_EIGEN
+            return Eigen::Map<const vector_t>(values.begin(), values.size());
+        #elif defined(_USE_ONEAPI)
+            // Implement oneAPI vector creation from initializer list here
+            return vector_t(); // Placeholder
+        #elif defined(_USE_CUDA)
+            // Implement CUDA vector creation from initializer list here
+            return vector_t(); // Placeholder
+        #elif defined(_USE_NATIVE_CPU)
+            return vector_t(values);
+        #else
+            #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, _USE_CUDA, or _USE_NATIVE_CPU."
+        #endif
+    }
+
     vector_t vectorAdd(const vector_t& a, const vector_t& b)
     {
         #ifdef _USE_EIGEN

@@ -6,6 +6,7 @@
 #endif
 
 #include "runtime_config.hpp"
+
 namespace YANN::Models::Layers
 {
     // Dense::Dense(int layerSize, int inputWidth, const char* func) : LayerBase()

@@ -35,7 +35,13 @@ include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>
     $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
     $<INSTALL_INTERFACE:include>
-    /usr/include/eigen3
+    ${CMAKE_SOURCE_DIR}/include/YANN/
+    ${CMAKE_SOURCE_DIR}/include/YANN/Models/
+    ${CMAKE_SOURCE_DIR}/include/YANN/Models/Layers
+    ${CMAKE_SOURCE_DIR}/include/YANN/Utility/
+    ${CMAKE_SOURCE_DIR}/include/**
+    ${CMAKE_SOURCE_DIR}/include/
+    /usr/include/eigen3/
 )
 
 # Collect source and header files
@@ -93,8 +99,8 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 # Install header files while preserving directory structure
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/src/
-    DESTINATION include/${PROJECT_NAME}
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
+    DESTINATION include/
     FILES_MATCHING
         PATTERN "*.hpp"
         PATTERN "*.h"

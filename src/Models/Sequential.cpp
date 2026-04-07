@@ -51,7 +51,12 @@ namespace YANN::Models
         }
     }
 
-    matrix_t Sequential::forward(matrix_t input)
+    void Sequential::clear()
+    {
+        topology.clear();
+    }
+
+    matrix_t Sequential::forward(const matrix_t& input)
     {
         topology[0]->forward(input);
 
@@ -112,7 +117,7 @@ namespace YANN::Models
             if(runtime_config::DEBUG_VEBOSITY >= 1)
                 std::cout << "\t" << "Epoch " << epoch << "\n";
             #endif
-            for(size_t i = 0 ; i < X.rows() ; i++)
+            for(int i = 0 ; i < X.rows() ; i++)
             {
                 #if defined(ENABLE_DEBUG_OUTPUT)
                 if(runtime_config::DEBUG_VEBOSITY >= 2)
@@ -178,32 +183,38 @@ namespace YANN::Models
         }
     }
 
-    matrix_t Sequential::getWeights(size_t layer)
+
+    matrix_t Sequential::getWeights(size_t layer) const
     {
         return topology[layer]->Weights();
     }
 
-    matrix_t Sequential::getBiases(size_t layer)
+    matrix_t Sequential::getBiases(size_t layer) const
     {
         return topology[layer]->Biases();
     }
 
-    Utils::activation_t Sequential::getActivation(size_t layer)
+    Utils::activation_t Sequential::getActivation(size_t layer) const
     {
         return topology[layer]->activation;
     }
 
-    LayerPtr Sequential::getLayer(size_t layer)
+    auto Sequential::getLayer(size_t layer) const -> LayerPtr
     {
-        return std::move(topology[layer]);
+        // return std::move(topology[layer]);
     }
 
-    Topology Sequential::getTopology()
+    auto Sequential::getTopology() const -> Topology
     {
-        return topology;
+        // Topology temp;
+        // for(size_t i = 0 ; i < topology.size() ; i++)
+        // {
+            // temp.push_back(std::move(topology[i]));
+        // }
+        // return temp;
     }
 
-    size_t Sequential::getLayersCount()
+    size_t Sequential::getLayersCount() const
     {
         return topology.size();
     }

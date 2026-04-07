@@ -7,8 +7,6 @@
 
 #include <nlohmann/json.hpp>
 
-#include "YANN/Models/Sequential.hpp"
-
 using json = nlohmann::json;
 
 namespace YANN::Utils
@@ -104,29 +102,30 @@ namespace YANN::Utils
             json j;
             j["layers"] = json::array();
 
-            for(const auto& layer : model.getTopology())
+            for(size_t i = 0 ; i < model.getLayersCount() ; i++)
             {
                 json layer_json;
-                // layer_json["type"] = layer->getType();
-                // layer_json["size"] = layer->getSize();
                 
-                // Convert Eigen matrices to vectors for JSON serialization
-                auto weights = layer->Weights();
+                matrix_t weights = model.getWeights(i);
+
                 std::vector<std::vector<numeric_t>> weights_vec(weights.rows());
+                
                 for(int i = 0; i < weights.rows(); ++i)
                     weights_vec[i] = std::vector<numeric_t>(weights.row(i).data(), weights.row(i).data() + weights.cols());
                 layer_json["weights"] = weights_vec;
                 
-                auto biases = layer->Biases();
+                matrix_t biases = model.getBiases(i);
                 std::vector<numeric_t> biases_vec(biases.data(), biases.data() + biases.size());
                 layer_json["biases"] = biases_vec;
                 
-                layer_json["activation"] = layer->activation.name;
+                layer_json["activation"] = model.getActivation(i).name;
                 j["layers"].push_back(layer_json);
             }
 
+            // convert to bson and write to file
+            std::vector<uint8_t> bson_data = json::to_bson(j);
+            file.write(reinterpret_cast<const char*>(bson_data.data()), bson_data.size());
 
-        
             file.close();
         }
         
@@ -134,13 +133,33 @@ namespace YANN::Utils
 
     void FileIO::loadSequentialModel(Models::Sequential& model, const char* filename)
     {
-        /*
+        model.clear();
         std::ifstream file(filename, std::ios::binary);
         if(file.is_open())
         {
-            model.deserialize(file);
+            std::vector<uint8_t> bson_data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+            json j = json::from_bson(bson_data);
+            for(const auto& layer_json : j["layers"])
+            {
+                matrix_t weights = math_api::createMatrix(layer_json["weights"].size(), layer_json["weights"][0].size());
+                for(int i = 0; i < weights.rows(); ++i)
+                    for(int j = 0; j < weights.cols(); ++j)
+                        weights(i, j) = layer_json["weights"][i][j].get<numeric_t>();
+
+                matrix_t biases = math_api::createMatrix(layer_json["biases"].size(), 1);
+                for(int i = 0; i < biases.rows(); ++i)
+                    biases(i, 0) = layer_json["biases"][i].get<numeric_t>();
+
+                Utils::activation_t activation;
+                activation.name = layer_json["activation"].get<std::string>().c_str();
+
+                // create layer and set parameters
+                auto layer = Models::Layers::Dense::createUnique(weights.rows(), activation.name);
+                layer->Weights() = weights;
+                layer->Biases() = biases;
+                model.addLayer(std::move(layer));
+            }
             file.close();
         }
-        */
     }
 }
