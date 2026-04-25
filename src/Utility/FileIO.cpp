@@ -48,7 +48,7 @@ namespace YANN::Utils
                 std::istringstream iss(line);
                 std::vector<numeric_t> row;
                 numeric_t value;
-                while(iss >> value)
+                while(iss >> (float)value)
                 {
                     row.push_back(value);
                 }
@@ -108,14 +108,30 @@ namespace YANN::Utils
                 
                 matrix_t weights = model.getWeights(i);
 
-                std::vector<std::vector<numeric_t>> weights_vec(weights.rows());
-                
+                #ifdef _USE_HALF_PRECISION OR _USE_BRAIN_PRECISION
+                    std::vector<std::vector<float>> weights_vec(math_api::matrixRows(weights));
+                #else
+                    std::vector<std::vector<numeric_t>> weights_vec(weights.rows());
+                #endif
+
                 for(int i = 0; i < weights.rows(); ++i)
-                    weights_vec[i] = std::vector<numeric_t>(weights.row(i).data(), weights.row(i).data() + weights.cols());
+                {
+                    #ifdef _USE_HALF_PRECISION OR _USE_BRAIN_PRECISION
+                        weights_vec[i] = std::vector<float>(weights.row(i).data(), weights.row(i).data() + weights.cols());
+                    #else
+                        weights_vec[i] = std::vector<numeric_t>(weights.row(i).data(), weights.row(i).data() + weights.cols());
+                    #endif
+                }
                 layer_json["weights"] = weights_vec;
                 
                 matrix_t biases = model.getBiases(i);
-                std::vector<numeric_t> biases_vec(biases.data(), biases.data() + biases.size());
+
+                #ifdef _USE_HALF_PRECISION OR _USE_BRAIN_PRECISION
+                    std::vector<float> biases_vec(biases.data(), biases.data() + biases.size());
+                #else
+                    std::vector<numeric_t> biases_vec(biases.data(), biases.data() + biases.size());
+                #endif
+
                 layer_json["biases"] = biases_vec;
                 
                 layer_json["activation"] = model.getActivation(i).name;
@@ -144,11 +160,23 @@ namespace YANN::Utils
                 matrix_t weights = math_api::createMatrix(layer_json["weights"].size(), layer_json["weights"][0].size());
                 for(int i = 0; i < weights.rows(); ++i)
                     for(int j = 0; j < weights.cols(); ++j)
-                        weights(i, j) = layer_json["weights"][i][j].get<numeric_t>();
+                        {
+                            #ifdef _USE_HALF_PRECISION OR _USE_BRAIN_PRECISION
+                                math_api::matrixSetAt(weights, i, j, (numeric_t)layer_json["weights"][i][j].get<float>());
+                            #else
+                                math_api::matrixSetAt(weights, i, j, layer_json["weights"][i][j].get<numeric_t>());
+                            #endif
+                        }
 
                 matrix_t biases = math_api::createMatrix(layer_json["biases"].size(), 1);
                 for(int i = 0; i < biases.rows(); ++i)
-                    biases(i, 0) = layer_json["biases"][i].get<numeric_t>();
+                {
+                    #ifdef _USE_HALF_PRECISION OR _USE_BRAIN_PRECISION
+                        math_api::matrixSetAt(biases, i, 0, (numeric_t)layer_json["biases"][i].get<float>());
+                    #else
+                        math_api::matrixSetAt(biases, i, 0, layer_json["biases"][i].get<numeric_t>());
+                    #endif
+                }
 
                 Utils::activation_t activation;
                 activation.name = layer_json["activation"].get<std::string>().c_str();

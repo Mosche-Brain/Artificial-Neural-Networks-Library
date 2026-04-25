@@ -3,19 +3,29 @@
 #include <YANN/Models/Sequential.hpp>
 #include <YANN/Utility/FileIO.hpp>
 
+#include <omp.h>
 // YANN::runtime_config::DEBUG_VERBOSITY = 3;
 
 int main()
 {
-    YANN::math_api::setUsedThreadCount(8);
-    size_t hidden_layer_size = 64;
+
+std::cout << "Max threads: " << omp_get_max_threads() << std::endl;
+#pragma omp parallel
+{
+    #pragma omp master
+    std::cout << "Running with " << omp_get_num_threads() << " threads" << std::endl;
+}
+
+
+    YANN::math_api::setUsedThreadCount(18);
+    size_t hidden_layer_size = 2048;
     YANN::Models::Sequential model({
         YANN::Models::Layers::Input::createUnique(3),
         YANN::Models::Layers::Dense::createUnique(hidden_layer_size, "leaky_relu"),
-        YANN::Models::Layers::Dense::createUnique(hidden_layer_size, "leaky_relu"),
-        YANN::Models::Layers::Dense::createUnique(hidden_layer_size, "leaky_relu"),
-        YANN::Models::Layers::Dense::createUnique(hidden_layer_size, "leaky_relu"),
-        YANN::Models::Layers::Dense::createUnique(hidden_layer_size, "leaky_relu"),
+        // YANN::Models::Layers::Dense::createUnique(hidden_layer_size, "leaky_relu"),
+        // YANN::Models::Layers::Dense::createUnique(hidden_layer_size, "leaky_relu"),
+        // YANN::Models::Layers::Dense::createUnique(hidden_layer_size, "leaky_relu"),
+        // YANN::Models::Layers::Dense::createUnique(hidden_layer_size, "leaky_relu"),
         YANN::Models::Layers::Dense::createUnique(1, "linear")
     });
 

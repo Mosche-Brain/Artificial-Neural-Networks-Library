@@ -12,9 +12,81 @@ option(BUILD_SHARED_LIBS "Build project as shared library" ON)
 # Option to build examples
 option(BUILD_EXAMPLES "Build example programs" ON)
 
-# Find required packages
-find_package(Eigen3 5.0 REQUIRED NO_MODULE)
-find_package(OpenMP)
+# Math backend options
+option(USE_EIGEN "Use Eigen library for math operations" ON)
+option(USE_OPENBLAS "Use OpenBLAS library for math operations" OFF)
+option(USE_NATIVE_CPU "Use native CPU implementation for math operations" OFF)
+
+# Precision options
+option(USE_DOUBLE_PRECISION "Use double precision (float 64-bit)" OFF)
+option(USE_SINGLE_PRECISION "Use single precision (float 32-bit)" ON)
+option(USE_HALF_PRECISION "Use half precision (float 16-bit)" OFF)
+option(USE_BRAIN_PRECISION "Use brain float precision (float 16-bit)" OFF)
+option(USE_QUARTER_PRECISION "Use quarter precision (int 8-bit)" OFF)
+
+# Check that only one math backend is selected
+if((USE_EIGEN AND USE_OPENBLAS) OR (USE_EIGEN AND USE_NATIVE_CPU) OR (USE_OPENBLAS AND USE_NATIVE_CPU))
+    message(FATAL_ERROR "Only one math backend can be selected: USE_EIGEN, USE_OPENBLAS, or USE_NATIVE_CPU")
+endif()
+
+if(NOT (USE_EIGEN OR USE_OPENBLAS OR USE_NATIVE_CPU))
+    message(FATAL_ERROR "At least one math backend must be selected: USE_EIGEN, USE_OPENBLAS, or USE_NATIVE_CPU")
+endif()
+
+# Check that only one precision is selected
+set(PRECISION_OPTIONS USE_DOUBLE_PRECISION USE_SINGLE_PRECISION USE_HALF_PRECISION USE_BRAIN_PRECISION USE_QUARTER_PRECISION)
+set(SELECTED_PRECISIONS 0)
+foreach(OPT IN LISTS PRECISION_OPTIONS)
+    if(${OPT})
+        math(EXPR SELECTED_PRECISIONS "${SELECTED_PRECISIONS} + 1")
+    endif()
+endforeach()
+
+if(SELECTED_PRECISIONS EQUAL 0)
+    message(FATAL_ERROR "At least one precision must be selected: USE_DOUBLE_PRECISION, USE_SINGLE_PRECISION, USE_HALF_PRECISION, USE_BRAIN_PRECISION, or USE_QUARTER_PRECISION")
+endif()
+
+if(SELECTED_PRECISIONS GREATER 1)
+    message(FATAL_ERROR "Only one precision can be selected: USE_DOUBLE_PRECISION, USE_SINGLE_PRECISION, USE_HALF_PRECISION, USE_BRAIN_PRECISION, or USE_QUARTER_PRECISION")
+endif()
+
+# Find required packages based on selected backend
+if(USE_EIGEN)
+    find_package(Eigen3 5.0 REQUIRED NO_MODULE)
+    add_definitions(-D_USE_EIGEN)
+endif()
+
+if(USE_OPENBLAS)
+    find_package(BLAS REQUIRED)
+    add_definitions(-D_USE_OPENBLAS)
+endif()
+
+if(USE_NATIVE_CPU)
+    add_definitions(-D_USE_NATIVE_CPU)
+endif()
+
+# Add precision definitions
+if(USE_DOUBLE_PRECISION)
+    add_definitions(-D_USE_DOUBLE_PRECISION)
+endif()
+
+if(USE_SINGLE_PRECISION)
+    add_definitions(-D_USE_SINGLE_PRECISION)
+endif()
+
+if(USE_HALF_PRECISION)
+    add_definitions(-D_USE_HALF_PRECISION)
+endif()
+
+if(USE_BRAIN_PRECISION)
+    add_definitions(-D_USE_BRAIN_PRECISION)
+endif()
+
+if(USE_QUARTER_PRECISION)
+    add_definitions(-D_USE_QUARTER_PRECISION)
+endif()
+
+find_package(OpenMP REQUIRED)
 # find_package(sciplot)
 find_package(nlohmann_json 3.12.0 REQUIRED)
 
@@ -73,14 +145,15 @@ target_compile_options(${PROJECT_NAME} PRIVATE
     -Wall
     -O3
     -ffast-math
-    # -D_USE_HALF_PRECISION
+    -mavxvnni
     -DENABLE_DEBUG_OUTPUT
 )
 
 # Link libraries
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
-        Eigen3::Eigen
+        $<$<BOOL:${USE_EIGEN}>:Eigen3::Eigen>
+        $<$<BOOL:${USE_OPENBLAS}>:BLAS::BLAS>
         OpenMP::OpenMP_CXX
     PRIVATE
         nlohmann_json::nlohmann_json

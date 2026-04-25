@@ -24,7 +24,7 @@ namespace YANN::Models
     //     return predict(newInput);
     // }
 
-    void Perceptron::fit(const matrix_t& input, const vector_t& target, float rate, int epochs)
+    void Perceptron::fit(const matrix_t& input, const vector_t& target, numeric_t rate, int epochs)
     {
         for(int epoch = 0 ; epoch < epochs ; epoch++)
         {
@@ -32,7 +32,8 @@ namespace YANN::Models
             {
                 numeric_t y = predict(input.row(row).transpose());
 
-                numeric_t error = (target[row] - y) * rate;
+                // numeric_t error = (target[row] - y) * rate;
+                numeric_t error = static_cast<numeric_t>(math_api::vectorAt(target, row) - y) * rate;
 
                 weights += error * input.row(row).transpose();
                 bias += error;
@@ -51,6 +52,6 @@ namespace YANN::Models
     void Perceptron::init()
     {
         this->weights = vector_t::Random(_inputWidth_) * static_cast<numeric_t>(0.1f);
-        this->bias = 0;
+        this->bias = static_cast<numeric_t>(0.0f);
     }
 }

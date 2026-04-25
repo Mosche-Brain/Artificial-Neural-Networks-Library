@@ -11,11 +11,14 @@
     #include <oneapi/dnnl.hpp>
 #elif defined(_USE_CUDA)
     #include <cuda_runtime.h>
+#elif defined(_USE_OPENBLAS)
+    #include <openblas/cblas.h>
 #elif defined(_USE_NATIVE_CPU)
     #include <vector>
 #else
     #error "No math API defined. Please define one of _USE_EIGEN, _USE_ONEAPI, _USE_CUDA, or _USE_NATIVE_CPU."
 #endif
+
 namespace YANN::math_api
 {
     /* numeric type definition */
@@ -24,9 +27,17 @@ namespace YANN::math_api
     #elif defined(_USE_SINGLE_PRECISION)
         typedef float numeric_t;
     #elif defined(_USE_HALF_PRECISION)
-        typedef std::float16_t numeric_t;
+        #ifdef _USE_EIGEN
+            typedef Eigen::half numeric_t;
+        #else
+            typedef std::float16_t numeric_t;
+        #endif
     #elif defined(_USE_BRAIN_PRECISION)
-        typedef std::bfloat16_t numeric_t;
+        #ifdef _USE_EIGEN
+            typedef Eigen::bfloat16 numeric_t;
+        #else
+            typedef std::bfloat16_t numeric_t;
+        #endif
     #elif defined(_USE_QUARTER_PRECISION)
         typedef int8_t numeric_t;
     #else
@@ -42,19 +53,47 @@ namespace YANN::math_api
         template<size_t n>
         using tensor_t = Eigen::Tensor<numeric_t, n>;
 
-        using matrix_t = Eigen::Matrix<numeric_t, Eigen::Dynamic, Eigen::Dynamic>;
-        using vector_t = Eigen::Matrix<numeric_t, Eigen::Dynamic, 1>;
-        using scalar_t = numeric_t;
+        #ifdef _USE_HALF_PRECISION OR _USE_BRAIN_PRECISION
+            using matrix_t = Eigen::Matrix<numeric_t, Eigen::Dynamic, Eigen::Dynamic>;
+            using vector_t = Eigen::Matrix<numeric_t, Eigen::Dynamic, 1>;
+            using scalar_t = numeric_t;
+        #else
+            using matrix_t = Eigen::Matrix<numeric_t, Eigen::Dynamic, Eigen::Dynamic>;
+            using vector_t = Eigen::Matrix<numeric_t, Eigen::Dynamic, 1>;
+            using scalar_t = numeric_t;
+        #endif
     #elif defined(_USE_ONEAPI)
-        #error "OneAPI backend not implemented yet. Plese define _USE_EIGEN_CPU instead."
+        #error "OneAPI backend not implemented yet. Plese define _USE_EIGEN instead."
     #elif defined(_USE_CUDA)
-        #error "CUDA backend not implemented yet. Plese define _USE_EIGEN_CPU instead."
+        #error "CUDA backend not implemented yet. Plese define _USE_EIGEN instead."
+    #elif defined(_USE_OPENBLAS)
+        typedef struct
+        {
+            numeric_t* data;
+            size_t dimensions;
+            size_t* shape;
+        } tensor_t;
+
+        typedef struct
+        {
+            numeric_t* data;
+            size_t rows;
+            size_t cols;
+        } matrix_t;
+
+        typedef struct
+        {
+            numeric_t* data;
+            size_t size;
+        } vector_t;
+
+        using scalar_t = numeric_t;
     #elif defined(_USE_NATIVE_CPU)
         using matrix_t = std::vector<std::vector<numeric_t>>;
         using vector_t = std::vector<numeric_t>;
         using scalar_t = numeric_t;
     #else
-        #error "No math API defined. Please define one of _USE_EIGEN_CPU, _USE_ONEAPI, or _USE_CUDA."
+        #error "No math API defined. Please define one of _USE_EIGEN, _USE_OPENBLAS, _USE_ONEAPI, or _USE_CUDA."
     #endif
 
     void setUsedThreadCount(size_t threadCount);
@@ -136,6 +175,10 @@ namespace YANN::math_api
     matrix_t  matrixCol(const matrix_t& a, size_t col);
     numeric_t matrixAt(const matrix_t& a, size_t row, size_t col);
     
+    void matrixSetRow(matrix_t& a, size_t row, const vector_t& values);
+    void matrixSetCol(matrix_t& a, size_t col, const vector_t& values);
+    void matrixSetAt(matrix_t& a, size_t row, size_t col, numeric_t value);
+
     /* vector operations */
 
     vector_t createVector(size_t size);
