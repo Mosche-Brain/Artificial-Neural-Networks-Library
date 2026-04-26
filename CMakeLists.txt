@@ -6,11 +6,10 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 
-# Option to build shared or static library
+# Build options
 option(BUILD_SHARED_LIBS "Build project as shared library" ON)
-
-# Option to build examples
 option(BUILD_EXAMPLES "Build example programs" ON)
+option(BUILD_PYTHON_BINDINGS "Build Python bindings if pybind11 is available" ON)
 
 # Math backend options
 option(USE_EIGEN "Use Eigen library for math operations" ON)
@@ -50,189 +49,54 @@ if(SELECTED_PRECISIONS GREATER 1)
     message(FATAL_ERROR "Only one precision can be selected: USE_DOUBLE_PRECISION, USE_SINGLE_PRECISION, USE_HALF_PRECISION, USE_BRAIN_PRECISION, or USE_QUARTER_PRECISION")
 endif()
 
-# Find required packages based on selected backend
+set(YANN_BACKEND_LIBS "")
+set(YANN_COMPILE_DEFINITIONS "")
+
 if(USE_EIGEN)
     find_package(Eigen3 5.0 REQUIRED NO_MODULE)
-    add_definitions(-D_USE_EIGEN)
+    list(APPEND YANN_BACKEND_LIBS Eigen3::Eigen)
+    list(APPEND YANN_COMPILE_DEFINITIONS _USE_EIGEN)
 endif()
 
 if(USE_OPENBLAS)
     find_package(BLAS REQUIRED)
-    add_definitions(-D_USE_OPENBLAS)
+    list(APPEND YANN_BACKEND_LIBS BLAS::BLAS)
+    list(APPEND YANN_COMPILE_DEFINITIONS _USE_OPENBLAS)
 endif()
 
 if(USE_NATIVE_CPU)
-    add_definitions(-D_USE_NATIVE_CPU)
+    list(APPEND YANN_COMPILE_DEFINITIONS _USE_NATIVE_CPU)
 endif()
 
-# Add precision definitions
 if(USE_DOUBLE_PRECISION)
-    add_definitions(-D_USE_DOUBLE_PRECISION)
+    list(APPEND YANN_COMPILE_DEFINITIONS _USE_DOUBLE_PRECISION)
 endif()
 
 if(USE_SINGLE_PRECISION)
-    add_definitions(-D_USE_SINGLE_PRECISION)
+    list(APPEND YANN_COMPILE_DEFINITIONS _USE_SINGLE_PRECISION)
 endif()
 
 if(USE_HALF_PRECISION)
-    add_definitions(-D_USE_HALF_PRECISION)
+    list(APPEND YANN_COMPILE_DEFINITIONS _USE_HALF_PRECISION)
 endif()
 
 if(USE_BRAIN_PRECISION)
-    add_definitions(-D_USE_BRAIN_PRECISION)
+    list(APPEND YANN_COMPILE_DEFINITIONS _USE_BRAIN_PRECISION)
 endif()
 
 if(USE_QUARTER_PRECISION)
-    add_definitions(-D_USE_QUARTER_PRECISION)
+    list(APPEND YANN_COMPILE_DEFINITIONS _USE_QUARTER_PRECISION)
 endif()
 
 find_package(OpenMP REQUIRED)
-# find_package(sciplot)
 find_package(nlohmann_json 3.12.0 REQUIRED)
 
-# find_package(Matplot++ REQUIRED)
+add_subdirectory(src)
 
-# if (OPENMP_FOUND)
-#     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-#     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-#     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-# endif()
-   
-# find_package(nlohmann_json 3.2.0 REQUIRED)
-# find_package(Matplot++ REQUIRED)
-
-# Include directories (prefer target-based includes over global include_directories)
-# target_include_directories(${PROJECT_NAME} PUBLIC
-include_directories(${PROJECT_NAME} PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>
-    $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-    ${CMAKE_SOURCE_DIR}/include/YANN/
-    ${CMAKE_SOURCE_DIR}/include/YANN/Models/
-    ${CMAKE_SOURCE_DIR}/include/YANN/Models/Layers
-    ${CMAKE_SOURCE_DIR}/include/YANN/Utility/
-    ${CMAKE_SOURCE_DIR}/include/**
-    ${CMAKE_SOURCE_DIR}/include/
-    /usr/include/eigen3/
-)
-
-# Collect source and header files
-file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS "src/*.cpp")
-file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS "src/*.hpp" "src/*.h")
-
-# Copy header files to build/include while preserving directory structure
-foreach(HEADER ${HEADER_FILES})
-    file(RELATIVE_PATH REL_PATH "${CMAKE_SOURCE_DIR}/src" "${HEADER}")
-    get_filename_component(REL_DIR "${REL_PATH}" DIRECTORY)
-    file(COPY "${HEADER}" DESTINATION "${CMAKE_BINARY_DIR}/include/${PROJECT_NAME}/${REL_DIR}")
-endforeach()
-
-# Define the library target
-add_library(${PROJECT_NAME} ${PROJECT_SOURCES})
-
-# Set target properties
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    CXX_STANDARD 23
-    CXX_STANDARD_REQUIRED ON
-    CXX_EXTENSIONS OFF
-    PUBLIC_HEADER "${HEADER_FILES}"
-)
-
-# Compiler options
-target_compile_options(${PROJECT_NAME} PRIVATE
-    -fopenmp
-    -march=native
-    -Wall
-    -O3
-    -ffast-math
-    -mavxvnni
-    -DENABLE_DEBUG_OUTPUT
-)
-
-# Link libraries
-target_link_libraries(${PROJECT_NAME}
-    PUBLIC
-        $<$<BOOL:${USE_EIGEN}>:Eigen3::Eigen>
-        $<$<BOOL:${USE_OPENBLAS}>:BLAS::BLAS>
-        OpenMP::OpenMP_CXX
-    PRIVATE
-        nlohmann_json::nlohmann_json
-        ${CMAKE_DL_LIBS}
-)
-# nlohmann_json::nlohmann_json
-# Matplot++::matplot
-
-# Install rules for the library
-install(TARGETS ${PROJECT_NAME}
-    EXPORT ${PROJECT_NAME}Targets
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    RUNTIME DESTINATION bin
-    INCLUDES DESTINATION include
-)
-
-# Install header files while preserving directory structure
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
-    DESTINATION include/
-    FILES_MATCHING
-        PATTERN "*.hpp"
-        PATTERN "*.h"
-)
-
-# Export targets for find_package support
-install(EXPORT ${PROJECT_NAME}Targets
-    FILE ${PROJECT_NAME}Targets.cmake
-    NAMESPACE ${PROJECT_NAME}::
-    DESTINATION lib/cmake/${PROJECT_NAME}
-)
-
-# === EXAMPLES ===
 if(BUILD_EXAMPLES)
-    # Find all .cpp files in the example directory
-    file(GLOB EXAMPLE_SOURCES CONFIGURE_DEPENDS "examples/*.cpp")
+    add_subdirectory(examples)
+endif()
 
-    foreach(EXAMPLE_SOURCE ${EXAMPLE_SOURCES})
-        # Get filename without extension
-        get_filename_component(EXAMPLE_NAME ${EXAMPLE_SOURCE} NAME_WE)
-
-        # Create executable
-        add_executable(${EXAMPLE_NAME} ${EXAMPLE_SOURCE})
-
-        # Set C++ standard for example
-        set_target_properties(${EXAMPLE_NAME} PROPERTIES
-            CXX_STANDARD 23
-            CXX_STANDARD_REQUIRED ON
-            CXX_EXTENSIONS OFF
-        )
-
-
-        # Include directories (same as library)
-        target_include_directories(${EXAMPLE_NAME} PRIVATE
-            ${CMAKE_SOURCE_DIR}/src
-            ${CMAKE_BINARY_DIR}/include
-            ${CMAKE_BINARY_DIR}/.datasets
-            ${CMAKE_BINARY_DIR}/.external
-            /usr/include/eigen3
-        )
-
-        # Link with YANN library
-        target_link_libraries(${EXAMPLE_NAME} PRIVATE ${PROJECT_NAME}    
-                                                    OpenMP::OpenMP_CXX)
-                                                    # sciplot::sciplot
-                                                    # Matplot++::matplot)
-
-        # Compiler options (same as library)
-        target_compile_options(${EXAMPLE_NAME} PRIVATE
-            -fopenmp
-            -march=native
-            -Wall
-            -O3
-            -ffast-math
-        )
-
-        # Optional: install example binaries
-        install(TARGETS ${EXAMPLE_NAME}
-            RUNTIME DESTINATION build/examples
-        )
-    endforeach()
+if(BUILD_PYTHON_BINDINGS)
+    add_subdirectory(bindings/python)
 endif()
