@@ -17,6 +17,6 @@ namespace cum
     using cumeric_t = float;
     #else
     // using cumeric_t = _Float16;
-    using cumeric_t = std::float_t;
+    using cumeric_t = float;
     #endif
 } // namespace cum

@@ -10,7 +10,7 @@ add_library(${PROJECT_NAME}::Core ALIAS ${PROJECT_NAME}_Core)
 if(BUILD_USE_MKL)
     target_compile_definitions(${PROJECT_NAME}_Core PRIVATE fsycl)
     target_include_directories(${PROJECT_NAME}_Core
-        PRIVATE /opt/intel/oneapi/compiler/latest/include/
+        PRIVATE /opt/intel/oneapi/compiler/latest/include/ /opt/intel/oneapi/tbb/latest/include/ /opt/intel/oneapi/compiler/latest/include/
     )
     add_subdirectory(Backends/MKL)
 elseif(BUILD_USE_CBLAS)

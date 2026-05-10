@@ -36,29 +36,28 @@ target_link_libraries(${PROJECT_NAME}
     PUBLIC
         ${YANN_BACKEND_LIBS}
         OpenMP::OpenMP_CXX
-        YANNMathAPI
     PRIVATE
         nlohmann_json::nlohmann_json
         ${CMAKE_DL_LIBS}
 )
 
-install(TARGETS ${PROJECT_NAME}
-    EXPORT ${PROJECT_NAME}Targets
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    RUNTIME DESTINATION bin
-    INCLUDES DESTINATION include
-)
+# install(TARGETS ${PROJECT_NAME}
+#     EXPORT ${PROJECT_NAME}Targets
+#     LIBRARY DESTINATION lib
+#     ARCHIVE DESTINATION lib
+#     RUNTIME DESTINATION bin
+#     INCLUDES DESTINATION include
+# )
 
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
-    DESTINATION include/
-    FILES_MATCHING
-        PATTERN "*.hpp"
-        PATTERN "*.h"
-)
+# install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
+#     DESTINATION include/
+#     FILES_MATCHING
+#         PATTERN "*.hpp"
+#         PATTERN "*.h"
+# )
 
-install(EXPORT ${PROJECT_NAME}Targets
-    FILE ${PROJECT_NAME}Targets.cmake
-    NAMESPACE ${PROJECT_NAME}::
-    DESTINATION lib/cmake/${PROJECT_NAME}
-)
+# install(EXPORT ${PROJECT_NAME}Targets
+#     FILE ${PROJECT_NAME}Targets.cmake
+#     NAMESPACE ${PROJECT_NAME}::
+#     DESTINATION lib/cmake/${PROJECT_NAME}
+# )

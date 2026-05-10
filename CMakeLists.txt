@@ -8,38 +8,28 @@ set(CMAKE_CXX_EXTENSIONS ON)
 
 # Build options
 option(BUILD_SHARED_LIBS "Build project as shared library" ON)
-option(BUILD_EXAMPLES "Build example programs" ON)
-option(BUILD_PYTHON_BINDINGS "Build Python bindings if pybind11 is available" ON)
+option(BUILD_EXAMPLES "Build example programs" OFF)
+option(BUILD_PYTHON_BINDINGS "Build Python bindings if pybind11 is available" OFF)
 
 # Math backend options
-option(USE_EIGEN "Use Eigen library for math operations" ON)
-option(USE_OPENBLAS "Use OpenBLAS library for math operations" OFF)
-option(USE_MKL "Use Intel MKL library for math operations" OFF)
-option(USE_NATIVE "Use native CPU implementation for math operations" OFF)
+option(BUILD_USE_EIGEN "Use Eigen library for math operations" OFF)
+option(BUILD_USE_OPENBLAS "Use OpenBLAS library for math operations" OFF)
+option(BUILD_USE_MKL "Use Intel oneMKL library for math operations" ON)
+option(BUILD_USE_NATIVE "Use native C++ implementation for math operations" OFF)
 
 # Precision options
-option(USE_F64 "Use double precision (float 64-bit)" OFF)
-option(USE_F32 "Use single precision (float 32-bit)" ON)
-option(USE_F16 "Use half precision (float 16-bit)" OFF)
-option(USE_BF16 "Use brain float precision (float 16-bit)" OFF)
-option(USE_Q8 "Use quarter precision (int 8-bit)" OFF)
-# option(USE_DOUBLE_PRECISION "Use double precision (float 64-bit)" OFF)
-# option(USE_SINGLE_PRECISION "Use single precision (float 32-bit)" ON)
-# option(USE_HALF_PRECISION "Use half precision (float 16-bit)" OFF)
-# option(USE_BRAIN_PRECISION "Use brain float precision (float 16-bit)" OFF)
-# option(USE_QUARTER_PRECISION "Use quarter precision (int 8-bit)" OFF)
+option(CUM_USE_F64 "Use double precision (float 64-bit)" OFF)
+option(CUM_USE_F32 "Use single precision (float 32-bit)" ON)
+option(CUM_USE_F16 "Use half precision (float 16-bit)" OFF)
+option(CUM_USE_BF16 "Use brain float precision (float 16-bit)" OFF)
+option(CUM_USE_Q8 "Use quarter precision (int 8-bit)" OFF)
 
-# Check that only one math backend is selected
-if((USE_EIGEN AND USE_OPENBLAS) OR (USE_EIGEN AND USE_NATIVE) OR (USE_OPENBLAS AND USE_NATIVE) OR (USE_MKL AND USE_NATIVE))
-    message(FATAL_ERROR "Only one math backend can be selected: USE_EIGEN, USE_OPENBLAS, USE_MKL, or USE_NATIVE")
-endif()
-
-if(NOT (USE_EIGEN OR USE_OPENBLAS OR USE_NATIVE))
+if(NOT (BUILD_USE_EIGEN OR BUILD_USE_OPENBLAS OR BUILD_USE_NATIVE OR BUILD_USE_MKL))
     message(FATAL_ERROR "At least one math backend must be selected: USE_EIGEN, USE_OPENBLAS, or USE_NATIVE")
 endif()
 
 # Check that only one precision is selected
-set(PRECISION_OPTIONS USE_DOUBLE_PRECISION USE_SINGLE_PRECISION USE_HALF_PRECISION USE_BRAIN_PRECISION USE_QUARTER_PRECISION)
+set(PRECISION_OPTIONS CUM_USE_F64 CUM_USE_F32 CUM_USE_F16 CUM_USE_BF16 CUM_USE_Q8)
 set(SELECTED_PRECISIONS 0)
 foreach(OPT IN LISTS PRECISION_OPTIONS)
     if(${OPT})
@@ -70,34 +60,43 @@ if(USE_OPENBLAS)
     list(APPEND YANN_COMPILE_DEFINITIONS _USE_OPENBLAS)
 endif()
 
-if(USE_NATIVE_CPU)
-    list(APPEND YANN_COMPILE_DEFINITIONS _USE_NATIVE_CPU)
+if(BUILD_USE_MKL)
+    # set(CMAKE_CXX_COMPILER /opt/intel/oneapi/compiler/latest/bin/icpx)
+    # set(CMAKE_C_COMPILER /opt/intel/oneapi/compiler/latest/bin/icx)
+    list(APPEND YANN_COMPILE_DEFINITIONS BUILD_USE_MKL)
+    list(APPEND YANN_COMPILE_DEFINITIONS fsycl)
+    list(APPEND YANN_BACKEND_LIBS cum::Core)
+    list(APPEND YANN_BACKEND_LIBS cum::MKL)
 endif()
 
-if(USE_DOUBLE_PRECISION)
-    list(APPEND YANN_COMPILE_DEFINITIONS _USE_DOUBLE_PRECISION)
+if(USE_NATIVE)
+    list(APPEND YANN_COMPILE_DEFINITIONS CUM_USE_NATIVE)
 endif()
 
-if(USE_SINGLE_PRECISION)
-    list(APPEND YANN_COMPILE_DEFINITIONS _USE_SINGLE_PRECISION)
+if(CUM_USE_F64)
+    list(APPEND YANN_COMPILE_DEFINITIONS CUM_USE_F64)
 endif()
 
-if(USE_HALF_PRECISION)
-    list(APPEND YANN_COMPILE_DEFINITIONS _USE_HALF_PRECISION)
+if(CUM_USE_F32)
+    list(APPEND YANN_COMPILE_DEFINITIONS CUM_CUM_USE_F32)
 endif()
 
-if(USE_BRAIN_PRECISION)
-    list(APPEND YANN_COMPILE_DEFINITIONS _USE_BRAIN_PRECISION)
+if(CUM_USE_F16)
+    list(APPEND YANN_COMPILE_DEFINITIONS CUM_CUM_USE_F16)
 endif()
 
-if(USE_QUARTER_PRECISION)
-    list(APPEND YANN_COMPILE_DEFINITIONS _USE_QUARTER_PRECISION)
+if(CUM_USE_BF16)
+    list(APPEND YANN_COMPILE_DEFINITIONS CUM_CUM_USE_BF16)
+endif()
+
+if(CUM_USE_Q8)
+    list(APPEND YANN_COMPILE_DEFINITIONS CUM_CUM_USE_Q8)
 endif()
 
 find_package(OpenMP REQUIRED)
 find_package(nlohmann_json 3.12.0 REQUIRED)
 
-add_subdirectory(Cumerics)
+add_subdirectory(modules/cum)
 add_subdirectory(src)
 
 if(BUILD_EXAMPLES)

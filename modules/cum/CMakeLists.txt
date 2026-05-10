@@ -24,17 +24,3 @@ target_compile_definitions(example PRIVATE fsycl)
 target_include_directories(example PRIVATE
     /opt/intel/oneapi/compiler/latest/include/    
 )
-# file(GLOB_RECURSE SOURCES ${CMAKE_SOURCE_DIR}/source/*.cpp ${CMAKE_SOURCE_DIR}/source/*.c)
-# file(GLOB_RECURSE SOURCES ${CMAKE_SOURCE_DIR}/source/*.cpp ${CMAKE_SOURCE_DIR}/source/*.c)
-
-# set(SOURCES)
-
-# if(BUILD_USE_MKL)
-#     add_subdirectory(${CMAKE_SOURCE_DIR}/source/Backends/MKL)
-# elseif(BUILD_USE_CBLAS)
-
-# else()
-
-# endif()
-
-# add_library(${PROJECT_NAME} ${SOURCES})
