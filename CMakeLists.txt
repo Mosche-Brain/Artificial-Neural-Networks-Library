@@ -14,22 +14,28 @@ option(BUILD_PYTHON_BINDINGS "Build Python bindings if pybind11 is available" ON
 # Math backend options
 option(USE_EIGEN "Use Eigen library for math operations" ON)
 option(USE_OPENBLAS "Use OpenBLAS library for math operations" OFF)
-option(USE_NATIVE_CPU "Use native CPU implementation for math operations" OFF)
+option(USE_MKL "Use Intel MKL library for math operations" OFF)
+option(USE_NATIVE "Use native CPU implementation for math operations" OFF)
 
 # Precision options
-option(USE_DOUBLE_PRECISION "Use double precision (float 64-bit)" OFF)
-option(USE_SINGLE_PRECISION "Use single precision (float 32-bit)" ON)
-option(USE_HALF_PRECISION "Use half precision (float 16-bit)" OFF)
-option(USE_BRAIN_PRECISION "Use brain float precision (float 16-bit)" OFF)
-option(USE_QUARTER_PRECISION "Use quarter precision (int 8-bit)" OFF)
+option(USE_F64 "Use double precision (float 64-bit)" OFF)
+option(USE_F32 "Use single precision (float 32-bit)" ON)
+option(USE_F16 "Use half precision (float 16-bit)" OFF)
+option(USE_BF16 "Use brain float precision (float 16-bit)" OFF)
+option(USE_Q8 "Use quarter precision (int 8-bit)" OFF)
+# option(USE_DOUBLE_PRECISION "Use double precision (float 64-bit)" OFF)
+# option(USE_SINGLE_PRECISION "Use single precision (float 32-bit)" ON)
+# option(USE_HALF_PRECISION "Use half precision (float 16-bit)" OFF)
+# option(USE_BRAIN_PRECISION "Use brain float precision (float 16-bit)" OFF)
+# option(USE_QUARTER_PRECISION "Use quarter precision (int 8-bit)" OFF)
 
 # Check that only one math backend is selected
-if((USE_EIGEN AND USE_OPENBLAS) OR (USE_EIGEN AND USE_NATIVE_CPU) OR (USE_OPENBLAS AND USE_NATIVE_CPU))
-    message(FATAL_ERROR "Only one math backend can be selected: USE_EIGEN, USE_OPENBLAS, or USE_NATIVE_CPU")
+if((USE_EIGEN AND USE_OPENBLAS) OR (USE_EIGEN AND USE_NATIVE) OR (USE_OPENBLAS AND USE_NATIVE) OR (USE_MKL AND USE_NATIVE))
+    message(FATAL_ERROR "Only one math backend can be selected: USE_EIGEN, USE_OPENBLAS, USE_MKL, or USE_NATIVE")
 endif()
 
-if(NOT (USE_EIGEN OR USE_OPENBLAS OR USE_NATIVE_CPU))
-    message(FATAL_ERROR "At least one math backend must be selected: USE_EIGEN, USE_OPENBLAS, or USE_NATIVE_CPU")
+if(NOT (USE_EIGEN OR USE_OPENBLAS OR USE_NATIVE))
+    message(FATAL_ERROR "At least one math backend must be selected: USE_EIGEN, USE_OPENBLAS, or USE_NATIVE")
 endif()
 
 # Check that only one precision is selected
@@ -91,6 +97,7 @@ endif()
 find_package(OpenMP REQUIRED)
 find_package(nlohmann_json 3.12.0 REQUIRED)
 
+add_subdirectory(Cumerics)
 add_subdirectory(src)
 
 if(BUILD_EXAMPLES)

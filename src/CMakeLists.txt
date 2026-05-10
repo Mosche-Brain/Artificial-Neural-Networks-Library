@@ -36,6 +36,7 @@ target_link_libraries(${PROJECT_NAME}
     PUBLIC
         ${YANN_BACKEND_LIBS}
         OpenMP::OpenMP_CXX
+        YANNMathAPI
     PRIVATE
         nlohmann_json::nlohmann_json
         ${CMAKE_DL_LIBS}
