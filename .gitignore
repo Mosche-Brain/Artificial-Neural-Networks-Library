@@ -2,4 +2,5 @@
 /.archive/
 /.datasets/
 /.external/
-/build
+/modules/cum/build/
+/build/

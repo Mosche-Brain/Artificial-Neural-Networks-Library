@@ -1,17 +1,61 @@
 #include "cum/Matrix.hpp"
+#include "cum/LinearAlgbebra.hpp"
 
 #include "cumMKL.hpp"
 
 namespace cum
 {
-    Matrix::Matrix(size_t rows, size_t cols, cumeric_t value)    
+    Matrix::Matrix(size_t rows, size_t cols, cumeric_t value) : rows_(rows), cols_(cols)
+    {
+        data = sycl::malloc_shared<cumeric_t>(rows * cols, library::getQueue());
+        for(size_t i = 0 ; i < rows * cols ; i++)
+            data[i] = value;
+    }
+
+    Matrix::~Matrix()
+    {
+        sycl::free(data, library::getQueue());
+    }
+
+    cumeric_t& Matrix::at(size_t row, size_t col)
+    {
+        return data[index(row, col)];
+    }
+
+    std::size_t Matrix::index(size_t row, size_t col)
+    {
+        return row * cols_ + col;
+    }
+
+    Matrix& Matrix::operator += (const Matrix& other)
+    {
+        LinearAlgebra::matAddInPlace(this->data, other.data, this->rows_, this->cols_);
+    }
+
+    Matrix& Matrix::operator -= (const Matrix& other)
+    {
+        LinearAlgebra::matSubInPlace(this->data, other.data, this->rows_, this->cols_);
+    }
+
+    Matrix& Matrix::operator *= (const Matrix& other)
     {
 
     }
 
-    cumeric_t Matrix::at(size_t row, size_t col)
+    Matrix operator + (const Matrix& A, const Matrix& B)
     {
-        return 0; //placeholder
+        Matrix mat(A.rows_, A.cols_);
+        LinearAlgebra::matAdd(mat.data, A.data, B.data, A.rows_, A.cols_);
+        return mat;
     }
 
+    Matrix operator * (const Matrix& A, const Matrix& B)
+    {
+        Matrix mat(A.rows_, B.cols_);
+
+        LinearAlgebra::matMul(mat.data, A.data, B.data, A.rows_, B.cols_, A.cols_);
+
+        return mat; 
+    }
 } // namespace cum
+
