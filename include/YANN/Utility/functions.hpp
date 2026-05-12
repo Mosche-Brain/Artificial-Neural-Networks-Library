@@ -1,30 +1,27 @@
 #pragma once
 
-#include <cmath>
-#include <limits>
-
-#include "math_api.hpp"
+#include "cum/cum.hpp"
 
 namespace YANN::Utils
 {
-    numeric_t linear(math_api::numeric_t x);
-    numeric_t linear_derivative (math_api::numeric_t x);
+    cum::cumeric_t linear(cum::cumeric_t x);
+    cum::cumeric_t linear_derivative(cum::cumeric_t x);
 
-    numeric_t tanh(numeric_t x);
-    numeric_t tanh_derivative(numeric_t x);
+    cum::cumeric_t tanh(cum::cumeric_t x);
+    cum::cumeric_t tanh_derivative(cum::cumeric_t x);
 
-    numeric_t sigmoid(numeric_t x);
-    numeric_t sigmoid_derivative(numeric_t x);
+    cum::cumeric_t sigmoid(cum::cumeric_t x);
+    cum::cumeric_t sigmoid_derivative(cum::cumeric_t x);
 
-    numeric_t ReLU(numeric_t x);
-    numeric_t ReLU_derivative(numeric_t x);
+    cum::cumeric_t ReLU(cum::cumeric_t x);
+    cum::cumeric_t ReLU_derivative(cum::cumeric_t x);
 
-    numeric_t leaky_ReLU(numeric_t x);
-    numeric_t leaky_ReLU_derivative(numeric_t x);
+    cum::cumeric_t leaky_ReLU(cum::cumeric_t x);
+    cum::cumeric_t leaky_ReLU_derivative(cum::cumeric_t x);
 
-    numeric_t GELU(numeric_t x);
-    numeric_t GELU_derivative(numeric_t x);
+    cum::cumeric_t GELU(cum::cumeric_t x);
+    cum::cumeric_t GELU_derivative(cum::cumeric_t x);
 
-    matrix_t softmax(const matrix_t& x);
-    matrix_t softmax_derivative(const matrix_t& x);
+    cum::Matrix softmax(const cum::Matrix& x);
+    cum::Matrix softmax_derivative(const cum::Matrix& x);
 }

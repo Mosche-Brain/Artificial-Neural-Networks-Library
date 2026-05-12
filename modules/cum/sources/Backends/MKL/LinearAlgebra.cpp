@@ -1,4 +1,4 @@
-#include "cum/LinearAlgbebra.hpp"
+#include "cum/LinearAlgebra.hpp"
 #include "cumMKL.hpp"
 #include <cstring>
 #include <oneapi/mkl/blas.hpp>

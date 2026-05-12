@@ -4,11 +4,11 @@ namespace YANN::Models::Layers
 {
     void LayerBase::initParameters(int layerSize, int inputLenght)
     {
-        // this->weights = matrix_t::Random(layerSize, inputLenght) * static_cast<numeric_t>(0.01f);
-        // this->biases  = matrix_t::Zero(layerSize, 1)             ;
+        // this->weights = cum::Matrix::Random(layerSize, inputLenght) * static_cast<numeric_t>(0.01f);
+        // this->biases  = cum::Matrix::Zero(layerSize, 1)             ;
         // this->biases  = vector_t::Random(layerSize, 1) * static_cast<numeric_t>(0.1f);
-        // this->outputs = matrix_t::Zero(layerSize, 1);
-        // this->inputs  = matrix_t::Zero(layerSize, inputLenght);
+        // this->outputs = cum::Matrix::Zero(layerSize, 1);
+        // this->inputs  = cum::Matrix::Zero(layerSize, inputLenght);
 
         this->weights = YANN::math_api::createRandomMatrix(layerSize, inputLenght, static_cast<numeric_t>(-0.01f), static_cast<numeric_t>(0.01f));
         this->biases  = YANN::math_api::createMatrix(layerSize, 1, static_cast<numeric_t>(0));
@@ -28,22 +28,22 @@ namespace YANN::Models::Layers
         return this->_layerSize_;
     }
 
-    matrix_t LayerBase::Outputs()
+    cum::Matrix LayerBase::Outputs()
     {
         return this->outputs;
     }
     
-    matrix_t LayerBase::Inputs()
+    cum::Matrix LayerBase::Inputs()
     {
         return this->inputs;
     }
     
-    matrix_t LayerBase::Weights()
+    cum::Matrix LayerBase::Weights()
     {
         return this->weights;
     }
 
-    matrix_t LayerBase::Biases()
+    cum::Matrix LayerBase::Biases()
     {
         return this->biases;
     }

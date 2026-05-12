@@ -1,6 +1,6 @@
 #include "cum/cum.hpp"
 #include "cum/Core.hpp"
-#include "cum/LinearAlgbebra.hpp"
+#include "cum/LinearAlgebra.hpp"
 #include "cum/Matrix.hpp"
 
 #include <cstdlib>
@@ -53,20 +53,22 @@ int main()
 
     // free(r);
     // free(C);
-
-    cum::Matrix A(8, 8, 6.0);
-    cum::Matrix B(8, 8, 9.0);
-
-    cum::Matrix C = A * B;
-
-        for(size_t i = 0 ; i < C.rows(); i++)
+    for(int i = 0 ; i < 128 ; i++)
     {
-        for (size_t j = 0; j < C.cols(); j++)
-        {
-            std::cout << C.at(i, j) << '\t';
-        }
-        std::cout << '\n';
+        cum::Matrix A(4096, 4096, 6.0);
+        cum::Matrix B(4096, 4096, 9.0);
+
+        cum::Matrix C = A * B;
     }
+
+    // for(size_t i = 0 ; i < C.rows(); i++)
+    // {
+    //     for (size_t j = 0; j < C.cols(); j++)
+    //     {
+    //         std::cout << C.at(i, j) << '\t';
+    //     }
+    //     std::cout << '\n';
+    // }
 
     cum::decum();
 

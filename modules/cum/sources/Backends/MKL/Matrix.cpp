@@ -1,7 +1,9 @@
 #include "cum/Matrix.hpp"
-#include "cum/LinearAlgbebra.hpp"
+#include "cum/LinearAlgebra.hpp"
 
 #include "cumMKL.hpp"
+
+#include <utility>
 
 namespace cum
 {
@@ -17,12 +19,12 @@ namespace cum
         sycl::free(data, library::getQueue());
     }
 
-    cumeric_t& Matrix::at(size_t row, size_t col)
+    cumeric_t& Matrix::at(const size_t row, const size_t col)
     {
         return data[index(row, col)];
     }
 
-    std::size_t Matrix::index(size_t row, size_t col)
+    std::size_t Matrix::index(const size_t row, const size_t col)
     {
         return row * cols_ + col;
     }
@@ -39,7 +41,7 @@ namespace cum
 
     Matrix& Matrix::operator *= (const Matrix& other)
     {
-
+        LinearAlgebra::matMulInPlace(this->data, other.data, this->rows_, other.cols_, this->cols_);
     }
 
     Matrix operator + (const Matrix& A, const Matrix& B)
@@ -56,6 +58,29 @@ namespace cum
         LinearAlgebra::matMul(mat.data, A.data, B.data, A.rows_, B.cols_, A.cols_);
 
         return mat; 
+    }
+
+    Matrix Matrix::transpose()
+    {
+        Matrix temp(cols_, rows_);
+        LinearAlgebra::transpose(temp.data, data, rows_, cols_);
+        return temp;
+    }
+
+    void Matrix::transposeInPlace()
+    {
+        LinearAlgebra::transposeInPlace(data, rows_, cols_);
+        std::swap<std::size_t>(cols_, rows_);
+    }
+
+    Matrix Matrix::cwiseProduct(const Matrix& other)
+    {
+        
+    }
+
+    void Matrix::cwiseProductInPlace()
+    {
+        // LinearAlgebra:
     }
 } // namespace cum
 

@@ -12,10 +12,12 @@ namespace cum
         Matrix() = default;
         ~Matrix();
 
-        cumeric_t& at(std::size_t row, std::size_t col);
+        cumeric_t& at(const std::size_t row, const std::size_t col);
 
         std::size_t rows() { return rows_; }
         std::size_t cols() { return cols_; }
+
+        cumeric_t& operator () (const std::size_t row, const std::size_t col) { return data[index(row, col)]; };
 
         Matrix& operator += (const Matrix& other);
         Matrix& operator -= (const Matrix& other);
@@ -23,10 +25,12 @@ namespace cum
         friend Matrix operator + (const Matrix& A, const Matrix& B);
         friend Matrix operator * (const Matrix& A, const Matrix& B);
 
-        void transpose();
-        void cwiseProduct();
+        Matrix transpose();
+        void transposeInPlace();
+        Matrix cwiseProduct(const Matrix& other);
+        void cwiseProductInPlace();
     private:
-        std::size_t index(std::size_t row, std::size_t col);
+        std::size_t index(const std::size_t row, const std::size_t col);
 
         std::size_t rows_, cols_;
         cumeric_t* data;

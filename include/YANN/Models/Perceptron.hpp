@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "Utility/stlCompatibility.hpp"
-#include "math_api.hpp"
+#include "cum/cum.hpp"
 
 
 namespace YANN::Models
@@ -18,7 +18,7 @@ namespace YANN::Models
 
         void fit(const matrix_t& input, const vector_t& target, numeric_t rate, int epochs);
         
-        numeric_t predict(const vector_t& input);
+        cum::cumeric_t predict(const vector_t& input);
 
         int inputWidth() const { return _inputWidth_; }
 
@@ -26,7 +26,7 @@ namespace YANN::Models
         void init();
         int _inputWidth_;
 
-        numeric_t bias;
+        cum::cumeric_t bias;
         vector_t weights;
         std::function<numeric_t(numeric_t)> activation;
     };

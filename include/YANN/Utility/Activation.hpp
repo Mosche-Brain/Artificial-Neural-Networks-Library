@@ -3,7 +3,8 @@
 #include <functional>
 #include <map>
 
-#include "math_api.hpp"
+#include "cum/Matrix.hpp"
+#include "cum/LinearAlgebra.hpp"
 #include "functions.hpp"
 
 namespace YANN::Utils
@@ -13,30 +14,30 @@ namespace YANN::Utils
     public:
         Activation();
 
-        Activation(std::function<numeric_t(numeric_t)> function, 
-                   std::function<numeric_t(numeric_t)> derivative);
+        Activation(std::function<cum::cumeric_t(cum::cumeric_t)> function, 
+                   std::function<cum::cumeric_t(cum::cumeric_t)> derivative);
 
-        Activation(std::function<matrix_t(matrix_t)> matrixFunction,
-                   std::function<matrix_t(matrix_t)> matrixDerivative);
+        Activation(std::function<cum::Matrix(cum::Matrix)> matrixFunction,
+                   std::function<cum::Matrix(cum::Matrix)> matrixDerivative);
 
         Activation(const char* func);
 
 
-        std::function<numeric_t(numeric_t)> function;
-        std::function<numeric_t(numeric_t)> derivative;
+        std::function<cum::cumeric_t(cum::cumeric_t)> function;
+        std::function<cum::cumeric_t(cum::cumeric_t)> derivative;
 
-        std::function<matrix_t(matrix_t)> matrixFunction;
-        std::function<matrix_t(matrix_t)> matrixDerivative;
+        std::function<cum::Matrix(cum::Matrix)> matrixFunction;
+        std::function<cum::Matrix(cum::Matrix)> matrixDerivative;
     };
 
     struct activation_t
     {
         const char* name;
-        numeric_t (*function)(numeric_t);
-        numeric_t (*derivative)(numeric_t);
+        cum::cumeric_t (*function)(cum::cumeric_t);
+        cum::cumeric_t (*derivative)(cum::cumeric_t);
 
-        matrix_t (*matFunction)(matrix_t);
-        matrix_t (*matDerivative)(matrix_t);
+        cum::Matrix (*matFunction)(cum::Matrix);
+        cum::Matrix (*matDerivative)(cum::Matrix);
     };
 
     activation_t getActivationByName(const char* name);

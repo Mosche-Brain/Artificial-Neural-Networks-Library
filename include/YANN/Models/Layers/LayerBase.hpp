@@ -1,7 +1,7 @@
 #pragma once
 
-#include "math_api.hpp"
-#include <Eigen/Dense>
+#include "cum/Matrix.hpp"
+#include "cum/LinearAlgebra.hpp"
 #include <memory>
 
 #include "Utility/Activation.hpp"
@@ -16,28 +16,28 @@ namespace YANN::Models::Layers
 
         virtual void initParameters(int layerSize, int inputLenght);
         
-        virtual matrix_t forward(const matrix_t& input) = 0;
-        virtual matrix_t backward(const matrix_t& deltaOutput) = 0;
-        virtual void update_weights(numeric_t rate) = 0;
+        virtual cum::Matrix forward(const cum::Matrix& input) = 0;
+        virtual cum::Matrix backward(const cum::Matrix& deltaOutput) = 0;
+        virtual void update_weights(cum::cumeric_t rate) = 0;
         
         // virtual std::unique_ptr<LayerBase> getUnique() = 0;
         
         bool initialized();
         virtual int size();
-        virtual matrix_t Outputs();
-        virtual matrix_t Inputs();
-        virtual matrix_t Weights();
-        virtual matrix_t Biases();
+        virtual cum::Matrix Outputs();
+        virtual cum::Matrix Inputs();
+        virtual cum::Matrix Weights();
+        virtual cum::Matrix Biases();
         // Utils::Activation activation;
         Utils::activation_t activation;
         
         LAYER_TYPE layerType();
     protected:
-        matrix_t weights;
+        cum::Matrix weights;
         vector_t biases;
-        matrix_t outputs;
-        matrix_t preactivatedOutputs;
-        matrix_t inputs;
+        cum::Matrix outputs;
+        cum::Matrix preactivatedOutputs;
+        cum::Matrix inputs;
            
         int _layerSize_;
         bool _initialized_ = false;

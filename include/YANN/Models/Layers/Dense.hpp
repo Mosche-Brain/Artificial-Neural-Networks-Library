@@ -1,6 +1,5 @@
 #pragma once
 
-#include "math_api.hpp"
 #include "LayerBase.hpp"
 
 namespace YANN::Models::Layers
@@ -11,14 +10,14 @@ namespace YANN::Models::Layers
         // Dense(int layerSize, int inputWidth, const char* func);
         Dense(int layerSize, const char* func);
 
-        matrix_t forward(const matrix_t& input) override;
-        matrix_t backward(const matrix_t& deltaOutput) override;
-        void update_weights(numeric_t rate);
+        cum::Matrix forward(const cum::Matrix& input) override;
+        cum::Matrix backward(const cum::Matrix& deltaOutput) override;
+        void update_weights(cum::cumeric_t rate);
 
         static std::unique_ptr<LayerBase> createUnique(int layerSize, const char* func);
 
     protected:
-        matrix_t deltaWeights;
+        cum::Matrix deltaWeights;
         vector_t deltaBiases; 
     };
 }

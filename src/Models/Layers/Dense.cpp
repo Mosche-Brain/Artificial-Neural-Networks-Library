@@ -19,7 +19,7 @@ namespace YANN::Models::Layers
         this->_layerType_   = LAYER_TYPE::DENSE;
     }
     
-    matrix_t Dense::forward(const matrix_t& input)
+    cum::Matrix Dense::forward(const cum::Matrix& input)
     {
         if(input.size() != weights.cols())
         {
@@ -36,14 +36,14 @@ namespace YANN::Models::Layers
         return outputs;
     }
 
-    matrix_t Dense::backward(const matrix_t& deltaOutput)
+    cum::Matrix Dense::backward(const cum::Matrix& deltaOutput)
     {
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::DEBUG_VEBOSITY >= 4)
             std::cout << "\t\t\t\t" << "matrixElementwiseMultiply(deltaOutput, activation.matrixDerivative(preactivatedOutputs))\n";
         #endif
 
-        matrix_t d_pre_activation = math_api::matrixElementwiseMultiply(deltaOutput, 
+        cum::Matrix d_pre_activation = math_api::matrixElementwiseMultiply(deltaOutput, 
                                                                         math_api::matrixTransform(preactivatedOutputs, activation.derivative));
         
         
@@ -64,7 +64,7 @@ namespace YANN::Models::Layers
         if(runtime_config::DEBUG_VEBOSITY >= 4)
             std::cout << "\t\t\t\t" << "deltaInput = matrixMultiply(matrixTranspose(weights), d_pre_activation)\n";
         #endif
-        matrix_t deltaInput = math_api::matrixMultiply(math_api::matrixTranspose(weights), d_pre_activation);       
+        cum::Matrix deltaInput = math_api::matrixMultiply(math_api::matrixTranspose(weights), d_pre_activation);       
         
         return deltaInput;
     }
@@ -74,7 +74,7 @@ namespace YANN::Models::Layers
         this->weights -= math_api::matrixScalarMultiply(this->deltaWeights, rate);
         this->biases  -= math_api::vectorScalarMultiply(this->deltaBiases, rate);
 
-        this->deltaWeights = matrix_t::Zero(math_api::matrixRows(this->deltaWeights), math_api::matrixCols(this->deltaWeights));
+        this->deltaWeights = cum::Matrix::Zero(math_api::matrixRows(this->deltaWeights), math_api::matrixCols(this->deltaWeights));
         this->deltaBiases = vector_t::Zero(math_api::vectorSize(this->deltaBiases));
     }
 
