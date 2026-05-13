@@ -18,6 +18,6 @@ namespace YANN::Models::Layers
 
     protected:
         cum::Matrix deltaWeights;
-        vector_t deltaBiases; 
+        cum::Vector deltaBiases; 
     };
 }

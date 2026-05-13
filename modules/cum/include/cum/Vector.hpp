@@ -9,7 +9,9 @@ namespace cum
     public:
         Vector(std::size_t lenght, cumeric_t value=0);
     
-        cumeric_t& operator[](std::size_t index) { this->data[index]; }
+        cumeric_t& operator[](std::size_t index) { this->data_[index]; }
+
+        std::size_t lenght() const { return lenght_; }
 
         Vector operator +=(const Vector& other);
         Vector operator -=(const Vector& other);
@@ -23,6 +25,7 @@ namespace cum
     
         Vector dot(const Vector& other);
     private:
-        cumeric_t* data;
+        std::size_t lenght_;
+        cumeric_t* data_;
     };
 } // namespace cum

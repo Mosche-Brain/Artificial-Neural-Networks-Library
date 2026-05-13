@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cum/Matrix.hpp"
+#include "cum/Vector.hpp"
 #include "cum/LinearAlgebra.hpp"
 #include <memory>
 
@@ -18,7 +19,7 @@ namespace YANN::Models::Layers
         
         virtual cum::Matrix forward(const cum::Matrix& input) = 0;
         virtual cum::Matrix backward(const cum::Matrix& deltaOutput) = 0;
-        virtual void update_weights(cum::cumeric_t rate) = 0;
+        virtual void update_weights(const cum::cumeric_t rate) = 0;
         
         // virtual std::unique_ptr<LayerBase> getUnique() = 0;
         
@@ -27,14 +28,14 @@ namespace YANN::Models::Layers
         virtual cum::Matrix Outputs();
         virtual cum::Matrix Inputs();
         virtual cum::Matrix Weights();
-        virtual cum::Matrix Biases();
+        virtual cum::Vector Biases();
         // Utils::Activation activation;
         Utils::activation_t activation;
         
         LAYER_TYPE layerType();
     protected:
         cum::Matrix weights;
-        vector_t biases;
+        cum::Vector biases;
         cum::Matrix outputs;
         cum::Matrix preactivatedOutputs;
         cum::Matrix inputs;

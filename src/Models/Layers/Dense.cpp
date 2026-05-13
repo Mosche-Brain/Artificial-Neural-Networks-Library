@@ -30,8 +30,10 @@ namespace YANN::Models::Layers
 
         this->inputs = input;
  
-        preactivatedOutputs = math_api::matrixColwiseAdd(math_api::matrixMultiply(weights, input), biases);
-        outputs = math_api::matrixTransform(preactivatedOutputs, activation.function);
+        // preactivatedOutputs = math_api::matrixColwiseAdd(math_api::matrixMultiply(weights, input), biases);
+        // outputs = math_api::matrixTransform(preactivatedOutputs, activation.function);
+
+        // preactivatedOutputs = weights
 
         return outputs;
     }

@@ -4,16 +4,21 @@ namespace YANN::Models::Layers
 {
     void LayerBase::initParameters(int layerSize, int inputLenght)
     {
-        // this->weights = cum::Matrix::Random(layerSize, inputLenght) * static_cast<numeric_t>(0.01f);
+        // this->weights = cum::Matrix::Random(layerSize, inputLenght) * static_cast<cum::cumeric_t>(0.01f);
         // this->biases  = cum::Matrix::Zero(layerSize, 1)             ;
-        // this->biases  = vector_t::Random(layerSize, 1) * static_cast<numeric_t>(0.1f);
+        // this->biases  = vector_t::Random(layerSize, 1) * static_cast<cum::cumeric_t>(0.1f);
         // this->outputs = cum::Matrix::Zero(layerSize, 1);
         // this->inputs  = cum::Matrix::Zero(layerSize, inputLenght);
 
-        this->weights = YANN::math_api::createRandomMatrix(layerSize, inputLenght, static_cast<numeric_t>(-0.01f), static_cast<numeric_t>(0.01f));
-        this->biases  = YANN::math_api::createMatrix(layerSize, 1, static_cast<numeric_t>(0));
-        this->outputs = YANN::math_api::createMatrix(layerSize, 1, static_cast<numeric_t>(0));
-        this->inputs  = YANN::math_api::createMatrix(layerSize, inputLenght, static_cast<numeric_t>(0));
+        // this->weights = YANN::math_api::createRandomMatrix(layerSize, inputLenght, static_cast<cum::cumeric_t>(-0.01f), static_cast<cum::cumeric_t>(0.01f));
+        // this->biases  = YANN::math_api::createMatrix(layerSize, 1, static_cast<cum::cumeric_t>(0));
+        // this->outputs = YANN::math_api::createMatrix(layerSize, 1, static_cast<cum::cumeric_t>(0));
+        // this->inputs  = YANN::math_api::createMatrix(layerSize, inputLenght, static_cast<cum::cumeric_t>(0));
+
+        this->weights = cum::Matrix(layerSize, inputLenght, 0.001);
+        this->biases  = cum::Vector(layerSize, 0);
+        this->outputs = cum::Matrix(layerSize, 1, 0);
+        this->inputs  = cum::Matrix(layerSize, inputLenght, 0);
 
         this->_initialized_ = true;
     }
@@ -43,7 +48,7 @@ namespace YANN::Models::Layers
         return this->weights;
     }
 
-    cum::Matrix LayerBase::Biases()
+    cum::Vector LayerBase::Biases()
     {
         return this->biases;
     }
