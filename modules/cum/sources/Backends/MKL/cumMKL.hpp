@@ -15,12 +15,18 @@ namespace cum
             sycl::queue queue;
             std::once_flag initialized;
 
+            cumeric_t* zeros;
+            cumeric_t* ones;
+
             Context();
         };
 
         Context& getContext();
 
         sycl::queue& getQueue();
+
+        cumeric_t* getZeros();
+        cumeric_t* getOnes();
     }
 
     // using cumeric_t = sycl::half;

@@ -11,51 +11,89 @@ namespace cum
     }
 
 
-    Vector Vector::operator +=(const Vector& other)
+    Vector& Vector::operator +=(const Vector& other)
     {
         LinearAlgebra::addInPlace(this->data_, other.data_, lenght_);
+        return *this;
     }
 
-    Vector Vector::operator -=(const Vector& other)
+    Vector& Vector::operator -=(const Vector& other)
     {
         LinearAlgebra::subInPlace(this->data_, other.data_, lenght_);
+        return *this;
     }
 
-    Vector Vector::operator *=(const Vector& other)
+    Vector& Vector::operator *=(const Vector& other)
     {
-
+        LinearAlgebra::cwiseProductInPlace(this->data_, other.data_, lenght_);
+        return *this;                                                                                                                      
     }
 
-    Vector Vector::operator /=(const Vector& other)
+    Vector& Vector::operator /=(const Vector& other)
     {
-
+        LinearAlgebra::divInPlace(this->data_, other.data_, lenght_);
+        return *this;
     }
-
 
     Vector operator + (const Vector& v, const Vector& u)
     {
-        
+        Vector result(v.lenght_);
+        LinearAlgebra::add(result.data_, v.data_, u.data_, v.lenght_);
+        return result;
     }
 
     Vector operator - (const Vector& v, const Vector& u)
     {
-
+        Vector result(v.lenght_);
+        LinearAlgebra::sub(result.data_, v.data_, u.data_, v.lenght_);
+        return result;
     }
 
     Vector operator * (const Vector& v, const Vector& u)
     {
-
+        Vector result(v.lenght_);
+        LinearAlgebra::cwiseProduct(result.data_, v.data_, u.data_, v.lenght_);
+        return result;
     }
 
     Vector operator / (const Vector& v, const Vector& u)
     {
-
+        Vector result(v.lenght_);
+        LinearAlgebra::div(result.data_, v.data_, u.data_, v.lenght_);
+        return result;
     }
 
-
-    Vector dot(const Vector& other)
+    Vector Vector::dot(const Vector& other)
     {
+        Vector result(1);
+        // LinearAlgebra::dot(result.data_, data_, other.data_, lenght_);
+        return result;
+    }
 
-    }   
+    Vector& Vector::dotInPlace(const Vector& other)
+    {
+        // LinearAlgebra::dot(data_, data_, other.data_, lenght_);
+        return *this;
+    }
+
+    cumeric_t Vector::sum()
+    {
+        cumeric_t result;
+        LinearAlgebra::sum(result, data_, lenght_);
+        return result;
+    }
+
+    Vector Vector::normalize()
+    {
+        Vector result(lenght_);
+        LinearAlgebra::normalize(result.data_, data_, lenght_);
+        return result;
+    }
+
+    Vector& Vector::normalizeInPlace()
+    {
+        LinearAlgebra::normalizeInPlace(data_, lenght_);
+        return *this;
+    }
 
 } // namespace cum

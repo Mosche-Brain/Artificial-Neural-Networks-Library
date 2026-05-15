@@ -2,6 +2,8 @@
 
 #include "Core.hpp"
 
+#include "cum/Vector.hpp"
+
 namespace cum
 {
     enum MemoryAlingment { RowMajor, ColMajor };
@@ -12,18 +14,25 @@ namespace cum
         Matrix() = default;
         ~Matrix();
 
-        cumeric_t& at(const std::size_t row, const std::size_t col);
+        cumeric_t& at(const std::size_t row, const std::size_t col) { return data_[get_idx(row, col)]; }
 
         std::size_t rows() { return rows_; }
         std::size_t cols() { return cols_; }
 
-        cumeric_t& operator () (const std::size_t row, const std::size_t col) { return data_[index(row, col)]; };
+        Matrix row(std::size_t i) const;
+        Matrix col(std::size_t i) const;
+
+        std::size_t size() const { return rows_ * cols_; }
+
+        cumeric_t& operator () (const std::size_t row, const std::size_t col) { return data_[get_idx(row, col)]; };
+
+        Matrix& operator = (const Matrix& other);
 
         Matrix& operator += (const Matrix& other);
         Matrix& operator -= (const Matrix& other);
         Matrix& operator *= (const Matrix& other);
         Matrix& operator /= (const Matrix& other);
-
+  
         Matrix& operator *= (const cumeric_t& scalar);
         Matrix& operator /= (const cumeric_t& scalar);
 
@@ -38,14 +47,20 @@ namespace cum
         cumeric_t* data() { return data_; };
 
         Matrix transpose();
-        void transposeInPlace();
+        Matrix& transposeInPlace();
         Matrix cwiseProduct(const Matrix& other);
-        void cwiseProductInPlace();
+        Matrix& cwiseProductInPlace();
 
-        void rowwiseOpInPlace(void (*op)(cumeric_t* row, const cumeric_t* v, const std::size_t cols), const cumeric_t* arr);
-        void colwiseOpInPlace(void (*op)(cumeric_t* col, const cumeric_t* v, const std::size_t rows), const cumeric_t* arr);
+        Matrix transform(void (*func)(cumeric_t* data, const std::size_t size)) const;
+        Matrix& transformInPlace(void (*func)(cumeric_t* data, const std::size_t size));
+
+        Matrix& rowwiseOpInPlace(void (*op)(cumeric_t* row, const cumeric_t* v, const std::size_t cols), const cumeric_t* arr);
+        Matrix& colwiseOpInPlace(void (*op)(cumeric_t* col, const cumeric_t* v, const std::size_t rows), const cumeric_t* arr);
+
+        Matrix colwiseSum();
+        Matrix rowwiseSum();
     private:
-        std::size_t index(const std::size_t row, const std::size_t col);
+        std::size_t get_idx(const std::size_t row, const std::size_t col) { return row * cols_ + col; }
 
         std::size_t rows_, cols_;
         cumeric_t* data_;

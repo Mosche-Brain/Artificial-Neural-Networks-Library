@@ -1,4 +1,6 @@
 #include "Dense.hpp"
+#include <cum/functions.hpp>
+#include <cum/LinearAlgebra.hpp>
 
 #if defined(ENABLE_DEBUG_OUTPUT)
     #include <iostream>
@@ -33,6 +35,9 @@ namespace YANN::Models::Layers
         // preactivatedOutputs = math_api::matrixColwiseAdd(math_api::matrixMultiply(weights, input), biases);
         // outputs = math_api::matrixTransform(preactivatedOutputs, activation.function);
 
+        preactivatedOutputs = weights * input;
+
+        outputs = preactivatedOutputs.transform(cum::LinearAlgebra::relu);
         // preactivatedOutputs = weights
 
         return outputs;
@@ -45,8 +50,8 @@ namespace YANN::Models::Layers
             std::cout << "\t\t\t\t" << "matrixElementwiseMultiply(deltaOutput, activation.matrixDerivative(preactivatedOutputs))\n";
         #endif
 
-        cum::Matrix d_pre_activation = math_api::matrixElementwiseMultiply(deltaOutput, 
-                                                                        math_api::matrixTransform(preactivatedOutputs, activation.derivative));
+        // cum::Matrix d_pre_activation = math_api::matrixElementwiseMultiply(deltaOutput, 
+        //                                                                 math_api::matrixTransform(preactivatedOutputs, activation.derivative));
         
         
         #if defined(ENABLE_DEBUG_OUTPUT)

@@ -19,39 +19,51 @@ namespace cum
         sycl::free(data_, library::getQueue());
     }
 
-    cumeric_t& Matrix::at(const size_t row, const size_t col)
-    {
-        return data_[index(row, col)];
+    Matrix Matrix::row(size_t i) const
+    { 
+        Matrix temp(1, cols_); memcpy(temp.data_, data_ + i * rows_ * sizeof(cumeric_t), cols_ * sizeof(cumeric_t)); 
+        return temp;
     }
 
-    std::size_t Matrix::index(const size_t row, const size_t col)
+    Matrix Matrix::col(size_t i) const
     {
-        return row * cols_ + col;
+        Matrix temp(rows_, 1); 
+        for(size_t j = 0 ; j < rows_ ; j++)
+        {
+            temp.data_[j] = data_[j * cols_ + i];
+        }
+        return temp;
     }
+
 
     Matrix& Matrix::operator += (const Matrix& other)
     {
         LinearAlgebra::matAddInPlace(this->data_, other.data_, this->rows_, this->cols_);
+        return *this;
     }
 
     Matrix& Matrix::operator -= (const Matrix& other)
     {
         LinearAlgebra::matSubInPlace(this->data_, other.data_, this->rows_, this->cols_);
+        return *this;
     }
 
     Matrix& Matrix::operator *= (const Matrix& other)
     {
         LinearAlgebra::matMulInPlace(this->data_, other.data_, this->rows_, other.cols_, this->cols_);
+        return *this;
     }
 
     Matrix& Matrix::operator *= (const cumeric_t& scalar)
     {
         LinearAlgebra::scaleInPlace(this->data_, scalar, rows_ * cols_);
+        return *this;
     }
 
     Matrix& Matrix::operator /= (const cumeric_t& scalar)
     {
         LinearAlgebra::scaleInPlace(this->data_, 1 / scalar, rows_ * cols_);
+        return *this;
     }
 
     Matrix operator + (const Matrix& A, const Matrix& B)
@@ -95,33 +107,73 @@ namespace cum
         return temp;
     }
 
-    void Matrix::transposeInPlace()
+    Matrix& Matrix::transposeInPlace()
     {
         LinearAlgebra::transposeInPlace(data_, rows_, cols_);
         std::swap<std::size_t>(cols_, rows_);
+        return *this;
+    }
+
+
+    Matrix Matrix::transform(void (*func)(cumeric_t* data, const std::size_t size)) const
+    {
+        Matrix temp(rows_, cols_);
+        memcpy(temp.data_, data_, rows_ * cols_ * sizeof(cumeric_t));
+        temp.transformInPlace(func);
+        return temp;
+    }
+
+
+    Matrix& Matrix::transformInPlace(void (*func)(cumeric_t* data, const std::size_t size))
+    {
+        func(data_, rows_ * cols_);
+        return *this;
     }
 
     Matrix Matrix::cwiseProduct(const Matrix& other)
     {
-        
+        Matrix temp(rows_, cols_);
+        LinearAlgebra::cwiseProduct(temp.data_, data_, other.data_, rows_ * cols_);
+        return temp;
     }
 
-    void Matrix::cwiseProductInPlace()
+    Matrix& Matrix::cwiseProductInPlace()
     {
-        // LinearAlgebra::
+        LinearAlgebra::cwiseProductInPlace(data_, data_, rows_ * cols_);
+        return *this;
     }
 
-    void Matrix::rowwiseOpInPlace(void (*op)(cumeric_t* row, const cumeric_t* v, const std::size_t cols), const cumeric_t* arr)
+    Matrix& Matrix::rowwiseOpInPlace(void (*op)(cumeric_t* row, const cumeric_t* v, const std::size_t cols), const cumeric_t* arr)
     {
         for(size_t i = 0 ; i < rows_ ; i++)
         {
             cumeric_t* row_begin = data_ + (i * cols_ * sizeof(cumeric_t));
             op(row_begin, arr, cols_);
         }
+        return *this;
     }
 
-    void Matrix::colwiseOpInPlace(void (*op)(cumeric_t* col, const cumeric_t* v, const std::size_t rows), const cumeric_t* arr)
+    Matrix& Matrix::colwiseOpInPlace(void (*op)(cumeric_t* col, const cumeric_t* v, const std::size_t rows), const cumeric_t* arr)
     {
         // for(size_t i = 0 ; i < rows_ ; i+=cols_)
+
+
+        return *this;
     }
+
+    Matrix Matrix::colwiseSum()
+    {
+        Matrix temp(1, cols_);
+        LinearAlgebra::colwiseSum(temp.data_, data_, rows_, cols_);
+        return temp;
+    }
+
+    Matrix Matrix::rowwiseSum()
+    {
+        Matrix temp(rows_, 1);
+        LinearAlgebra::rowwiseSum(temp.data_, data_, rows_, cols_);
+        return temp;
+    }
+
+    
 } // namespace cum

@@ -5,7 +5,7 @@
 
 namespace YANN::Utils
 {
-    cum::cumeric_t linear(::m::cumeric_t x)
+    cum::cumeric_t linear(cum::cumeric_t x)
     {
         return x;
     }

@@ -4,7 +4,11 @@
 
 namespace cum
 {
-    library::Context::Context() : queue(sycl::cpu_selector_v) {}
+    library::Context::Context() : queue(sycl::cpu_selector_v) 
+    {
+        zeros = sycl::malloc_shared<cumeric_t>(2048*2048, queue);
+        ones = sycl::malloc_shared<cumeric_t>(2048*2048, queue);
+    }
 
     library::Context& library::getContext()
     {
@@ -20,4 +24,7 @@ namespace cum
         });
         return getContext().queue;
     }
+
+    cumeric_t* library::getZeros() { return getContext().zeros; }
+    cumeric_t* library::getOnes() { return getContext().ones; }
 }
