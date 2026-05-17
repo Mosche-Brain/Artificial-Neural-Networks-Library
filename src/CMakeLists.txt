@@ -23,10 +23,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 target_compile_options(${PROJECT_NAME} PRIVATE
-    -fopenmp
+    -qopenmp
     -march=native
     -Wall
     -O3
+    -fsycl
     -ffast-math
     -mavxvnni
     -DENABLE_DEBUG_OUTPUT

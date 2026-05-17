@@ -9,67 +9,64 @@
 #define fsycl
 #include <sycl/sycl.hpp>
 
+#include <ctime>
+#include <unistd.h>
+
+bool is_addition_correct()
+{
+    cum::Matrix A(2, 2, 1.0);
+    cum::Matrix B(2, 2, 2.0);
+
+    cum::Matrix C = A + B;
+
+    for(size_t i = 0 ; i < C.rows() ; i++)
+        for(size_t j = 0 ; j < C.cols() ; j++)
+            if(C.at(i, j) != 3.0)
+                return false;
+    
+    return true;
+}
+
+double benchmark()
+{
+    cum::Matrix A(4096, 4096, 6.0);
+    cum::Matrix B(4096, 4096, 9.0);
+
+    //measure time of 128 multiplications
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    for(int i = 0 ; i < 256 ; i++)
+    {
+        A * B;
+    }
+    clock_gettime(CLOCK_MONOTONIC, &end);
+    long long elapsed = (end.tv_sec - start.tv_sec) * 1000000000LL + (end.tv_nsec - start.tv_nsec);
+    double time = elapsed / 1000000000.0;
+    return time;
+}
+
 int main()
 {
-    cum::cum();
+    cum::cum(cum::CUM_DEVICE::GPU);
 
-    // size_t N = 8;
-    // // cum::cumeric_t v[] = {1, 2.3, 9.4, 1.7, 6.7, 6.9, 9.6, 7.6};
-    // // cum::cumeric_t u[] = {6.7, 6.9, 9.6, 7.6, 1, 2.3, 9.4, 1.7};
-    // // cum::cumeric_t* r = (cum::cumeric_t*)malloc(N * sizeof(cum::cumeric_t));
-    // cum::cumeric_t v[] = {1, 2.3, 9.4, 1.7, 6.7, 6.9, 9.6, 7.6};
-    // cum::cumeric_t u[] = {6.7, 6.9, 9.6, 7.6, 1, 2.3, 9.4, 1.7};
-    // cum::cumeric_t* r = (cum::cumeric_t*)calloc(N, sizeof(cum::cumeric_t));
 
-    // // cum::LinearAlgebra::add(r, v, u, N);
-    // cum::LinearAlgebra::addInPlace(v, u, N);
+    std::cout << "Testing addition correctness... ";
+    if(is_addition_correct())
+        std::cout << "PASSED" << std::endl;
+    else
+        std::cout << "FAILED" << std::endl;
+    sleep(1);
 
-    // for(int i = 0 ; i < N ; i++)
-    // {
-    //     std::cout << v[i] << ' ';
-    // }
-    // std::cout << '\n';
-    
+    std::cout << "Time taken on GPU: ";
+    double gpu_time = benchmark();
+    std::cout << gpu_time << " seconds" << std::endl;
 
-    // size_t n = 2, m = 2, k = 2;
-    // cum::cumeric_t A[] = {1, 2,
-    //                       3, 4};
+    cum::recum(cum::CUM_DEVICE::CPU);
+    sleep(5);
 
-    // cum::cumeric_t B[] = {6, 9,
-    //                       6, 7};
-
-    // cum::cumeric_t* C = (cum::cumeric_t*)calloc(m * n, sizeof(cum::cumeric_t));
-
-    // cum::LinearAlgebra::matMul(C, A, B, n, m, k);
-
-    // for(size_t i = 0 ; i < m; i++)
-    // {
-    //     for (size_t j = 0; j < n; j++)
-    //     {
-    //         std::cout << C[i * n + j] << ' ';
-    //     }
-    //     std::cout << '\n';
-    // }
-
-    // free(r);
-    // free(C);
-    for(int i = 0 ; i < 128 ; i++)
-    {
-        cum::Matrix A(4096, 4096, 6.0);
-        cum::Matrix B(4096, 4096, 9.0);
-
-        cum::Matrix C = A * B;
-    }
-
-    // for(size_t i = 0 ; i < C.rows(); i++)
-    // {
-    //     for (size_t j = 0; j < C.cols(); j++)
-    //     {
-    //         std::cout << C.at(i, j) << '\t';
-    //     }
-    //     std::cout << '\n';
-    // }
-
+    std::cout << "Time taken on CPU: ";
+    double cpu_time = benchmark();
+    std::cout << cpu_time << " seconds" << std::endl;
     cum::decum();
 
     return 0;

@@ -8,7 +8,7 @@
 
 namespace cum
 {
-    void cum();
-    void recum();
+    void cum(CUM_DEVICE device = CUM_DEVICE::AUTO);
+    void recum(CUM_DEVICE device = CUM_DEVICE::AUTO);
     void decum();
 }

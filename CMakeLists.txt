@@ -19,7 +19,7 @@ option(BUILD_USE_NATIVE "Use native C++ implementation for math operations" OFF)
 
 # Precision options
 option(CUM_USE_F64 "Use double precision (float 64-bit)" OFF)
-option(CUM_USE_F32 "Use single precision (float 32-bit)" ON)
+option(CUM_USE_F32 "Use single precision (float 32-bit)" OFF)
 option(CUM_USE_F16 "Use half precision (float 16-bit)" OFF)
 option(CUM_USE_BF16 "Use brain float precision (float 16-bit)" OFF)
 option(CUM_USE_Q8 "Use quarter precision (int 8-bit)" OFF)
@@ -38,7 +38,9 @@ foreach(OPT IN LISTS PRECISION_OPTIONS)
 endforeach()
 
 if(SELECTED_PRECISIONS EQUAL 0)
-    message(FATAL_ERROR "At least one precision must be selected: USE_DOUBLE_PRECISION, USE_SINGLE_PRECISION, USE_HALF_PRECISION, USE_BRAIN_PRECISION, or USE_QUARTER_PRECISION")
+    # message(FATAL_ERROR "At least one precision must be selected: USE_DOUBLE_PRECISION, USE_SINGLE_PRECISION, USE_HALF_PRECISION, USE_BRAIN_PRECISION, or USE_QUARTER_PRECISION")
+    message(WARNING "No precision option selected, defaulting to single precision (float 32-bit)")
+    set(CUM_USE_F32 ON)
 endif()
 
 if(SELECTED_PRECISIONS GREATER 1)

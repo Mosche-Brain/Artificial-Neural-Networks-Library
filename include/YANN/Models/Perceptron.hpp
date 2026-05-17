@@ -4,8 +4,9 @@
 
 #include <vector>
 
-#include "Utility/stlCompatibility.hpp"
-#include "cum/cum.hpp"
+#include "cum/Matrix.hpp"
+#include "cum/Vector.hpp"
+#include "cum/functions.hpp"
 
 
 namespace YANN::Models
@@ -14,11 +15,12 @@ namespace YANN::Models
     {
     public:
         Perceptron(int inputLenght, const char* func);
-        Perceptron(int inputLenght, std::function<numeric_t(numeric_t)> func);
+        // Perceptron(int inputLenght, std::function<numeric_t(numeric_t)> func);
+        // Perceptron(int inputLenght, std::function<numeric_t(numeric_t)> func);
 
-        void fit(const matrix_t& input, const vector_t& target, numeric_t rate, int epochs);
+        void fit(const cum::Matrix& input, const cum::Vector& target, cum::cumeric_t rate, size_t epochs);
         
-        cum::cumeric_t predict(const vector_t& input);
+        cum::cumeric_t predict(const cum::Vector& input);
 
         int inputWidth() const { return _inputWidth_; }
 
@@ -27,7 +29,8 @@ namespace YANN::Models
         int _inputWidth_;
 
         cum::cumeric_t bias;
-        vector_t weights;
-        std::function<numeric_t(numeric_t)> activation;
+        cum::Vector weights;
+
+        cum::functions::activation_t activation;
     };
 }

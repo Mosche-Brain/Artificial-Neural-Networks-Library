@@ -1,7 +1,7 @@
 #pragma once
 
 #include "cum/cum.hpp"
-#include "Utility/Activation.hpp"
+#include "cum/functions.hpp"
 
 namespace YANN::Models::Layers
 {
@@ -9,6 +9,6 @@ namespace YANN::Models::Layers
     {
         cum::Matrix weights;
         cum::Matrix biases;
-        Utils::activation_t activation;
+        cum::functions::activation_t activation;
     };
 }

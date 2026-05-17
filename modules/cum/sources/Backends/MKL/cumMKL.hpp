@@ -18,8 +18,13 @@ namespace cum
             cumeric_t* zeros;
             cumeric_t* ones;
 
+            void setDevice(CUM_DEVICE device);
+
+            ~Context();
             Context();
         };
+
+        // static Context& context;
 
         Context& getContext();
 

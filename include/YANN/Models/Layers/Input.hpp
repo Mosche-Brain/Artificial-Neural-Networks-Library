@@ -1,6 +1,4 @@
 #pragma once
-
-#include "math_api.hpp"
 #include "LayerBase.hpp"
 
 namespace YANN::Models::Layers
@@ -10,9 +8,9 @@ namespace YANN::Models::Layers
     public:
         Input(int layerSize);
 
-        matrix_t forward(const matrix_t& input) override;
-        matrix_t backward(const matrix_t& deltaOutput);
-        void update_weights(numeric_t rate);
+        cum::Matrix forward(const cum::Matrix& input) override;
+        cum::Matrix backward(const cum::Matrix& deltaOutput) override;
+        void update_weights(cum::cumeric_t rate) override;
 
         static std::unique_ptr<LayerBase> createUnique(int layerSize);
     };

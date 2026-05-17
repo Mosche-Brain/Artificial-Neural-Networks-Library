@@ -1,4 +1,5 @@
 #include "cum/Vector.hpp"
+#include "cum/Matrix.hpp"
 
 #include "cum/LinearAlgebra.hpp"
 #include "cumMKL.hpp"
@@ -10,10 +11,23 @@ namespace cum
         data_ = sycl::malloc_shared<cumeric_t>(lenght, library::getQueue());
     }
 
+    Vector::operator Matrix() const
+    {
+        Matrix temp(lenght_, 1);
+        for(size_t i = 0 ; i < lenght_ ; i++)
+            temp.at(i, 0) = data_[i];
+        return temp;
+    }
 
-    Vector& Vector::operator +=(const Vector& other)
+    Vector& Vector::operator += (const Vector& other)
     {
         LinearAlgebra::addInPlace(this->data_, other.data_, lenght_);
+        return *this;
+    }
+
+    Vector& Vector::operator += (Matrix& matrix)
+    {
+        LinearAlgebra::addInPlace(this->data_, matrix.data(), lenght_);
         return *this;
     }
 
@@ -23,15 +37,15 @@ namespace cum
         return *this;
     }
 
-    Vector& Vector::operator *=(const Vector& other)
+    Vector& Vector::operator *= (const Vector& other)
     {
         LinearAlgebra::cwiseProductInPlace(this->data_, other.data_, lenght_);
         return *this;                                                                                                                      
     }
 
-    Vector& Vector::operator /=(const Vector& other)
+    Vector& Vector::operator /= (const Vector& other)
     {
-        LinearAlgebra::divInPlace(this->data_, other.data_, lenght_);
+        LinearAlgebra::divInPlace (this->data_, other.data_, lenght_);
         return *this;
     }
 

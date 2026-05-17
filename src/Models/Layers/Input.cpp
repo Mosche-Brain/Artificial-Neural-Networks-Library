@@ -1,33 +1,35 @@
 #include "Input.hpp"
 
+#include <cum/functions.hpp>
+
 namespace YANN::Models::Layers
 {
     Input::Input(int layerSize)
     {
         // this->activation = Utils::Activation("linear");
-        this->activation = Utils::getActivationByName("linear");
+        cum::functions::getFunctionByName(&this->activation, "linear");
 
-        this->weights = matrix_t::Ones(layerSize, 1);
-        this->biases  = vector_t::Zero(layerSize);
+        this->weights = cum::Matrix(layerSize, 1, 1);
+        this->biases  = cum::Matrix(layerSize, 1, 0);
 
         this->_layerSize_   = layerSize;
         this->_layerType_   = LAYER_TYPE::INPUT;
         this->_initialized_ = true;
     }
 
-    matrix_t Input::forward(const matrix_t& input)
+    cum::Matrix Input::forward(const cum::Matrix& input)
     {
         this->outputs = input;
         return input;
     }
 
-    matrix_t Input::backward(const matrix_t& deltaOutput)
+    cum::Matrix Input::backward(const cum::Matrix& deltaOutput)
     {
-        // return matrix_t::Zero(_layerSize_, 1);
-        return math_api::createMatrix(_layerSize_, 1, static_cast<numeric_t>(1));
+        // return cum::Matrix::Zero(_layerSize_, 1);
+        return cum::Matrix(_layerSize_, 1, static_cast<cum::cumeric_t>(1));
     }
 
-    void Input::update_weights(numeric_t rate)
+    void Input::update_weights(cum::cumeric_t rate)
     {
 
     }

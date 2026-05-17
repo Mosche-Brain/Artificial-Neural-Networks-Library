@@ -5,6 +5,7 @@
 
 namespace YANN::Utils
 {
+    /*
     cum::cumeric_t linear(cum::cumeric_t x)
     {
         return x;
@@ -110,4 +111,5 @@ namespace YANN::Utils
         
         return softmax_diag - softmax_outer;
     }
+        */
 }

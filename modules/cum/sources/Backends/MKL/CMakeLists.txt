@@ -6,6 +6,8 @@ set(CMAKE_C_COMPILER icx)
 
 set(CMAKE_CXX_STANDARD 23)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 find_package(TBB CONFIG REQUIRED PATHS $ENV{TBBROOT} /opt/intel/oneapi/tbb/latest/lib/cmake/tbb/)
 find_package(MKL CONFIG REQUIRED PATHS $ENV{MKLROOT} /opt/intel/oneapi/mkl/latest/lib/cmake/mkl/)
 
@@ -26,7 +28,7 @@ target_link_libraries(${PROJECT_NAME}_MKL
 )
 
 target_compile_definitions(${PROJECT_NAME}_MKL 
-    PRIVATE fsycl
+    PRIVATE fsycl fPIC
 )
 
 add_library(${PROJECT_NAME}::MKL ALIAS ${PROJECT_NAME}_MKL)

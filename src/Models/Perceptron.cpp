@@ -2,19 +2,29 @@
 
 #include "Utility/stlCompatibility.hpp"
 
+#include <cum/LinearAlgebra.hpp>
+#include <cum/functions.hpp>
+
 namespace YANN::Models
 {
-    Perceptron::Perceptron(int inputLenght, std::function<numeric_t(numeric_t)> func) : _inputWidth_(inputLenght)
-    {  
-        activation = std::move(func);
+    // Perceptron::Perceptron(int inputLenght, std::function<numeric_t(numeric_t)> func) : _inputWidth_(inputLenght)
+    // {  
+    //     activation = std::move(func);
 
+    //     init();
+    // }
+
+    Perceptron::Perceptron(int inputLenght, const char* func) : _inputWidth_(inputLenght)
+    {
+        cum::functions::getFunctionByName(&activation, func);
         init();
     }
 
-    numeric_t Perceptron::predict(const vector_t& input)
+    cum::cumeric_t Perceptron::predict(const cum::Vector& input)
     {
-        return activation((input * weights).sum() + bias);
-        // return (input * weights).sum() + bias;
+        cum::cumeric_t result = (input * weights).sum() + bias;
+        cum::functions::transformInPlace(&result, activation, 1);
+        return result;
     }
 
     // numeric_t Perceptron::predict(const std::vector<numeric_t>& input)
@@ -24,18 +34,19 @@ namespace YANN::Models
     //     return predict(newInput);
     // }
 
-    void Perceptron::fit(const matrix_t& input, const vector_t& target, numeric_t rate, int epochs)
+    void Perceptron::fit(const cum::Matrix& input, const cum::Vector& target, cum::cumeric_t rate, size_t epochs)
     {
-        for(int epoch = 0 ; epoch < epochs ; epoch++)
+        for(size_t epoch = 0 ; epoch < epochs ; epoch++)
         {
-            for(int row = 0 ; row < input.rows() ; row++)
+            for(size_t row = 0 ; row < input.rows() ; row++)
             {
-                numeric_t y = predict(input.row(row).transpose());
+                cum::cumeric_t y = predict(input.row(row).flatten());
 
                 // numeric_t error = (target[row] - y) * rate;
-                numeric_t error = static_cast<numeric_t>(math_api::vectorAt(target, row) - y) * rate;
+                // cum::cumeric_t error = static_cast<cum::cumeric_t>(cum::math_api::vectorAt(target, row) - y) * rate;
+                cum::cumeric_t error = (target[row] - y) * rate;
 
-                weights += error * input.row(row).transpose();
+                weights += (input.row(row).flatten() * error);
                 bias += error;
             }
         }
@@ -51,7 +62,9 @@ namespace YANN::Models
 
     void Perceptron::init()
     {
-        this->weights = vector_t::Random(_inputWidth_) * static_cast<numeric_t>(0.1f);
-        this->bias = static_cast<numeric_t>(0.0f);
+        // this->weights = vector_t::Random(_inputWidth_) * static_cast<numeric_t>(0.1f);
+        // this->bias = static_cast<numeric_t>(0.0f);
+        weights = cum::Vector(_inputWidth_, 0.001);
+        bias = 0;
     }
 }

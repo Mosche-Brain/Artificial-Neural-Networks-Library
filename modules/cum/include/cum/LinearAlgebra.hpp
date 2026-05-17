@@ -36,6 +36,8 @@ namespace cum::LinearAlgebra /* LATK */
     void matMul(cumeric_t* C, const cumeric_t* A, const cumeric_t* B, std::size_t m, std::size_t n, std::size_t k);
     void matMulInPlace(cumeric_t* A, const cumeric_t* B, std::size_t m, std::size_t n, std::size_t k);
 
+    void matVecMul(cumeric_t* r, const cumeric_t* A, const cumeric_t* v, std::size_t rows, std::size_t cols);
+
     void matScale(cumeric_t* mat, const cumeric_t* old, const cumeric_t& a, const std::size_t& rows, const std::size_t& cols);
     void matScaleInPlace(cumeric_t* mat, const cumeric_t& a, const std::size_t& rows, const std::size_t& cols);
 
@@ -50,6 +52,9 @@ namespace cum::LinearAlgebra /* LATK */
 
     void transform(cumeric_t* mat, const cumeric_t* old, void (*func)(cumeric_t* data, const std::size_t size));
     void transformInPlace(cumeric_t* mat, void (*func)(cumeric_t* data, const std::size_t size));
+
+    void transform(cumeric_t* mat, const cumeric_t* old, cumeric_t (*func)(cumeric_t x), std::size_t N);
+    void transformInPlace(cumeric_t* mat, cumeric_t (*func)(cumeric_t x), std::size_t N);
 
     void sin(cumeric_t* r, const cumeric_t* v, const std::size_t& N);
     void sinInPlace(cumeric_t* v, const std::size_t& N);
@@ -68,6 +73,8 @@ namespace cum::LinearAlgebra /* LATK */
 
     void norm(cumeric_t& r, const cumeric_t* v, std::size_t N);
     void normInplace(cumeric_t* v, std::size_t N);
+
+    void squaredNorm(cumeric_t& r, const cumeric_t* v, std::size_t N);
 
     void normalize(cumeric_t* r, const cumeric_t* v, std::size_t N);
     void normalizeInPlace(cumeric_t* v, std::size_t N);

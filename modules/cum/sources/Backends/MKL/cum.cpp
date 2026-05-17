@@ -2,14 +2,14 @@
 
 #include "cumMKL.hpp"
 
-void cum::cum()
+void cum::cum(CUM_DEVICE device)
 {
-    cum::library::getQueue();
+    cum::library::getContext().setDevice(device);
 }
 
-void cum::recum()
+void cum::recum(CUM_DEVICE device)
 {
-
+    cum::library::getContext().setDevice(device);
 }
 
 void cum::decum()

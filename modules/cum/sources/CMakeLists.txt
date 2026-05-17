@@ -8,7 +8,8 @@ add_library(${PROJECT_NAME}::Core ALIAS ${PROJECT_NAME}_Core)
 
 # Backendy
 if(BUILD_USE_MKL)
-    target_compile_definitions(${PROJECT_NAME}_Core PRIVATE fsycl)
+    target_compile_definitions(${PROJECT_NAME}_Core PRIVATE fsycl fPIC)
+    target_compile_options(${PROJECT_NAME}_Core PRIVATE -fsycl)
     target_include_directories(${PROJECT_NAME}_Core
         PRIVATE /opt/intel/oneapi/compiler/latest/include/ /opt/intel/oneapi/tbb/latest/include/ /opt/intel/oneapi/compiler/latest/include/
     )

@@ -14,8 +14,7 @@ namespace YANN::Models::Layers
     // Dense::Dense(int layerSize, int inputWidth, const char* func) : LayerBase()
     Dense::Dense(int layerSize, const char* func)
     {
-        // activation  = Utils::Activation(func);
-        activation  = Utils::getActivationByName(func);
+        cum::functions::getFunctionByName(&activation, func);
         _layerSize_ = layerSize;
 
         this->_layerType_   = LAYER_TYPE::DENSE;
@@ -35,9 +34,10 @@ namespace YANN::Models::Layers
         // preactivatedOutputs = math_api::matrixColwiseAdd(math_api::matrixMultiply(weights, input), biases);
         // outputs = math_api::matrixTransform(preactivatedOutputs, activation.function);
 
-        preactivatedOutputs = weights * input;
+        preactivatedOutputs = (weights * input) + biases;
 
-        outputs = preactivatedOutputs.transform(cum::LinearAlgebra::relu);
+        // outputs = preactivatedOutputs.transform(cum::LinearAlgebra::relu);
+        cum::functions::transform(outputs.data(), preactivatedOutputs.data(), activation, preactivatedOutputs.size());
         // preactivatedOutputs = weights
 
         return outputs;
@@ -53,36 +53,42 @@ namespace YANN::Models::Layers
         // cum::Matrix d_pre_activation = math_api::matrixElementwiseMultiply(deltaOutput, 
         //                                                                 math_api::matrixTransform(preactivatedOutputs, activation.derivative));
         
-        
+        // cum::Matrix d_pre_activation = deltaOutput.cwiseProduct(cum::functions::transform(preactivatedOutputs, activation.derivative));
+        // cum::Matrix d_pre_activation(deltaOutput.rows(), deltaOutput.cols());
+        cum::Matrix d_pre_activation = deltaOutput;
+        cum::functions::activationDerivative(d_pre_activation.data(), preactivatedOutputs.data(), activation, preactivatedOutputs.size());
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::DEBUG_VEBOSITY >= 4)
             std::cout << "\t\t\t\t" << "deltaWeights = matrixMultiply(d_pre_activation, matrixTranspose(inputs))\n";
         #endif
-        deltaWeights = math_api::matrixMultiply(d_pre_activation, math_api::matrixTranspose(inputs));
+        // deltaWeights = math_api::matrixMultiply(d_pre_activation, math_api::matrixTranspose(inputs));
+        deltaWeights = d_pre_activation * inputs.transpose();
 
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::DEBUG_VEBOSITY >= 4)
             std::cout << "\t\t\t\t" << "deltaBiases = matrixRowwiseSum(d_pre_activation)\n";
         #endif
-        deltaBiases = math_api::matrixRowwiseSum(d_pre_activation);
+        // deltaBiases = math_api::matrixRowwiseSum(d_pre_activation);
+        deltaBiases = d_pre_activation.rowwiseSum();
            
 
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::DEBUG_VEBOSITY >= 4)
             std::cout << "\t\t\t\t" << "deltaInput = matrixMultiply(matrixTranspose(weights), d_pre_activation)\n";
         #endif
-        cum::Matrix deltaInput = math_api::matrixMultiply(math_api::matrixTranspose(weights), d_pre_activation);       
+        // cum::Matrix deltaInput = math_api::matrixMultiply(math_api::matrixTranspose(weights), d_pre_activation);       
+        cum::Matrix deltaInput = weights.transpose() * d_pre_activation;       
         
         return deltaInput;
     }
 
-    void Dense::update_weights(numeric_t rate)
+    void Dense::update_weights(cum::cumeric_t rate)
     {
-        this->weights -= math_api::matrixScalarMultiply(this->deltaWeights, rate);
-        this->biases  -= math_api::vectorScalarMultiply(this->deltaBiases, rate);
+        this->weights -= this->deltaWeights * rate;
+        this->biases  -= this->deltaBiases  * rate;
 
-        this->deltaWeights = cum::Matrix::Zero(math_api::matrixRows(this->deltaWeights), math_api::matrixCols(this->deltaWeights));
-        this->deltaBiases = vector_t::Zero(math_api::vectorSize(this->deltaBiases));
+        this->deltaWeights = cum::Matrix(this->deltaWeights.rows(), this->deltaWeights.cols(), 0);
+        this->deltaBiases = cum::Matrix(this->deltaBiases.rows(), this->deltaBiases.cols(), 0);
     }
 
     std::unique_ptr<LayerBase> Dense::createUnique(int layerSize, const char* func)

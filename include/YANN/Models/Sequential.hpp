@@ -6,7 +6,6 @@
 
 #include "Layers/Layers.hpp"
 #include "Utility/loss.hpp"
-#include "math_api.hpp"
 
 namespace YANN::Models
 {
@@ -22,23 +21,23 @@ namespace YANN::Models
 
         /* Methods */
         
-        matrix_t forward(const matrix_t& input);
+        cum::Matrix forward(const cum::Matrix& input);
         
-        void fit(const matrix_t& X, const matrix_t& Y, numeric_t rate, size_t epochs);
+        void fit(const cum::Matrix& X, const cum::Matrix& Y, cum::cumeric_t rate, size_t epochs);
         void addLayer(LayerPtr layer);
         void clear();
 
         /* Getters */
-        matrix_t getWeights(size_t layer) const;
-        matrix_t getBiases(size_t layer) const;
-        Utils::activation_t getActivation(size_t layer) const;
+        cum::Matrix& getWeights(size_t layer) const;
+        cum::Matrix& getBiases(size_t layer) const;
+        cum::functions::activation_t getActivation(size_t layer) const;
         auto getTopology() const -> Topology;
         auto getLayer(size_t layer) const -> LayerPtr;
         size_t getLayersCount() const;
         
     protected:
-        void backward(const matrix_t& d_output);
-        void updateParams(numeric_t rate);
+        void backward(const cum::Matrix& d_output);
+        void updateParams(cum::cumeric_t rate);
 
         Topology topology;
         Utils::loss::LossFunction loss_function = Utils::loss::LossFunction::mse;

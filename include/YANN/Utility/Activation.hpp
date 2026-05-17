@@ -9,37 +9,16 @@
 
 namespace YANN::Utils
 {
-    class Activation
-    {
-    public:
-        Activation();
+    // struct activation_t
+    // {
+    //     const char* name;
+    //     cum::cumeric_t (*function)(cum::cumeric_t&);
+    //     cum::cumeric_t (*derivative)(cum::cumeric_t&);
 
-        Activation(std::function<cum::cumeric_t(cum::cumeric_t)> function, 
-                   std::function<cum::cumeric_t(cum::cumeric_t)> derivative);
+    //     cum::Matrix (*matFunction)(cum::Matrix&);
+    //     cum::Matrix (*matDerivative)(cum::Matrix&);
+    // };
 
-        Activation(std::function<cum::Matrix(cum::Matrix)> matrixFunction,
-                   std::function<cum::Matrix(cum::Matrix)> matrixDerivative);
-
-        Activation(const char* func);
-
-
-        std::function<cum::cumeric_t(cum::cumeric_t)> function;
-        std::function<cum::cumeric_t(cum::cumeric_t)> derivative;
-
-        std::function<cum::Matrix(cum::Matrix)> matrixFunction;
-        std::function<cum::Matrix(cum::Matrix)> matrixDerivative;
-    };
-
-    struct activation_t
-    {
-        const char* name;
-        cum::cumeric_t (*function)(cum::cumeric_t);
-        cum::cumeric_t (*derivative)(cum::cumeric_t);
-
-        cum::Matrix (*matFunction)(cum::Matrix);
-        cum::Matrix (*matDerivative)(cum::Matrix);
-    };
-
-    activation_t getActivationByName(const char* name);
+    // activation_t getActivationByName(const char* name);
     
 }

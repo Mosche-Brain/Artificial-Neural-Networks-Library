@@ -4,6 +4,7 @@
 
 namespace YANN::Utils
 {
+    /*
     cum::cumeric_t linear(cum::cumeric_t x);
     cum::cumeric_t linear_derivative(cum::cumeric_t x);
 
@@ -24,4 +25,5 @@ namespace YANN::Utils
 
     cum::Matrix softmax(const cum::Matrix& x);
     cum::Matrix softmax_derivative(const cum::Matrix& x);
+    */
 }
