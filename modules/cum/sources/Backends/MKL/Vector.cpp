@@ -43,6 +43,12 @@ namespace cum
         return *this;                                                                                                                      
     }
 
+    Vector& Vector::operator *= (const cumeric_t& scalar)
+    {
+        LinearAlgebra::scaleInPlace(this->data_, scalar, lenght_);
+        return *this;                                                                                                                      
+    }
+
     Vector& Vector::operator /= (const Vector& other)
     {
         LinearAlgebra::divInPlace (this->data_, other.data_, lenght_);
@@ -67,6 +73,13 @@ namespace cum
     {
         Vector result(v.lenght_);
         LinearAlgebra::cwiseProduct(result.data_, v.data_, u.data_, v.lenght_);
+        return result;
+    }
+
+    Vector operator * (const Vector& v, const cumeric_t& scalar)
+    {
+        Vector result(v.lenght_);
+        LinearAlgebra::scaleInPlace(result.data_, scalar, v.lenght_);
         return result;
     }
 

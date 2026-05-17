@@ -87,8 +87,8 @@ namespace YANN::Models::Layers
         this->weights -= this->deltaWeights * rate;
         this->biases  -= this->deltaBiases  * rate;
 
-        this->deltaWeights = cum::Matrix(this->deltaWeights.rows(), this->deltaWeights.cols(), 0);
-        this->deltaBiases = cum::Matrix(this->deltaBiases.rows(), this->deltaBiases.cols(), 0);
+        this->deltaWeights = cum::Matrix(this->deltaWeights.rows(), this->deltaWeights.cols(), 0_c);
+        this->deltaBiases = cum::Matrix(this->deltaBiases.rows(), this->deltaBiases.cols(), 0_c);
     }
 
     std::unique_ptr<LayerBase> Dense::createUnique(int layerSize, const char* func)

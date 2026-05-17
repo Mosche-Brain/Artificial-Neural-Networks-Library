@@ -113,7 +113,7 @@ namespace YANN::Models
             
 
 
-            cum::cumeric_t totalLoss = 0;
+            cum::cumeric_t totalLoss = 0_c;
 
 
 

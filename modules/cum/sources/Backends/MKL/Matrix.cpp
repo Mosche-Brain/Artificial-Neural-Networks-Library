@@ -50,6 +50,22 @@ namespace cum
         return temp;
     }
 
+    Matrix& Matrix::operator = (const Matrix& other)
+    {
+        if(this != &other)
+        {
+            if(rows_ * cols_ != other.rows_ * other.cols_)
+            {
+                sycl::free(data_, library::getQueue());
+                data_ = sycl::malloc_shared<cumeric_t>(other.rows_ * other.cols_, library::getQueue());
+            }
+            rows_ = other.rows_;
+            cols_ = other.cols_;
+            memcpy(data_, other.data_, rows_ * cols_ * sizeof(cumeric_t));
+        }
+        return *this;
+    }
+
 
     Matrix& Matrix::operator += (const Matrix& other)
     {
@@ -75,6 +91,12 @@ namespace cum
         return *this;
     }
 
+    Matrix& Matrix::operator /= (const Matrix& other)
+    {
+        // LinearAlgebra::matDivInPlace(this->data_, other.data_, this->rows_, this->cols_);
+        return *this;
+    }
+
     Matrix& Matrix::operator /= (const cumeric_t& scalar)
     {
         LinearAlgebra::scaleInPlace(this->data_, 1 / scalar, rows_ * cols_);
@@ -86,6 +108,14 @@ namespace cum
         Matrix mat(A.rows_, A.cols_);
 
         LinearAlgebra::matAdd(mat.data_, A.data_, B.data_, A.rows_, A.cols_);
+        return mat;
+    }
+
+    Matrix operator - (const Matrix& A, const Matrix& B)
+    {
+        Matrix mat(A.rows_, A.cols_);
+
+        LinearAlgebra::matSub(mat.data_, A.data_, B.data_, A.rows_, A.cols_);
         return mat;
     }
 
@@ -112,6 +142,14 @@ namespace cum
         
         LinearAlgebra::scaleInPlace(temp.data_, scalar, mat.rows_ * mat.cols_);
         return temp;
+    }
+
+    Matrix operator / (const Matrix& A, const Matrix& B)
+    {
+        Matrix mat(A.rows_, A.cols_);
+
+        // LinearAlgebra::matDiv(mat.data_, A.data_, B.data_, A.rows_, A.cols_);
+        return mat; 
     }
 
     Matrix operator / (const Matrix& mat, const cumeric_t& scalar)

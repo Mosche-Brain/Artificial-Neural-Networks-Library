@@ -8,7 +8,7 @@ set(CMAKE_CXX_EXTENSIONS ON)
 
 # Build options
 option(BUILD_SHARED_LIBS "Build project as shared library" ON)
-option(BUILD_EXAMPLES "Build example programs" OFF)
+option(BUILD_EXAMPLES "Build example programs" ON)
 option(BUILD_PYTHON_BINDINGS "Build Python bindings if pybind11 is available" OFF)
 
 # Math backend options
@@ -20,7 +20,7 @@ option(BUILD_USE_NATIVE "Use native C++ implementation for math operations" OFF)
 # Precision options
 option(CUM_USE_F64 "Use double precision (float 64-bit)" OFF)
 option(CUM_USE_F32 "Use single precision (float 32-bit)" OFF)
-option(CUM_USE_F16 "Use half precision (float 16-bit)" OFF)
+option(CUM_USE_F16 "Use half precision (float 16-bit)" ON)
 option(CUM_USE_BF16 "Use brain float precision (float 16-bit)" OFF)
 option(CUM_USE_Q8 "Use quarter precision (int 8-bit)" OFF)
 
@@ -103,6 +103,7 @@ add_subdirectory(src)
 
 if(BUILD_EXAMPLES)
     add_subdirectory(examples)
+    add_subdirectory(thirdparty/rapidcsv)
 endif()
 
 if(BUILD_PYTHON_BINDINGS)

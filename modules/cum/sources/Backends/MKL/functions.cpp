@@ -62,22 +62,22 @@ namespace cum::functions
         return gelu(x);
     }
     
-    cumeric_t relu(cumeric_t x) { return x > cumeric_t(0.0f) ? x : cumeric_t(0.0f); }
-    cumeric_t relu_derivative(cumeric_t x) { return x > cumeric_t(0.0f) ? cumeric_t(1.0f) : cumeric_t(0.0f); }
+    cumeric_t relu(cumeric_t x) { return x > 0.0_c ? x : 0.0_c; }
+    cumeric_t relu_derivative(cumeric_t x) { return x > 0.0_c ? 1.0_c : 0.0_c; }
     cumeric_t ReLU::operator()(cumeric_t x) const
     {
         return relu(x);
     }
 
     cumeric_t tanh(cumeric_t x) { return tanhf(x); }
-    cumeric_t tanh_derivative(cumeric_t x) { return cumeric_t(1.0f) - x * x; }
+    cumeric_t tanh_derivative(cumeric_t x) { return 1.0_c - x * x; }
     cumeric_t Tanh::operator()(cumeric_t x) const
     {
         return tanhf(x);
     }
 
-    cumeric_t sigmoid(cumeric_t x) { return cumeric_t(1.0f) / (cumeric_t(1.0f) + expf(-x)); }
-    cumeric_t sigmoid_derivative(cumeric_t x) { return x * (cumeric_t(1.0f) - x); }
+    cumeric_t sigmoid(cumeric_t x) { return 1.0_c / (1.0_c + expf(-x)); }
+    cumeric_t sigmoid_derivative(cumeric_t x) { return x * (1.0_c - x); }
     cumeric_t Sigmoid::operator()(cumeric_t x) const
     {
         return sigmoid(x);

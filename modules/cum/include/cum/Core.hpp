@@ -3,12 +3,14 @@
 #include <cstdint>
 #include <stdfloat>
 
-#define CUM_USE_F16
-#define BUILD_USE_MKL
+// #define CUM_USE_F16
+// #define BUILD_USE_MKL
 
 #if defined(BUILD_USE_MKL)
     #include <sycl/sycl.hpp>
 #endif
+
+
 
 namespace cum
 {
@@ -40,4 +42,16 @@ namespace cum
     using cumeric_t = float;
     #warning "F32"
     #endif
+
 } // namespace cum
+
+
+inline cum::cumeric_t operator"" _c(long double val) 
+{
+    return static_cast<cum::cumeric_t>(val);
+}
+
+inline cum::cumeric_t operator"" _c(unsigned long long val) 
+{
+    return static_cast<cum::cumeric_t>(val);
+}

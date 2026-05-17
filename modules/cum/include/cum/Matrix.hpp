@@ -35,10 +35,10 @@ namespace cum
         Matrix& operator += (const Matrix& other);
         Matrix& operator -= (const Matrix& other);
         Matrix& operator *= (const Matrix& other);
-        Matrix& operator /= (const Matrix& other);
-  
         Matrix& operator *= (const cumeric_t& scalar);
+        Matrix& operator /= (const Matrix& other);
         Matrix& operator /= (const cumeric_t& scalar);
+  
 
         friend Matrix operator + (const Matrix& A, const Matrix& B);
         friend Matrix operator - (const Matrix& A, const Matrix& B);

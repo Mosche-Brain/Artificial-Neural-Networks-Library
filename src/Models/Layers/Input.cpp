@@ -1,6 +1,7 @@
 #include "Input.hpp"
 
 #include <cum/functions.hpp>
+#include <cum/Core.hpp>
 
 namespace YANN::Models::Layers
 {
@@ -9,8 +10,8 @@ namespace YANN::Models::Layers
         // this->activation = Utils::Activation("linear");
         cum::functions::getFunctionByName(&this->activation, "linear");
 
-        this->weights = cum::Matrix(layerSize, 1, 1);
-        this->biases  = cum::Matrix(layerSize, 1, 0);
+        this->weights = cum::Matrix(layerSize, 1, 1_c);
+        this->biases  = cum::Matrix(layerSize, 1, 0_c);
 
         this->_layerSize_   = layerSize;
         this->_layerType_   = LAYER_TYPE::INPUT;

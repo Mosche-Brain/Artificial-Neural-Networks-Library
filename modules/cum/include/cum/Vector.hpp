@@ -27,12 +27,14 @@ namespace cum
         Vector& operator += (Matrix& matrix);
         Vector& operator -= (const Vector& other);
         Vector& operator *= (const Vector& other);
+        Vector& operator *= (const cumeric_t& scalar);
         Vector& operator /= (const Vector& other);
 
         friend Vector operator + (const Vector& v, const Vector& u);
         friend Vector operator + (const Vector& v, const Matrix& A);
         friend Vector operator - (const Vector& v, const Vector& u);
         friend Vector operator * (const Vector& v, const Vector& u);
+        friend Vector operator * (const Vector& v, const cumeric_t& scalar);
         // friend Vector operator * (const Vector& v, const Matrix& A);
         friend Vector operator / (const Vector& v, const Vector& u);
     

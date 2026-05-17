@@ -124,11 +124,11 @@ namespace cum::LinearAlgebra
     {
         auto& q = library::getQueue();
         int64_t i;
-        if constexpr (std::is_same_v<cumeric_t, double> || std::is_same_v<cumeric_t, float>)
+        #if defined(CUM_USE_F64) || defined(CUM_USE_F32)
         {
             oneapi::mkl::blas::row_major::iamax(q, N, v, 1, &i);
         }
-        else // use custom argmax kernel
+        #else // use custom argmax kernel
         {
             q.submit([=](sycl::handler& h){
 
@@ -140,6 +140,7 @@ namespace cum::LinearAlgebra
                 });
             }).wait();
         }
+        #endif
         r[0] = v[i];
         q.wait();
     }
@@ -149,11 +150,11 @@ namespace cum::LinearAlgebra
         auto& q = library::getQueue();
         // oneapi::mkl::blas::row_major::iamin(q, N, v, 1, r, {});
         int64_t i;
-        if constexpr (std::is_same_v<cumeric_t, double> || std::is_same_v<cumeric_t, float>)
+        #if defined(CUM_USE_F64) || defined(CUM_USE_F32)
         {
             oneapi::mkl::blas::row_major::iamin(q, N, v, 1, &i);
         }
-        else // use custom argmin kernel
+        #else // use custom argmin kernel
         {
             q.submit([=](sycl::handler& h){
 
@@ -165,6 +166,7 @@ namespace cum::LinearAlgebra
                 });
             }).wait();
         }
+        #endif
         r[0] = v[i];
         q.wait();
     }
@@ -250,11 +252,11 @@ namespace cum::LinearAlgebra
     void transpose(cumeric_t* A, const cumeric_t* B, std::size_t rows, std::size_t cols)
     {
         auto& q = library::getQueue();
-        if constexpr (std::is_same_v<cumeric_t, double> || std::is_same_v<cumeric_t, float>)
+        #if defined(CUM_USE_F64) || defined(CUM_USE_F32)
         {
             oneapi::mkl::blas::row_major::omatcopy(q, oneapi::mkl::transpose::trans, rows, cols, 1.0, B, cols, A, rows);
         }
-        else // use custom transposition kernel
+        #else // use custom transposition kernel
         {
             q.submit([=](sycl::handler& h){
                 h.parallel_for(sycl::range<2>(rows, cols), [=](sycl::id<2> i){
@@ -262,17 +264,18 @@ namespace cum::LinearAlgebra
                 });
             });
         }
+        #endif
         q.wait();
     }
 
     void transposeInPlace(cumeric_t* mat, std::size_t rows, std::size_t cols)
     {
         auto& q = library::getQueue();
-        if constexpr (std::is_same_v<cumeric_t, double> || std::is_same_v<cumeric_t, float>)
+        #if defined(CUM_USE_F64) || defined(CUM_USE_F32)
         {
             oneapi::mkl::blas::row_major::imatcopy(q, oneapi::mkl::transpose::trans, rows, cols, 1.0, mat, cols, rows);
         }
-        else // use custom transposition kernel
+        #else // use custom transposition kernel
         {
             q.submit([=](sycl::handler& h){
                 h.parallel_for(sycl::range<2>(rows, cols), [=](sycl::id<2> i){
@@ -284,34 +287,37 @@ namespace cum::LinearAlgebra
                 });
             });
         }
+        #endif
         q.wait();
     }
 
     void rowwiseSum(cumeric_t* r, const cumeric_t* mat, std::size_t rows, std::size_t cols)
     {
         auto& q = library::getQueue();
-        if constexpr (std::is_same_v<cumeric_t, double> || std::is_same_v<cumeric_t, float>)
+        #if defined(CUM_USE_F64) || defined(CUM_USE_F32)
         {
             oneapi::mkl::blas::row_major::gemv(q, oneapi::mkl::transpose::nontrans, rows, cols, 1.0, mat, cols, library::getOnes(), 1, 0.0, r, 1);
         }
-        else // use standard gemm
+        #else // use standard gemm
         {
             oneapi::mkl::blas::row_major::gemm(q, oneapi::mkl::transpose::nontrans, oneapi::mkl::transpose::nontrans, 1, cols, rows, 1.0, mat, cols, library::getOnes(), 1, 0.0, r, cols);
         }
+        #endif
         q.wait();
     }
 
     void colwiseSum(cumeric_t* r, const cumeric_t* mat, std::size_t rows, std::size_t cols)
     {
         auto& q = library::getQueue();
-        if constexpr (std::is_same_v<cumeric_t, double> || std::is_same_v<cumeric_t, float>)
+        #if defined(CUM_USE_F64) || defined(CUM_USE_F32)
         {
             oneapi::mkl::blas::row_major::gemv(q, oneapi::mkl::transpose::trans, rows, cols, 1.0, mat, cols, library::getOnes(), 1, 0.0, r, 1);
         }
-        else // use standard gemm
+        #else // use standard gemm
         {
             oneapi::mkl::blas::row_major::gemm(q, oneapi::mkl::transpose::trans, oneapi::mkl::transpose::nontrans, cols, 1, rows, 1.0, mat, cols, library::getOnes(), 1, 0.0, r, 1);
         }
+        #endif
         q.wait();
     }
 

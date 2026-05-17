@@ -1,4 +1,5 @@
-file(GLOB EXAMPLE_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
+# file(GLOB EXAMPLE_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
+file(GLOB EXAMPLE_SOURCES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/examples/*.cpp)
 
 foreach(EXAMPLE_SOURCE ${EXAMPLE_SOURCES})
     get_filename_component(EXAMPLE_NAME ${EXAMPLE_SOURCE} NAME_WE)
@@ -14,13 +15,20 @@ foreach(EXAMPLE_SOURCE ${EXAMPLE_SOURCES})
     target_include_directories(${EXAMPLE_NAME} PRIVATE
         ${CMAKE_SOURCE_DIR}/src
         ${CMAKE_SOURCE_DIR}/include
-        /usr/include/eigen3
     )
 
-    target_link_libraries(${EXAMPLE_NAME} PRIVATE ${PROJECT_NAME} OpenMP::OpenMP_CXX)
+    target_link_libraries(${EXAMPLE_NAME} PRIVATE ${PROJECT_NAME} OpenMP::OpenMP_CXX cum::Core)
+
+
+    # if using MKL, link to it
+    if(BUILD_USE_MKL)
+        target_link_libraries(${EXAMPLE_NAME} PRIVATE cum::MKL cum_MKL)
+        target_compile_definitions(${EXAMPLE_NAME} PRIVATE fsycl fPIC)
+        target_compile_options(${EXAMPLE_NAME} PRIVATE -fsycl)
+    endif()
 
     target_compile_options(${EXAMPLE_NAME} PRIVATE
-        -fopenmp
+        -qopenmp
         -march=native
         -Wall
         -O3
