@@ -26,8 +26,6 @@ A lightweight, modular minimalistic and easy to use C++ library for machine lear
 * G++ compiler or clang++
 * CPU with at least one core
 
-
-
 ### 🐧 Linux and GNU/Linux
 
 ```bash
@@ -46,14 +44,33 @@ Probably almost, just like in linux and GNU/Linux (I guess).
 
 ## 💡 Examples of usage
 
+### Building project
+
+```cmake 
+# CMakeLists.txt
+cmake_minimum_required(VERSION 3.10)
+project(gpt69)
+
+add_executable(${project_name} main.cpp)
+target_link_libraries(${project_name} PRIVATE YANN OpenMP::OpenMP_CXX cum::Core)
+
+if(BUILD_USE_MKL)
+    target_link_libraries(${project_name} PRIVATE cum::MKL cum_MKL)
+    target_compile_definitions(${project_name} PRIVATE fsycl fPIC)
+    target_compile_options(${project_name} PRIVATE -fsycl -qopenmp)
+else()
+    target_compile_options(${project_name} PRIVATE -fopenmp)
+endif()
+```
+
 ### Initializing library
 #### Notes
 * If you use different type than `FP32` must define used numeric type and backend before including yann or cum headers for proper compilation or add these definitions as a compile definitions in your CMakeLists.txt or compiler args.
 * Before creating any Yann or cum objects you must call `cum::cum(cum::CUM_DEVICE device)` and pass `AUTO`/`CPU`/`GPU` next to `cum::CUM_DEVICE` due to device your want to use.
-* I din't tested it yet on computers with more than one GPU (integrated or dicrete) so it can select wrong one.
+* I din't tested it yet on computers with more than one GPU (integrated or discrete) so it can select wrong one.
 * Supported numeric types
     * `CUM_USE_F64`
-    * `CUM_USE_F32` (defining is optional)
+    * `CUM_USE_F32` (defining it is optional)
     * `CUM_USE_F16`
     * `CUM_USE_BF16`
     * `CUM_USE_Q8` (didn't tested  yet )
@@ -183,7 +200,7 @@ You can find full API documentation [there (currently not avaible)](www.amogus.o
 * ❌ ROCm support
 * ❌ Q8 and Q4 quantization support
 * ❌ Dynamic computational graphs
-* ❌ Fully working Python binging
+* ❌ Fully working Python binding
 * ❌ Recurent Neural Networks
 * ❌ Transformers
 * ❌ Outperform TensorFlow

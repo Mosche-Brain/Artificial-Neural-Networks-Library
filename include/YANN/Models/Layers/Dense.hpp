@@ -11,7 +11,7 @@ namespace YANN::Models::Layers
         Dense(int layerSize, const char* func);
 
         // cum::Vector forward(const cum::Vector& input) override;
-        cum::Matrix forward(const cum::Matrix& input) override;
+        cum::Matrix& forward(const cum::Matrix& input) override;
         cum::Matrix backward(const cum::Matrix& deltaOutput) override;
         void update_weights(cum::cumeric_t rate) override;
 

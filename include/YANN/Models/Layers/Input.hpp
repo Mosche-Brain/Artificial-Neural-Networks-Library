@@ -8,7 +8,7 @@ namespace YANN::Models::Layers
     public:
         Input(int layerSize);
 
-        cum::Matrix forward(const cum::Matrix& input) override;
+        cum::Matrix& forward(const cum::Matrix& input) override;
         cum::Matrix backward(const cum::Matrix& deltaOutput) override;
         void update_weights(cum::cumeric_t rate) override;
 

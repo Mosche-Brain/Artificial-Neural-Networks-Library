@@ -38,16 +38,16 @@ namespace YANN::Models::Layers
         this->_initialized_ = true;
     }
 
-    cum::Matrix Input::forward(const cum::Matrix& input)
+    cum::Matrix& Input::forward(const cum::Matrix& input)
     {
         this->outputs = input;
-        return input;
+        return this->inputs;
     }
 
     cum::Matrix Input::backward(const cum::Matrix& deltaOutput)
     {
         // return cum::Matrix::Zero(_layerSize_, 1);
-        return cum::Matrix(_layerSize_, 1, static_cast<cum::cumeric_t>(1));
+        return cum::Matrix(_layerSize_, 1, 1._c);
     }
 
     void Input::update_weights(cum::cumeric_t rate)

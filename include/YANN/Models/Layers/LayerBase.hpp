@@ -19,7 +19,7 @@ namespace YANN::Models::Layers
         virtual void initParameters(int layerSize, int inputLenght);
         
         // virtual cum::Vector forward(const cum::Vector& input) = 0;
-        virtual cum::Matrix forward(const cum::Matrix& input) = 0;
+        virtual cum::Matrix& forward(const cum::Matrix& input) = 0;
         virtual cum::Matrix backward(const cum::Matrix& deltaOutput) = 0;
         virtual void update_weights(const cum::cumeric_t rate) = 0;
         

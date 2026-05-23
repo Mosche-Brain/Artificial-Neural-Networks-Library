@@ -66,7 +66,7 @@ namespace YANN::Models
 
         for(size_t i = 1 ; i < topology.size() ; ++i)
         {
-            // std::cout << "bach\n";
+            std::cout << "bach\n";
             topology[i]->forward(topology[i - 1]->Outputs());
         }
 

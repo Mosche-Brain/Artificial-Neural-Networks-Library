@@ -24,13 +24,16 @@ namespace YANN::Models::Layers
         this->_layerType_   = LAYER_TYPE::DENSE;
     }
     
-    cum::Matrix Dense::forward(const cum::Matrix& input)
+    cum::Matrix& Dense::forward(const cum::Matrix& input)
     {
         if(input.size() != weights.cols())
         {
-            // std::cout << "\x1B[31minput size doesn't match with weights\x1B[37m\n";
-            // std::cout << "input " << Utils::logs::show_matrix_dimensions(input) << ", "
-                    //   << "weights " << Utils::logs::show_matrix_dimensions(weights) << '\n';
+            #if defined(ENABLE_DEBUG_OUTPUT)     
+                std::cout << "\x1B[31minput size doesn't match with weights\x1B[37m\n";
+                std::cout << "input " << Utils::logs::show_matrix_dimensions(input) << ", "
+                          << "weights " << Utils::logs::show_matrix_dimensions(weights) << '\n';
+            #endif
+
         }
 
         this->inputs = input;
@@ -38,12 +41,22 @@ namespace YANN::Models::Layers
         // preactivatedOutputs = math_api::matrixColwiseAdd(math_api::matrixMultiply(weights, input), biases);
         // outputs = math_api::matrixTransform(preactivatedOutputs, activation.function);
 
+        #if defined(ENABLE_DEBUG_OUTPUT) 
+            std::cout << "Performing (weights * input) + biases\n";
+        #endif
         preactivatedOutputs = (weights * input) + biases;
-
+        
         // outputs = preactivatedOutputs.transform(cum::LinearAlgebra::relu);
+
+        #if defined(ENABLE_DEBUG_OUTPUT)    
+            std::cout << "Performing activation\n";
+        #endif
         cum::functions::transform(outputs.data(), preactivatedOutputs.data(), activation, preactivatedOutputs.size());
         // preactivatedOutputs = weights
 
+        #if defined(ENABLE_DEBUG_OUTPUT)    
+            std::cout << "forward pass succed\n";
+        #endif
         return outputs;
     }
 
