@@ -4,13 +4,16 @@
 #include <stdfloat>
 
 // #define CUM_USE_F16
-// #define BUILD_USE_MKL
+#define BUILD_USE_MKL
 
 #if defined(BUILD_USE_MKL)
     #include <sycl/sycl.hpp>
 #endif
 
-
+#ifndef CUM_USE_F64 && !defined(CUM_USE_F32) && !defined(CUM_USE_F16) && !defined(CUM_USE_BF16) && !defined(CUM_USE_INT8)
+    #define CUM_USE_F16    
+// #error "Data type didn't specified. Define one of CUM_USE_F64, CUM_USE_F32, CUM_USE_F16, CUM_USE_BF16 or CUM_USE_INT8"
+#endif
 
 namespace cum
 {
@@ -18,8 +21,11 @@ namespace cum
 
     // give info ABOUT used precision in compile time for each precision
     #if defined(CUM_USE_F64)
-    using cumeric_t = double;        
-    #warning "F64"
+        using cumeric_t = double;        
+        #warning "F64"
+    #elif defined(CUM_USE_F32)
+        using cumeric_t = float;
+        #warning "F32"
     #elif defined(CUM_USE_F16)
         #if defined(BUILD_USE_MKL)
         using cumeric_t = sycl::half;
@@ -39,8 +45,8 @@ namespace cum
     using cumeric_t = int8_t;
     #warning "INT8"
     #else
-    using cumeric_t = float;
-    #warning "F32"
+        #warning "Type didn't"
+    // #error "Data type didn't specified"
     #endif
 
 } // namespace cum

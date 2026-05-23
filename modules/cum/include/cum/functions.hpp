@@ -4,13 +4,23 @@
 
 namespace cum::functions
 {
+    enum class ActivationFunction
+    {
+        undefined = 0,
+        linear,
+        gelu,
+        relu,
+        tanh,
+        sigmoid
+    };
     typedef cumeric_t (*function_t)(cumeric_t);
     typedef struct
     {
-        const char* name;
+        ActivationFunction name;
         function_t function;
         function_t derivative;
     } activation_t;    
+
 
     cumeric_t linear(cumeric_t x);
     struct Linear

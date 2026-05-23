@@ -2,10 +2,10 @@
 
 A lightweight, modular minimalistic and easy to use C++ library for machine learning
 
-![C++17](https://img.shields.io/badge/C%2B%2B-17-blue)
+![C++23](https://img.shields.io/badge/C%2B%2B-23-blue)
 ![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Czuowuek-SOS/Artificial-Neural-Networks-Library/graphs/commit-activity)
 
-## Table of content
+## 📜 Content
 
 * [installation](#️-installaction-and-building-process)
 * [examples of usage](#-examples-of-usage)
@@ -17,21 +17,22 @@ A lightweight, modular minimalistic and easy to use C++ library for machine lear
 
 ### requirements
 
-* eigen3 devel
-* OpenMP
-* G++ compiler
 * CMake
+* OpenMP
+* eigen3 or oneAPI or openBLAS
+* G++ compiler or clang++
 * CPU with at least one core
 
 ### 🐧 Linux and GNU/Linux
 
 ```bash
 git clone https://github.com/Czuowuek-SOS/Artificial-Neural-Networks-Library
-cd Artificial-Neural-Networks-Library
+mv Artificial-Neural-Networks-Library Yet-Another-Artificial-Neural-Networks-Library
+cd Yet-Another-Artificial-Neural-Networks-Library
 mkdir build
 cd build
-cmake ..
-make
+cmake .. [options]
+cmake --build . [options]
 ```
 
 ### 🪟 Windows and MacOS
@@ -39,6 +40,22 @@ make
 Probably almost, just like in linux and GNU/Linux (I guess).
 
 ## 💡 Examples of usage
+
+### Initializing library
+
+```cpp
+#include <cum/cum.hpp>
+
+int main()
+{
+    // ↓ you must do this at first
+    cum::cum(cum::CUM_DEVICE::AUTO); // there are also avaible CUM_DEVICE::CPU and CUM_DEVICE::GPU
+    
+    /* some strange code */
+    
+    cum::decum()
+}
+```
 
 ### Creating and fitting sequential model
 
@@ -58,11 +75,12 @@ int main()
                       /* you can also put tanh, gelu, softmax, etc */
 
     int number_of_samples = 4;
-    YANN::matrix_t x_train(number_of_samples, input_layer_size);
-    YANN::matrix_t y_train(number_of_samples, input_layer_size);
+    cum::Matrix x_train(number_of_samples, input_layer_size);
+    cum::Matrix y_train(number_of_samples, input_layer_size);
 
-    /* Filling training data */
-    YANN::numeric_t learning_rate = 0.1;
+    /* Fill training data here */
+
+    cum::cumeric_t learning_rate = 0.1_c;
     int epochs = 200;
 
     model.fit(x_train, y_train, learning_rate, epochs);
@@ -83,11 +101,12 @@ int main()
     Perceptron model(perceptron_input_size, "relu");
 
     int number_of_samples = 2137;
-    YANN::matrix_t x_train(number_of_samples, perceptron_input_size);
-    YANN::vector_t y_train(number_of_samples);
+    cum::Matrix x_train(number_of_samples, perceptron_input_size);
+    cum::Vector y_train(number_of_samples);
 
     /* Filling training data */
-    YANN::numeric_t learning_rate = 0.1;
+
+    cum::cumeric_t learning_rate = 0.1_c;
     int epochs = 200;
 
     model.fit(x_train, y_train, learning_rate, epochs);
@@ -107,18 +126,17 @@ MyLayer::MyLayer(int layerSize)
     this->_initialized_ = true;
 }
 
-YANN::matrix_t MyLayer::forward(const YANN::matrix_t& input)
+cum::Matrix MyLayer::forward(const cum::Matrix& input)
 {
-    this->outputs = /* ... */;
-    return outputs;   
+    /* your implementation of forward pass */
 }
 
-YANN::matrix_t MyLayer::backward(const YANN::matrix_t deltaOutput)
+cum::Matrix MyLayer::backward(const cum::Matrix deltaOutput)
 {
     /* your implementation of backward pass */
 }
 
-void MyLayer::update_weights(YANN::numeric_t rate)
+void MyLayer::update_weights(cum::cumeric_t rate)
 {
     /* Your method to updating weights */
 }
@@ -138,13 +156,16 @@ You can find full API documentation [there (currently not avaible)](www.amogus.o
 * ✅ Dense layers
 * ✅ Working backward pass
 * ✅ Adjustable numbers precision
+* ✅ FP16 and BF16 supported
 * ✅ Parallel CPU Computatiopns
+* ✅ GPU support
+* ✅ OneAPI support
 * ⚠️ [Dedicated graphical envionment](https://github.com/Czuowuek-SOS/MLStudio) (work in progress)
-* ❌ OneAPI support
 * ❌ CUDA support
 * ❌ ROCm support
-* ❌ Computational graphs
-* ❌ Python API
+* ❌ Q8 and Q4 quantization support
+* ❌ Dynamic computational graphs
+* ❌ Fully working Python binging
 * ❌ Recurent Neural Networks
 * ❌ Transformers
 * ❌ Outperform TensorFlow
@@ -152,9 +173,10 @@ You can find full API documentation [there (currently not avaible)](www.amogus.o
 
 ## 🧷 Credits and used technologies
 
-* [Eigen3](https://eigen.tuxfamily.org/) - C++ Linear Algebra library
 * [OpenMP](https://www.openmp.org/) - Multiprocessing interface for C/C++
-* [Nlohmann JSON](https://github.com/nlohmann/json) - C++ library for parsing JSON
+* [Eigen3](https://eigen.tuxfamily.org/) - C++ Linear Algebra library
+* [oneAPI](https://oneapi.io/) - Open platform for heterogenous computing
+* [Nlohmann JSON](https://github.com/nlohmann/json) - C++ library for parsing JSON format
 * [Sarvel](https://sarvel.xyz/) - Literally Digital God
 * [Jakub Gładysz](https://sarvel.xyz/) - PhD at PWr
 
@@ -164,4 +186,4 @@ You can find full API documentation [there (currently not avaible)](www.amogus.o
 
 * Name refactoring tasks
 * Generating boilerplate
-* Basic inline code autocompletion
+* Basic inline code autocompletion from free github copilot credits

@@ -17,6 +17,10 @@ namespace YANN::Models
 
     Sequential::Sequential(std::initializer_list<std::unique_ptr<Layers::LayerBase>> newTopology)
     {
+        #if defined(ENABLE_DEBUG_OUTPUT)
+        if(runtime_config::DEBUG_VEBOSITY >= 2)
+            std::cout << "Initializing Sequential model with " << newTopology.size() << " layers...\n";
+        #endif
         topology.reserve(newTopology.size()); 
         for(auto& ptr : newTopology) 
         {

@@ -3,6 +3,10 @@
 #include <math.h>
 #include <string.h>
 
+#if defined(BUILD_DEBUG_OUTPUT)
+    #include <iostream>
+#endif
+
 namespace cum::functions
 {
     cumeric_t linear(cumeric_t x) { return x; }
@@ -21,8 +25,8 @@ namespace cum::functions
         #define M_SQRT_2_OVER_PI 0.79788456f
         #define M_SQRT_2_OVER_PI_A 0.044715f
         #elif defined(BUILD_USE_F16)
-        #define M_SQRT_2_OVER_PI 0.79788456f16
-        #define M_SQRT_2_OVER_PI_A 0.044715f16
+        #define M_SQRT_2_OVER_PI 0.79788456_c
+        #define M_SQRT_2_OVER_PI_A 0.044715_c
         #elif defined(BUILD_USE_BF16)
         #define M_SQRT_2_OVER_PI 0.79788456bf16
         #define M_SQRT_2_OVER_PI_A 0.044715bf16
@@ -31,7 +35,7 @@ namespace cum::functions
         #define M_SQRT_2_OVER_PI_A 0.044715f
         #endif
 
-        return 0.5f * x * (1.0f + tanhf(M_SQRT_2_OVER_PI * (x + M_SQRT_2_OVER_PI_A * x * x * x)));
+        return 0.5_c * x * (1.0_c + tanhf(M_SQRT_2_OVER_PI * (x + M_SQRT_2_OVER_PI_A * x * x * x)));
     }
     cumeric_t GELU_derivative(cumeric_t x)
     {
@@ -42,8 +46,8 @@ namespace cum::functions
         #define M_SQRT_2_OVER_PI 0.79788456f
         #define M_SQRT_2_OVER_PI_A 0.044715f
         #elif defined(BUILD_USE_F16)
-        #define M_SQRT_2_OVER_PI 0.79788456f16
-        #define M_SQRT_2_OVER_PI_A 0.044715f16
+        #define M_SQRT_2_OVER_PI 0.79788456_c
+        #define M_SQRT_2_OVER_PI_A 0.044715_c
         #elif defined(BUILD_USE_BF16)
         #define M_SQRT_2_OVER_PI 0.79788456bf16
         #define M_SQRT_2_OVER_PI_A 0.044715bf16
@@ -55,7 +59,7 @@ namespace cum::functions
         cumeric_t tanh_arg = M_SQRT_2_OVER_PI * (x + M_SQRT_2_OVER_PI_A * x * x * x);
         cumeric_t tanh_val = tanhf(tanh_arg);
         cumeric_t sech_squared = 1 - tanh_val * tanh_val;
-        return 0.5f * (1.0f + tanh_val) + (M_SQRT_2_OVER_PI * (x + 3 * M_SQRT_2_OVER_PI_A * x * x) * sech_squared) / 6.0f;
+        return 0.5_c * (1.0_c + tanh_val) + (M_SQRT_2_OVER_PI * (x + 3 * M_SQRT_2_OVER_PI_A * x * x) * sech_squared) / 6.0_c;
     }
     cumeric_t GELU::operator()(cumeric_t x) const
     {
@@ -121,27 +125,27 @@ namespace cum::functions
     {
         if(strcmp(name, "linear") == 0)
         {
-            *activation = { "linear", linear, linear_derivative };
+            activation = new activation_t{ ActivationFunction::linear, linear, linear_derivative };
         }
         else if(strcmp(name, "gelu") == 0)
         {
-            *activation = { "gelu", gelu, GELU_derivative };
+            *activation = { ActivationFunction::gelu, gelu, GELU_derivative };
         }
         else if(strcmp(name, "relu") == 0)
         {
-            *activation = { "relu", relu, relu_derivative };
+            *activation = { ActivationFunction::relu, relu, relu_derivative };
         }
         else if(strcmp(name, "tanh") == 0)
         {
-            *activation = { "tanh", tanh, tanh_derivative };
+            *activation = { ActivationFunction::tanh, tanh, tanh_derivative };
         }
         else if(strcmp(name, "sigmoid") == 0)
         {
-            *activation = { "sigmoid", sigmoid, sigmoid_derivative };
+            *activation = { ActivationFunction::sigmoid, sigmoid, sigmoid_derivative };
         }
         else
         {
-            *activation = { nullptr, nullptr, nullptr };
+            *activation = { ActivationFunction::undefined, nullptr, nullptr };
         }
     }
 

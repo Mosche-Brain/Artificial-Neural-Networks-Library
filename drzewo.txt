@@ -1,0 +1,555 @@
+.
+├── bindings
+│   ├── pyproject.toml
+│   ├── python
+│   │   ├── CMakeLists.txt
+│   │   └── _yann.cpp
+│   └── setup.py
+├── build
+│   ├── CMakeCache.txt
+│   ├── CMakeFiles
+│   │   ├── 4.3.2
+│   │   │   ├── CMakeCCompiler.cmake
+│   │   │   ├── CMakeCXXCompiler.cmake
+│   │   │   ├── CMakeDetermineCompilerABI_C.bin
+│   │   │   ├── CMakeDetermineCompilerABI_CXX.bin
+│   │   │   ├── CMakeSystem.cmake
+│   │   │   ├── CompilerIdC
+│   │   │   │   ├── a.out
+│   │   │   │   ├── CMakeCCompilerId.c
+│   │   │   │   └── tmp
+│   │   │   └── CompilerIdCXX
+│   │   │       ├── a.out
+│   │   │       ├── CMakeCXXCompilerId.cpp
+│   │   │       └── tmp
+│   │   ├── cmake.check_cache
+│   │   ├── CMakeConfigureLog.yaml
+│   │   ├── CMakeDirectoryInformation.cmake
+│   │   ├── cmake.verify_globs
+│   │   ├── FindOpenMP
+│   │   │   └── ompver_CXX.bin
+│   │   ├── InstallScripts.json
+│   │   ├── Makefile2
+│   │   ├── Makefile.cmake
+│   │   ├── pkgRedirects
+│   │   ├── progress.marks
+│   │   ├── TargetDirectories.txt
+│   │   └── VerifyGlobs.cmake
+│   ├── cmake_install.cmake
+│   ├── compile_commands.json
+│   ├── examples
+│   │   ├── CMakeFiles
+│   │   │   ├── CMakeDirectoryInformation.cmake
+│   │   │   ├── iris.dir
+│   │   │   │   ├── build.make
+│   │   │   │   ├── cmake_clean.cmake
+│   │   │   │   ├── compiler_depend.make
+│   │   │   │   ├── compiler_depend.ts
+│   │   │   │   ├── DependInfo.cmake
+│   │   │   │   ├── depend.make
+│   │   │   │   ├── flags.make
+│   │   │   │   ├── iris.cpp.o
+│   │   │   │   ├── iris.cpp.o.d
+│   │   │   │   ├── link.d
+│   │   │   │   ├── link.txt
+│   │   │   │   └── progress.make
+│   │   │   ├── mmul.dir
+│   │   │   │   ├── build.make
+│   │   │   │   ├── cmake_clean.cmake
+│   │   │   │   ├── compiler_depend.make
+│   │   │   │   ├── compiler_depend.ts
+│   │   │   │   ├── DependInfo.cmake
+│   │   │   │   ├── depend.make
+│   │   │   │   ├── flags.make
+│   │   │   │   ├── link.d
+│   │   │   │   ├── link.txt
+│   │   │   │   ├── mmul.cpp.o
+│   │   │   │   ├── mmul.cpp.o.d
+│   │   │   │   └── progress.make
+│   │   │   ├── mnist.dir
+│   │   │   │   ├── build.make
+│   │   │   │   ├── cmake_clean.cmake
+│   │   │   │   ├── compiler_depend.make
+│   │   │   │   ├── compiler_depend.ts
+│   │   │   │   ├── DependInfo.cmake
+│   │   │   │   ├── depend.make
+│   │   │   │   ├── flags.make
+│   │   │   │   ├── link.d
+│   │   │   │   ├── link.txt
+│   │   │   │   ├── mnist.cpp.o
+│   │   │   │   ├── mnist.cpp.o.d
+│   │   │   │   └── progress.make
+│   │   │   ├── ngram_example.dir
+│   │   │   │   ├── build.make
+│   │   │   │   ├── cmake_clean.cmake
+│   │   │   │   ├── compiler_depend.make
+│   │   │   │   ├── compiler_depend.ts
+│   │   │   │   ├── DependInfo.cmake
+│   │   │   │   ├── depend.make
+│   │   │   │   ├── flags.make
+│   │   │   │   ├── link.d
+│   │   │   │   ├── link.txt
+│   │   │   │   ├── ngram_example.cpp.o
+│   │   │   │   ├── ngram_example.cpp.o.d
+│   │   │   │   └── progress.make
+│   │   │   ├── playground.dir
+│   │   │   │   ├── build.make
+│   │   │   │   ├── cmake_clean.cmake
+│   │   │   │   ├── compiler_depend.make
+│   │   │   │   ├── compiler_depend.ts
+│   │   │   │   ├── DependInfo.cmake
+│   │   │   │   ├── depend.make
+│   │   │   │   ├── flags.make
+│   │   │   │   ├── link.d
+│   │   │   │   ├── link.txt
+│   │   │   │   ├── playground.cpp.o
+│   │   │   │   ├── playground.cpp.o.d
+│   │   │   │   └── progress.make
+│   │   │   ├── progress.marks
+│   │   │   ├── sine_aproximation.dir
+│   │   │   │   ├── build.make
+│   │   │   │   ├── cmake_clean.cmake
+│   │   │   │   ├── compiler_depend.make
+│   │   │   │   ├── compiler_depend.ts
+│   │   │   │   ├── DependInfo.cmake
+│   │   │   │   ├── depend.make
+│   │   │   │   ├── flags.make
+│   │   │   │   ├── link.d
+│   │   │   │   ├── link.txt
+│   │   │   │   ├── progress.make
+│   │   │   │   ├── sine_aproximation.cpp.o
+│   │   │   │   └── sine_aproximation.cpp.o.d
+│   │   │   ├── sleep_based_predictions.dir
+│   │   │   │   ├── build.make
+│   │   │   │   ├── cmake_clean.cmake
+│   │   │   │   ├── compiler_depend.make
+│   │   │   │   ├── compiler_depend.ts
+│   │   │   │   ├── DependInfo.cmake
+│   │   │   │   ├── depend.make
+│   │   │   │   ├── flags.make
+│   │   │   │   ├── link.d
+│   │   │   │   ├── link.txt
+│   │   │   │   ├── progress.make
+│   │   │   │   ├── sleep_based_predictions.cpp.o
+│   │   │   │   └── sleep_based_predictions.cpp.o.d
+│   │   │   └── xor_problem.dir
+│   │   │       ├── build.make
+│   │   │       ├── cmake_clean.cmake
+│   │   │       ├── compiler_depend.make
+│   │   │       ├── compiler_depend.ts
+│   │   │       ├── DependInfo.cmake
+│   │   │       ├── depend.make
+│   │   │       ├── flags.make
+│   │   │       ├── link.d
+│   │   │       ├── link.txt
+│   │   │       ├── progress.make
+│   │   │       ├── xor_problem.cpp.o
+│   │   │       └── xor_problem.cpp.o.d
+│   │   ├── cmake_install.cmake
+│   │   ├── iris
+│   │   ├── Makefile
+│   │   ├── mmul
+│   │   ├── mnist
+│   │   ├── ngram_example
+│   │   ├── playground
+│   │   ├── sine_aproximation
+│   │   ├── sleep_based_predictions
+│   │   └── xor_problem
+│   ├── Makefile
+│   ├── modules
+│   │   └── cum
+│   │       ├── CMakeFiles
+│   │       │   ├── CMakeDirectoryInformation.cmake
+│   │       │   ├── example.dir
+│   │       │   │   ├── build.make
+│   │       │   │   ├── cmake_clean.cmake
+│   │       │   │   ├── compiler_depend.internal
+│   │       │   │   ├── compiler_depend.make
+│   │       │   │   ├── compiler_depend.ts
+│   │       │   │   ├── DependInfo.cmake
+│   │       │   │   ├── depend.make
+│   │       │   │   ├── examples
+│   │       │   │   │   ├── test.cpp.o
+│   │       │   │   │   └── test.cpp.o.d
+│   │       │   │   ├── flags.make
+│   │       │   │   ├── link.d
+│   │       │   │   ├── link.txt
+│   │       │   │   └── progress.make
+│   │       │   └── progress.marks
+│   │       ├── cmake_install.cmake
+│   │       ├── example
+│   │       ├── Makefile
+│   │       └── sources
+│   │           ├── Backends
+│   │           │   └── MKL
+│   │           │       ├── CMakeFiles
+│   │           │       │   ├── CMakeDirectoryInformation.cmake
+│   │           │       │   ├── cum_MKL.dir
+│   │           │       │   │   ├── build.make
+│   │           │       │   │   ├── cmake_clean.cmake
+│   │           │       │   │   ├── cmake_clean_target.cmake
+│   │           │       │   │   ├── compiler_depend.internal
+│   │           │       │   │   ├── compiler_depend.make
+│   │           │       │   │   ├── compiler_depend.ts
+│   │           │       │   │   ├── cum.cpp.o
+│   │           │       │   │   ├── cum.cpp.o.d
+│   │           │       │   │   ├── cumMKL.cpp.o
+│   │           │       │   │   ├── cumMKL.cpp.o.d
+│   │           │       │   │   ├── DependInfo.cmake
+│   │           │       │   │   ├── depend.make
+│   │           │       │   │   ├── flags.make
+│   │           │       │   │   ├── functions.cpp.o
+│   │           │       │   │   ├── functions.cpp.o.d
+│   │           │       │   │   ├── LinearAlgebra.cpp.o
+│   │           │       │   │   ├── LinearAlgebra.cpp.o.d
+│   │           │       │   │   ├── link.txt
+│   │           │       │   │   ├── Matrix.cpp.o
+│   │           │       │   │   ├── Matrix.cpp.o.d
+│   │           │       │   │   ├── progress.make
+│   │           │       │   │   ├── Vector.cpp.o
+│   │           │       │   │   └── Vector.cpp.o.d
+│   │           │       │   └── progress.marks
+│   │           │       ├── cmake_install.cmake
+│   │           │       ├── libcum_MKL.a
+│   │           │       └── Makefile
+│   │           ├── CMakeFiles
+│   │           │   ├── CMakeDirectoryInformation.cmake
+│   │           │   ├── cum_Core.dir
+│   │           │   │   ├── build.make
+│   │           │   │   ├── cmake_clean.cmake
+│   │           │   │   ├── cmake_clean_target.cmake
+│   │           │   │   ├── compiler_depend.internal
+│   │           │   │   ├── compiler_depend.make
+│   │           │   │   ├── compiler_depend.ts
+│   │           │   │   ├── Core.cpp.o
+│   │           │   │   ├── Core.cpp.o.d
+│   │           │   │   ├── DependInfo.cmake
+│   │           │   │   ├── depend.make
+│   │           │   │   ├── flags.make
+│   │           │   │   ├── link.txt
+│   │           │   │   └── progress.make
+│   │           │   └── progress.marks
+│   │           ├── cmake_install.cmake
+│   │           ├── libcum_Core.a
+│   │           └── Makefile
+│   ├── src
+│   │   ├── CMakeFiles
+│   │   │   ├── CMakeDirectoryInformation.cmake
+│   │   │   ├── progress.marks
+│   │   │   └── YANN.dir
+│   │   │       ├── build.make
+│   │   │       ├── cmake_clean.cmake
+│   │   │       ├── compiler_depend.internal
+│   │   │       ├── compiler_depend.make
+│   │   │       ├── compiler_depend.ts
+│   │   │       ├── DependInfo.cmake
+│   │   │       ├── depend.make
+│   │   │       ├── flags.make
+│   │   │       ├── link.d
+│   │   │       ├── link.txt
+│   │   │       ├── Models
+│   │   │       │   ├── Layers
+│   │   │       │   │   ├── Dense.cpp.o
+│   │   │       │   │   ├── Dense.cpp.o.d
+│   │   │       │   │   ├── Input.cpp.o
+│   │   │       │   │   ├── Input.cpp.o.d
+│   │   │       │   │   ├── LayerBase.cpp.o
+│   │   │       │   │   └── LayerBase.cpp.o.d
+│   │   │       │   ├── NGram.cpp.o
+│   │   │       │   ├── NGram.cpp.o.d
+│   │   │       │   ├── Perceptron.cpp.o
+│   │   │       │   ├── Perceptron.cpp.o.d
+│   │   │       │   ├── Sequential.cpp.o
+│   │   │       │   └── Sequential.cpp.o.d
+│   │   │       ├── progress.make
+│   │   │       ├── runtime_config.cpp.o
+│   │   │       ├── runtime_config.cpp.o.d
+│   │   │       └── Utility
+│   │   │           ├── Activation.cpp.o
+│   │   │           ├── Activation.cpp.o.d
+│   │   │           ├── FileIO.cpp.o
+│   │   │           ├── FileIO.cpp.o.d
+│   │   │           ├── functions.cpp.o
+│   │   │           ├── functions.cpp.o.d
+│   │   │           ├── logs.cpp.o
+│   │   │           ├── logs.cpp.o.d
+│   │   │           ├── loss.cpp.o
+│   │   │           ├── loss.cpp.o.d
+│   │   │           ├── OneHot.cpp.o
+│   │   │           └── OneHot.cpp.o.d
+│   │   ├── cmake_install.cmake
+│   │   ├── libYANN.so
+│   │   └── Makefile
+│   └── thirdparty
+│       └── rapidcsv
+│           ├── CMakeFiles
+│           │   ├── CMakeDirectoryInformation.cmake
+│           │   └── progress.marks
+│           ├── cmake_install.cmake
+│           └── Makefile
+├── CMakeLists.txt
+├── docs
+│   └── USING-MATH-API.md
+├── drzewo.txt
+├── examples
+│   ├── CMakeLists.txt
+│   ├── iris.cpp
+│   ├── mmul.cpp
+│   ├── mnist.cpp
+│   ├── ngram_example.cpp
+│   ├── playground.cpp
+│   ├── plot.gp
+│   ├── sine_aproximation.cpp
+│   ├── sleep_based_predictions.cpp
+│   └── xor_problem.cpp
+├── include
+│   └── YANN
+│       ├── build_config.hpp
+│       ├── Models
+│       │   ├── Layers
+│       │   │   ├── Conv2D.hpp
+│       │   │   ├── Dense.hpp
+│       │   │   ├── Input.hpp
+│       │   │   ├── LayerBase.hpp
+│       │   │   ├── LayerData.hpp
+│       │   │   ├── Layer.hpp
+│       │   │   ├── Layers.hpp
+│       │   │   └── LayerType.hpp
+│       │   ├── ModelBase.hpp
+│       │   ├── NGram.hpp
+│       │   ├── Perceptron.hpp
+│       │   └── Sequential.hpp
+│       ├── runtime_config.hpp
+│       ├── Utility
+│       │   ├── Activation.hpp
+│       │   ├── FileIO.hpp
+│       │   ├── functions.hpp
+│       │   ├── logs.hpp
+│       │   ├── loss.hpp
+│       │   ├── OneHot.hpp
+│       │   └── stlCompatibility.hpp
+│       └── YANN.hpp
+├── LICENSE-APACHE-2.0
+├── modules
+│   └── cum
+│       ├── build
+│       ├── CMakeLists.txt
+│       ├── examples
+│       │   └── test.cpp
+│       ├── include
+│       │   └── cum
+│       │       ├── Core.hpp
+│       │       ├── cum.hpp
+│       │       ├── functions.hpp
+│       │       ├── LinearAlgebra.hpp
+│       │       ├── Matrix.hpp
+│       │       └── Vector.hpp
+│       └── sources
+│           ├── Backends
+│           │   ├── CBLAS
+│           │   │   └── CMakeLists.txt
+│           │   ├── MKL
+│           │   │   ├── CMakeLists.txt
+│           │   │   ├── cum.cpp
+│           │   │   ├── cumMKL.cpp
+│           │   │   ├── cumMKL.hpp
+│           │   │   ├── functions.cpp
+│           │   │   ├── LinearAlgebra.cpp
+│           │   │   ├── Matrix.cpp
+│           │   │   └── Vector.cpp
+│           │   └── Native
+│           │       └── CMakeLists.txt
+│           ├── CMakeLists.txt
+│           └── Core.cpp
+├── python
+│   └── pyann
+│       ├── __init__.py
+│       └── _yann.pyi
+├── README.md
+├── src
+│   ├── CMakeLists.txt
+│   ├── Models
+│   │   ├── Layers
+│   │   │   ├── Dense.cpp
+│   │   │   ├── Input.cpp
+│   │   │   └── LayerBase.cpp
+│   │   ├── NGram.cpp
+│   │   ├── Perceptron.cpp
+│   │   └── Sequential.cpp
+│   ├── runtime_config.cpp
+│   └── Utility
+│       ├── Activation.cpp
+│       ├── FileIO.cpp
+│       ├── functions.cpp
+│       ├── logs.cpp
+│       ├── loss.cpp
+│       ├── OneHot.cpp
+│       └── stlCompatibility.ipp
+└── thirdparty
+    └── rapidcsv
+        ├── cmake
+        │   └── rapidcsvConfig.cmake.in
+        ├── CMakeLists.txt
+        ├── doc
+        │   ├── rapidcsv_Converter.md
+        │   ├── rapidcsv_ConverterParams.md
+        │   ├── rapidcsv_Document.md
+        │   ├── rapidcsv_LabelParams.md
+        │   ├── rapidcsv_LineReaderParams.md
+        │   ├── rapidcsv_no_converter.md
+        │   ├── rapidcsv_SeparatorParams.md
+        │   └── README.md
+        ├── examples
+        │   ├── cmake-add-subdirectory
+        │   │   ├── CMakeLists.txt
+        │   │   ├── README.md
+        │   │   └── src
+        │   │       └── exprog2.cpp
+        │   ├── cmake-fetchcontent
+        │   │   ├── CMakeLists.txt
+        │   │   ├── README.md
+        │   │   └── src
+        │   │       └── exprog.cpp
+        │   ├── cmake-find-package
+        │   │   ├── CMakeLists.txt
+        │   │   ├── README.md
+        │   │   └── src
+        │   │       └── exprog3.cpp
+        │   ├── colhdr.csv
+        │   ├── colrowhdr.csv
+        │   ├── ex001.cpp
+        │   ├── ex002.cpp
+        │   ├── ex003.cpp
+        │   ├── ex004.cpp
+        │   ├── ex005.cpp
+        │   ├── ex006.cpp
+        │   ├── ex007.cpp
+        │   ├── ex008.cpp
+        │   ├── ex009.cpp
+        │   ├── nohdr.csv
+        │   ├── rowhdr.csv
+        │   └── semi.csv
+        ├── LICENSE
+        ├── make.sh
+        ├── README.md
+        ├── src
+        │   └── rapidcsv.h
+        ├── tests
+        │   ├── chi-utf16.csv
+        │   ├── msft.csv
+        │   ├── perftest.h
+        │   ├── ptest001.cpp
+        │   ├── ptest002.cpp
+        │   ├── test001.cpp
+        │   ├── test002.cpp
+        │   ├── test003.cpp
+        │   ├── test004.cpp
+        │   ├── test005.cpp
+        │   ├── test006.cpp
+        │   ├── test007.cpp
+        │   ├── test008.cpp
+        │   ├── test009.cpp
+        │   ├── test010.cpp
+        │   ├── test011.cpp
+        │   ├── test012.cpp
+        │   ├── test013.cpp
+        │   ├── test014.cpp
+        │   ├── test015.cpp
+        │   ├── test016.cpp
+        │   ├── test017.cpp
+        │   ├── test018.cpp
+        │   ├── test019.cpp
+        │   ├── test020.cpp
+        │   ├── test021.cpp
+        │   ├── test022.cpp
+        │   ├── test023.cpp
+        │   ├── test024.cpp
+        │   ├── test025.cpp
+        │   ├── test026.cpp
+        │   ├── test027.cpp
+        │   ├── test028.cpp
+        │   ├── test029.cpp
+        │   ├── test030.cpp
+        │   ├── test031.cpp
+        │   ├── test032.cpp
+        │   ├── test033.cpp
+        │   ├── test034.cpp
+        │   ├── test035.cpp
+        │   ├── test036.cpp
+        │   ├── test037.cpp
+        │   ├── test038.cpp
+        │   ├── test039.cpp
+        │   ├── test040b.cpp
+        │   ├── test040.cpp
+        │   ├── test041.cpp
+        │   ├── test042.cpp
+        │   ├── test043.cpp
+        │   ├── test044.cpp
+        │   ├── test045.cpp
+        │   ├── test046.cpp
+        │   ├── test047.cpp
+        │   ├── test048.cpp
+        │   ├── test049.cpp
+        │   ├── test050.cpp
+        │   ├── test051.cpp
+        │   ├── test052.cpp
+        │   ├── test053.cpp
+        │   ├── test054.cpp
+        │   ├── test055.cpp
+        │   ├── test056.cpp
+        │   ├── test057.cpp
+        │   ├── test058.cpp
+        │   ├── test059.cpp
+        │   ├── test060.cpp
+        │   ├── test061.cpp
+        │   ├── test062.cpp
+        │   ├── test063.cpp
+        │   ├── test064.cpp
+        │   ├── test065.cpp
+        │   ├── test066.cpp
+        │   ├── test067.cpp
+        │   ├── test068.cpp
+        │   ├── test069.cpp
+        │   ├── test070.cpp
+        │   ├── test071.cpp
+        │   ├── test072.cpp
+        │   ├── test073.cpp
+        │   ├── test074.cpp
+        │   ├── test075.cpp
+        │   ├── test076.cpp
+        │   ├── test077.cpp
+        │   ├── test078.cpp
+        │   ├── test079.cpp
+        │   ├── test080.cpp
+        │   ├── test081.cpp
+        │   ├── test082.cpp
+        │   ├── test083.cpp
+        │   ├── test084.cpp
+        │   ├── test085.cpp
+        │   ├── test086.cpp
+        │   ├── test087.cpp
+        │   ├── test088.cpp
+        │   ├── test089.cpp
+        │   ├── test090.cpp
+        │   ├── test091.cpp
+        │   ├── test092.cpp
+        │   ├── test093.cpp
+        │   ├── test094.cpp
+        │   ├── test095.cpp
+        │   ├── test096.cpp
+        │   ├── test097.cpp
+        │   ├── test098.cpp
+        │   ├── test099.cpp
+        │   ├── test100.cpp
+        │   ├── test101.cpp
+        │   ├── test102.cpp
+        │   ├── test103.cpp
+        │   ├── test104.cpp
+        │   ├── test105.cpp
+        │   ├── test106.cpp
+        │   ├── test107.cpp
+        │   └── unittest.h
+        ├── uncrustify.cfg
+        └── winmake.bat
+
+80 directories, 473 files

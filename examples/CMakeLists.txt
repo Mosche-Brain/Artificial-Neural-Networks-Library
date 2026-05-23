@@ -27,13 +27,20 @@ foreach(EXAMPLE_SOURCE ${EXAMPLE_SOURCES})
         target_compile_options(${EXAMPLE_NAME} PRIVATE -fsycl)
     endif()
 
+    # if(CUM_USE_F16)
+    #     target_compile_definitions(${EXAMPLE_NAME} PRIVATE CUM_USE_F16)
+    # endif()
+
     target_compile_options(${EXAMPLE_NAME} PRIVATE
         -qopenmp
         -march=native
         -Wall
         -O3
         -ffast-math
+        # ${YANN_COMPILE_DEFINITIONS}
     )
+
+    # target_compile_definitions(${EXAMPLE_NAME} PRIVATE ${YANN_COMPILE_DEFINITIONS})
 
     install(TARGETS ${EXAMPLE_NAME}
         RUNTIME DESTINATION build/examples

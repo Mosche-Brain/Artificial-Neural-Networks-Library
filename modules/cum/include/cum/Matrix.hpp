@@ -31,6 +31,7 @@ namespace cum
         const cumeric_t& operator () (const std::size_t row, const std::size_t col) const { return data_[get_idx(row, col)]; };
 
         Matrix& operator = (const Matrix& other);
+        // Matrix& operator = (const Matrix other);
 
         Matrix& operator += (const Matrix& other);
         Matrix& operator -= (const Matrix& other);

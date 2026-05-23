@@ -10,6 +10,7 @@ set(CMAKE_CXX_EXTENSIONS ON)
 option(BUILD_SHARED_LIBS "Build project as shared library" ON)
 option(BUILD_EXAMPLES "Build example programs" ON)
 option(BUILD_PYTHON_BINDINGS "Build Python bindings if pybind11 is available" OFF)
+option(ENABLE_DEBUG_OUTPUT "Enable debug logs" ON)
 
 # Math backend options
 option(BUILD_USE_EIGEN "Use Eigen library for math operations" OFF)

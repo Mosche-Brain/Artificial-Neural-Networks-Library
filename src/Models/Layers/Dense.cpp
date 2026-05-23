@@ -14,6 +14,10 @@ namespace YANN::Models::Layers
     // Dense::Dense(int layerSize, int inputWidth, const char* func) : LayerBase()
     Dense::Dense(int layerSize, const char* func)
     {
+        #if defined(ENABLE_DEBUG_OUTPUT)
+        // if(runtime_config::DEBUG_VEBOSITY >= 3)
+            std::cout << "\t\t\t" << "Initializing Dense layer with " << layerSize << " neurons and " << func << " activation function...\n";
+        #endif
         cum::functions::getFunctionByName(&activation, func);
         _layerSize_ = layerSize;
 
