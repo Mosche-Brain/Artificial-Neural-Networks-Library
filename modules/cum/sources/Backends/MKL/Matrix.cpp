@@ -52,16 +52,23 @@ namespace cum
 
     Matrix& Matrix::operator = (const Matrix& other)
     {
-        std::cout << "= called\n"
         if(this != &other)
         {
-            if(rows_ * cols_ != other.rows_ * other.cols_)
+            if(data_ == nullptr)
             {
+                data_ = sycl::malloc_shared<cumeric_t>(other.rows_ * other.cols_, library::getQueue());
+                
+            }
+            else if((rows_ * cols_ != other.rows_ * other.cols_))
+            {
+
                 sycl::free(data_, library::getQueue());
                 data_ = sycl::malloc_shared<cumeric_t>(other.rows_ * other.cols_, library::getQueue());
             }
+
             rows_ = other.rows_;
             cols_ = other.cols_;
+            
             memcpy(data_, other.data_, rows_ * cols_ * sizeof(cumeric_t));
         }
         return *this;

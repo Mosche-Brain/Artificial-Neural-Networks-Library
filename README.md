@@ -13,6 +13,9 @@ A lightweight, modular minimalistic and easy to use C++ library for machine lear
 * [credits](#-credits-and-used-technologies)
 * [other](#-other-useless-informations)
 
+## ❗ Disclaimers
+* I used very poor english due to prove it wasn't written by LLM or something simillar 
+
 ## ⬇️ Installaction and building process
 
 ### requirements
@@ -22,6 +25,8 @@ A lightweight, modular minimalistic and easy to use C++ library for machine lear
 * eigen3 or oneAPI or openBLAS
 * G++ compiler or clang++
 * CPU with at least one core
+
+
 
 ### 🐧 Linux and GNU/Linux
 
@@ -42,23 +47,36 @@ Probably almost, just like in linux and GNU/Linux (I guess).
 ## 💡 Examples of usage
 
 ### Initializing library
-
+#### Notes
+* If you use different type than `FP32` must define used numeric type and backend before including yann or cum headers for proper compilation or add these definitions as a compile definitions in your CMakeLists.txt or compiler args.
+* Before creating any Yann or cum objects you must call `cum::cum(cum::CUM_DEVICE device)` and pass `AUTO`/`CPU`/`GPU` next to `cum::CUM_DEVICE` due to device your want to use.
+* I din't tested it yet on computers with more than one GPU (integrated or dicrete) so it can select wrong one.
+* Supported numeric types
+    * `CUM_USE_F64`
+    * `CUM_USE_F32` (defining is optional)
+    * `CUM_USE_F16`
+    * `CUM_USE_BF16`
+    * `CUM_USE_Q8` (didn't tested  yet )
+* Currently supported backends
+    * `BUILD_USE_MKL`
 ```cpp
+#define CUM_USE_F16
+#define BUILD_USE_MKL
 #include <cum/cum.hpp>
 
 int main()
 {
-    // ↓ you must do this at first
-    cum::cum(cum::CUM_DEVICE::AUTO); // there are also avaible CUM_DEVICE::CPU and CUM_DEVICE::GPU
+    cum::cum(cum::CUM_DEVICE::AUTO);
     
-    /* some strange code */
+    /* you can put there some strange code */
     
     cum::decum()
 }
 ```
 
-### Creating and fitting sequential model
 
+### Creating and fitting sequential model
+* In constructor of `YANN::Models::Sequential` class your can put initializer list with 
 ```cpp
 #include <YANN/Models/Sequential.hpp>
 
@@ -178,7 +196,6 @@ You can find full API documentation [there (currently not avaible)](www.amogus.o
 * [oneAPI](https://oneapi.io/) - Open platform for heterogenous computing
 * [Nlohmann JSON](https://github.com/nlohmann/json) - C++ library for parsing JSON format
 * [Sarvel](https://sarvel.xyz/) - Literally Digital God
-* [Jakub Gładysz](https://sarvel.xyz/) - PhD at PWr
 
 ## 🥱 Other useless informations
 
