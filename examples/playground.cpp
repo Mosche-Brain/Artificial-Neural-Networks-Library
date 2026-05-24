@@ -13,41 +13,55 @@
 
 #include <YANN/Utility/logs.hpp>
 
+#include <cum/random.hpp>
+
 int main()
 {
-    cum::cum(cum::CUM_DEVICE::CPU);
+    cum::cum(cum::CUM_DEVICE::GPU);
 
     std::cout << "sizeof cumeric_t in bytes: " << sizeof(cum::cumeric_t) << '\n';
 
     std::cout << "YANN Playground\n";
 
-    YANN::Models::Sequential sequential({
-        YANN::Models::Layers::Input::createUnique(4),
-        YANN::Models::Layers::Dense::createUnique(4, "relu"),
-        YANN::Models::Layers::Dense::createUnique(4, "sigmoid")
-    });
+    // size_t N = 8;
+    // cum::cumeric_t* buffer = (cum::cumeric_t*)malloc(N * sizeof(cum::cumeric_t));
 
-    std::cout << "Model initialized\n";
+    size_t N = 16;
+    // cum::Matrix A(4, 4, 0._c);
+    cum::Matrix A = cum::Matrix::Random(4, 4);
 
-    for(int i = 0 ; i < sequential.getLayersCount() ; i++)
-    {
-        std::cout << "Layer " << i << "\n";
-        std::cout << "\tweights dimensions " << YANN::Utils::logs::show_matrix_dimensions(sequential.getWeights(i)) << "\n";
-        std::cout << "\tbiases dimensions " << YANN::Utils::logs::show_matrix_dimensions(sequential.getBiases(i)) << "\n";
-    }
+    // cum::random::uniform(A.data(), N, -1._c, 1._c);
 
-    cum::Matrix sample(1, 4, 1._c);
-    std::cout << "Sample created\n";
-    sequential.forward(sample);
+    std::cout << YANN::Utils::logs::matrixToString(A);
+
+    // YANN::Models::Sequential sequential({
+    //     YANN::Models::Layers::Input::createUnique(2),
+    //     YANN::Models::Layers::Dense::createUnique(3, "relu"),
+    //     YANN::Models::Layers::Dense::createUnique(1, "sigmoid")
+    // });
+
+    // std::cout << "Model initialized\n";
+
+    // for(int i = 0 ; i < sequential.getLayersCount() ; i++)
+    // {
+    //     std::cout << "Layer " << i << "\n";
+    //     std::cout << "\tweights dimensions " << YANN::Utils::logs::show_matrix_dimensions(sequential.getWeights(i)) << "\n";
+    //     std::cout << "\tbiases dimensions " << YANN::Utils::logs::show_matrix_dimensions(sequential.getBiases(i)) << "\n";
+    // }
+
+    // cum::Matrix sample(1, 2, 1._c);
+    // std::cout << "Sample created\n";
+    // // sequential.forward(sample);
     // cum::Matrix result = sequential.forward(sample);
-    std::cout << "Forward pass completed\n";
+    // std::cout << "Forward pass completed\n";
 
-    // model.addLayer(YANN::Models::Layers::Input::createUnique(2));
-    // model.addLayer(YANN::Models::Layers::Dense::createUnique(4, "relu"));
-    // model.addLayer(YANN::Models::Layers::Dense::createUnique(1, "sigmoid"));
 
+
+    // std::cout << YANN::Utils::logs::matrixToString(result);
+
+
+    std::cout << "end\n";
     cum::decum();
+
     return 0;
 }
-
-    // Foo fo(4);

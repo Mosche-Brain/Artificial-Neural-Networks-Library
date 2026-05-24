@@ -2,6 +2,7 @@
 #include "cum/Vector.hpp"
 #include "cum/LinearAlgebra.hpp"
 #include "cum/functions.hpp"
+#include "cum/random.hpp"
 
 #include "cumMKL.hpp"
 
@@ -21,6 +22,15 @@ namespace cum
             data_[i] = value;
     }
 
+    Matrix::Matrix(std::size_t rows, std::size_t cols, cumeric_t* source)
+    {
+        data_ = sycl::malloc_shared<cumeric_t>(rows * cols, library::getQueue());
+
+        // sycl::memc
+        for(size_t i = 0 ; i < rows * cols ; i++)
+            data_[i] = source[i];
+    }
+
     // Matrix::operator Vector() const
     // {
     //     Vector temp(rows_ * cols_);
@@ -33,6 +43,15 @@ namespace cum
     {
         sycl::free(data_, library::getQueue());
     }
+
+    Matrix Matrix::Random(std::size_t rows, std::size_t cols, cumeric_t min, cumeric_t max)
+    {
+        cumeric_t* temp = sycl::malloc_shared<cumeric_t>(rows * cols, library::getQueue());
+        cum::random::uniform(temp, rows * cols, min, max);
+
+        return Matrix(rows, cols, temp);
+    }
+
 
     Matrix Matrix::row(size_t i) const
     { 
