@@ -8,7 +8,6 @@
 
 #include <utility>
 
-
 #if defined(BUILD_ENABLE_IO_OVERLOADS)
 #include <iostream>
 #endif
@@ -31,13 +30,18 @@ namespace cum
             data_[i] = source[i];
     }
 
-    // Matrix::operator Vector() const
-    // {
-    //     Vector temp(rows_ * cols_);
-    //     for(size_t i = 0 ; i < rows_ * cols_ ; i++)
-    //         temp[i] = data_[i];
-    //     return temp;
-    // }
+    Matrix::Matrix(const Matrix& other) : rows_(other.rows_), cols_(other.cols_)
+    {
+        data_ = sycl::malloc_shared<cumeric_t>(rows_ * cols_, library::getQueue());
+        library::getQueue().memcpy(data_, other.data_, rows_ * cols_ * sizeof(cumeric_t)).wait();
+    }
+
+    Matrix::Matrix(Matrix&& other) noexcept : data_(other.data_), rows_(other.rows_), cols_(other.cols_)
+    {
+        other.data_ = nullptr;
+        other.rows_ = 0;
+        other.cols_ = 0;
+    }
 
     Matrix::~Matrix()
     {
@@ -46,12 +50,42 @@ namespace cum
 
     Matrix Matrix::Random(std::size_t rows, std::size_t cols, cumeric_t min, cumeric_t max)
     {
-        cumeric_t* temp = sycl::malloc_shared<cumeric_t>(rows * cols, library::getQueue());
-        cum::random::uniform(temp, rows * cols, min, max);
+        Matrix temp;
+        temp.data_ = sycl::malloc_shared<cumeric_t>(rows * cols, library::getQueue());
+        temp.rows_ = rows;
+        temp.cols_ = cols;
 
-        return Matrix(rows, cols, temp);
+        cum::random::uniform(temp.data_, rows * cols, min, max);
+        
+        return temp;
     }
 
+    Matrix Matrix::Zeros(std::size_t rows, std::size_t cols)
+    {
+        Matrix temp;
+        temp.data_ = sycl::malloc_shared<cumeric_t>(rows * cols, library::getQueue());
+        temp.rows_ = rows;
+        temp.cols_ = cols;
+
+        return temp;
+    }
+
+    Matrix Matrix::Ones(std::size_t rows, std::size_t cols)
+    {
+        Matrix temp;
+        temp.data_ = sycl::malloc_shared<cumeric_t>(rows * cols, library::getQueue());
+        temp.rows_ = rows;
+        temp.cols_ = cols;
+
+        for(size_t i = 0 ; i < rows * cols ; i++)
+        {
+            temp.data_[i] = 1._c;
+        }
+
+        return temp;
+    }
+
+    /* ============================== Accessors ================================ */
 
     Matrix Matrix::row(size_t i) const
     { 
@@ -69,45 +103,46 @@ namespace cum
         return temp;
     }
 
-    Matrix& Matrix::operator = (const Matrix& other)
+    /* ============================== Asingnment operators ================================ */
+
+    // Matrix& Matrix::operator = (const Matrix& other)
+    Matrix& Matrix::set(const Matrix& other)
     {
-        if(this != &other)
+        if (this == &other)
+            return *this;
+
+        if(data_ != nullptr)
         {
-            if(data_ == nullptr)
-            {
-                data_ = sycl::malloc_shared<cumeric_t>(other.rows_ * other.cols_, library::getQueue());
-                
-            }
-            else if((rows_ * cols_ != other.rows_ * other.cols_))
-            {
-
-                sycl::free(data_, library::getQueue());
-                data_ = sycl::malloc_shared<cumeric_t>(other.rows_ * other.cols_, library::getQueue());
-            }
-
-            rows_ = other.rows_;
-            cols_ = other.cols_;
-            
-            memcpy(data_, other.data_, rows_ * cols_ * sizeof(cumeric_t));
+            sycl::free(data_, library::getQueue());
+            data_ =        nullptr;
         }
+        data_ = sycl::malloc_shared<cumeric_t>(other.rows_ * other.cols_, library::getQueue());
+
+        library::getQueue().memcpy(other.data_, data_, other.rows_ * other.cols_ * sizeof(cumeric_t)).wait();
         return *this;
     }
 
-    // Matrix& Matrix::operator = (const Matrix other)
-    // {
-    //     if(this != &other)
-    //     {
-    //         if(rows_ * cols_ != other.rows_ * other.cols_)
-    //         {
-    //             sycl::free(data_, library::getQueue());
-    //             data_ = sycl::malloc_shared<cumeric_t>(other.rows_ * other.cols_, library::getQueue());
-    //         }
-    //         rows_ = other.rows_;
-    //         cols_ = other.cols_;
-    //         memcpy(data_, other.data_, rows_ * cols_ * sizeof(cumeric_t));
-    //     }
-    //     return *this;
-    // }
+    Matrix& Matrix::operator = (Matrix other) noexcept
+    {
+        if(data_ == nullptr)
+            data_ = sycl::malloc_shared<cumeric_t>(other.rows_ * other.cols_, library::getQueue());
+        swap(other);
+        return *this;
+    }
+
+    void Matrix::swap(Matrix& other)
+    {
+        std::swap(this->data_, other.data_);
+        std::swap(this->rows_, other.rows_);
+        std::swap(this->cols_, other.cols_);
+    }
+
+    void swap(Matrix& A, Matrix& B)
+    {
+        A.swap(B);
+    }
+
+    /* ============================== Inplace arithmetic operator ================================*/
 
     Matrix& Matrix::operator += (const Matrix& other)
     {
@@ -144,6 +179,8 @@ namespace cum
         LinearAlgebra::scaleInPlace(this->data_, 1 / scalar, rows_ * cols_);
         return *this;
     }
+
+    /* ============================== Outplace arithmetic operator ============================== */
 
     Matrix operator + (const Matrix& A, const Matrix& B)
     {

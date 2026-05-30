@@ -125,7 +125,7 @@ namespace cum::functions
     {
         if(strcmp(name, "linear") == 0)
         {
-            activation = new activation_t{ ActivationFunction::linear, linear, linear_derivative };
+            *activation = { ActivationFunction::linear, linear, linear_derivative };
         }
         else if(strcmp(name, "gelu") == 0)
         {

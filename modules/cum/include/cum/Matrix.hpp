@@ -13,11 +13,15 @@ namespace cum
     public:
         Matrix(std::size_t rows, std::size_t cols, cumeric_t value=0);
         Matrix(std::size_t rows, std::size_t cols, cumeric_t* source);
+        Matrix(const Matrix& other);
+        Matrix(Matrix&& other) noexcept;
         Matrix() = default;
         ~Matrix();
 
         /* functions for advanced initialization */
-        Matrix Random(std::size_t rows, std::size_t cols, cumeric_t min = -1_c, cumeric_t max = 1_c);
+        static Matrix Random(std::size_t rows, std::size_t cols, cumeric_t min = -1_c, cumeric_t max = 1_c);
+        static Matrix Zeros(std::size_t rows, std::size_t cols);
+        static Matrix Ones(std::size_t rows, std::size_t cols);
         // operator Vector() const;
 
 
@@ -30,12 +34,22 @@ namespace cum
         std::size_t size() const { return rows_ * cols_; }
         
         /* Accesors */
+        cumeric_t* data() { return data_; };
+
         cumeric_t& at(const std::size_t row, const std::size_t col) { return data_[get_idx(row, col)]; }
         const cumeric_t& at(const std::size_t row, const std::size_t col) const { return data_[get_idx(row, col)]; }
+
         cumeric_t& operator () (const std::size_t row, const std::size_t col) { return data_[get_idx(row, col)]; };
         const cumeric_t& operator () (const std::size_t row, const std::size_t col) const { return data_[get_idx(row, col)]; };
 
-        Matrix& operator = (const Matrix& other);
+        /* assingment operator */
+        // Matrix& operator = (const Matrix& other);
+        // Matrix& operator = (const Matrix& other);
+        Matrix& set(const Matrix& other);
+        Matrix& operator = (Matrix other) noexcept;
+
+        void swap(Matrix& other);
+        friend void swap(Matrix& A, Matrix& B);
 
         /* Inplace arithmetic operator */
         Matrix& operator += (const Matrix& other);
@@ -54,13 +68,15 @@ namespace cum
         friend Matrix operator / (const Matrix& A, const Matrix& B);
         friend Matrix operator / (const Matrix& mat, const cumeric_t& scalar);
 
+        
+        /* Transforming matrix dimensions */
+        Matrix transpose();
+        Matrix& transposeInPlace();
+        Vector flatten() const;
+        
         friend Matrix activation(const Matrix& mat, const char* name);
         friend Matrix activationInPlace(Matrix& mat, const char* name);
 
-        cumeric_t* data() { return data_; };
-
-        Matrix transpose();
-        Matrix& transposeInPlace();
         Matrix cwiseProduct(const Matrix& other);
         Matrix& cwiseProductInPlace();
 
@@ -81,7 +97,6 @@ namespace cum
         Matrix rowwiseSum();
         Vector rowwiseSum2vec();
 
-        Vector flatten() const;
     private:
         std::size_t get_idx(const std::size_t row, const std::size_t col) const { return row * cols_ + col; }
 

@@ -11,8 +11,6 @@ namespace cum
         oneapi::mkl::rng::device::philox4x32x10 engine;
         oneapi::mkl::rng::device::uniform dist((float)min, (float)max);
 
-        // float* temp = sycl::malloc_shared<float>(N, library::getQueue());
-        // oneapi::mkl::rng::device::generate(dist, engine, N, temp);
         for(size_t i = 0 ; i < N ; i++)
         {
             buff[i] = (cumeric_t)oneapi::mkl::rng::device::generate(dist, engine);

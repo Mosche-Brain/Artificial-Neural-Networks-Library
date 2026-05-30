@@ -4,11 +4,10 @@ namespace YANN::Models::Layers
 {
     void LayerBase::initParameters(int layerSize, int inputLenght)
     {
-        this->weights = cum::Matrix(layerSize, inputLenght, 0.001);
-        this->biases  = cum::Matrix(layerSize, 1, 0);
-        this->outputs = cum::Matrix(layerSize, 1, 0);
-        this->inputs  = cum::Matrix(layerSize, inputLenght, 0);
-
+        this->weights = cum::Matrix::Random(layerSize, inputLenght);
+        this->biases  = cum::Matrix::Zeros(layerSize, 1);
+        this->outputs = cum::Matrix::Zeros(layerSize, 1);
+        this->inputs  = cum::Matrix::Zeros(layerSize, inputLenght);
         this->_initialized_ = true;
     }
 

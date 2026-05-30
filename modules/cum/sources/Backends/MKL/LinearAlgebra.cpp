@@ -87,6 +87,7 @@ namespace cum::LinearAlgebra
         auto& q = library::getQueue();
         auto copy = q.copy(v, r, N);
         oneapi::mkl::blas::row_major::axpy(q, N, -1.0, u, 1, r, 1, {copy});
+        q.wait();
     }
 
     void subInPlace(cumeric_t* v, const cumeric_t* u, std::size_t N)

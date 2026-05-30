@@ -21,15 +21,19 @@ namespace YANN::Models
         if(runtime_config::DEBUG_VEBOSITY >= 2)
             std::cout << "Initializing Sequential model with " << newTopology.size() << " layers...\n";
         #endif
+
         topology.reserve(newTopology.size()); 
         for(auto& ptr : newTopology) 
         {
+            std::cout << "oh\n";
             topology.push_back(std::move(const_cast<std::unique_ptr<Layers::LayerBase>&>(ptr)));
         }
-
+        
+        std::cout << "ah\n";
         topology[0]->initParameters(topology[0]->size(), 1);
         for(size_t i = 1 ; i < topology.size() ; i++)
         {
+            std::cout << "uh\n";
             int previous_layer_size = topology[i - 1]->size();
             int  current_layer_size = topology[  i  ]->size();
 
