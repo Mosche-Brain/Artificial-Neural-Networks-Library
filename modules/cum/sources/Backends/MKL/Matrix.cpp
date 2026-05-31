@@ -21,7 +21,7 @@ namespace cum
             data_[i] = value;
     }
 
-    Matrix::Matrix(std::size_t rows, std::size_t cols, cumeric_t* source)
+    Matrix::Matrix(std::size_t rows, std::size_t cols, cumeric_t* source) : rows_(rows), cols_(cols)
     {
         data_ = sycl::malloc_shared<cumeric_t>(rows * cols, library::getQueue());
 
@@ -29,6 +29,16 @@ namespace cum
         for(size_t i = 0 ; i < rows * cols ; i++)
             data_[i] = source[i];
     }
+
+    Matrix::Matrix(std::size_t rows, std::size_t cols, std::initializer_list<cumeric_t> elements) : rows_(rows), cols_(cols)
+    {
+        data_ = sycl::malloc_shared<cumeric_t>(rows * cols, library::getQueue());
+
+        // for(size_t i = 0 ; i < rows * cols ; i++)
+        //     data_[i] = elements.;
+        library::getQueue().copy(elements.begin(), data_, rows * cols).wait();
+    }
+
 
     Matrix::Matrix(const Matrix& other) : rows_(other.rows_), cols_(other.cols_)
     {

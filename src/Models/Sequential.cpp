@@ -5,6 +5,7 @@
 
 #if defined(ENABLE_DEBUG_OUTPUT)
     #include <iostream>
+    #include "Utility/logs.hpp"
 #endif
 
 #include "runtime_config.hpp"
@@ -82,7 +83,7 @@ namespace YANN::Models
         cum::Matrix curr_gradient = d_output;
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::DEBUG_VEBOSITY >= 3)
-            // std::cout << "\t\t\t" << "layer output gradient: " << math_api::matrixTranspose(curr_gradient) << '\n';
+            std::cout << "\t\t\t" << "layer output gradient: " << YANN::Utils::logs::matrixToString(curr_gradient) << '\n';
         #endif
         for(size_t i = topology.size() - 1 ; i > 0 ; --i)
         {

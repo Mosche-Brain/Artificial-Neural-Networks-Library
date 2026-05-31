@@ -34,35 +34,47 @@ int main()
 
     YANN::Models::Sequential sequential({
         YANN::Models::Layers::Input::createUnique(2),
-        YANN::Models::Layers::Dense::createUnique(1024, "relu"),
-        // YANN::Models::Layers::Dense::createUnique(2, "tanh"),
-        // YANN::Models::Layers::Dense::createUnique(2, "tanh"),
-        YANN::Models::Layers::Dense::createUnique(1, "relu")
+        YANN::Models::Layers::Dense::createUnique(3, "sigmoid"),
+        YANN::Models::Layers::Dense::createUnique(1, "sigmoid")
     });
 
     std::cout << "Model initialized\n";
 
-    for(int i = 0 ; i < sequential.getLayersCount() ; i++)
-    {
-        std::cout << "Layer " << i << "\n";
-        std::cout << "\tweights dimensions " << YANN::Utils::logs::show_matrix_dimensions(sequential.getWeights(i)) << "\n";
-        std::cout << "\tbiases dimensions " << YANN::Utils::logs::show_matrix_dimensions(sequential.getBiases(i)) << "\n";
-    }
+    cum::Matrix x_train(4, 2,
+                       {0, 0,
+                        0, 1,
+                        1, 0,
+                        1, 1});
+
+    cum::Matrix y_train(4, 1, {0, 1, 1, 0});
+
+
+    cum::cumeric_t rate = 0.01_c;
+    size_t epochs = 50;
+
+    sequential.fit(x_train, y_train, rate, epochs);
+
+    // for(int i = 0 ; i < sequential.getLayersCount() ; i++)
+    // {
+    //     std::cout << "Layer " << i << "\n";
+    //     std::cout << "\tweights dimensions " << YANN::Utils::logs::show_matrix_dimensions(sequential.getWeights(i)) << "\n";
+    //     std::cout << "\tbiases dimensions " << YANN::Utils::logs::show_matrix_dimensions(sequential.getBiases(i)) << "\n";
+    // }
 
     cum::Matrix sample(1, 2, 1._c);
     std::cout << "Sample created\n"; 
 
     // forward sample 1024 times
-    for(int i = 0 ; i < 1024 ; i++)
-    {
-        sequential.forward(sample);
-    }
+    // for(int i = 0 ; i < 1024 ; i++)
+    // {
+        // sequential.forward(sample);
+    // }
 
 
-    cum::Matrix result = sequential.forward(sample);
+    // cum::Matrix result = sequential.forward(sample);
     std::cout << "Forward pass completed\n";
 
-    std::cout << YANN::Utils::logs::matrixToString(result);
+    // std::cout << YANN::Utils::logs::matrixToString(result);
 
 
     std::cout << "end\n";

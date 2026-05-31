@@ -221,3 +221,4 @@ You can find full API documentation [there (currently not avaible)](www.amogus.o
 * Name refactoring tasks
 * Generating boilerplate
 * Basic inline code autocompletion from free github copilot credits
+* I also spend 0.05$ for Grok API tokens

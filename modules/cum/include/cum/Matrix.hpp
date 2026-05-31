@@ -4,6 +4,8 @@
 
 #include "cum/Vector.hpp"
 
+#include <initializer_list>
+
 namespace cum
 {
     class Vector;
@@ -13,6 +15,7 @@ namespace cum
     public:
         Matrix(std::size_t rows, std::size_t cols, cumeric_t value=0);
         Matrix(std::size_t rows, std::size_t cols, cumeric_t* source);
+        Matrix(std::size_t rows, std::size_t cols, std::initializer_list<cumeric_t> elements);
         Matrix(const Matrix& other);
         Matrix(Matrix&& other) noexcept;
         Matrix() = default;

@@ -10,6 +10,7 @@ set(CMAKE_CXX_EXTENSIONS ON)
 option(BUILD_SHARED_LIBS "Build project as shared library" ON)
 option(BUILD_EXAMPLES "Build example programs" ON)
 option(BUILD_PYTHON_BINDINGS "Build Python bindings if pybind11 is available" OFF)
+option(BUILD_C_API "Build the stable C API" ON)
 option(ENABLE_DEBUG_OUTPUT "Enable debug logs" ON)
 
 # Math backend options
@@ -105,6 +106,10 @@ add_subdirectory(src)
 if(BUILD_EXAMPLES)
     add_subdirectory(examples)
     add_subdirectory(thirdparty/rapidcsv)
+endif()
+
+if(BUILD_C_API)
+    add_subdirectory(bindings/C)
 endif()
 
 if(BUILD_PYTHON_BINDINGS)
