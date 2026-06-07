@@ -32,7 +32,7 @@ target_sources(${CYANN_TARGET}
     PRIVATE
         src/yann_c_api.cpp
         src/yann_context.cpp
-        src/yann_tensor.cpp
+        src/yann_matrix.cpp
         src/yann_model.cpp
 )
 

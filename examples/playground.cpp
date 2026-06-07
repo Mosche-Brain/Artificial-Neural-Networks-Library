@@ -15,6 +15,10 @@
 
 #include <cum/random.hpp>
 
+#include <YANN/runtime_config.hpp>
+
+// YANN::runtime_config::DEBUG_VEBOSITY = 5;
+
 int main()
 {
     cum::cum(cum::CUM_DEVICE::GPU);
@@ -23,7 +27,14 @@ int main()
 
     std::cout << "YANN Playground\n";
 
-    // size_t N = 8;
+
+    std::cout << "verbosity level " << YANN::runtime_config::verbosity_level() << '\n';
+
+    YANN::runtime_config::set_verbosity(3);
+
+    std::cout << "verbosity level " << YANN::runtime_config::verbosity_level() << '\n';
+
+    // size_t N = 8;                                                                              v   v v v v           v   v     v                                                                            
     // cum::cumeric_t* buffer = (cum::cumeric_t*)malloc(N * sizeof(cum::cumeric_t));
 
     // std::cout << YANN::Utils::logs::matrixToString(A);
@@ -50,7 +61,7 @@ int main()
 
 
     cum::cumeric_t rate = 0.01_c;
-    size_t epochs = 50;
+    size_t epochs = 1;
 
     sequential.fit(x_train, y_train, rate, epochs);
 

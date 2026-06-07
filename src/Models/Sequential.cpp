@@ -88,7 +88,7 @@ namespace YANN::Models
         for(size_t i = topology.size() - 1 ; i > 0 ; --i)
         {
             curr_gradient = topology[i]->backward(curr_gradient);
-            #if defined(ENABLE_DEBUG_OUTPUT)
+            #if defined(ENABLE_DEBUG_OUTPUT)     
             // if(runtime_config::DEBUG_VEBOSITY >= 3)
                 // std::cout << "\t\t\t" << "layer " << i << " gradient: " << math_api::matrixTranspose(curr_gradient) << '\n';
             #endif
@@ -127,7 +127,7 @@ namespace YANN::Models
 
 
             #if defined(ENABLE_DEBUG_OUTPUT)
-            if(runtime_config::DEBUG_VEBOSITY >= 1)
+            if(runtime_config::verbosity_level() >= 1)
                 std::cout << "\t" << "Epoch " << epoch << "\n";
             #endif
             for(int i = 0 ; i < X.rows() ; i++)
@@ -140,8 +140,11 @@ namespace YANN::Models
                 // cum::Vector x = math_api::matrixTranspose(math_api::matrixRow(X, i));
                 // cum::Vector y = math_api::matrixTranspose(math_api::matrixRow(Y, i)); // Todo: check what is shuffling
 
-                cum::Matrix x = X.row(i).transpose();
-                cum::Matrix y = Y.row(i).transpose();
+                // cum::Matrix x = X.row(i).transpose();
+                // cum::Matrix y = Y.row(i).transpose();
+
+                cum::Matrix x = X.row(i);
+                cum::Matrix y = Y.row(i);
 
                 #if defined(ENABLE_DEBUG_OUTPUT)
                 if(runtime_config::DEBUG_VEBOSITY >= 2) {

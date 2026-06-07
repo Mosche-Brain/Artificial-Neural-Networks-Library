@@ -8,40 +8,26 @@
 #include <memory>
 #include <string>
 
-/* ============================================================================
- * Internal structures for the YANN C API
- *
- * These are NOT part of the public API and can change at any time.
- * ============================================================================ */
-
-struct yann_context_t
-{
-    // Future: can hold SYCL queue, device selection, memory pool, etc.
-    // For now it mostly serves as a lifetime anchor.
+/* Internal struct definitions (full types) */
+struct yann_context_s {
+    // Reserved for future use (device, queue, etc.)
 };
 
-struct yann_tensor_t
-{
-    // Always stores data using the library's internal cumeric_t type.
-    // The public C API always speaks in float (FP32).
+struct yann_matrix_s {
     cum::Matrix matrix;
 };
 
-struct yann_model_t
-{
+struct yann_model_s {
     YANN::Models::Sequential model;
 };
 
-/* --------------------------- Error Handling ------------------------------- */
-
+/* Thread-local error message */
 inline thread_local std::string g_last_error;
 
-inline void yann_set_error(const std::string& msg)
-{
+inline void yann_set_error(const std::string& msg) {
     g_last_error = msg;
 }
 
-inline void yann_set_error(const char* msg)
-{
+inline void yann_set_error(const char* msg) {
     g_last_error = msg ? msg : "Unknown error";
 }
