@@ -40,11 +40,14 @@ namespace YANN::Models::Layers
         #if defined(ENABLE_DEBUG_OUTPUT) 
             std::cout << "copying inputs\n";
         #endif
-        // this->inputs.set(input);
+        this->inputs = input;
 
         #if defined(ENABLE_DEBUG_OUTPUT) 
             std::cout << "Performing (weights * input) + biases\n";
         #endif
+        // Note: when using row_major + f16 + GPU, the underlying Matrix leading dims must be
+        // compatible with what matMul passes to row_major::gemm (lda = logical cols of A).
+        // Odd k (like layer width 3) can trigger lda validation errors in hgemm on Arc.
         preactivatedOutputs = (weights * input) + biases;
         
         #if defined(ENABLE_DEBUG_OUTPUT)    

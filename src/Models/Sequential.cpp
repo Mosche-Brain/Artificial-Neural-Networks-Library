@@ -68,11 +68,13 @@ namespace YANN::Models
     cum::Matrix Sequential::forward(const cum::Matrix& input)
     {
         topology[0]->forward(input);
+        std::cout << "layer 0 output dimensions " << Utils::logs::show_matrix_dimensions(topology[0]->Outputs()) << '\n';
 
         for(size_t i = 1 ; i < topology.size() ; ++i)
         {
             std::cout << "bach\n";
             topology[i]->forward(topology[i - 1]->Outputs());
+            std::cout << "layer " << i << " output dimensions " << Utils::logs::show_matrix_dimensions(topology[i]->Outputs()) << '\n';
         }
 
         return topology.back()->Outputs();
@@ -82,21 +84,23 @@ namespace YANN::Models
     {
         cum::Matrix curr_gradient = d_output;
         #if defined(ENABLE_DEBUG_OUTPUT)
-        if(runtime_config::DEBUG_VEBOSITY >= 3)
+        if(runtime_config::verbosity_level() >= 3)
             std::cout << "\t\t\t" << "layer output gradient: " << YANN::Utils::logs::matrixToString(curr_gradient) << '\n';
         #endif
         for(size_t i = topology.size() - 1 ; i > 0 ; --i)
         {
+            std::cout << "layer type: " << topology[i]->layerType() << '\n';
             curr_gradient = topology[i]->backward(curr_gradient);
             #if defined(ENABLE_DEBUG_OUTPUT)     
-            // if(runtime_config::DEBUG_VEBOSITY >= 3)
-                // std::cout << "\t\t\t" << "layer " << i << " gradient: " << math_api::matrixTranspose(curr_gradient) << '\n';
+            if(runtime_config::verbosity_level() >= 3)
+                std::cout << "\t\t\t" << "layer " << i << " gradient: " << Utils::logs::matrixToString(curr_gradient) << '\n';
+                // std::cout << "layer type: " << topology[i]->layerType() << '\n';
             #endif
         }        
         #if defined(ENABLE_DEBUG_OUTPUT)
-        if(runtime_config::DEBUG_VEBOSITY >= 3)
+        if(runtime_config::verbosity_level() >= 3)
         {
-            // std::cout << "\t\t\t" << "layer 0 gradient: " << math_api::matrixTranspose(curr_gradient) << '\n';
+            std::cout << "\t\t\t" << "layer 0 gradient: " << Utils::logs::matrixToString(curr_gradient) << '\n';
         }
         #endif
     }
@@ -133,7 +137,7 @@ namespace YANN::Models
             for(int i = 0 ; i < X.rows() ; i++)
             {
                 #if defined(ENABLE_DEBUG_OUTPUT)
-                if(runtime_config::DEBUG_VEBOSITY >= 2)
+                if(runtime_config::verbosity_level() >= 2)
                     std::cout << "\t\t" << "Sample " << i << "\n";
                 #endif
 
@@ -147,7 +151,7 @@ namespace YANN::Models
                 cum::Matrix y = Y.row(i);
 
                 #if defined(ENABLE_DEBUG_OUTPUT)
-                if(runtime_config::DEBUG_VEBOSITY >= 2) {
+                if(runtime_config::verbosity_level() >= 2) {
                     // std::cout << "\t\t" << "input: "  << x << '\n';
                     // std::cout << "\t\t" << "target: " << math_api::matrixTranspose(y) << '\n';
                 }
@@ -155,26 +159,27 @@ namespace YANN::Models
 
                 cum::Matrix result = this->forward(x);
                 #if defined(ENABLE_DEBUG_OUTPUT)
-                if(runtime_config::DEBUG_VEBOSITY >= 2)
+                if(runtime_config::verbosity_level() >= 2)
                 {
                     // std::cout << "\t\t" << "resutl: " << math_api::matrixTranspose(result) << '\n';
 
                     std::cout << "\t\t" << "Computing loss and gradient...\n";
                 }
-                #endif                
+                #endif            
                 Utils::loss::LossType error = Utils::loss::computeLoss(result, y, this->loss_function);
+                
                 cum::Matrix gradient = error.gradient;
                 
 
                 #if defined(ENABLE_DEBUG_OUTPUT)
-                if(runtime_config::DEBUG_VEBOSITY >= 2)
+                if(runtime_config::verbosity_level() >= 2)
                     std::cout << "\t\t" << "Performing backpropagation...\n";
                 #endif
 
                 this->backward(gradient);
 
                 #if defined(ENABLE_DEBUG_OUTPUT)
-                if(runtime_config::DEBUG_VEBOSITY >= 2)
+                if(runtime_config::verbosity_level() >= 2)
                     std::cout << "\t\t" << "Updating parameters...\n";
                 #endif              
 

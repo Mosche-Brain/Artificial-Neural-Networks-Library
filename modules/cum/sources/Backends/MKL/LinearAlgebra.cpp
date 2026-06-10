@@ -280,11 +280,20 @@ namespace cum::LinearAlgebra
         {
             q.submit([=](sycl::handler& h){
                 h.parallel_for(sycl::range<2>(rows, cols), [=](sycl::id<2> i){
-                    if (i[0] < i[1]) {
-                        cumeric_t temp = mat[i[0] * cols + i[1]];
-                        mat[i[0] * cols + i[1]] = mat[i[1] * rows + i[0]];
-                        mat[i[1] * rows + i[0]] = temp;
+                    
+                    const std::size_t r = i[0];
+                    const std::size_t c = i[1];
+
+                    if (r < c)
+                    {
+                        const std::size_t a = r * cols + c;
+                        const std::size_t b = c * cols + r;
+
+                        cumeric_t tmp = mat[a];
+                        mat[a] = mat[b];
+                        mat[b] = tmp;
                     }
+                    
                 });
             });
         }

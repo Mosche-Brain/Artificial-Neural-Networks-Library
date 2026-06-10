@@ -46,8 +46,10 @@ namespace YANN::Models::Layers
 
     cum::Matrix Input::backward(const cum::Matrix& deltaOutput)
     {
-        // return cum::Matrix::Zero(_layerSize_, 1);
-        return cum::Matrix(_layerSize_, 1, 1._c);
+        return deltaOutput;
+        // return cum::Matrix::Zeros(_layerSize_, 1);
+        // return cum::Matrix(_layerSize_, 1, 1._c);
+        // return cum::Matrix(_layerSize_, 1, 1._c);
     }
 
     void Input::update_weights(cum::cumeric_t rate)

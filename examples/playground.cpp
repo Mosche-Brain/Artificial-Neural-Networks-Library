@@ -34,7 +34,7 @@ int main()
 
     std::cout << "verbosity level " << YANN::runtime_config::verbosity_level() << '\n';
 
-    // size_t N = 8;                                                                              v   v v v v           v   v     v                                                                            
+    // size_t N = 8;                                                                                                                                                   
     // cum::cumeric_t* buffer = (cum::cumeric_t*)malloc(N * sizeof(cum::cumeric_t));
 
     // std::cout << YANN::Utils::logs::matrixToString(A);
