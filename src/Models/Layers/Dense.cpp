@@ -82,7 +82,7 @@ namespace YANN::Models::Layers
             std::cout << "\t\t\t\t" << "deltaWeights = matrixMultiply(d_pre_activation, matrixTranspose(inputs))\n";
         #endif
         // deltaWeights = math_api::matrixMultiply(d_pre_activation, math_api::matrixTranspose(inputs));
-        deltaWeights = d_pre_activation * inputs.transpose();
+        deltaWeights = d_pre_activation * inputs;
 
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::DEBUG_VEBOSITY >= 4)
@@ -97,7 +97,7 @@ namespace YANN::Models::Layers
             std::cout << "\t\t\t\t" << "deltaInput = matrixMultiply(matrixTranspose(weights), d_pre_activation)\n";
         #endif
         // cum::Matrix deltaInput = math_api::matrixMultiply(math_api::matrixTranspose(weights), d_pre_activation);       
-        cum::Matrix deltaInput = weights.transpose() * d_pre_activation;       
+        cum::Matrix deltaInput = weights * d_pre_activation;       
         
         return deltaInput;
     }

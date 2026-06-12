@@ -25,6 +25,7 @@ namespace cum
         #warning "F64"
     #elif defined(CUM_USE_F32)
         using cumeric_t = float;
+        constexpr cumeric_t EPSILON = 1e-9f;
         #warning "F32"
     #elif defined(CUM_USE_F16)
         #if defined(BUILD_USE_MKL)
@@ -33,16 +34,19 @@ namespace cum
         #else
         using cumeric_t = _Float16;
         #endif
+        constexpr cumeric_t EPSILON = 1e-3f16;
     #elif defined(CUM_USE_BF16)
         #if defined(BUILD_USE_MKL)
         using cumeric_t = sycl::bfloat16;
         #warning "BF16 sycl format"
         #else
         using cumeric_t = std::bfloat16;
+        constexpr cumeric_t EPSILON = 1e-3bf16;
         #warning "BF16"
         #endif
     #elif defined(CUM_USE_INT8)
-    using cumeric_t = int8_t;
+        using cumeric_t = int8_t;
+        constexpr cumeric_t EPSILON = 1e1;
     #warning "INT8"
     #else
         #warning "Type didn't"

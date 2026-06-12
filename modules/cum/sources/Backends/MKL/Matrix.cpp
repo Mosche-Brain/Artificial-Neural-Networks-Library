@@ -99,7 +99,12 @@ namespace cum
 
     Matrix Matrix::row(size_t i) const
     { 
-        Matrix temp(1, cols_); memcpy(temp.data_, data_ + i * rows_ * sizeof(cumeric_t), cols_ * sizeof(cumeric_t)); 
+        Matrix temp(1, cols_);
+        library::getQueue().memcpy(
+            temp.data_,
+            data_ + i * cols_,
+            cols_ * sizeof(cumeric_t)
+        ).wait();
         return temp;
     }
 
@@ -313,7 +318,8 @@ namespace cum
     {
         for(size_t i = 0 ; i < rows_ ; i++)
         {
-            cumeric_t* row_begin = data_ + (i * cols_ * sizeof(cumeric_t));
+            // cumeric_t* row_begin = data_ + (i * cols_ * sizeof(cumeric_t));
+            cumeric_t* row_begin = data_ + (i * cols_);
             op(row_begin, arr, cols_);
         }
         return *this;

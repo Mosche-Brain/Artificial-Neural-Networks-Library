@@ -61,7 +61,7 @@ int main()
 
 
     cum::cumeric_t rate = 0.01_c;
-    size_t epochs = 1;
+    size_t epochs = 100;
 
     sequential.fit(x_train, y_train, rate, epochs);
 

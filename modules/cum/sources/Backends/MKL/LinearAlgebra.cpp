@@ -287,7 +287,8 @@ namespace cum::LinearAlgebra
                     if (r < c)
                     {
                         const std::size_t a = r * cols + c;
-                        const std::size_t b = c * cols + r;
+                        // const std::size_t b = c * cols + r;
+                        const std::size_t b = c * rows + r;  // ✓ POPRAWNIE
 
                         cumeric_t tmp = mat[a];
                         mat[a] = mat[b];
