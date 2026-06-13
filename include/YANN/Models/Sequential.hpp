@@ -40,6 +40,6 @@ namespace YANN::Models
         void updateParams(cum::cumeric_t rate);
 
         Topology topology;
-        Utils::loss::LossFunction loss_function = Utils::loss::LossFunction::mse;
+        Utils::loss::LossFunction loss_function = Utils::loss::LossFunction::binary_cross_entropy;
     };
 }

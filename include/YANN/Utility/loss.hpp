@@ -8,7 +8,7 @@ namespace YANN::Utils::loss
 {
     typedef struct { cum::cumeric_t loss ; cum::Matrix gradient; } LossType;
     
-    enum class LossFunction { mse, cross_entropy, binary_cross_entropy }     ;
+    enum class LossFunction { mse, cross_entropy, binary_cross_entropy };
 
     LossType computeLoss(const cum::Matrix& result, const cum::Matrix& target, LossFunction loss_function);
 

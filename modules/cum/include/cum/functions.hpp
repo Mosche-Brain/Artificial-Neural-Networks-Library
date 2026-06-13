@@ -51,6 +51,12 @@ namespace cum::functions
         cumeric_t operator()(cumeric_t x) const;
     };
 
+
+    cumeric_t min(const cumeric_t a, const cumeric_t b);
+    cumeric_t max(const cumeric_t a, const cumeric_t b);
+
+    void clip(cumeric_t* r, const cumeric_t* v, const cumeric_t min, const cumeric_t max, const std::size_t N);
+    void clipInPlace(cumeric_t* v, const cumeric_t min, const cumeric_t max, const std::size_t N);
     // void activation(cumeric_t* r, const cumeric_t* v, const char* name, std::size_t N);
     // void activationInPlace(cumeric_t* v, const char* name, std::size_t N);
 

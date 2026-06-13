@@ -92,6 +92,9 @@ namespace cum
         Matrix& rowwiseOpInPlace(void (*op)(cumeric_t* row, const cumeric_t* v, const std::size_t cols), const cumeric_t* arr);
         Matrix& colwiseOpInPlace(void (*op)(cumeric_t* col, const cumeric_t* v, const std::size_t rows), const cumeric_t* arr);
 
+        Matrix clip(const cumeric_t min, const cumeric_t max) const;
+        Matrix& clipInPlace(const cumeric_t min, const cumeric_t max);
+
         cumeric_t norm();
         cumeric_t squaredNorm();
 

@@ -368,6 +368,20 @@ namespace cum
         return temp;
     }
 
+
+    Matrix Matrix::clip(const cumeric_t min, const cumeric_t max) const
+    {
+        Matrix temp(rows_, cols_);
+        cum::functions::clip(temp.data(), data_, min, max, rows_ * cols_);
+        return temp;
+    }
+
+    Matrix& Matrix::clipInPlace(const cumeric_t min, const cumeric_t max)
+    {
+        cum::functions::clipInPlace(data_, min, max, rows_ * cols_);
+        return *this;
+    }
+
     cumeric_t Matrix::norm()
     {
         cumeric_t result;

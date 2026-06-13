@@ -64,25 +64,7 @@ namespace YANN::Utils::loss
 
     LossType binary_cross_entropy(const cum::Matrix& result, const cum::Matrix& target)
     {
-
-        // cum::Matrix sigmoid_output = result.transform([](cum::cumeric_t x) { return 1.0f / (1.0f + std::exp(-x)); });
-
-        // // Compute loss: -sum(targets * log(sigmoid_output) + (1 - targets) * log(1 - sigmoid_output)) / n_samples
-        // cum::cumeric_t loss = static_cast<cumeric_t>(0.0f);
-        // for (int j = 0; j < result.cols(); ++j) 
-        // {
-        //     for (int i = 0; i < result.rows(); ++i) 
-        //     {
-        //         loss -= target(i, j) * std::log(std::max(sigmoid_output(i, j), static_cast<cumeric_t>(1e-10f))) + 
-        //                 (1 - target(i, j)) * std::log(std::max(1 - sigmoid_output(i, j), static_cast<cumeric_t>(1e-10f))); // Avoid log(0)
-        //     }
-        // }
-        
-        // loss /= result.cols();
-
-        // // Gradient: sigmoid_output - targets
-        // cum::Matrix d_result = sigmoid_output - target;
-        // d_result /= static_cast<cumeric_t>(result.cols()); // Average over samples
+        cum::Matrix clipped_target = target.clip(cum::EPSILON, 1._c - cum::EPSILON);
         // return { loss, d_result };
     }
 

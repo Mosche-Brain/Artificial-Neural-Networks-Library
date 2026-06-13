@@ -3,6 +3,8 @@
 #include <math.h>
 #include <string.h>
 
+#include <sycl/sycl.hpp>
+
 #if defined(BUILD_DEBUG_OUTPUT)
     #include <iostream>
 #endif
@@ -85,6 +87,32 @@ namespace cum::functions
     cumeric_t Sigmoid::operator()(cumeric_t x) const
     {
         return sigmoid(x);
+    }
+
+    cumeric_t min(const cumeric_t a, const cumeric_t b)
+    {
+        return sycl::min(a, b);
+    }
+    
+    cumeric_t max(const cumeric_t a, const cumeric_t b)
+    {
+        return sycl::max(a, b);
+    }
+
+    void clip(cumeric_t* r, const cumeric_t* v, const cumeric_t min, const cumeric_t max, const std::size_t N)
+    {
+        // temporary naive implementation
+        for(size_t i = 0 ; i < N ; i++)
+            r[i] = v[i] > min && v[i] < max ? v[i] : v[i] < min ? min : max; 
+            // r[i] = v[i] > min && v[i] < max ? v[i] : v[i] < min ? min : v[i] > max ? max; 
+    }
+
+    void clipInPlace(cumeric_t* v, const cumeric_t min, const cumeric_t max, const std::size_t N)
+    {
+        // temporary naive implementation
+        for(size_t i = 0 ; i < N ; i++)
+            v[i] = v[i] > min && v[i] < max ? v[i] : v[i] < min ? min : max; 
+            // v[i] = v[i] > min && v[i] < max ? v[i] : v[i] < min ? min : v[i] > max ? max; 
     }
 
     void activation(cumeric_t* r, const cumeric_t* v, const char* name, std::size_t N)
