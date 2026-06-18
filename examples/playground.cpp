@@ -2,7 +2,8 @@
 #include <iostream>
 
 
-#define CUM_USE_F16
+// #define CUM_USE_F16
+#define CUM_USE_F32
 #define BUILD_USE_MKL
 #include <cum/Core.hpp>
 #include <cum/cum.hpp>
@@ -22,34 +23,14 @@
 int main()
 {
     cum::cum(cum::CUM_DEVICE::GPU);
-
     std::cout << "sizeof cumeric_t in bytes: " << sizeof(cum::cumeric_t) << '\n';
-
-    std::cout << "YANN Playground\n";
-
-
-    std::cout << "verbosity level " << YANN::runtime_config::verbosity_level() << '\n';
-
-    YANN::runtime_config::set_verbosity(3);
-
-    std::cout << "verbosity level " << YANN::runtime_config::verbosity_level() << '\n';
-
-    // size_t N = 8;                                                                                                                                                   
-    // cum::cumeric_t* buffer = (cum::cumeric_t*)malloc(N * sizeof(cum::cumeric_t));
-
-    // std::cout << YANN::Utils::logs::matrixToString(A);
-    // return 0;
-    // cum::random::uniform(A.data(), N, -1._c, 1._c);
-
-    // return 0;
+    YANN::runtime_config::set_verbosity(0);
 
     YANN::Models::Sequential sequential({
         YANN::Models::Layers::Input::createUnique(2),
-        YANN::Models::Layers::Dense::createUnique(3, "sigmoid"),
+        YANN::Models::Layers::Dense::createUnique(3, "tanh"),
         YANN::Models::Layers::Dense::createUnique(1, "sigmoid")
     });
-
-    std::cout << "Model initialized\n";
 
     cum::Matrix x_train(4, 2,
                        {0, 0,
@@ -58,10 +39,19 @@ int main()
                         1, 1});
 
     cum::Matrix y_train(4, 1, {0, 1, 1, 0});
+    cum::Matrix y_eval(4, 1);
 
-
-    cum::cumeric_t rate = 0.01_c;
+    cum::cumeric_t rate = 0.1_c;
     size_t epochs = 100;
+
+    for(int i = 0 ; i < 4 ; i++)
+        y_eval(i, 0) = sequential.forward(x_train.row(i))(0,0);
+
+    std::cout << "pretrain:\n";
+    std::cout << '[' << x_train(0, 0) << ',' << x_train(0, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 0) << "\n";
+    std::cout << '[' << x_train(1, 0) << ',' << x_train(1, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 1) << "\n";
+    std::cout << '[' << x_train(2, 0) << ',' << x_train(2, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 2) << "\n";
+    std::cout << '[' << x_train(3, 0) << ',' << x_train(3, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 3) << "\n";
 
     sequential.fit(x_train, y_train, rate, epochs);
 
@@ -73,22 +63,17 @@ int main()
     // }
 
     cum::Matrix sample(1, 2, 1._c);
-    std::cout << "Sample created\n"; 
-
-    // forward sample 1024 times
-    // for(int i = 0 ; i < 1024 ; i++)
-    // {
-        // sequential.forward(sample);
-    // }
 
 
-    // cum::Matrix result = sequential.forward(sample);
-    std::cout << "Forward pass completed\n";
+    for(int i = 0 ; i < 4 ; i++)
+        y_eval(i, 0) = sequential.forward(x_train.row(i))(0,0);
 
-    // std::cout << YANN::Utils::logs::matrixToString(result);
+    std::cout << "aftertrain:\n";
+    std::cout << '[' << x_train(0, 0) << ',' << x_train(0, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 0) << "\n";
+    std::cout << '[' << x_train(1, 0) << ',' << x_train(1, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 1) << "\n";
+    std::cout << '[' << x_train(2, 0) << ',' << x_train(2, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 2) << "\n";
+    std::cout << '[' << x_train(3, 0) << ',' << x_train(3, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 3) << "\n";
 
-
-    std::cout << "end\n";
     cum::decum();
 
     return 0;

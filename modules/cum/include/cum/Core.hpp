@@ -10,9 +10,19 @@
     #include <sycl/sycl.hpp>
 #endif
 
-#ifndef CUM_USE_F64 && !defined(CUM_USE_F32) && !defined(CUM_USE_F16) && !defined(CUM_USE_BF16) && !defined(CUM_USE_INT8)
-    #define CUM_USE_F16    
+// #ifndef CUM_USE_F64 && !defined(CUM_USE_F32) && !defined(CUM_USE_F16) && !defined(CUM_USE_BF16) && !defined(CUM_USE_INT8)
+    // #define CUM_USE_F16    
 // #error "Data type didn't specified. Define one of CUM_USE_F64, CUM_USE_F32, CUM_USE_F16, CUM_USE_BF16 or CUM_USE_INT8"
+// #endif
+
+#if !defined(CUM_USE_F64)  && \
+    !defined(CUM_USE_F32)  && \
+    !defined(CUM_USE_F16)  && \
+    !defined(CUM_USE_BF16) && \
+    !defined(CUM_USE_INT8)
+
+#define CUM_USE_F32
+
 #endif
 
 namespace cum
@@ -22,23 +32,23 @@ namespace cum
     // give info ABOUT used precision in compile time for each precision
     #if defined(CUM_USE_F64)
         using cumeric_t = double;        
-        #warning "F64"
+        // #warning "F64"
     #elif defined(CUM_USE_F32)
         using cumeric_t = float;
         constexpr cumeric_t EPSILON = 1e-9f;
-        #warning "F32"
+        // #warning "F32"
     #elif defined(CUM_USE_F16)
         #if defined(BUILD_USE_MKL)
         using cumeric_t = sycl::half;
-        #warning "F16 sycl format"
+        // #warning "F16 sycl format"
         #else
         using cumeric_t = _Float16;
         #endif
-        constexpr cumeric_t EPSILON = 1e-3f16;
+        constexpr cumeric_t EPSILON = 1e-4f16;
     #elif defined(CUM_USE_BF16)
         #if defined(BUILD_USE_MKL)
         using cumeric_t = sycl::bfloat16;
-        #warning "BF16 sycl format"
+        // #warning "BF16 sycl format"
         #else
         using cumeric_t = std::bfloat16;
         constexpr cumeric_t EPSILON = 1e-3bf16;
@@ -47,12 +57,13 @@ namespace cum
     #elif defined(CUM_USE_INT8)
         using cumeric_t = int8_t;
         constexpr cumeric_t EPSILON = 1e1;
-    #warning "INT8"
+        // #warning "INT8"
     #else
-        #warning "Type didn't"
+        #warning "Type was not defined"
     // #error "Data type didn't specified"
     #endif
 
+    using cummulative_t = float;
 } // namespace cum
 
 

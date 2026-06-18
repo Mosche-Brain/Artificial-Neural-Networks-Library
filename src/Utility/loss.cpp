@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <cmath>
+#include <limits>
 
 namespace YANN::Utils::loss
 {
@@ -64,8 +65,52 @@ namespace YANN::Utils::loss
 
     LossType binary_cross_entropy(const cum::Matrix& result, const cum::Matrix& target)
     {
-        cum::Matrix clipped_target = target.clip(cum::EPSILON, 1._c - cum::EPSILON);
-        // return { loss, d_result };
+        if (result.rows() != target.rows() || result.cols() != target.cols())
+        {
+            throw std::invalid_argument(
+                "binary_cross_entropy: result and target dimensions must match"
+            );
+        }
+
+        const std::size_t rows = result.rows();
+        const std::size_t cols = result.cols();
+        const std::size_t size = result.size();
+
+        // const cum::cumeric_t eps = cum::EPSILON;
+        const cum::cummulative_t eps = std::numeric_limits<cum::cummulative_t>::epsilon();
+
+        cum::cummulative_t loss = 0;
+        cum::Matrix gradient(rows, cols, 0_c);
+
+        for (std::size_t i = 0; i < rows; ++i)
+        {
+            for (std::size_t j = 0; j < cols; ++j)
+            {
+                const cum::cummulative_t y = (cum::cummulative_t)target(i, j);
+
+                cum::cummulative_t p = (cum::cummulative_t)result(i, j);
+
+                if (p < eps)
+                    p = eps;
+                else if (p > 1_c - eps)
+                    p = 1 - eps;
+
+                loss += -(
+                    y * std::log(p)
+                    + (1 - y) * std::log(1 - p)
+                );
+
+                gradient(i, j) =
+                    (
+                        (1_c - y) / (1_c - p)
+                        - y / p
+                    ) / static_cast<cum::cumeric_t>(size);
+            }
+        }
+
+        loss /= static_cast<cum::cummulative_t>(size);
+
+        return LossType{ loss, gradient };
     }
 
     LossType cross_entropy(const cum::Matrix& result, const cum::Matrix& target)

@@ -38,11 +38,13 @@ namespace YANN::Models::Layers
         }
 
         #if defined(ENABLE_DEBUG_OUTPUT) 
+        if(runtime_config::verbosity_level() >= 4)
             std::cout << "copying inputs\n";
         #endif
         this->inputs = input;
 
         #if defined(ENABLE_DEBUG_OUTPUT) 
+        if(runtime_config::verbosity_level() >= 4)
             std::cout << "Performing (weights * input) + biases\n";
         #endif
         // Note: when using row_major + f16 + GPU, the underlying Matrix leading dims must be
@@ -51,13 +53,15 @@ namespace YANN::Models::Layers
         preactivatedOutputs = (weights * input) + biases;
         
         #if defined(ENABLE_DEBUG_OUTPUT)    
+        if(runtime_config::verbosity_level() >= 4)
             std::cout << "Performing activation\n";
         #endif
         // cum::functions::transform(outputs.data(), preactivatedOutputs.data(), activation, preactivatedOutputs.size());
         cum::Matrix result(_layerSize_, 1);
         cum::functions::transform(result.data(), preactivatedOutputs.data(), activation, preactivatedOutputs.size());
         outputs = result;
-        #if defined(ENABLE_DEBUG_OUTPUT)    
+        #if defined(ENABLE_DEBUG_OUTPUT)   
+        if(runtime_config::verbosity_level() >= 4) 
             std::cout << "forward pass succed\n";
         #endif
         return outputs;

@@ -19,18 +19,16 @@ namespace YANN::Models
     Sequential::Sequential(std::initializer_list<std::unique_ptr<Layers::LayerBase>> newTopology)
     {
         #if defined(ENABLE_DEBUG_OUTPUT)
-        if(runtime_config::DEBUG_VEBOSITY >= 2)
+        if(runtime_config::verbosity_level() >= 1)
             std::cout << "Initializing Sequential model with " << newTopology.size() << " layers...\n";
         #endif
 
         topology.reserve(newTopology.size()); 
         for(auto& ptr : newTopology) 
         {
-            std::cout << "oh\n";
             topology.push_back(std::move(const_cast<std::unique_ptr<Layers::LayerBase>&>(ptr)));
         }
         
-        std::cout << "ah\n";
         topology[0]->initParameters(topology[0]->size(), 1);
         for(size_t i = 1 ; i < topology.size() ; i++)
         {
@@ -41,7 +39,6 @@ namespace YANN::Models
             topology[i]->initParameters(current_layer_size, previous_layer_size);
         }
     }
-
 
     void Sequential::addLayer(LayerPtr layer)
     {
@@ -68,13 +65,13 @@ namespace YANN::Models
     cum::Matrix Sequential::forward(const cum::Matrix& input)
     {
         topology[0]->forward(input);
-        std::cout << "layer 0 output dimensions " << Utils::logs::show_matrix_dimensions(topology[0]->Outputs()) << '\n';
+        // std::cout << "layer 0 output dimensions " << Utils::logs::show_matrix_dimensions(topology[0]->Outputs()) << '\n';
 
         for(size_t i = 1 ; i < topology.size() ; ++i)
         {
-            std::cout << "bach\n";
+            // std::cout << "bach\n";
             topology[i]->forward(topology[i - 1]->Outputs());
-            std::cout << "layer " << i << " output dimensions " << Utils::logs::show_matrix_dimensions(topology[i]->Outputs()) << '\n';
+            // std::cout << "layer " << i << " output dimensions " << Utils::logs::show_matrix_dimensions(topology[i]->Outputs()) << '\n';
         }
 
         return topology.back()->Outputs();
@@ -89,7 +86,7 @@ namespace YANN::Models
         #endif
         for(size_t i = topology.size() - 1 ; i > 0 ; --i)
         {
-            std::cout << "layer type: " << topology[i]->layerType() << '\n';
+            // std::cout << "layer type: " << topology[i]->layerType() << '\n';
             curr_gradient = topology[i]->backward(curr_gradient);
             #if defined(ENABLE_DEBUG_OUTPUT)     
             if(runtime_config::verbosity_level() >= 3)
@@ -108,27 +105,20 @@ namespace YANN::Models
     void Sequential::fit(const cum::Matrix& X, const cum::Matrix& Y, cum::cumeric_t rate, size_t epochs)
     {
         #if defined(ENABLE_DEBUG_OUTPUT)
-        if(runtime_config::DEBUG_VEBOSITY >= 1)
+        if(runtime_config::verbosity_level() >= 1)
             std::cout << "Starting training for " << epochs << " epochs...\n";
         #endif
         for(size_t epoch = 0 ; epoch < epochs ; epoch++)
         {
             // Eigen::PermutationMatrix<Eigen::Dynamic> perm(X.rows());
             // perm.setIdentity();
-            
             // cum::Matrix perm(X.rows(), X.rows());
             // std::random_shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size());
             // std::shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size(), 
                         // std::mt19937(std::random_device{}()));
-            
             // cum::Matrix X_shuffled = perm * X;
             // cum::Matrix Y_shuffled = perm * Y;
-            
-
-
-            cum::cumeric_t totalLoss = 0_c;
-
-
+            cum::cummulative_t totalLoss = 0;
 
             #if defined(ENABLE_DEBUG_OUTPUT)
             if(runtime_config::verbosity_level() >= 1)
@@ -143,7 +133,6 @@ namespace YANN::Models
 
                 // cum::Vector x = math_api::matrixTranspose(math_api::matrixRow(X, i));
                 // cum::Vector y = math_api::matrixTranspose(math_api::matrixRow(Y, i)); // Todo: check what is shuffling
-
                 // cum::Matrix x = X.row(i).transpose();
                 // cum::Matrix y = Y.row(i).transpose();
 
@@ -162,14 +151,12 @@ namespace YANN::Models
                 if(runtime_config::verbosity_level() >= 2)
                 {
                     // std::cout << "\t\t" << "resutl: " << math_api::matrixTranspose(result) << '\n';
-
                     std::cout << "\t\t" << "Computing loss and gradient...\n";
                 }
                 #endif            
                 Utils::loss::LossType error = Utils::loss::computeLoss(result, y, this->loss_function);
                 
                 cum::Matrix gradient = error.gradient;
-                
 
                 #if defined(ENABLE_DEBUG_OUTPUT)
                 if(runtime_config::verbosity_level() >= 2)
@@ -190,7 +177,7 @@ namespace YANN::Models
             cum::cumeric_t avarageLoss = totalLoss / X.rows();
             
             #if defined(ENABLE_DEBUG_OUTPUT)
-            if(runtime_config::DEBUG_VEBOSITY >= 1) {
+            if(runtime_config::verbosity_level() >= 1) {
                 std::cout << "\t" << "Avarage epoch loss: " << avarageLoss << '\n';
                 std::cout << "\t" << "Total epoch loss: " << totalLoss << '\n';
             }
@@ -206,7 +193,6 @@ namespace YANN::Models
                 topology[i]->update_weights(rate);
         }
     }
-
 
     cum::Matrix& Sequential::getWeights(size_t layer) const
     {

@@ -24,7 +24,7 @@ option(BUILD_USE_NATIVE "Use native C++ implementation for math operations" OFF)
 # Precision options
 option(CUM_USE_F64 "Use double precision (float 64-bit)" OFF)
 option(CUM_USE_F32 "Use single precision (float 32-bit)" OFF)
-option(CUM_USE_F16 "Use half precision (float 16-bit)" ON)
+option(CUM_USE_F16 "Use half precision (float 16-bit)" OFF)
 option(CUM_USE_BF16 "Use brain float precision (float 16-bit)" OFF)
 option(CUM_USE_Q8 "Use quarter precision (int 8-bit)" OFF)
 
