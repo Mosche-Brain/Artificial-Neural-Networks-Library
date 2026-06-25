@@ -17,7 +17,7 @@ foreach(EXAMPLE_SOURCE ${EXAMPLE_SOURCES})
         ${CMAKE_SOURCE_DIR}/include
     )
 
-    target_link_libraries(${EXAMPLE_NAME} PRIVATE ${PROJECT_NAME} OpenMP::OpenMP_CXX cum::Core)
+    target_link_libraries(${EXAMPLE_NAME} PRIVATE ${PROJECT_NAME} OpenMP::OpenMP_CXX cum::Core cum::MKL)
 
 
     # if using MKL, link to it
@@ -40,7 +40,7 @@ foreach(EXAMPLE_SOURCE ${EXAMPLE_SOURCES})
         # ${YANN_COMPILE_DEFINITIONS}
     )
 
-    # target_compile_definitions(${EXAMPLE_NAME} PRIVATE ${YANN_COMPILE_DEFINITIONS})
+    target_compile_definitions(${EXAMPLE_NAME} PRIVATE ${YANN_COMPILE_DEFINITIONS})
 
     install(TARGETS ${EXAMPLE_NAME}
         RUNTIME DESTINATION build/examples

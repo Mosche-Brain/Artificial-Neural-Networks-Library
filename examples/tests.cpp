@@ -3,8 +3,6 @@
 #include <iomanip>
 #include <cmath>
 
-#define CUM_USE_F16
-#define BUILD_USE_MKL
 #include <cum/Core.hpp>
 #include <cum/cum.hpp>
 #include <cum/Matrix.hpp>

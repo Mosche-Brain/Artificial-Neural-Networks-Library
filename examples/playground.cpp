@@ -2,9 +2,7 @@
 #include <iostream>
 
 
-// #define CUM_USE_F16
-#define CUM_USE_F32
-#define BUILD_USE_MKL
+//#define CUM_USE_F32
 #include <cum/Core.hpp>
 #include <cum/cum.hpp>
 #include <cum/Matrix.hpp>
