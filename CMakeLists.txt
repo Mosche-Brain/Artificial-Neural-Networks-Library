@@ -125,6 +125,7 @@ add_subdirectory(src)
 if(BUILD_EXAMPLES)
     add_subdirectory(examples)
     add_subdirectory(thirdparty/rapidcsv)
+    add_subdirectory(thirdparty/matplotplusplus)
 endif()
 
 if(BUILD_C_API)

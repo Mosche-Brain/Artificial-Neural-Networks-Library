@@ -40,12 +40,15 @@ namespace cum::functions
         cumeric_t operator()(cumeric_t x) const;
     };
 
+    cumeric_t tanh(cumeric_t x);
+    cumeric_t tanh_derivative(cumeric_t x);
     struct Tanh
     {
         cumeric_t operator()(cumeric_t x) const;
     };
 
     cumeric_t sigmoid(cumeric_t x);
+    cumeric_t sigmoid_derivative(cumeric_t x);
     struct Sigmoid
     {
         cumeric_t operator()(cumeric_t x) const;

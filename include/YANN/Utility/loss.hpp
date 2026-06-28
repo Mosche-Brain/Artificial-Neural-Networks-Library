@@ -6,7 +6,12 @@
 
 namespace YANN::Utils::loss
 {
-    typedef struct { cum::cummulative_t loss ; cum::Matrix gradient; } LossType;
+    typedef struct
+    {
+        cum::cummulative_t loss;
+        cum::cummulative_t gradient_scale;
+        cum::Matrix gradient;
+    } LossType;
     
     enum class LossFunction { mse, cross_entropy, binary_cross_entropy };
 

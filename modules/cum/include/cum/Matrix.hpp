@@ -103,6 +103,9 @@ namespace cum
         Matrix rowwiseSum();
         Vector rowwiseSum2vec();
 
+        Matrix shuffleRows() const;
+        Matrix& shuffleRowsInPlace();
+
     private:
         std::size_t get_idx(const std::size_t row, const std::size_t col) const { return row * cols_ + col; }
 

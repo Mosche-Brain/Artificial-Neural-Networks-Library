@@ -58,7 +58,7 @@ namespace YANN::Utils::loss
         cum::cumeric_t loss = diff.squaredNorm() / result.cols();
         cum::Matrix grad = diff / result.cols();
 
-        return { loss, grad };
+        return { loss, 1, grad };
 
 
     }
@@ -76,8 +76,10 @@ namespace YANN::Utils::loss
         const std::size_t cols = result.cols();
         const std::size_t size = result.size();
 
+        const cum::cummulative_t grad_scale = 1.f;
         // const cum::cumeric_t eps = cum::EPSILON;
-        const cum::cummulative_t eps = std::numeric_limits<cum::cummulative_t>::epsilon();
+        // const cum::cummulative_t eps = std::numeric_limits<cum::cummulative_t>::epsilon();
+        const cum::cummulative_t eps = static_cast<cum::cummulative_t>(1e-4f);
 
         cum::cummulative_t loss = 0;
         cum::Matrix gradient(rows, cols, 0_c);
@@ -92,7 +94,7 @@ namespace YANN::Utils::loss
 
                 if (p < eps)
                     p = eps;
-                else if (p > 1_c - eps)
+                else if (p > 1 - eps)
                     p = 1 - eps;
 
                 loss += -(
@@ -100,17 +102,21 @@ namespace YANN::Utils::loss
                     + (1 - y) * std::log(1 - p)
                 );
 
-                gradient(i, j) =
-                    (
-                        (1_c - y) / (1_c - p)
-                        - y / p
-                    ) / static_cast<cum::cumeric_t>(size);
+                cum::cummulative_t deriv = ((1 - y) / (1 - p) - y / p) / static_cast<cum::cummulative_t>(1e-4) * grad_scale;
+                gradient(i, j) = deriv;
+                // gradient(i, j) =
+                //     (
+                //         (1_c - y) / (1_c - p)
+                //         - y / p
+                //     ) / static_cast<cum::cumeric_t>(size);
+
+                // gradient(i, j) = (y / p - (1_c - y) / (1_c - p)) / static_cast<cum::cumeric_t>(size);
             }
         }
 
         loss /= static_cast<cum::cummulative_t>(size);
 
-        return LossType{ loss, gradient };
+        return LossType{ loss, grad_scale ,gradient, };
     }
 
     LossType cross_entropy(const cum::Matrix& result, const cum::Matrix& target)

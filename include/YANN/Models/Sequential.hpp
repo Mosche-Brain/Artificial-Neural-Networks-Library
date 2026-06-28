@@ -27,6 +27,8 @@ namespace YANN::Models
         void addLayer(LayerPtr layer);
         void clear();
 
+        void setLossFunction(Utils::loss::LossFunction new_loss_function);
+
         /* Getters */
         cum::Matrix& getWeights(size_t layer) const;
         cum::Matrix& getBiases(size_t layer) const;
@@ -41,6 +43,6 @@ namespace YANN::Models
 
         Topology topology;
         // Utils::loss::LossFunction loss_function = Utils::loss::LossFunction::binary_cross_entropy;
-        Utils::loss::LossFunction loss_function = Utils::loss::LossFunction::mse;
+        Utils::loss::LossFunction loss_function;
     };
 }

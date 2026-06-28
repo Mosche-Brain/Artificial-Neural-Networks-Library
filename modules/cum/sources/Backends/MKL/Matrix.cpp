@@ -7,6 +7,7 @@
 #include "cumMKL.hpp"
 
 #include <utility>
+#include <random>
 
 #if defined(BUILD_ENABLE_IO_OVERLOADS)
 #include <iostream>
@@ -300,6 +301,27 @@ namespace cum
     //     LinearAlgebra::transformInPlace(data_, func, rows_ * cols_);
     //     return *this;
     // }
+    
+    Matrix Matrix::transform(void (*func)(cumeric_t* data, const std::size_t size)) const
+    {
+        Matrix temp(rows_, cols_);
+        memcpy(temp.data_, data_, rows_ * cols_ * sizeof(cumeric_t));
+        temp.transformInPlace(func);
+        return temp;
+    }
+
+    Matrix& Matrix::transformInPlace(void (*func)(cumeric_t* data, const std::size_t size))
+    {
+        // cum::functions::transformInPlace(data_, func, rows_ * cols_);
+    }
+
+    Matrix Matrix::transform(cumeric_t (*func)(cumeric_t x)) const
+    {
+
+    }
+
+    Matrix& Matrix::transformInPlace(cumeric_t (*func)(cumeric_t x))
+    {}
 
     Matrix Matrix::cwiseProduct(const Matrix& other)
     {
@@ -404,5 +426,49 @@ namespace cum
         return temp;
     }
     Matrix activationInPlace(Matrix& mat, const char* name);
+
+    Matrix Matrix::shuffleRows() const
+    {
+        Matrix temp(*this);
+        temp.shuffleRowsInPlace();
+        return temp;
+    }
+
+    Matrix& Matrix::shuffleRowsInPlace()
+    {
+        if (rows_ <= 1 || cols_ == 0)
+            return *this;
+
+        std::vector<std::size_t> indices(rows_);
+
+        for (std::size_t i = 0; i < rows_; ++i)
+            indices[i] = i;
+
+        std::random_device rd;
+        std::mt19937 gen(rd());
+
+        std::shuffle(indices.begin(), indices.end(), gen);
+
+        Matrix temp(rows_, cols_);
+
+        for (std::size_t newRow = 0; newRow < rows_; ++newRow)
+        {
+            std::size_t oldRow = indices[newRow];
+
+            std::memcpy(
+                temp.data_ + newRow * cols_,
+                data_ + oldRow * cols_,
+                cols_ * sizeof(cumeric_t)
+            );
+        }
+
+        std::memcpy(
+            data_,
+            temp.data_,
+            rows_ * cols_ * sizeof(cumeric_t)
+        );
+
+        return *this;
+    }
     
 } // namespace cum

@@ -15,6 +15,16 @@ namespace cum
         {
             buff[i] = (cumeric_t)oneapi::mkl::rng::device::generate(dist, engine);
         }
+        //
+        // cum::library::getQueue().submit([&](sycl::handler& h) {
+        //     h.parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx) {
+        //         oneapi::mkl::rng::device::philox4x32x10<> engine(69, idx[0]);
+        //         oneapi::mkl::rng::device::uniform<float> distr(min, max);
+        //
+        //         float x = oneapi::mkl::rng::device::generate(distr, engine);
+        //         buff[idx] = static_cast<cumeric_t>(x);
+        //     });
+        // });
 
     }
-}
+}  

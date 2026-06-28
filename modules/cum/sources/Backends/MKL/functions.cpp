@@ -76,14 +76,16 @@ namespace cum::functions
     }
 
     cumeric_t tanh(cumeric_t x) { return tanhf(x); }
-    cumeric_t tanh_derivative(cumeric_t x) { return 1.0_c - x * x; }
+    cumeric_t tanh_derivative(cumeric_t x) { return 1.0_c - tanh(x) * tanh(x); }
+    // cumeric_t tanh_derivative(cumeric_t x) { return 1.0_c - x * x; }
     cumeric_t Tanh::operator()(cumeric_t x) const
     {
         return tanhf(x);
     }
 
     cumeric_t sigmoid(cumeric_t x) { return 1.0_c / (1.0_c + expf(-x)); }
-    cumeric_t sigmoid_derivative(cumeric_t x) { return x * (1.0_c - x); }
+    cumeric_t sigmoid_derivative(cumeric_t x) { return sigmoid(x) * (1.0_c - sigmoid(x)); }
+    cumeric_t sigmoid_derivative_from_result(cumeric_t x) { return x * (1.0_c - x); }
     cumeric_t Sigmoid::operator()(cumeric_t x) const
     {
         return sigmoid(x);

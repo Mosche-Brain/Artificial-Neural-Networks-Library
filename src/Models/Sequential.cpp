@@ -9,6 +9,9 @@
 #endif
 
 #include "runtime_config.hpp"
+
+#define DEFAULT_LOSS_FUNC Utils::loss::LossFunction::mse
+
 namespace YANN::Models
 {
     Sequential::Sequential()
@@ -16,7 +19,7 @@ namespace YANN::Models
 
     }
 
-    Sequential::Sequential(std::initializer_list<std::unique_ptr<Layers::LayerBase>> newTopology)
+    Sequential::Sequential(std::initializer_list<std::unique_ptr<Layers::LayerBase>> newTopology) : loss_function(DEFAULT_LOSS_FUNC)
     {
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::verbosity_level() >= 1)
@@ -34,7 +37,7 @@ namespace YANN::Models
         {
             std::cout << "uh\n";
             int previous_layer_size = topology[i - 1]->size();
-            int  current_layer_size = topology[  i  ]->size();
+            int current_layer_size  = topology[  i  ]->size();
 
             topology[i]->initParameters(current_layer_size, previous_layer_size);
         }
@@ -62,6 +65,11 @@ namespace YANN::Models
         topology.clear();
     }
 
+    void Sequential::setLossFunction(Utils::loss::LossFunction new_loss_function)
+    {
+        loss_function = new_loss_function;
+    }
+
     cum::Matrix Sequential::forward(const cum::Matrix& input)
     {
         topology[0]->forward(input);
@@ -82,7 +90,7 @@ namespace YANN::Models
         cum::Matrix curr_gradient = d_output;
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::verbosity_level() >= 3)
-            std::cout << "\t\t\t" << "layer output gradient: " << YANN::Utils::logs::matrixToString(curr_gradient) << '\n';
+            std::cout << "\t\t\t" << "layer output gradient: " << YANN::Utils::logs::matrixToString(curr_gradient.transpose()) << '\n';
         #endif
         for(size_t i = topology.size() - 1 ; i > 0 ; --i)
         {
@@ -90,15 +98,15 @@ namespace YANN::Models
             curr_gradient = topology[i]->backward(curr_gradient);
             #if defined(ENABLE_DEBUG_OUTPUT)     
             if(runtime_config::verbosity_level() >= 3)
-                std::cout << "\t\t\t" << "layer " << i << " gradient: " << Utils::logs::matrixToString(curr_gradient) << '\n';
+                std::cout << "\t\t\t" << "layer " << i << " gradient: " << Utils::logs::matrixToString(curr_gradient.transpose()) << '\n';
                 // std::cout << "layer type: " << topology[i]->layerType() << '\n';
             #endif
         }        
         #if defined(ENABLE_DEBUG_OUTPUT)
-        if(runtime_config::verbosity_level() >= 3)
-        {
-            std::cout << "\t\t\t" << "layer 0 gradient: " << Utils::logs::matrixToString(curr_gradient) << '\n';
-        }
+        // if(runtime_config::verbosity_level() >= 3)
+        // {
+        //     std::cout << "\t\t\t" << "layer 0 gradient: " << Utils::logs::matrixToString(curr_gradient.transpose()) << '\n';
+        // }
         #endif
     }
 

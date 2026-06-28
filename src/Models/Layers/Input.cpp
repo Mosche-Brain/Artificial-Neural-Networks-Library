@@ -38,7 +38,7 @@ namespace YANN::Models::Layers
         this->_initialized_ = true;
     }
 
-    cum::Matrix& Input::forward(const cum::Matrix& input)
+    cum::Matrix Input::forward(const cum::Matrix& input)
     {
         this->outputs = input;
         return this->inputs;

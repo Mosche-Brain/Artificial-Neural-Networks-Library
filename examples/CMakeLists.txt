@@ -17,7 +17,7 @@ foreach(EXAMPLE_SOURCE ${EXAMPLE_SOURCES})
         ${CMAKE_SOURCE_DIR}/include
     )
 
-    target_link_libraries(${EXAMPLE_NAME} PRIVATE ${PROJECT_NAME} OpenMP::OpenMP_CXX cum::Core cum::MKL)
+    target_link_libraries(${EXAMPLE_NAME} PRIVATE ${PROJECT_NAME} OpenMP::OpenMP_CXX cum::Core cum::MKL matplot)
 
 
     # if using MKL, link to it
