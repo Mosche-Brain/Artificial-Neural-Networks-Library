@@ -7,6 +7,13 @@
 #include "Layers/Layers.hpp"
 #include "Utility/loss.hpp"
 
+/* # Used conventions
+ * - Layer indexing starts from 0
+ * - Vectors are 1D matrices
+ * - Inputs and results are column vectors
+ * - Training data are transposed (every row is a sample, it is transposed in training)
+ */
+
 namespace YANN::Models
 {
     class Sequential

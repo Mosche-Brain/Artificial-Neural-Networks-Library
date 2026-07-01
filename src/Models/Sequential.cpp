@@ -73,13 +73,10 @@ namespace YANN::Models
     cum::Matrix Sequential::forward(const cum::Matrix& input)
     {
         topology[0]->forward(input);
-        // std::cout << "layer 0 output dimensions " << Utils::logs::show_matrix_dimensions(topology[0]->Outputs()) << '\n';
 
         for(size_t i = 1 ; i < topology.size() ; ++i)
         {
-            // std::cout << "bach\n";
             topology[i]->forward(topology[i - 1]->Outputs());
-            // std::cout << "layer " << i << " output dimensions " << Utils::logs::show_matrix_dimensions(topology[i]->Outputs()) << '\n';
         }
 
         return topology.back()->Outputs();
@@ -114,7 +111,7 @@ namespace YANN::Models
     {
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::verbosity_level() >= 1)
-            std::cout << "Starting training for " << epochs << " epochs...\n";
+            std::cout << "Started training for " << epochs << " epochs...\n";
         #endif
         for(size_t epoch = 0 ; epoch < epochs ; epoch++)
         {
@@ -144,8 +141,8 @@ namespace YANN::Models
                 // cum::Matrix x = X.row(i).transpose();
                 // cum::Matrix y = Y.row(i).transpose();
 
-                cum::Matrix x = X.row(i);
-                cum::Matrix y = Y.row(i);
+                cum::Matrix x = X.row(i).transpose();
+                cum::Matrix y = Y.row(i).transpose();
 
                 #if defined(ENABLE_DEBUG_OUTPUT)
                 if(runtime_config::verbosity_level() >= 2) {

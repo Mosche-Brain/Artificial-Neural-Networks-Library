@@ -21,7 +21,7 @@ int main()
 
     YANN::Models::Sequential sequential({
         YANN::Models::Layers::Input::createUnique(2),
-        YANN::Models::Layers::Dense::createUnique(3, "sigmoid"),
+        YANN::Models::Layers::Dense::createUnique(2, "sigmoid"),
         YANN::Models::Layers::Dense::createUnique(1, "sigmoid")
     });
 
@@ -35,10 +35,10 @@ int main()
     cum::Matrix y_eval(4, 1);
 
     cum::cumeric_t rate = 0.1_c;
-    size_t epochs = 1;
+    size_t epochs = 100;
 
     for(int i = 0 ; i < 4 ; i++)
-        y_eval(i, 0) = sequential.forward(x_train.row(i))(0,0);
+        y_eval(i, 0) = sequential.forward(x_train.row(i)).transpose()(0,0);
 
     std::cout << "pretrain:\n";
     std::cout << '[' << x_train(0, 0) << ',' << x_train(0, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 0) << "\n";

@@ -5,6 +5,8 @@
 #include <cmath>
 #include <limits>
 
+#include "cum/functions.hpp"
+
 namespace YANN::Utils::loss
 {
     LossType computeLoss(const cum::Matrix& result, const cum::Matrix& target, LossFunction loss_function)
@@ -76,33 +78,33 @@ namespace YANN::Utils::loss
         const std::size_t cols = result.cols();
         const std::size_t size = result.size();
 
-        const cum::cummulative_t grad_scale = 1.f;
+        // const cum::cummulative_t grad_scale = 1. f; // Not used
         // const cum::cumeric_t eps = cum::EPSILON;
         // const cum::cummulative_t eps = std::numeric_limits<cum::cummulative_t>::epsilon();
-        const cum::cummulative_t eps = static_cast<cum::cummulative_t>(1e-4f);
+        // const cum::cummulative_t eps = static_cast<cum::cummulative_t>(1e-4f);
+        const cum::cumeric_t eps = 1e-4_c;
 
-        cum::cummulative_t loss = 0;
-        cum::Matrix gradient(rows, cols, 0_c);
+        cum::cumeric_t loss = 0;
+        cum::Matrix gradient(rows, cols);
 
         for (std::size_t i = 0; i < rows; ++i)
         {
             for (std::size_t j = 0; j < cols; ++j)
             {
-                const cum::cummulative_t y = (cum::cummulative_t)target(i, j);
+                const cum::cumeric_t y = target(i, j);
 
-                cum::cummulative_t p = (cum::cummulative_t)result(i, j);
+                cum::cumeric_t p = result(i, j);
 
-                if (p < eps)
-                    p = eps;
-                else if (p > 1 - eps)
-                    p = 1 - eps;
+                cum::functions::clipInPlace(&p, eps, 1 - eps, 1);
+
 
                 loss += -(
                     y * std::log(p)
                     + (1 - y) * std::log(1 - p)
                 );
 
-                cum::cummulative_t deriv = ((1 - y) / (1 - p) - y / p) / static_cast<cum::cummulative_t>(1e-4) * grad_scale;
+                // cum::cummulative_t deriv = ((1 - y) / (1 - p) - y / p) / static_cast<cum::cummulative_t>(1e-4);
+                cum::cumeric_t deriv = ((1 - y) / (1 - p) - y / p);
                 gradient(i, j) = deriv;
                 // gradient(i, j) =
                 //     (
@@ -114,9 +116,10 @@ namespace YANN::Utils::loss
             }
         }
 
-        loss /= static_cast<cum::cummulative_t>(size);
+        // loss /= static_cast<cum::cummulative_t>(size);
+        loss /= static_cast<cum::cumeric_t>(size);
 
-        return LossType{ loss, grad_scale ,gradient, };
+        return LossType{ loss, 1 ,gradient, }; // nie zwracaj usagi na 1 jako drugi argument
     }
 
     LossType cross_entropy(const cum::Matrix& result, const cum::Matrix& target)

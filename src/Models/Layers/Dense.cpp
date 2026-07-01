@@ -24,7 +24,7 @@ namespace YANN::Models::Layers
         cum::functions::getFunctionByName(&activation, func);
         _layerSize_ = layerSize;
 
-        this->_layerType_   = LAYER_TYPE::DENSE;
+        this->_layerType_ = LAYER_TYPE::DENSE;
     }
     
     cum::Matrix Dense::forward(const cum::Matrix& input)
@@ -35,11 +35,12 @@ namespace YANN::Models::Layers
                 // std::cout << "\x1B[31minput size doesn't match with weights\x1B[37m\n";
                 // std::cout << "input " << Utils::logs::show_matrix_dimensions(input) << ", "
                 //           << "weights " << Utils::logs::show_matrix_dimensions(weights) << '\n';
-
-            throw std::runtime_error("Input dimension mismatch: " +
-                std::to_string(input.cols()) + " != " + std::to_string(weights.rows()));
+            // if(input.cols() != weights.rows())
+            if(input.rows() != weights.cols())
+            {
+                throw std::runtime_error("Input dimension mismatch: " + std::to_string(input.rows()) + " != " + std::to_string(weights.cols()));
+            }
             #endif
-
         }
 
         #if defined(ENABLE_DEBUG_OUTPUT) 
@@ -53,7 +54,7 @@ namespace YANN::Models::Layers
             std::cout << "Performing (weights * input) + biases\n";
         #endif
 
-        preactivatedOutputs = (input * weights) + biases;
+        preactivatedOutputs = (weights * input) + biases;
 
         #if defined(ENABLE_DEBUG_OUTPUT)    
         if(runtime_config::verbosity_level() >= 4)
@@ -100,8 +101,8 @@ namespace YANN::Models::Layers
         if(runtime_config::verbosity_level() >= 4)
             std::cout << "\t\t\t\t" << "deltaWeights = matrixMultiply(d_pre_activation, matrixTranspose(inputs))\n";
         #endif
-        // deltaWeights = d_pre_activation * inputs.transpose(); // input is col
-        deltaWeights = inputs.transpose() * d_pre_activation; // input is row
+        deltaWeights = d_pre_activation * inputs.transpose(); // input is col
+        // deltaWeights = inputs.transpose() * d_pre_activation; // input is row
 
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::verbosity_level() >= 4)
@@ -117,25 +118,24 @@ namespace YANN::Models::Layers
             std::cout << "\t\t\t\t" << "deltaInput = matrixMultiply(matrixTranspose(weights), d_pre_activation)\n";
         #endif
 
-        // cum::Matrix deltaInput = weights.transpose() * d_pre_activation;
-        cum::Matrix deltaInput = d_pre_activation * weights.transpose();
+        cum::Matrix deltaInput = weights.transpose() * d_pre_activation;
+        // cum::Matrix deltaInput = d_pre_activation * weights.transpose();
 
         return deltaInput;
     }
 
     void Dense::update_weights(cum::cumeric_t rate)
     {
-        // const cum::cummulative_t grad_scale = 1024.f; // temporarely hardcoded
-        // this->deltaBiases *= (1.f / grad_scale);
-        // this->deltaWeights *= (1.f / grad_scale);
+        #if defined(ENABLE_DEBUG_OUTPUT)
+            cum::Matrix oldWeights = this->weights;
+        #endif
 
         this->weights -= this->deltaWeights * rate;
         this->biases  -= this->deltaBiases  * rate;
 
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::verbosity_level() >= 4)
-            // std::cout << "\t\t\t\t" << "changed weight by " << Utils::logs::matrixToString(weights.transpose()) << " * rate\n";
-                std::cout << Utils::logs::matricesWithArrowToString(deltaWeights, weights, 4, 16) << '\n';
+            std::cout << Utils::logs::matricesWithArrowToString(oldWeights, weights, 4, 16) << '\n';
         #endif
 
         this->deltaWeights = cum::Matrix(this->deltaWeights.rows(), this->deltaWeights.cols(), 0_c);

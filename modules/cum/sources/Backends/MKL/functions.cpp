@@ -116,6 +116,12 @@ namespace cum::functions
             v[i] = v[i] > min && v[i] < max ? v[i] : v[i] < min ? min : max; 
             // v[i] = v[i] > min && v[i] < max ? v[i] : v[i] < min ? min : v[i] > max ? max; 
     }
+    //
+    // void clipInPlace(cummulative_t* v, const cummulative_t min, const cummulative_t max, const std::size_t N)
+    // {
+    //     for(size_t i = 0 ; i < N ; i++)
+    //         v[i] = v[i] > min && v[i] < max ? v[i] : v[i] < min ? min : max;
+    // }
 
     void activation(cumeric_t* r, const cumeric_t* v, const char* name, std::size_t N)
     {

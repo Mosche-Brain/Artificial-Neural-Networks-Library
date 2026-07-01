@@ -60,6 +60,8 @@ namespace cum::functions
 
     void clip(cumeric_t* r, const cumeric_t* v, const cumeric_t min, const cumeric_t max, const std::size_t N);
     void clipInPlace(cumeric_t* v, const cumeric_t min, const cumeric_t max, const std::size_t N);
+    // void clip(cummulative_t* r, const cumeric_t* v, const cumeric_t min, const cumeric_t max, const std::size_t N);
+    // void clipInPlace(cummulative_t* v, const cummulative_t min, const cummulative_t max, const std::size_t N);
     // void activation(cumeric_t* r, const cumeric_t* v, const char* name, std::size_t N);
     // void activationInPlace(cumeric_t* v, const char* name, std::size_t N);
 

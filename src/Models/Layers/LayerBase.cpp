@@ -5,9 +5,9 @@ namespace YANN::Models::Layers
     void LayerBase::initParameters(int layerSize, int inputLenght)
     {
         this->weights = cum::Matrix::Random(layerSize, inputLenght) * 0.1_c;
-        this->biases  = cum::Matrix::Zeros(layerSize, 1);
-        this->outputs = cum::Matrix::Zeros(layerSize, 1);
-        this->inputs  = cum::Matrix::Zeros(layerSize, inputLenght);
+        this->biases  = cum::Matrix::Zeros(layerSize, 1); /* Column-Vector */
+        this->outputs = cum::Matrix::Zeros(layerSize, 1); /* Column-Vector */
+        this->inputs  = cum::Matrix::Zeros(layerSize, inputLenght); /* Column-Vector */
         this->_initialized_ = true;
     }
 
