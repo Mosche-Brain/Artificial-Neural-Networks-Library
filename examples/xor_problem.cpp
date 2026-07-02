@@ -1,75 +1,61 @@
-#include <cum/cum.hpp>
-#include <matplot/matplot.h>
-
-#include <vector>
 #include <iostream>
-#include <algorithm>
 
-std::vector<std::vector<float>> make_matrix_row_major(const cum::Matrix& mat)
-{
-    std::size_t rows = mat.rows();
-    std::size_t cols = mat.cols();
+#include <cum/Core.hpp>
+#include <cum/cum.hpp>
+#include <cum/Matrix.hpp>
 
-    std::vector<std::vector<float>> M(rows, std::vector<float>(cols));
-
-    for (std::size_t r = 0; r < rows; ++r)
-    {
-        for (std::size_t c = 0; c < cols; ++c)
-        {
-            M[r][c] = static_cast<float>(mat(r, c)); // sycl::half -> float
-        }
-    }
-
-    return M;
-}
-
-std::vector<std::vector<float>> make_min_2x2(const std::vector<std::vector<float>>& M)
-{
-    std::size_t rows = M.size();
-    std::size_t cols = M.empty() ? 0 : M[0].size();
-
-    std::size_t out_rows = std::max<std::size_t>(rows, 2);
-    std::size_t out_cols = std::max<std::size_t>(cols, 2);
-
-    std::vector<std::vector<float>> out(out_rows, std::vector<float>(out_cols));
-
-    for (std::size_t r = 0; r < out_rows; ++r)
-    {
-        for (std::size_t c = 0; c < out_cols; ++c)
-        {
-            std::size_t rr = std::min(r, rows - 1);
-            std::size_t cc = std::min(c, cols - 1);
-            out[r][c] = M[rr][cc];
-        }
-    }
-
-    return out;
-}
+#include <YANN/Models/Sequential.hpp>
+#include <YANN/Utility/FileIO.hpp>
+#include <YANN/runtime_config.hpp>
 
 int main()
 {
     cum::cum(cum::CUM_DEVICE::CPU);
+    std::cout << "sizeof cumeric_t in bytes: " << sizeof(cum::cumeric_t) << '\n';
+    YANN::runtime_config::set_verbosity(0);
 
-    cum::Matrix weights_hidden = cum::Matrix::Random(3, 2);
-    cum::Matrix weights_output = cum::Matrix::Random(3, 1);
+    YANN::Models::Sequential sequential({
+        YANN::Models::Layers::Input::createUnique(2),
+        YANN::Models::Layers::Dense::createUnique(3, "sigmoid"),
+        YANN::Models::Layers::Dense::createUnique(1, "sigmoid")
+    });
 
-    auto W_h = make_min_2x2(make_matrix_row_major(weights_hidden));
-    auto W_o = make_min_2x2(make_matrix_row_major(weights_output));
+    cum::Matrix x_train(4, 2,
+                       {0, 0,
+                        0, 1,
+                        1, 0,
+                        1, 1});
 
-    matplot::figure(true);
+    cum::Matrix y_train(4, 1, {0, 1, 1, 0});
+    cum::Matrix y_eval(4, 1);
 
-    matplot::subplot(1, 2, 1);
-    matplot::imagesc(W_o);
-    matplot::axis(matplot::equal);
-    matplot::title("Output weights");
+    cum::cumeric_t rate = 0.1_c;
+    size_t epochs = 5000;
 
-    matplot::subplot(1, 2, 2);
-    matplot::imagesc(W_h);
-    matplot::axis(matplot::equal);
-    matplot::title("Hidden weights");
+    for(int i = 0 ; i < 4 ; i++)
+        y_eval(i, 0) = sequential.forward(x_train.row(i).transpose())(0,0);
 
-    // matplot::colorbar();
-    matplot::show();
+    std::cout << "pretrain:\n";
+    std::cout << '[' << x_train(0, 0) << ',' << x_train(0, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 0) << "\n";
+    std::cout << '[' << x_train(1, 0) << ',' << x_train(1, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 1) << "\n";
+    std::cout << '[' << x_train(2, 0) << ',' << x_train(2, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 2) << "\n";
+    std::cout << '[' << x_train(3, 0) << ',' << x_train(3, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 3) << "\n";
+
+    sequential.setLossFunction(YANN::Utils::loss::LossFunction::binary_cross_entropy);
+
+    sequential.fit(x_train, y_train, rate, epochs);
+
+    cum::Matrix sample(1, 2, 1._c);
+
+
+    for(int i = 0 ; i < 4 ; i++)
+        y_eval(i, 0) = sequential.forward(x_train.row(i).transpose())(0,0);
+
+    std::cout << "aftertrain:\n";
+    std::cout << '[' << x_train(0, 0) << ',' << x_train(0, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 0) << "\n";
+    std::cout << '[' << x_train(1, 0) << ',' << x_train(1, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 1) << "\n";
+    std::cout << '[' << x_train(2, 0) << ',' << x_train(2, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 2) << "\n";
+    std::cout << '[' << x_train(3, 0) << ',' << x_train(3, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 3) << "\n";
 
     cum::decum();
 
