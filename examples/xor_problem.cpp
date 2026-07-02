@@ -30,7 +30,7 @@ int main()
     cum::Matrix y_eval(4, 1);
 
     cum::cumeric_t rate = 0.1_c;
-    size_t epochs = 5000;
+    size_t epochs = 4000;
 
     for(int i = 0 ; i < 4 ; i++)
         y_eval(i, 0) = sequential.forward(x_train.row(i).transpose())(0,0);

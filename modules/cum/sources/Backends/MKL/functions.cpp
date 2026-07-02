@@ -1,7 +1,10 @@
 #include "cum/functions.hpp"
 
+#include "cumMKL.hpp"
+
 #include <math.h>
 #include <string.h>
+#include <oneapi/mkl/vm/buffer.hpp>
 
 #include <sycl/sycl.hpp>
 
@@ -74,6 +77,18 @@ namespace cum::functions
     {
         return relu(x);
     }
+    void relu(cumeric_t* r, const cumeric_t* v, const std::size_t N)
+    {
+        library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            const std::size_t i = idx[0];
+            r[i] = v[i] > 0_c ? v[i] : 0_c;
+        }).wait();
+    }
+    void reluInPlace(cumeric_t* v, const std::size_t N)
+    {
+
+    }
 
     cumeric_t tanh(cumeric_t x) { return tanhf(x); }
     cumeric_t tanh_derivative(cumeric_t x) { return 1.0_c - tanh(x) * tanh(x); }
@@ -81,6 +96,16 @@ namespace cum::functions
     cumeric_t Tanh::operator()(cumeric_t x) const
     {
         return tanhf(x);
+    }
+
+    void tanh(cumeric_t* r, const cumeric_t* v, const std::size_t N)
+    {
+        oneapi::mkl::vm::tanh(library::getQueue(), N, v, r).wait();
+    }
+
+    void tanhInPlace(cumeric_t* v, const std::size_t N)
+    {
+        oneapi::mkl::vm::tanh(library::getQueue(), N, v, v).wait();
     }
 
     cumeric_t sigmoid(cumeric_t x) { return 1.0_c / (1.0_c + expf(-x)); }
@@ -106,7 +131,6 @@ namespace cum::functions
         // temporary naive implementation
         for(size_t i = 0 ; i < N ; i++)
             r[i] = v[i] > min && v[i] < max ? v[i] : v[i] < min ? min : max; 
-            // r[i] = v[i] > min && v[i] < max ? v[i] : v[i] < min ? min : v[i] > max ? max; 
     }
 
     void clipInPlace(cumeric_t* v, const cumeric_t min, const cumeric_t max, const std::size_t N)

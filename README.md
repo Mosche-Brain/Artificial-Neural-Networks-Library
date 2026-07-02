@@ -93,11 +93,11 @@ int main()
 
 
 ### Creating and fitting sequential model
-* In constructor of `YANN::Models::Sequential` class your can put initializer list with 
+* In constructor of `yann::models::Sequential` class your can put initializer list with 
 ```cpp
 #include <YANN/Models/Sequential.hpp>
 
-using namespace YANN::Models;
+using namespace yann::models;
 
 int main()
 {

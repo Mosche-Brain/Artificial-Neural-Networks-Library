@@ -4,6 +4,8 @@
 
 namespace cum
 {
+
+
     library::Context::Context() // : queue(sycl::default_selector{})
     {
         // this->setDevice(CUM_DEVICE::AUTO);
@@ -24,24 +26,8 @@ namespace cum
 
     void library::Context::setDevice(CUM_DEVICE device)
     {
-        // sycl::device selected_device;
-        // if(device == CUM_DEVICE::AUTO)
-        //     selected_device = sycl::default_selector{}.select_device();
-        // else if(device == CUM_DEVICE::CPU)
-        //     selected_device = sycl::cpu_selector{}.select_device();
-        // else if(device == CUM_DEVICE::GPU)
-        //     selected_device = sycl::gpu_selector{}.select_device();
-        // else
-        //     throw std::runtime_error("Invalid device type");
-        
-            // sycl::device selected_device;
-
-            // std::call_o
-        // if(this->initialized)
-        // {
-            sycl::free(zeros, queue);
-            sycl::free(ones, queue);
-        // }
+        sycl::free(zeros, queue);
+        sycl::free(ones, queue);
         queue.wait();
 
         if(device == CUM_DEVICE::AUTO)

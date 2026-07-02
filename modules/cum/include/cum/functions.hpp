@@ -39,9 +39,14 @@ namespace cum::functions
     {
         cumeric_t operator()(cumeric_t x) const;
     };
+    void relu(cumeric_t* r, const cumeric_t* v, const std::size_t N);
+    void reluInPlace(cumeric_t* v, const std::size_t N);
 
     cumeric_t tanh(cumeric_t x);
     cumeric_t tanh_derivative(cumeric_t x);
+    void tanh(cumeric_t* r, const cumeric_t* v, const std::size_t N);
+    void tanhInPlace(cumeric_t* v, const std::size_t N);
+
     struct Tanh
     {
         cumeric_t operator()(cumeric_t x) const;
