@@ -18,7 +18,7 @@ struct yann_matrix_s {
 };
 
 struct yann_model_s {
-    YANN::Models::Sequential model;
+    yann::models::Sequential model;
 };
 
 /* Thread-local error message */

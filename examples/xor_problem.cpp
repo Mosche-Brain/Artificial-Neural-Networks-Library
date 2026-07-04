@@ -12,12 +12,12 @@ int main()
 {
     cum::cum(cum::CUM_DEVICE::CPU);
     std::cout << "sizeof cumeric_t in bytes: " << sizeof(cum::cumeric_t) << '\n';
-    YANN::runtime_config::set_verbosity(0);
+    yann::runtime_config::set_verbosity(0);
 
-    YANN::Models::Sequential sequential({
-        YANN::Models::Layers::Input::createUnique(2),
-        YANN::Models::Layers::Dense::createUnique(3, "sigmoid"),
-        YANN::Models::Layers::Dense::createUnique(1, "sigmoid")
+    yann::models::Sequential sequential({
+        yann::models::layers::Input::createUnique(2),
+        yann::models::layers::Dense::createUnique(3, "sigmoid"),
+        yann::models::layers::Dense::createUnique(1, "sigmoid")
     });
 
     cum::Matrix x_train(4, 2,
@@ -41,7 +41,7 @@ int main()
     std::cout << '[' << x_train(2, 0) << ',' << x_train(2, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 2) << "\n";
     std::cout << '[' << x_train(3, 0) << ',' << x_train(3, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 3) << "\n";
 
-    sequential.setLossFunction(YANN::Utils::loss::LossFunction::binary_cross_entropy);
+    sequential.setLossFunction(yann::Utils::loss::LossFunction::binary_cross_entropy);
 
     sequential.fit(x_train, y_train, rate, epochs);
 

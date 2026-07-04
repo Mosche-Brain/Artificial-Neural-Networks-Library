@@ -4,7 +4,7 @@
 
 #include <cum/Matrix.hpp>
 
-namespace YANN::Utils::loss
+namespace yann::Utils::loss
 {
     typedef struct
     {

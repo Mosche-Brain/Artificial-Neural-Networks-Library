@@ -4,8 +4,6 @@
 
 namespace cum
 {
-
-
     library::Context::Context() // : queue(sycl::default_selector{})
     {
         // this->setDevice(CUM_DEVICE::AUTO);
@@ -40,12 +38,11 @@ namespace cum
             throw std::runtime_error("Invalid device type");
 
         zeros = sycl::malloc_shared<cumeric_t>(2048*2048, queue);
-        ones = sycl::malloc_shared<cumeric_t>(2048*2048, queue);
+        ones  = sycl::malloc_shared<cumeric_t>(2048*2048, queue);
         queue.wait();
         // queue = sycl::queue(selected_device);
         std::cout << "Selected device: " << queue.get_device().get_info<sycl::info::device::name>() << '\n';
     }
-
 
     library::Context& library::getContext()
     {
@@ -55,7 +52,6 @@ namespace cum
 
     sycl::queue& library::getQueue()
     {
-
         return getContext().queue;
     }
 

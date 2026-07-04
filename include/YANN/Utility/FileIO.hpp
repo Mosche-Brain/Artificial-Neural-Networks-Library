@@ -9,6 +9,6 @@
 //     void saveMatrix(YANN::matrix_t  mat, const char* filename);
 //     void readMatrix(YANN::matrix_t& mat, const char* filename);
 
-//     void saveSequentialModel(const Models::Sequential& model, const char* filename);
-//     void loadSequentialModel(Models::Sequential& model, const char* filename);
+//     void saveSequentialModel(const models::Sequential& model, const char* filename);
+//     void loadSequentialModel(models::Sequential& model, const char* filename);
 // }

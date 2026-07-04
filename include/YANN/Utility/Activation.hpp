@@ -7,7 +7,7 @@
 #include "cum/LinearAlgebra.hpp"
 #include "functions.hpp"
 
-namespace YANN::Utils
+namespace yann::Utils
 {
     // struct activation_t
     // {

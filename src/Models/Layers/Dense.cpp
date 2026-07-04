@@ -12,7 +12,7 @@
 
 #define ENABLE_RUNTIME_CHECKS // this macro will be moved to runtime config soon
 
-namespace YANN::Models::Layers
+namespace yann::models::layers
 {
     // Dense::Dense(int layerSize, int inputWidth, const char* func) : LayerBase()
     Dense::Dense(int layerSize, const char* func)

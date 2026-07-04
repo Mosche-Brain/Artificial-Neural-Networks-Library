@@ -2,7 +2,7 @@
 
 #include "cum/cum.hpp"
 
-namespace YANN::Utils
+namespace yann::Utils
 {
     /*
     cum::cumeric_t linear(cum::cumeric_t x);

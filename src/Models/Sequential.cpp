@@ -12,14 +12,14 @@
 
 #define DEFAULT_LOSS_FUNC Utils::loss::LossFunction::mse
 
-namespace YANN::Models
+namespace yann::models
 {
     Sequential::Sequential()
     {
 
     }
 
-    Sequential::Sequential(std::initializer_list<std::unique_ptr<Layers::LayerBase>> newTopology) : loss_function(DEFAULT_LOSS_FUNC)
+    Sequential::Sequential(std::initializer_list<std::unique_ptr<layers::LayerBase>> newTopology) : loss_function(DEFAULT_LOSS_FUNC)
     {
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::verbosity_level() >= 1)
@@ -29,7 +29,7 @@ namespace YANN::Models
         topology.reserve(newTopology.size()); 
         for(auto& ptr : newTopology) 
         {
-            topology.push_back(std::move(const_cast<std::unique_ptr<Layers::LayerBase>&>(ptr)));
+            topology.push_back(std::move(const_cast<std::unique_ptr<layers::LayerBase>&>(ptr)));
         }
         
         topology[0]->initParameters(topology[0]->size(), 1);
@@ -87,7 +87,7 @@ namespace YANN::Models
         cum::Matrix curr_gradient = d_output;
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::verbosity_level() >= 3)
-            std::cout << "\t\t\t" << "layer output gradient: " << YANN::Utils::logs::matrixToString(curr_gradient.transpose()) << '\n';
+            std::cout << "\t\t\t" << "layer output gradient: " << yann::Utils::logs::matrixToString(curr_gradient.transpose()) << '\n';
         #endif
         for(size_t i = topology.size() - 1 ; i > 0 ; --i)
         {
@@ -194,7 +194,7 @@ namespace YANN::Models
     {
         for(size_t i = 0 ; i < topology.size() ; i++)
         {
-            if(topology[i]->layerType() != Layers::LAYER_TYPE::INPUT)
+            if(topology[i]->layerType() != layers::LAYER_TYPE::INPUT)
                 topology[i]->update_weights(rate);
         }
     }

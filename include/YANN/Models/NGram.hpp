@@ -12,7 +12,7 @@
 
 #define int_t int32_t
 
-namespace YANN::Models
+namespace yann::models
 {
     class NGram
     {

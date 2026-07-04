@@ -14,13 +14,13 @@
  * - Training data are transposed (every row is a sample, it is transposed in training)
  */
 
-namespace YANN::Models
+namespace yann::models
 {
     class Sequential
     {
     public:
-        using Topology = std::vector<std::unique_ptr<Layers::LayerBase>>;
-        using LayerPtr = std::unique_ptr<Layers::LayerBase>;
+        using Topology = std::vector<std::unique_ptr<layers::LayerBase>>;
+        using LayerPtr = std::unique_ptr<layers::LayerBase>;
 
         /* Constructors */
         Sequential() ;

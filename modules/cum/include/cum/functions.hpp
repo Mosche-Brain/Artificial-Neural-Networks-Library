@@ -27,6 +27,9 @@ namespace cum::functions
     {
         cumeric_t operator()(cumeric_t x) const;
     };
+    void linear(cumeric_t* r, const cumeric_t* v, const std::size_t N);
+    void linearInPlace(cumeric_t* v, const std::size_t N);
+
 
     cumeric_t gelu(cumeric_t x);
     struct GELU

@@ -9,7 +9,7 @@
 #include "cum/functions.hpp"
 
 
-namespace YANN::Models
+namespace yann::models
 {
     class Perceptron
     {

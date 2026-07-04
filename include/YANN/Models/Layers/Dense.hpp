@@ -2,7 +2,7 @@
 
 #include "LayerBase.hpp"
 
-namespace YANN::Models::Layers
+namespace yann::models::layers
 {
     class Dense : public LayerBase
     {

@@ -7,7 +7,7 @@
 
 #include "cum/functions.hpp"
 
-namespace YANN::Utils::loss
+namespace yann::Utils::loss
 {
     LossType computeLoss(const cum::Matrix& result, const cum::Matrix& target, LossFunction loss_function)
     {

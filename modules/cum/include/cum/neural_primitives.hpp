@@ -11,7 +11,9 @@
 
 namespace cum::neural_primitives
 {
-    typedef struct memory memory;
+    typedef struct Memory Memory;
+    typedef struct Engine Engine;
+    typedef struct Stream Stream;
 
     class tensor_descriptor
     {
@@ -22,6 +24,21 @@ namespace cum::neural_primitives
 
         tensor_descriptor(dimensions dims, data_type dtype, layout format=layout::ANY);
         ~tensor_descriptor();
+    private:
+        struct Impl;
+        Impl* impl;
+    };
+
+    class tensor_memory
+    {
+    public:
+        tensor_memory(const tensor_descriptor& desc, Engine& engine);
+        tensor_memory(const tensor_descriptor& desc, Engine& engine, void* data);
+
+        void* data() const;
+        void  set_data(void* data);
+
+        const tensor_descriptor& descriptor() const;
     private:
         struct Impl;
         Impl* impl;

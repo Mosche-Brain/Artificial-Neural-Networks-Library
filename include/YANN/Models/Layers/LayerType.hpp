@@ -1,6 +1,6 @@
 #pragma once
 
-namespace YANN::Models::Layers
+namespace yann::models::layers
 {    
     enum LAYER_TYPE
     {

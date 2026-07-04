@@ -3,7 +3,7 @@
 #include <cum/functions.hpp>
 #include <cstring>
 
-namespace YANN::Utils
+namespace yann::Utils
 {
 
     // activation_t getActivationByName(const char* name)

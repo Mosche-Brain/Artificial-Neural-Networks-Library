@@ -1,6 +1,6 @@
 #include "LayerBase.hpp"
 
-namespace YANN::Models::Layers
+namespace yann::models::layers
 {
     void LayerBase::initParameters(int layerSize, int inputLenght)
     {

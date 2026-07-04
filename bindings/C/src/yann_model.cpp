@@ -35,7 +35,7 @@ yann_status_t yann_model_add_dense(yann_model_t* model,
     }
 
     try {
-        auto layer = YANN::Models::Layers::Dense::createUnique(
+        auto layer = yann::models::layers::Dense::createUnique(
             static_cast<int>(units), activation);
 
         if (!layer) {

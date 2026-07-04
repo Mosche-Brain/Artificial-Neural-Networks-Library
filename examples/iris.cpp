@@ -6,7 +6,7 @@
 int main()
 {
     cum::cum(cum::CUM_DEVICE::GPU);
-    YANN::Models::Perceptron p(2, "sigmoid");
+    yann::models::Perceptron p(2, "sigmoid");
 
     cum::Matrix train_x(4, 2);
     train_x(0, 0) = 0.0f; train_x(0, 1) = 0.0f;

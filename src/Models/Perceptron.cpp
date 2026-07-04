@@ -5,7 +5,7 @@
 #include <cum/LinearAlgebra.hpp>
 #include <cum/functions.hpp>
 
-namespace YANN::Models
+namespace yann::models
 {
     // Perceptron::Perceptron(int inputLenght, std::function<numeric_t(numeric_t)> func) : _inputWidth_(inputLenght)
     // {  

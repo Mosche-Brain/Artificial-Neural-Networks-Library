@@ -9,7 +9,7 @@
 #include "Utility/Activation.hpp"
 #include "Models/Layers/LayerType.hpp"
 
-namespace YANN::Models::Layers
+namespace yann::models::layers
 {
     class LayerBase
     {

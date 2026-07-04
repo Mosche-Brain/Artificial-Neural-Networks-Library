@@ -8,7 +8,7 @@
     #include "Utility/logs.hpp"
 #endif
 
-namespace YANN::Models::Layers
+namespace yann::models::layers
 {
     Input::Input(int layerSize)
     {

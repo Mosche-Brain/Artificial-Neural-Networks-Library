@@ -73,7 +73,7 @@ endif()
     * `CUM_USE_F32` (defining it is optional)
     * `CUM_USE_F16`
     * `CUM_USE_BF16`
-    * `CUM_USE_Q8` (didn't tested  yet )
+    * `CUM_USE_Q8` (didn't tested yet )
 * Currently supported backends
     * `BUILD_USE_MKL`
 ```cpp
@@ -104,9 +104,9 @@ int main()
     int input_layer_size = 2;
     int hidden_layer_size = 69;
     int outut_layer_size = 1;
-    Sequential model({Layers::Input::createUnique(input_layer_size),
-             Layers::Dense::createUnique(hidden_layer_size, "relu"),
-             Layers::Dense::createUnique(outut_layer_size, "sigmoid")}); 
+    Sequential model({layers::Input::createUnique(input_layer_size),
+             layers::Dense::createUnique(hidden_layer_size, "relu"),
+             layers::Dense::createUnique(outut_layer_size, "sigmoid")}); 
                       /* you can also put tanh, gelu, softmax, etc */
 
     int number_of_samples = 4;
@@ -128,7 +128,7 @@ int main()
 ```cpp
 #include <YANN/Models/Perceptron.hpp>
 
-using namespace YANN::Models;
+using namespace yann::models;
 
 int main()
 {
@@ -192,7 +192,8 @@ You can find full API documentation [there (currently not avaible)](www.amogus.o
 * ✅ Working backward pass
 * ✅ Adjustable numbers precision
 * ✅ FP16 and BF16 supported
-* ✅ Parallel CPU Computatiopns
+* ✅ Parallel CPU computations
+* ✅ Own template-free Vector and Matrix classes
 * ✅ GPU support
 * ✅ OneAPI support
 * ⚠️ [Dedicated graphical envionment](https://github.com/Czuowuek-SOS/MLStudio) (work in progress)
@@ -212,6 +213,7 @@ You can find full API documentation [there (currently not avaible)](www.amogus.o
 * [Eigen3](https://eigen.tuxfamily.org/) - C++ Linear Algebra library
 * [oneAPI](https://oneapi.io/) - Open platform for heterogenous computing
 * [Nlohmann JSON](https://github.com/nlohmann/json) - C++ library for parsing JSON format
+* [Easy3D](https://github.com/LiangliangNan/Easy3D) - 3D visualizations library used in examples
 * [Sarvel](https://sarvel.xyz/) - Literally Digital God
 
 ## 🥱 Other useless informations
