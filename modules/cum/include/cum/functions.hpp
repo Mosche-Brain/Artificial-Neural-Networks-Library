@@ -13,6 +13,7 @@ namespace cum::functions
         tanh,
         sigmoid
     };
+    // typedef cumeric_t (*function_t)(cumeric_t);
     typedef cumeric_t (*function_t)(cumeric_t);
     typedef struct
     {
@@ -21,6 +22,8 @@ namespace cum::functions
         function_t derivative;
     } activation_t;    
 
+
+    void fill(cumeric_t* v, cumeric_t val, const std::size_t N);
 
     cumeric_t linear(cumeric_t x);
     struct Linear
@@ -61,6 +64,8 @@ namespace cum::functions
     {
         cumeric_t operator()(cumeric_t x) const;
     };
+    void sigmoid(cumeric_t* r, const cumeric_t* v, const std::size_t N);
+    void sigmoidInPlace(cumeric_t* v, const std::size_t N);
 
 
     cumeric_t min(const cumeric_t a, const cumeric_t b);

@@ -17,7 +17,7 @@ namespace cum
     }
 
     library::Context::~Context()
-    {
+    {              
         sycl::free(zeros, queue);
         sycl::free(ones, queue);
     }

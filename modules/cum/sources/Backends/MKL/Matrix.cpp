@@ -18,8 +18,9 @@ namespace cum
     Matrix::Matrix(size_t rows, size_t cols, cumeric_t value) : rows_(rows), cols_(cols)
     {
         data_ = sycl::malloc_shared<cumeric_t>(rows * cols, library::getQueue());
-        for(size_t i = 0 ; i < rows * cols ; i++)
-            data_[i] = value;
+        // for(size_t i = 0 ; i < rows * cols ; i++)
+        //     data_[i] = value;
+        cum::functions::fill(data_, value, rows * cols);
     }
 
     Matrix::Matrix(std::size_t rows, std::size_t cols, cumeric_t* source) : rows_(rows), cols_(cols)
@@ -92,6 +93,47 @@ namespace cum
         {
             temp.data_[i] = 1._c;
         }
+
+        return temp;
+    }
+
+    Matrix Matrix::Linspace(cumeric_t start, cumeric_t end, std::size_t num)
+    {
+
+
+        cumeric_t* buff = sycl::malloc_shared<cumeric_t>(num, library::getQueue());
+        library::getQueue().parallel_for(sycl::range<1>(num), [=](sycl::id<1> idx)
+        {
+            const std::size_t i = idx[0];
+
+            if (num == 1)
+            {
+                buff[i] = start;
+            }
+            else
+            {
+                buff[i] = start + static_cast<cumeric_t>(i) * (end - start) / static_cast<cumeric_t>(num - 1);
+            }
+        }).wait();
+
+        Matrix temp(1, num, buff);
+        // temp.data_ = sycl::malloc_shared<cumeric_t>(num, library::getQueue());
+        // temp.rows_ = 1;
+        // temp.cols_ = num;
+        // copy buff to temp matrix data
+
+
+        // library::getQueue().submit([=](sycl::handler& h){
+        //
+        //     h.parallel_for(sycl::range<1>(num), [=](sycl::id<1> i)
+        //     {
+        //         if (num == 1) {
+        //             temp.data_[i] = start;
+        //         } else {
+        //             temp.data_[i] = start + static_cast<cumeric_t>(i) *
+        //                         (end - start) / static_cast<cumeric_t>(num - 1);
+        //         }
+        // }).wait();
 
         return temp;
     }

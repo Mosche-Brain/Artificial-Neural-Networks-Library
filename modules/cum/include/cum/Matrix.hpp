@@ -25,6 +25,7 @@ namespace cum
         static Matrix Random(std::size_t rows, std::size_t cols, cumeric_t min = -1_c, cumeric_t max = 1_c);
         static Matrix Zeros(std::size_t rows, std::size_t cols);
         static Matrix Ones(std::size_t rows, std::size_t cols);
+        static Matrix Linspace(cumeric_t start, cumeric_t end, std::size_t num); /* Row Vector */
         // operator Vector() const;
 
 

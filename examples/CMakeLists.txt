@@ -17,7 +17,7 @@ foreach(EXAMPLE_SOURCE ${EXAMPLE_SOURCES})
         ${CMAKE_SOURCE_DIR}/include
     )
 
-    target_link_libraries(${EXAMPLE_NAME} PRIVATE ${PROJECT_NAME} OpenMP::OpenMP_CXX cum::Core cum::MKL matplot)
+    target_link_libraries(${EXAMPLE_NAME} PRIVATE ${PROJECT_NAME} OpenMP::OpenMP_CXX cum::Core cum::MKL matplot easy3d::viewer)
 
 
     # if using MKL, link to it
@@ -26,10 +26,6 @@ foreach(EXAMPLE_SOURCE ${EXAMPLE_SOURCES})
         target_compile_definitions(${EXAMPLE_NAME} PRIVATE fsycl fPIC)
         target_compile_options(${EXAMPLE_NAME} PRIVATE -fsycl)
     endif()
-
-    # if(CUM_USE_F16)
-    #     target_compile_definitions(${EXAMPLE_NAME} PRIVATE CUM_USE_F16)
-    # endif()
 
     target_compile_options(${EXAMPLE_NAME} PRIVATE
         -qopenmp

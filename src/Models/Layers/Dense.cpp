@@ -60,8 +60,7 @@ namespace yann::models::layers
         if(runtime_config::verbosity_level() >= 4)
             std::cout << "Performing activation\n";
         #endif
-        // cum::functions::transform(outputs.data(), preactivatedOutputs.data(), activation, preactivatedOutputs.size());
-        // cum::Matrix result(_layerSize_, 1);
+
         cum::Matrix result(preactivatedOutputs.rows(), preactivatedOutputs.cols());
         cum::functions::transform(result.data(), preactivatedOutputs.data(), activation, preactivatedOutputs.size());
         outputs = result;
@@ -74,13 +73,6 @@ namespace yann::models::layers
 
     cum::Matrix Dense::backward(const cum::Matrix& deltaOutput)
     {
-
-        // cum::Matrix d_pre_activation = math_api::matrixElementwiseMultiply(deltaOutput, 
-        //                                                                 math_api::matrixTransform(preactivatedOutputs, activation.derivative));
-        
-        // cum::Matrix d_pre_activation = deltaOutput.cwiseProduct(cum::functions::transform(preactivatedOutputs, activation.derivative));
-        // cum::Matrix d_pre_activation(deltaOutput.rows(), deltaOutput.cols());
-        // cum::Matrix derivative(deltaOutput.cols(), deltaOutput.cols());
         cum::Matrix derivative(preactivatedOutputs.rows(), preactivatedOutputs.cols());
 
         #if defined(ENABLE_DEBUG_OUTPUT)
@@ -111,7 +103,6 @@ namespace yann::models::layers
 
         // deltaBiases = d_pre_activation.colwiseSum();
         deltaBiases = d_pre_activation;
-
 
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::verbosity_level() >= 4)
