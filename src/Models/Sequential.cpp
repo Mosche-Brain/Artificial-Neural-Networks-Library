@@ -1,4 +1,5 @@
 #include "Sequential.hpp"
+#include "LayerType.hpp"
 
 #include <algorithm>
 #include <random>
@@ -10,7 +11,7 @@
 
 #include "runtime_config.hpp"
 
-#define DEFAULT_LOSS_FUNC Utils::loss::LossFunction::mse
+#define DEFAULT_LOSS_FUNC utils::loss::LossFunction::mse
 
 namespace yann::models
 {
@@ -65,7 +66,7 @@ namespace yann::models
         topology.clear();
     }
 
-    void Sequential::setLossFunction(Utils::loss::LossFunction new_loss_function)
+    void Sequential::setLossFunction(utils::loss::LossFunction new_loss_function)
     {
         loss_function = new_loss_function;
     }
@@ -87,22 +88,23 @@ namespace yann::models
         cum::Matrix curr_gradient = d_output;
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::verbosity_level() >= 3)
-            std::cout << "\t\t\t" << "layer output gradient: " << yann::Utils::logs::matrixToString(curr_gradient.transpose()) << '\n';
+            std::cout << "\t\t\t" << "layer output gradient: " << yann::utils::logs::matrixToString(curr_gradient.transpose()) << '\n';
         #endif
         for(size_t i = topology.size() - 1 ; i > 0 ; --i)
         {
-            // std::cout << "layer type: " << topology[i]->layerType() << '\n';
+            // if(topology[i]->layerType() == layers::LAYER_TYPE::INPUT)
+            //     continue;
+
             curr_gradient = topology[i]->backward(curr_gradient);
             #if defined(ENABLE_DEBUG_OUTPUT)     
             if(runtime_config::verbosity_level() >= 3)
-                std::cout << "\t\t\t" << "layer " << i << " gradient: " << Utils::logs::matrixToString(curr_gradient.transpose()) << '\n';
-                // std::cout << "layer type: " << topology[i]->layerType() << '\n';
+                std::cout << "\t\t\t" << "layer " << i << " gradient: " << utils::logs::matrixToString(curr_gradient.transpose()) << '\n';
             #endif
         }        
         #if defined(ENABLE_DEBUG_OUTPUT)
         // if(runtime_config::verbosity_level() >= 3)
         // {
-        //     std::cout << "\t\t\t" << "layer 0 gradient: " << Utils::logs::matrixToString(curr_gradient.transpose()) << '\n';
+        //     std::cout << "\t\t\t" << "layer 0 gradient: " << utils::logs::matrixToString(curr_gradient.transpose()) << '\n';
         // }
         #endif
     }
@@ -159,7 +161,7 @@ namespace yann::models
                     std::cout << "\t\t" << "Computing loss and gradient...\n";
                 }
                 #endif            
-                Utils::loss::LossType error = Utils::loss::computeLoss(result, y, this->loss_function);
+                utils::loss::LossType error = utils::loss::computeLoss(result, y, this->loss_function);
                 
                 cum::Matrix gradient = error.gradient;
 

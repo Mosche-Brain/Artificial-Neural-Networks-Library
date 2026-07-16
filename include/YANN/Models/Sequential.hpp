@@ -34,7 +34,7 @@ namespace yann::models
         void addLayer(LayerPtr layer);
         void clear();
 
-        void setLossFunction(Utils::loss::LossFunction new_loss_function);
+        void setLossFunction(utils::loss::LossFunction new_loss_function);
 
         /* Getters */
         cum::Matrix& getWeights(size_t layer) const;
@@ -49,7 +49,7 @@ namespace yann::models
         void updateParams(cum::cumeric_t rate);
 
         Topology topology;
-        // Utils::loss::LossFunction loss_function = Utils::loss::LossFunction::binary_cross_entropy;
-        Utils::loss::LossFunction loss_function;
+        // utils::loss::LossFunction loss_function = utils::loss::LossFunction::binary_cross_entropy;
+        utils::loss::LossFunction loss_function;
     };
 }

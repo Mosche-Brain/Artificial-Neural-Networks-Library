@@ -4,6 +4,10 @@
 #include <algorithm>
 #include <random>
 
+/*
+ * Temporarely not developed
+ */
+
 namespace yann::models
 {
 

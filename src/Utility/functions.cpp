@@ -3,7 +3,7 @@
 #include <cmath>
 #include <limits>
 
-namespace yann::Utils
+namespace yann::utils
 {
     /*
     cum::cumeric_t linear(cum::cumeric_t x)

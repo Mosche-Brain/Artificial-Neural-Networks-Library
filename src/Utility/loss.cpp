@@ -7,7 +7,7 @@
 
 #include "cum/functions.hpp"
 
-namespace yann::Utils::loss
+namespace yann::utils::loss
 {
     LossType computeLoss(const cum::Matrix& result, const cum::Matrix& target, LossFunction loss_function)
     {
@@ -82,7 +82,7 @@ namespace yann::Utils::loss
         // const cum::cumeric_t eps = cum::EPSILON;
         // const cum::cummulative_t eps = std::numeric_limits<cum::cummulative_t>::epsilon();
         // const cum::cummulative_t eps = static_cast<cum::cummulative_t>(1e-4f);
-        const cum::cumeric_t eps = 1e-4_c;
+        const cum::cumeric_t eps = 1e-3_c;
 
         cum::cumeric_t loss = 0;
         cum::Matrix gradient(rows, cols);

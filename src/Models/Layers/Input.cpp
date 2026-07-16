@@ -16,7 +16,7 @@ namespace yann::models::layers
         // if(runtime_config::DEBUG_VEBOSITY >= 3)
             std::cout << "\t\t\t" << "Initializing Input layer with " << layerSize << " neurons...\n";
         #endif
-        // this->activation = Utils::Activation("linear");
+        // this->activation = utils::Activation("linear");
         #if defined(ENABLE_DEBUG_OUTPUT)
             std::cout << "Initializing activation function: linear\n";
         #endif

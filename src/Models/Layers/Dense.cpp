@@ -33,8 +33,8 @@ namespace yann::models::layers
         {
             #if defined(ENABLE_RUNTIME_CHECKS)
                 // std::cout << "\x1B[31minput size doesn't match with weights\x1B[37m\n";
-                // std::cout << "input " << Utils::logs::show_matrix_dimensions(input) << ", "
-                //           << "weights " << Utils::logs::show_matrix_dimensions(weights) << '\n';
+                // std::cout << "input " << utils::logs::show_matrix_dimensions(input) << ", "
+                //           << "weights " << utils::logs::show_matrix_dimensions(weights) << '\n';
             // if(input.cols() != weights.rows())
             if(input.rows() != weights.cols())
             {
@@ -126,7 +126,7 @@ namespace yann::models::layers
 
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::verbosity_level() >= 4)
-            std::cout << Utils::logs::matricesWithArrowToString(oldWeights, weights, 4, 16) << '\n';
+            std::cout << utils::logs::matricesWithArrowToString(oldWeights, weights, 4, 16) << '\n';
         #endif
 
         this->deltaWeights = cum::Matrix(this->deltaWeights.rows(), this->deltaWeights.cols(), 0_c);

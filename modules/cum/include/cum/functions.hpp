@@ -47,6 +47,8 @@ namespace cum::functions
     };
     void relu(cumeric_t* r, const cumeric_t* v, const std::size_t N);
     void reluInPlace(cumeric_t* v, const std::size_t N);
+    void relu_derivative(cumeric_t* r, const cumeric_t* v, const std::size_t N);
+
 
     cumeric_t tanh(cumeric_t x);
     cumeric_t tanh_derivative(cumeric_t x);
@@ -66,6 +68,7 @@ namespace cum::functions
     };
     void sigmoid(cumeric_t* r, const cumeric_t* v, const std::size_t N);
     void sigmoidInPlace(cumeric_t* v, const std::size_t N);
+    void sigmoid_derivative(cumeric_t* r, const cumeric_t* v, const std::size_t N);
 
 
     cumeric_t min(const cumeric_t a, const cumeric_t b);

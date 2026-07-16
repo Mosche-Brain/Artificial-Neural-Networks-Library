@@ -31,7 +31,7 @@ namespace yann::models::layers
         virtual cum::Matrix& Inputs();
         virtual cum::Matrix& Weights();
         virtual cum::Matrix& Biases();
-        // Utils::Activation activation;
+        // utils::Activation activation;
         cum::functions::activation_t activation;
         
         LAYER_TYPE layerType();

@@ -24,9 +24,7 @@ int main()
     yann::models::Sequential model({
         yann::models::layers::Input::createUnique(2),
         // yann::models::layers::Dense::createUnique(256, "relu"),
-        yann::models::layers::Dense::createUnique(64, "relu"),
-        yann::models::layers::Dense::createUnique(64, "relu"),
-        yann::models::layers::Dense::createUnique(64, "relu"),
+        yann::models::layers::Dense::createUnique(128, "relu"),
         yann::models::layers::Dense::createUnique(1, "tanh")
     });
 

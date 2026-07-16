@@ -10,11 +10,11 @@ int main()
 
     cum::Matrix mat(2, 2, {1, 2, 3, 4});
 
-    std::cout << "before transpose:\n" << yann::Utils::logs::matrixToString(mat);
+    std::cout << "before transpose:\n" << yann::utils::logs::matrixToString(mat);
 
     mat.transposeInPlace();
 
-    std::cout << "after transpose:\n" << yann::Utils::logs::matrixToString(mat);
+    std::cout << "after transpose:\n" << yann::utils::logs::matrixToString(mat);
 
     cum::decum();
 

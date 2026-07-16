@@ -2,7 +2,7 @@
 
 namespace yann::models::layers
 {    
-    enum LAYER_TYPE
+    enum class LAYER_TYPE
     {
         INPUT,
         DENSE,

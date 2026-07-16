@@ -8,6 +8,7 @@
 
 #include <YANN/Models/Sequential.hpp>
 #include <YANN/Utility/FileIO.hpp>
+#include <YANN/Utility/logs.hpp>
 #include <YANN/runtime_config.hpp>
 
 #include "helpers/surface_visualisation.hpp"
@@ -19,14 +20,20 @@ int main()
     yann::runtime_config::set_verbosity(0);
 
 
-    easy3d::initialize();
-    easy3d::Viewer viewer("plot");
+    // easy3d::initialize();
+    // easy3d::Viewer viewer("plot");
 
     yann::models::Sequential sequential({
         yann::models::layers::Input::createUnique(2),
         yann::models::layers::Dense::createUnique(3, "sigmoid"),
         yann::models::layers::Dense::createUnique(1, "sigmoid")
     });
+
+    // Display weights for each layer
+    for (int i = 0 ; i < sequential.getLayersCount() ; i++)
+    {
+        std::cout << yann::utils::logs::matrixToString(sequential.getWeights(i)) << '\n';
+    }
 
 
     SurfaceFunc f = [&](cum::cumeric_t x, cum::cumeric_t y) -> cum::cumeric_t {
@@ -35,15 +42,15 @@ int main()
         sample(1, 0) = y;
         return sequential.forward(sample)(0,0);
     };
+    //
+    // auto* surface1 = make_function_surface(
+    // f,
+    // -5.0f, 5.0f,
+    // -5.0f, 5.0f,
+    // 150, 150
+    // );
 
-    auto* surface1 = make_function_surface(
-    f,
-    -5.0f, 5.0f,
-    -5.0f, 5.0f,
-    150, 150
-    );
-
-    viewer.add_model(surface1, false);
+    // viewer.add_model(surface1, false);
 
     cum::Matrix x_train(4, 2,
                        {0, 0,
@@ -66,7 +73,7 @@ int main()
     std::cout << '[' << x_train(2, 0) << ',' << x_train(2, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 2) << "\n";
     std::cout << '[' << x_train(3, 0) << ',' << x_train(3, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 3) << "\n";
 
-    sequential.setLossFunction(yann::Utils::loss::LossFunction::binary_cross_entropy);
+    sequential.setLossFunction(yann::utils::loss::LossFunction::binary_cross_entropy);
 
     sequential.fit(x_train, y_train, rate, epochs);
 
@@ -83,17 +90,22 @@ int main()
     std::cout << '[' << x_train(3, 0) << ',' << x_train(3, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 3) << "\n";
 
 
-
-    auto* surface2 = make_function_surface(
-    f,
-    -5.0f, 5.0f,
-    -5.0f, 5.0f,
-    150, 150
-    );
-
-    viewer.add_model(surface2, true);
-
-    viewer.run();
+    for (int i = 0 ; i < sequential.getLayersCount() ; i++)
+    {
+        std::cout << yann::utils::logs::matrixToString(sequential.getWeights(i)) << '\n';
+    }
+    //
+    //
+    // auto* surface2 = make_function_surface(
+    // f,
+    // -5.0f, 5.0f,
+    // -5.0f, 5.0f,
+    // 150, 150
+    // );
+    //
+    // viewer.add_model(surface2, true);
+    //
+    // viewer.run();
     cum::decum();
 
     return 0;

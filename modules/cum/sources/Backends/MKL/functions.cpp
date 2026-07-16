@@ -1,93 +1,80 @@
 #include "cum/functions.hpp"
+#include "cum/LinearAlgebra.hpp"
+#include "cum/memory.hpp"
 
 #include "cumMKL.hpp"
 
-#include <math.h>
-#include <string.h>
 #include <oneapi/mkl/vm/buffer.hpp>
-
 #include <sycl/sycl.hpp>
 
-#include "cum/LinearAlgebra.hpp"
-
+#include <string.h>
 #if defined(BUILD_DEBUG_OUTPUT)
     #include <iostream>
 #endif
 
 namespace cum::functions
 {
-    void fill(cumeric_t* v, cumeric_t val, const std::size_t N)
-    {
-        library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
-        {
-            const std::size_t i = idx[0];
-            v[i] = val;
-        }).wait();
-    }
-
+    /* Standard Functions */
     cumeric_t linear(cumeric_t x) { return x; }
     cumeric_t linear_derivative(cumeric_t x) { return 1; }
-    cumeric_t Linear::operator()(cumeric_t x) const
-    {
-        return linear(x);
-    }
-    
+
     cumeric_t gelu(cumeric_t x)
     {
-#if defined(BUILD_USE_F64)
-#define M_SQRT_2_OVER_PI 0.7978845608028654
-#define M_SQRT_2_OVER_PI_A 0.044715000000000000
-#elif defined(BUILD_USE_F32)
-#define M_SQRT_2_OVER_PI 0.79788456f
-#define M_SQRT_2_OVER_PI_A 0.044715f
-#elif defined(BUILD_USE_F16)
-#define M_SQRT_2_OVER_PI 0.79788456_c
-#define M_SQRT_2_OVER_PI_A 0.044715_c
-#elif defined(BUILD_USE_BF16)
-#define M_SQRT_2_OVER_PI 0.79788456bf16
-#define M_SQRT_2_OVER_PI_A 0.044715bf16
-#else
-#define M_SQRT_2_OVER_PI 0.79788456f
-#define M_SQRT_2_OVER_PI_A 0.044715f
-#endif
+        #if defined(BUILD_USE_F64)
+        #define M_SQRT_2_OVER_PI 0.7978845608028654
+        #define M_SQRT_2_OVER_PI_A 0.044715000000000000
+        #elif defined(BUILD_USE_F32)
+        #define M_SQRT_2_OVER_PI 0.79788456f
+        #define M_SQRT_2_OVER_PI_A 0.044715f
+        #elif defined(BUILD_USE_F16)
+        #define M_SQRT_2_OVER_PI 0.79788456_c
+        #define M_SQRT_2_OVER_PI_A 0.044715_c
+        #elif defined(BUILD_USE_BF16)
+        #define M_SQRT_2_OVER_PI 0.79788456bf16
+        #define M_SQRT_2_OVER_PI_A 0.044715bf16
+        #else
+        #define M_SQRT_2_OVER_PI 0.79788456f
+        #define M_SQRT_2_OVER_PI_A 0.044715f
+        #endif
 
         return 0.5_c * x * (1.0_c + tanhf(M_SQRT_2_OVER_PI * (x + M_SQRT_2_OVER_PI_A * x * x * x)));
     }
     cumeric_t GELU_derivative(cumeric_t x)
     {
-#if defined(BUILD_USE_F64)
-#define M_SQRT_2_OVER_PI 0.7978845608028654
-#define M_SQRT_2_OVER_PI_A 0.044715000000000000
-#elif defined(BUILD_USE_F32)
-#define M_SQRT_2_OVER_PI 0.79788456f
-#define M_SQRT_2_OVER_PI_A 0.044715f
-#elif defined(BUILD_USE_F16)
-#define M_SQRT_2_OVER_PI 0.79788456_c
-#define M_SQRT_2_OVER_PI_A 0.044715_c
-#elif defined(BUILD_USE_BF16)
-#define M_SQRT_2_OVER_PI 0.79788456bf16
-#define M_SQRT_2_OVER_PI_A 0.044715bf16
-#else
-#define M_SQRT_2_OVER_PI 0.79788456f
-#define M_SQRT_2_OVER_PI_A 0.044715f
-#endif
+        #if defined(BUILD_USE_F64)
+        #define M_SQRT_2_OVER_PI 0.7978845608028654
+        #define M_SQRT_2_OVER_PI_A 0.044715000000000000
+        #elif defined(BUILD_USE_F32)
+        #define M_SQRT_2_OVER_PI 0.79788456f
+        #define M_SQRT_2_OVER_PI_A 0.044715f
+        #elif defined(BUILD_USE_F16)
+        #define M_SQRT_2_OVER_PI 0.79788456_c
+        #define M_SQRT_2_OVER_PI_A 0.044715_c
+        #elif defined(BUILD_USE_BF16)
+        #define M_SQRT_2_OVER_PI 0.79788456bf16
+        #define M_SQRT_2_OVER_PI_A 0.044715bf16
+        #else
+        #define M_SQRT_2_OVER_PI 0.79788456f
+        #define M_SQRT_2_OVER_PI_A 0.044715f
+        #endif
 
         cumeric_t tanh_arg = M_SQRT_2_OVER_PI * (x + M_SQRT_2_OVER_PI_A * x * x * x);
         cumeric_t tanh_val = tanhf(tanh_arg);
         cumeric_t sech_squared = 1 - tanh_val * tanh_val;
         return 0.5_c * (1.0_c + tanh_val) + (M_SQRT_2_OVER_PI * (x + 3 * M_SQRT_2_OVER_PI_A * x * x) * sech_squared) / 6.0_c;
     }
-    cumeric_t GELU::operator()(cumeric_t x) const
-    {
-        return gelu(x);
-    }
-     
+
     cumeric_t relu(cumeric_t x) { return x > 0.0_c ? x : 0.0_c; }
     cumeric_t relu_derivative(cumeric_t x) { return x > 0.0_c ? 1.0_c : 0.0_c; }
-    cumeric_t ReLU::operator()(cumeric_t x) const
-    {
-        return relu(x);
-    }
+
+    cumeric_t tanh(cumeric_t x) { return sycl::tanh(x); }
+    cumeric_t tanh_derivative(cumeric_t x) { return 1.0_c - sycl::tanh(x) * sycl::tanh(x); }
+
+    cumeric_t sigmoid(cumeric_t x) { return 1.0_c / (1.0_c + expf(-x)); }
+    cumeric_t sigmoid_derivative(cumeric_t x) { return sigmoid(x) * (1.0_c - sigmoid(x)); }
+    cumeric_t sigmoid_derivative_from_result(cumeric_t x) { return x * (1.0_c - x); }
+    /* Parallel Functions */
+
     void relu(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
         library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
@@ -113,7 +100,6 @@ namespace cum::functions
             r[i] = v[i] > 0_c ? 1_c : 0_c;
         }).wait();
     }
-
     void relu_derivativeInPlace(cumeric_t* v, const std::size_t N)
     {
         library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
@@ -123,19 +109,10 @@ namespace cum::functions
         }).wait();
     }
 
-    cumeric_t tanh(cumeric_t x) { return tanhf(x); }
-    cumeric_t tanh_derivative(cumeric_t x) { return 1.0_c - tanh(x) * tanh(x); }
-    // cumeric_t tanh_derivative(cumeric_t x) { return 1.0_c - x * x; }
-    cumeric_t Tanh::operator()(cumeric_t x) const
-    {
-        return tanhf(x);
-    }
-
     void tanh(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
         oneapi::mkl::vm::tanh(library::getQueue(), N, v, r).wait();
     }
-
     void tanhInPlace(cumeric_t* v, const std::size_t N)
     {
         oneapi::mkl::vm::tanh(library::getQueue(), N, v, v).wait();
@@ -150,7 +127,6 @@ namespace cum::functions
             r[i] = 1 - v[i] * v[i];
         }).wait();
     }
-
     void tanh_devivativeInPlace(cumeric_t* v, const std::size_t N)
     {
         oneapi::mkl::vm::tanh(library::getQueue(), N, v, v).wait();
@@ -161,22 +137,16 @@ namespace cum::functions
         }).wait();
     }
 
-    cumeric_t sigmoid(cumeric_t x) { return 1.0_c / (1.0_c + expf(-x)); }
-    cumeric_t sigmoid_derivative(cumeric_t x) { return sigmoid(x) * (1.0_c - sigmoid(x)); }
-    cumeric_t sigmoid_derivative_from_result(cumeric_t x) { return x * (1.0_c - x); }
-    cumeric_t Sigmoid::operator()(cumeric_t x) const
-    {
-        return sigmoid(x);
-    }
     void sigmoid(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-;
-        LinearAlgebra::scale(r, v, -1.0_c, N);
-        oneapi::mkl::vm::exp(library::getQueue(), N, r, r).wait();
+
+        // LinearAlgebra::scale(r, v, -1.0_c, N);
+        // oneapi::mkl::vm::exp(library::getQueue(), N, r, r).wait();
         library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             const std::size_t i = idx[0];
-            r[i] = 1.f / (1.f + r[i]);
+            // r[i] = 1.f / (1.f + r[i]);
+            r[i] = 1.f / (1.f + sycl::exp(-v[i]));
         }).wait();
     }
     void sigmoidInPlace(cumeric_t* v, const std::size_t N)
@@ -186,78 +156,58 @@ namespace cum::functions
 
     void sigmoid_derivative(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        LinearAlgebra::scale(r, v, -1.0_c, N);
-        oneapi::mkl::vm::exp(library::getQueue(), N, r, r).wait();
+        // LinearAlgebra::scale(r, v, -1.0_c, N);
+        // oneapi::mkl::vm::exp(library::getQueue(), N, r, r).wait();
+        cumeric_t* temp = cum::memory::allocate(N);
+        cum::functions::sigmoid(temp, v, N);
         library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             const std::size_t i = idx[0];
-            r[i] = r[i] * (1 - r[i]);
+            r[i] = temp[i] * (1 - temp[i]);
+            // r[i] = r[i] * (1  - r[i]);
+        }).wait();
+        cum::memory::free(temp);
+    }
+    void sigmoid_derivativeInPlace(cumeric_t* v, const std::size_t N)
+    {
+
+    }
+    /* Functors Functions */
+
+    cumeric_t Linear::operator()(cumeric_t x) const { return linear(x); }
+    
+    cumeric_t GELU::operator()(cumeric_t x) const { return gelu(x); }
+     
+    cumeric_t ReLU::operator()(cumeric_t x) const { return relu(x); }
+
+    cumeric_t Tanh::operator()(cumeric_t x) const { return sycl::tanh(x); }
+
+    cumeric_t Sigmoid::operator()(cumeric_t x) const { return sigmoid(x); }
+
+    /* Various non x->y functions */
+
+    void fill(cumeric_t* v, cumeric_t val, const std::size_t N)
+    {
+        library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            const std::size_t i = idx[0];
+            v[i] = val;
         }).wait();
     }
 
-    cumeric_t min(const cumeric_t a, const cumeric_t b)
-    {
-        return sycl::min(a, b);
-    }
+    cumeric_t min(const cumeric_t a, const cumeric_t b) { return sycl::min(a, b); }
     
-    cumeric_t max(const cumeric_t a, const cumeric_t b)
-    {
-        return sycl::max(a, b);
-    }
+    cumeric_t max(const cumeric_t a, const cumeric_t b) { return sycl::max(a, b); }
 
+    // temporary naive implementation
     void clip(cumeric_t* r, const cumeric_t* v, const cumeric_t min, const cumeric_t max, const std::size_t N)
     {
-        // temporary naive implementation
-        for(size_t i = 0 ; i < N ; i++)
-            r[i] = v[i] > min && v[i] < max ? v[i] : v[i] < min ? min : max; 
+        for(size_t i = 0 ; i < N ; i++) { r[i] = v[i] > min && v[i] < max ? v[i] : v[i] < min ? min : max; };
     }
 
     void clipInPlace(cumeric_t* v, const cumeric_t min, const cumeric_t max, const std::size_t N)
     {
-        // temporary naive implementation
-        for(size_t i = 0 ; i < N ; i++)
-            v[i] = v[i] > min && v[i] < max ? v[i] : v[i] < min ? min : max; 
-            // v[i] = v[i] > min && v[i] < max ? v[i] : v[i] < min ? min : v[i] > max ? max; 
-    }
-    //
-    // void clipInPlace(cummulative_t* v, const cummulative_t min, const cummulative_t max, const std::size_t N)
-    // {
-    //     for(size_t i = 0 ; i < N ; i++)
-    //         v[i] = v[i] > min && v[i] < max ? v[i] : v[i] < min ? min : max;
-    // }
-
-    void activation(cumeric_t* r, const cumeric_t* v, const char* name, std::size_t N)
-    {
-        if (strcmp(name, "linear") == 0)
-        {
-            auto func = Linear();
-            for (std::size_t i = 0; i < N; ++i)
-                r[i] = func(v[i]);
-        }
-        else if (strcmp(name, "relu") == 0)
-        {
-            auto func = ReLU();
-            for (std::size_t i = 0; i < N; ++i)
-                r[i] = func(v[i]);
-        }
-        else if (strcmp(name, "gelu") == 0)
-        {
-            auto func = GELU();
-            for (std::size_t i = 0; i < N; ++i)
-                r[i] = func(v[i]);
-        }
-        else if (strcmp(name, "tanh") == 0)
-        {
-            auto func = Tanh();
-            for (std::size_t i = 0; i < N; ++i)
-                r[i] = func(v[i]);
-        }
-        else if (strcmp(name, "sigmoid") == 0)
-        {
-            auto func = Sigmoid();
-            for (std::size_t i = 0; i < N; ++i)
-                r[i] = func(v[i]);
-        }
+        for(size_t i = 0 ; i < N ; i++) { v[i] = v[i] > min && v[i] < max ? v[i] : v[i] < min ? min : max; };
     }
 
     void getFunctionByName(activation_t* activation, const char* name)
@@ -290,14 +240,12 @@ namespace cum::functions
 
     void transform(cumeric_t* r, const cumeric_t* v, activation_t& func, std::size_t N)
     {
-        // #pragma omp parallel for
-        // for (std::size_t i = 0; i < N; ++i)
-            // r[i] = func.function(v[i]);
         switch (func.name)
         {
             case ActivationFunction::linear:
             {
                 // copy v to r (use queue beceuse r and v are pointing to Unified Shared Memory)
+                // std::cout << "linear activation\n";
                 library::getQueue().copy(v, r, N);
                 break;
             }
@@ -308,7 +256,13 @@ namespace cum::functions
             }
             case ActivationFunction::sigmoid:
             {
+                // std::cout << "sigmoid activation\n";\
+                // NAIVE L0OP
+
                 sigmoid(r, v, N);
+                // for (std::size_t i = 0; i < N; ++i)
+                    // r[i] = sigmoid(v[i]);
+                    // r[i] = 1.0 / (1.0 + std::exp(-v[i]));
                 break;
             }
             case ActivationFunction::tanh:
@@ -341,7 +295,7 @@ namespace cum::functions
             case ActivationFunction::linear:
             {
                 // copy v to r (use queue beceuse r and v are pointing to Unified Shared Memory)
-                library::getQueue().copy(v, r, N);
+                library::getQueue().copy(library::getOnes(), r, N);
                 break;
             }
             case ActivationFunction::relu:
@@ -351,7 +305,9 @@ namespace cum::functions
             }
             case ActivationFunction::sigmoid:
             {
-                sigmoid_derivative(r, v, N);
+                for (std::size_t i = 0; i < N; ++i)
+                    r[i] = (cumeric_t)sigmoid_derivative(v[i]);
+                // sigmoid_derivative(r, v, N);
                 break;
             }
             case ActivationFunction::tanh:
@@ -373,4 +329,4 @@ namespace cum::functions
             v[i] = func.derivative(v[i]);
     }
 
-} // namespace cum::functions
+}

@@ -4,7 +4,7 @@
 
 // #include "Sequential.hpp"
 
-// namespace YANN::Utils::FileIO
+// namespace YANN::utils::FileIO
 // {
 //     void saveMatrix(YANN::matrix_t  mat, const char* filename);
 //     void readMatrix(YANN::matrix_t& mat, const char* filename);
