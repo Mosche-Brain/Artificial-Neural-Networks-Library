@@ -55,6 +55,8 @@ namespace cum::functions
     void tanh(cumeric_t* r, const cumeric_t* v, const std::size_t N);
     void tanhInPlace(cumeric_t* v, const std::size_t N);
 
+    void tanh_derivative(cumeric_t* r, const cumeric_t* v, const std::size_t N);
+
     struct Tanh
     {
         cumeric_t operator()(cumeric_t x) const;

@@ -8,6 +8,7 @@
 
 #include <cmath>
 
+#include "runtime_config.hpp"
 #include "helpers/surface_visualisation.hpp"
 
 using cum::cumeric_t;
@@ -20,13 +21,15 @@ cumeric_t f(cumeric_t x, cumeric_t y)
 
 int main()
 {
-    cum::cum(cum::CUM_DEVICE::GPU);
+    cum::cum(          cum::CUM_DEVICE::CPU);
     yann::models::Sequential model({
         yann::models::layers::Input::createUnique(2),
         // yann::models::layers::Dense::createUnique(256, "relu"),
-        yann::models::layers::Dense::createUnique(128, "relu"),
+        yann::models::layers::Dense::createUnique(128, "tanh"),
         yann::models::layers::Dense::createUnique(1, "tanh")
     });
+
+    yann::runtime_config::set_verbosity(5);
 
     cumeric_t x_from = -4*M_PI;
     cumeric_t y_from = -4*M_PI;
@@ -50,8 +53,11 @@ int main()
     }
 
     cumeric_t rate = 0.1;
-    size_t epochs = 100;
+    size_t epochs = 1;
+    model.setLossFunction(yann::utils::loss::LossFunction::mse);
     model.fit(XY, Z, rate, epochs);
+
+    return 0;
 
     auto* surface = make_function_surface(
         model_forward,

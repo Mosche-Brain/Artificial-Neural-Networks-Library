@@ -23,7 +23,7 @@ int main()
         // return (double)cum::functions::tanh((cum::cumeric_t)x);
         cum::cumeric_t* temp = cum::memory::allocate(1);
         temp[0] = (cum::cumeric_t)x;
-        cum::functions::sigmoid(temp, temp, 1);
+        cum::functions::tanh_derivative(temp, temp, 1);
         cum::cumeric_t y = temp[0];
         cum::memory::free(temp);
         return (double)y;

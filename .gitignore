@@ -5,3 +5,4 @@
 /.external/
 /modules/cum/build/
 /build/
+thirdparty/*

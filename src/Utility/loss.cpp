@@ -40,7 +40,8 @@ namespace yann::utils::loss
 
     LossType mse(const cum::Matrix& result, const cum::Matrix& target)
     {
-        if (result.rows() != target.rows() || result.cols() != target.cols()) {
+        if (result.rows() != target.rows() || result.cols() != target.cols())
+        {
             throw std::runtime_error("Matrix dimensions do not match: result(" + 
                 std::to_string(result.rows()) + "x" + std::to_string(result.cols()) + 
                 "), target(" + std::to_string(target.rows()) + "x" + std::to_string(target.cols()) + ")");
@@ -50,15 +51,17 @@ namespace yann::utils::loss
             throw std::runtime_error("Number of columns in result is zero");
         }
 
+        std::size_t N = result.rows() * result.cols(); // It sould be number of rows
         // if (!result.allFinite() || !target.allFinite()) {
         //     throw std::runtime_error("Input matrices contain NaN or inf values");
         // }
 
-        // Obliczenie różnicy
         cum::Matrix diff = result - target;
 
-        cum::cumeric_t loss = diff.squaredNorm() / result.cols();
-        cum::Matrix grad = diff / result.cols();
+        cum::cumeric_t loss = diff.squaredNorm() / N;
+        cum::Matrix grad = (diff * 2) / N;
+        // cum::functions::clipInPlace(grad.data(), -1000, 1000, N);
+
 
         return { loss, 1, grad };
 
