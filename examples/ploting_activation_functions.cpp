@@ -5,11 +5,12 @@
 #include <matplot/matplot.h>
 
 #include <cum/functions.hpp>
+#include <cum/LinearAlgebra.hpp>
 
 #include <array>
 
-#include "cum/Matrix.hpp"
-#include "cum/memory.hpp"
+#include <cum/Matrix.hpp>
+#include <cum/memory.hpp>
 
 #include "helpers/conversion_helpers.hpp"
 
@@ -25,7 +26,7 @@ int main()
     cum::Matrix X = cum::Matrix::Linspace(-10, 10, 100);
     cum::Matrix Y = cum::Matrix::Linspace(-10, 10, 100);
 
-    cum::functions::linear_derivative(Y.data(), X.data(), 100);
+    cum::functions::linear(Y.data(), X.data(), 100);
     // cum::functions::tanh_derivative(Y.data(), X.data(), 100);
     // cum::functions::tanh(Y.data(), X.data(), 100);
 

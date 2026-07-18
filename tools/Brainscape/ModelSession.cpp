@@ -3,9 +3,10 @@
 #include <algorithm>
 #include <utility>
 
-ModelSession::ModelSession(yann::models::Sequential model)
-    : model_(std::move(model))
+ModelSession::ModelSession(yann::models::Sequential model, yann::optimizers::Optimizer optimizer)
+    : model_(std::move(model)), optimizer_(std::move(optimizer))
 {
+
 }
 
 ModelSession::~ModelSession()
@@ -35,6 +36,13 @@ void ModelSession::setLossFunction(yann::utils::loss::LossFunction loss)
     std::lock_guard<std::mutex> lock(mutex_);
     lossFunction_ = loss;
     model_.setLossFunction(loss);
+}
+
+
+void ModelSession::setLearningRate(cum::cumeric_t rate)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    optimizer_->learning_rate = rate;
 }
 
 void ModelSession::reset(yann::models::Sequential model)
@@ -87,7 +95,23 @@ void ModelSession::recomputeCurveLocked()
         curve_.ys[i] = y.rows() > 0 ? toF(y(0, 0)) : 0.0f;
     }
 
-    curve_.valid = n > 0;
+    const std::size_t nTrain = std::min(X_train_.rows(), Y_train_.rows());
+    curve_.trainPredYs.resize(nTrain);
+    double sse = 0.0;
+    for (std::size_t i = 0; i < nTrain; ++i)
+    {
+        const cum::cumeric_t xin = X_train_(i, 0);
+        cum::Matrix x(1, 1, {xin});
+        const cum::Matrix y = model_.forward(x);
+        const float pred = y.rows() > 0 ? toF(y(0, 0)) : 0.0f;
+        curve_.trainPredYs[i] = pred;
+        const float target = toF(Y_train_(i, 0));
+        const double d = static_cast<double>(pred - target);
+        sse += d * d;
+    }
+    curve_.mse = nTrain > 0 ? static_cast<float>(sse / static_cast<double>(nTrain)) : 0.0f;
+
+    curve_.valid = n > 0 || nTrain > 0;
     curveDirty_ = false;
 }
 
@@ -161,10 +185,10 @@ void ModelSession::startTraining(cum::cumeric_t rate, std::size_t epochs)
         trainThread_.join();
 
     isTraining_.store(true);
-    trainThread_ = std::thread([this, rate, epochs]()
+    trainThread_ = std::thread([this, epochs]()
     {
         std::lock_guard<std::mutex> lock(mutex_);
-        model_.fit(X_train_, Y_train_, rate, epochs);
+        model_.fit(X_train_, Y_train_, *optimizer_, epochs);
         curveDirty_ = true;
         isTraining_.store(false);
     });

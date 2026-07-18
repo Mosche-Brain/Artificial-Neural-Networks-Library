@@ -5,12 +5,11 @@
 #include <cum/LinearAlgebra.hpp>
 
 #include <YANN//Models/Sequential.hpp>
-
-#include "Sequential.hpp"
+#include <YANN/optimizers/SGD.hpp>
+#include <YANN/runtime_config.hpp>
 
 #include <matplot/matplot.h>
 
-#include "runtime_config.hpp"
 #include "helpers/conversion_helpers.hpp"
 
 namespace plt = matplot;
@@ -45,8 +44,9 @@ int main()
 
     // model.setLossFunction(yann::utils::loss::LossFunction::binary_cross_entropy);
     // model.setLossFunction(yann::utils::loss::LossFunction::mse);
-    // yann::optimizers::OptimizerBase* o
+    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.01);
     // model.fit(X_train, Y_train, 0.01_c, 50);
+    model.fit(X_train, Y_train, *optimizer, 50);
 
     cum::Matrix Y_pred_pretrain = cum::Matrix(N_eval, 1);
 

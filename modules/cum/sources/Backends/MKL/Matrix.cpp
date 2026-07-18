@@ -138,6 +138,11 @@ namespace cum
         return temp;
     }
 
+    void Matrix::fill(cumeric_t value)
+    {
+        functions::fill(data_, value, rows_ * cols_);
+    }
+
     /* ============================== Accessors ================================ */
 
     Matrix Matrix::row(size_t i) const

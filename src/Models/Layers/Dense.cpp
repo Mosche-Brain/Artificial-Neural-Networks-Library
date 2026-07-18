@@ -18,8 +18,8 @@ namespace yann::models::layers
     Dense::Dense(int layerSize, const char* func)
     {
         #if defined(ENABLE_DEBUG_OUTPUT)
-        // if(runtime_config::DEBUG_VEBOSITY >= 3)
-            std::cout << "\t\t\t" << "Initializing Dense layer with " << layerSize << " neurons and " << func << " activation function...\n";
+        if(runtime_config::verbosity_level() >= 1)
+            std::cout << "\t" << "Initializing Dense layer with " << layerSize << " neurons and " << func << " activation function...\n";
         #endif
         cum::functions::getFunctionByName(&activation, func);
         _layerSize_ = layerSize;
@@ -54,7 +54,7 @@ namespace yann::models::layers
             std::cout << "Performing (weights * input) + biases\n";
         #endif
 
-        preactivatedOutputs = (weights * input) + biases;
+        preactivatedOutputs = (weights() * input) + biases();
 
         #if defined(ENABLE_DEBUG_OUTPUT)    
         if(runtime_config::verbosity_level() >= 4)
@@ -93,7 +93,7 @@ namespace yann::models::layers
         if(runtime_config::verbosity_level() >= 4)
             std::cout << "\t\t\t\t" << "deltaWeights = matrixMultiply(d_pre_activation, matrixTranspose(inputs))\n";
         #endif
-        deltaWeights = d_pre_activation * inputs.transpose(); // input is col
+        weights.gradient = d_pre_activation * inputs.transpose(); // input is col
         // deltaWeights = inputs.transpose() * d_pre_activation; // input is row
 
         #if defined(ENABLE_DEBUG_OUTPUT)
@@ -102,14 +102,14 @@ namespace yann::models::layers
         #endif
 
         // deltaBiases = d_pre_activation.colwiseSum();
-        deltaBiases = d_pre_activation;
+        biases.gradient = d_pre_activation;
 
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::verbosity_level() >= 4)
             std::cout << "\t\t\t\t" << "deltaInput = matrixMultiply(matrixTranspose(weights), d_pre_activation)\n";
         #endif
 
-        cum::Matrix deltaInput = weights.transpose() * d_pre_activation;
+        cum::Matrix deltaInput = weights().transpose() * d_pre_activation;
         // cum::Matrix deltaInput = d_pre_activation * weights.transpose();
 
         return deltaInput;
@@ -117,20 +117,26 @@ namespace yann::models::layers
 
     void Dense::update_weights(cum::cumeric_t rate)
     {
-        #if defined(ENABLE_DEBUG_OUTPUT)
-            cum::Matrix oldWeights = this->weights;
-        #endif
+    //     #if defined(ENABLE_DEBUG_OUTPUT)
+    //         cum::Matrix oldWeights = this->weights;
+    //     #endif
+    //
+    //     this->weights -= this->deltaWeights * rate;
+    //     this->biases  -= this->deltaBiases  * rate;
+    //
+    //     #if defined(ENABLE_DEBUG_OUTPUT)
+    //     if(runtime_config::verbosity_level() >= 4)
+    //         std::cout << utils::logs::matricesWithArrowToString(oldWeights, weights, 4, 16) << '\n';
+    //     #endif
+    //
+    //     this->deltaWeights = cum::Matrix(this->deltaWeights.rows(), this->deltaWeights.cols(), 0_c);
+    //     this->deltaBiases = cum::Matrix(this->deltaBiases.rows(), this->deltaBiases.cols(), 0_c);
+    }
 
-        this->weights -= this->deltaWeights * rate;
-        this->biases  -= this->deltaBiases  * rate;
-
-        #if defined(ENABLE_DEBUG_OUTPUT)
-        if(runtime_config::verbosity_level() >= 4)
-            std::cout << utils::logs::matricesWithArrowToString(oldWeights, weights, 4, 16) << '\n';
-        #endif
-
-        this->deltaWeights = cum::Matrix(this->deltaWeights.rows(), this->deltaWeights.cols(), 0_c);
-        this->deltaBiases = cum::Matrix(this->deltaBiases.rows(), this->deltaBiases.cols(), 0_c);
+    void Dense::collect_parameters(std::vector<Parameter*>& params)
+    {
+        params.push_back(&weights);
+        params.push_back(&biases);
     }
 
     std::unique_ptr<LayerBase> Dense::createUnique(int layerSize, const char* func)

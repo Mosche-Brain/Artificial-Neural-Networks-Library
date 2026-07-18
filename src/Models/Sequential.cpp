@@ -177,7 +177,7 @@ namespace yann::models
                     std::cout << "\t\t" << "Updating parameters...\n";
                 #endif
 
-                this->updateParams(rate);
+                // this->updateParams(rate);
                 totalLoss += error.loss;
             }
             // totalLoss /= X.rows();
@@ -192,9 +192,76 @@ namespace yann::models
         }
     }
 
-    void Sequential::fit(const cum::Matrix& X, const cum::Matrix& Y, optimizers::OptimizerBase* optimizer, size_t epochs)
+    void Sequential::fit(const cum::Matrix& X, const cum::Matrix& Y, optimizers::OptimizerBase& optimizer, size_t epochs)
     {
+        std::vector<Parameter*> params = this->parameters();
 
+        #if defined(ENABLE_DEBUG_OUTPUT)
+        if(runtime_config::verbosity_level() >= 1)
+            std::cout << "Started training for " << epochs << " epochs...\n";
+        #endif
+        for(size_t epoch = 0 ; epoch < epochs ; epoch++)
+        {
+            cum::cummulative_t totalLoss = 0;
+
+            #if defined(ENABLE_DEBUG_OUTPUT)
+            if(runtime_config::verbosity_level() >= 1)
+                std::cout << "\t" << "Epoch " << epoch << "\n";
+            #endif
+            for(int i = 0 ; i < X.rows() ; i++)
+            {
+                #if defined(ENABLE_DEBUG_OUTPUT)
+                if(runtime_config::verbosity_level() >= 2)
+                    std::cout << "\t\t" << "Sample " << i << "\n";
+                #endif
+
+                cum::Matrix x = X.row(i).transpose();
+                cum::Matrix y = Y.row(i).transpose();
+
+                #if defined(ENABLE_DEBUG_OUTPUT)
+                if(runtime_config::verbosity_level() >= 2) {
+                    // std::cout << "\t\t" << "input: "  << x << '\n';
+                    // std::cout << "\t\t" << "target: " << math_api::matrixTranspose(y) << '\n';
+                }
+                #endif
+
+                cum::Matrix result = this->forward(x);
+                #if defined(ENABLE_DEBUG_OUTPUT)
+                if(runtime_config::verbosity_level() >= 2)
+                {
+                    // std::cout << "\t\t" << "resutl: " << math_api::matrixTranspose(result) << '\n';
+                    std::cout << "\t\t" << "Computing loss and gradient...\n";
+                }
+                #endif
+                utils::loss::LossType error = utils::loss::computeLoss(result, y, this->loss_function);
+
+                cum::Matrix gradient = error.gradient;
+
+                #if defined(ENABLE_DEBUG_OUTPUT)
+                if(runtime_config::verbosity_level() >= 2)
+                    std::cout << "\t\t" << "Performing backpropagation...\n";
+                #endif
+
+                this->backward(gradient);
+
+                #if defined(ENABLE_DEBUG_OUTPUT)
+                if(runtime_config::verbosity_level() >= 2)
+                    std::cout << "\t\t" << "Updating parameters...\n";
+                #endif
+
+                optimizer.step(params);
+                totalLoss += error.loss;
+            }
+            // totalLoss /= X.rows();
+            cum::cumeric_t avarageLoss = totalLoss / X.rows();
+
+            #if defined(ENABLE_DEBUG_OUTPUT)
+            if(runtime_config::verbosity_level() >= 1) {
+                std::cout << "\t" << "Avarage epoch loss: " << avarageLoss << '\n';
+                std::cout << "\t" << "Total epoch loss: " << totalLoss << '\n';
+            }
+            #endif
+        }
     }
 
     void Sequential::updateParams(cum::cumeric_t rate)
@@ -249,5 +316,15 @@ namespace yann::models
     int Sequential::getLayerSize(size_t layer) const
     {
         return topology[layer]->size();
+    }
+
+    std::vector<Parameter*> Sequential::parameters()
+    {
+        std::vector<Parameter*> params;
+
+        for(auto& layer : topology)
+            layer->collect_parameters(params);
+
+        return params;
     }
 }

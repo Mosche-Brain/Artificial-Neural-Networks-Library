@@ -302,6 +302,7 @@ namespace cum::functions
                 // copy v to r (use queue beceuse r and v are pointing to Unified Shared Memory)
                 // std::cout << "linear activation\n";
                 // library::getQueue().copy(v, r, N);
+                linear(r, v, N);
                 break;
             }
             case ActivationFunction::relu:
@@ -354,7 +355,6 @@ namespace cum::functions
         {
             case ActivationFunction::linear:
             {
-                // copy v to r (use queue beceuse r and v are pointing to Unified Shared Memory)
                 linear_derivative(r, v, N);
                 break;
             }

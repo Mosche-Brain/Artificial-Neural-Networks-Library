@@ -4,12 +4,25 @@ namespace yann::models::layers
 {
     void LayerBase::initParameters(int layerSize, int inputLenght)
     {
-        this->weights = cum::Matrix::Random(layerSize, inputLenght) * 0.1_c;
-        this->biases  = cum::Matrix::Zeros(layerSize, 1); /* Column-Vector */
+        this->weights = Parameter::He(layerSize, inputLenght);
+        this->biases  = Parameter::Zeros(layerSize, 1); /* Column-Vector */
         this->outputs = cum::Matrix::Zeros(layerSize, 1); /* Column-Vector */
         this->inputs  = cum::Matrix::Zeros(layerSize, inputLenght); /* Column-Vector */
         this->_initialized_ = true;
+        // this->weights = cum::Matrix::Random(layerSize, inputLenght) * 0.1_c;
+        // this->biases  = cum::Matrix::Zeros(layerSize, 1); /* Column-Vector */
+        // this->outputs = cum::Matrix::Zeros(layerSize, 1); /* Column-Vector */
+        // this->inputs  = cum::Matrix::Zeros(layerSize, inputLenght); /* Column-Vector */
+        // this->_initialized_ = true;
     }
+
+    // std::vector<Parameter*> LayerBase::collect_params()
+    // {
+    //     std::vector<Parameter*> params;
+    //     params.push_back(&weights);
+    //     params.push_back(&biases);
+    //     return params;
+    // }
 
     bool LayerBase::initialized()
     {
@@ -33,12 +46,12 @@ namespace yann::models::layers
     
     cum::Matrix& LayerBase::Weights()
     {
-        return this->weights;
+        return this->weights();
     }
 
     cum::Matrix& LayerBase::Biases()
     {
-        return this->biases;
+        return this->biases();
     }
 
     LAYER_TYPE LayerBase::layerType()

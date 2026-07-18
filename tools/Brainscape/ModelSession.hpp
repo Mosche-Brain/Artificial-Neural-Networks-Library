@@ -12,7 +12,7 @@
 class ModelSession
 {
 public:
-    explicit ModelSession(yann::models::Sequential model);
+    explicit ModelSession(yann::models::Sequential model, yann::optimizers::Optimizer optimizer);
     ~ModelSession();
 
     ModelSession(const ModelSession&) = delete;
@@ -21,6 +21,7 @@ public:
     void setTrainingData(cum::Matrix X, cum::Matrix Y);
     void setEvalInputs(cum::Matrix X);
     void setLossFunction(yann::utils::loss::LossFunction loss);
+    void setLearningRate(cum::cumeric_t rate);
     yann::utils::loss::LossFunction lossFunction() const { return lossFunction_; }
 
     void reset(yann::models::Sequential model);
@@ -41,6 +42,7 @@ private:
     void recomputeCurveLocked();
     void cacheTrainTargetsLocked();
 
+    yann::optimizers::Optimizer optimizer_;
     yann::models::Sequential model_;
     cum::Matrix X_train_;
     cum::Matrix Y_train_;

@@ -14,11 +14,11 @@ namespace yann::models::layers
         cum::Matrix forward(const cum::Matrix& input) override;
         cum::Matrix backward(const cum::Matrix& deltaOutput) override;
         void update_weights(cum::cumeric_t rate) override;
+        // std::vector<Parameter> collect_params() override;
+
+        void collect_parameters(std::vector<Parameter*>& params) override;
 
         static std::unique_ptr<LayerBase> createUnique(int layerSize, const char* func);
 
-    protected:
-        cum::Matrix deltaWeights;
-        cum::Matrix deltaBiases; 
     };
 }

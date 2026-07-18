@@ -12,6 +12,8 @@ namespace yann::models::layers
         cum::Matrix backward(const cum::Matrix& deltaOutput) override;
         void update_weights(cum::cumeric_t rate) override;
 
+        void collect_parameters(std::vector<Parameter*>& params) override;
+
         static std::unique_ptr<LayerBase> createUnique(int layerSize);
     };
 }

@@ -16,15 +16,14 @@ namespace yann::optimizers
     class SGD : public OptimizerBase
     {
     public:
-        SGD();
         SGD(cum::cumeric_t learning_rate);
 
         // void step() override;
         void step(cum::Matrix& params, cum::Matrix& grad) override;
+        void step(std::vector<Parameter*>& params) override;
 
         static std::unique_ptr<SGD> create(cum::cumeric_t learning_rate);
     private:
-        cum::cumeric_t learning_rate;
         // std::vector<cum::Matrix*> weights_grad;
         // std::vector<cum::Matrix*> biases_grad; // column vector
         std::vector<cum::Matrix> momentum;

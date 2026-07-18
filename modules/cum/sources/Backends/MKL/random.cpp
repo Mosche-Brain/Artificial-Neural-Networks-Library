@@ -27,4 +27,28 @@ namespace cum
         // });
 
     }
+
+    void random::normal(cumeric_t* buff, size_t N, cumeric_t sigma, std::size_t seed)
+    {
+        // oneapi::mkl::rng::device::philox4x32x10 engine(library::getQueue(), 777);
+        // oneapi::mkl::rng::device::gaussian<> dist((float)0, (float)sigma);
+
+        constexpr int VecSize = 4;
+        library::getQueue().parallel_for(sycl::range<1>(N + VecSize - 1), [=](sycl::item<1> item) {
+
+            // constexpr int VecSize = 1;
+
+            oneapi::mkl::rng::device::philox4x32x10<VecSize>
+                engine(seed, item.get_linear_id() * VecSize);
+
+            oneapi::mkl::rng::device::gaussian<float> dist(0.0f, sigma);
+            auto rnd = oneapi::mkl::rng::device::generate(dist, engine);
+
+            size_t base = item.get_linear_id() * VecSize;
+
+            #pragma unroll
+            for (int i = 0; i < VecSize && base + i < N; ++i)
+                buff[base + i] = rnd[i];
+        }).wait();
+    }
 }  

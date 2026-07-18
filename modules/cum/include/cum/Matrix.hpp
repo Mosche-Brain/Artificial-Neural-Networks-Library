@@ -28,6 +28,7 @@ namespace cum
         static Matrix Linspace(cumeric_t start, cumeric_t end, std::size_t num); /* Row Vector */
         // operator Vector() const;
 
+        void fill(cumeric_t value);
 
         std::size_t rows() const { return rows_; }
         std::size_t cols() const { return cols_; }

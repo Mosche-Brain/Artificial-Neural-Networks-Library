@@ -25,11 +25,11 @@ namespace yann::models::layers
             std::cout << "Activation function initialized: " << '\n';
         #endif
         // this->weights = cum::Matrix(2, 1, 1);
-        this->weights = cum::Matrix(layerSize, 1, 1_c);
+        this->weights = Parameter::Ones(layerSize, 1);
         #if defined(ENABLE_DEBUG_OUTPUT)
             std::cout << "Weights initialized with dimensions: " << '\n';
         #endif
-        this->biases  = cum::Matrix(layerSize, 1, 0_c);
+        this->biases  = Parameter::Zeros(layerSize, 1);
         #if defined(ENABLE_DEBUG_OUTPUT)
             std::cout << "Biases initialized with dimensions: " << '\n';
         #endif
@@ -53,6 +53,11 @@ namespace yann::models::layers
     }
 
     void Input::update_weights(cum::cumeric_t rate)
+    {
+
+    }
+
+    void Input::collect_parameters(std::vector<Parameter*>& params)
     {
 
     }

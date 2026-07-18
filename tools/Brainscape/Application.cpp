@@ -9,31 +9,71 @@
 
 #include "imgui.h"
 
+#include <YANN/optimizers/SGD.hpp>
+
 namespace
 {
     yann::models::Sequential makeDefaultModel()
     {
+        // yann::optimizers::SGD::create(0.01);
+
         return yann::models::Sequential({
             yann::models::layers::Input::createUnique(1),
-            yann::models::layers::Dense::createUnique(32, "sigmoid"),
-            yann::models::layers::Dense::createUnique(32, "sigmoid"),
+            yann::models::layers::Dense::createUnique(20, "tanh"),
+            yann::models::layers::Dense::createUnique(20, "tanh"),
+            // yann::models::layers::Dense::createUnique(8, "leaky_relu"),
+            // yann::models::layers::Dense::createUnique(16, "leaky_relu"),
+            // yann::models::layers::Dense::createUnique(8, "leaky_relu"),
+            // yann::models::layers::Dense::createUnique(8, "leaky_relu"),
+            // yann::models::layers::Dense::createUnique(8, "leaky_relu"),
+            // yann::models::layers::Dense::createUnique(8, "leaky_relu"),
+            // yann::models::layers::Dense::createUnique(8, "leaky_relu"),
+            // yann::models::layers::Dense::createUnique(8, "leaky_relu"),
+            // yann::models::layers::Dense::createUnique(24, "leaky_relu"),
+            // yann::models::layers::Dense::createUnique(16, "tanh"),
+            // yann::models::layers::Dense::createUnique(32, "sigmoid"),
             // yann::models::layers::Dense::createUnique(16, "tanh"),
             // yann::models::layers::Dense::createUnique(32, "tanh"),
-            yann::models::layers::Dense::createUnique(1, "tanh"),
+            yann::models::layers::Dense::createUnique(1, "linear"),
         });
+    }
+
+    yann::optimizers::Optimizer makeDefaultOptimizer()
+    {
+        return yann::optimizers::SGD::create(0.01);
     }
 
     void setupSessionData(ModelSession& session)
     {
-        const cum::cumeric_t x_min = static_cast<cum::cumeric_t>(-6.0f * static_cast<float>(M_PI));
-        const cum::cumeric_t x_max = static_cast<cum::cumeric_t>( 6.0f * static_cast<float>(M_PI));
+        const float x_min = -4.0f * static_cast<float>(M_PI);
+        const float x_max =  4.0f * static_cast<float>(M_PI);
         const std::size_t N_train = 64;
         const std::size_t N_eval = 512;
 
-        cum::Matrix X_train = cum::Matrix::Linspace(x_min, x_max, N_train).transpose();
-        cum::Matrix Y_train = cum::Matrix::Linspace(x_min, x_max, N_train).transpose();
-        cum::LinearAlgebra::sinInPlace(Y_train.data(), N_train);
-        cum::Matrix X_eval = cum::Matrix::Linspace(x_min, x_max, N_eval).transpose();
+        // Column samples (N x 1). Build Y explicitly as sin(X) — do not reuse X buffer.
+        cum::Matrix X_train(N_train, 1);
+        cum::Matrix Y_train(N_train, 1);
+        for (std::size_t i = 0; i < N_train; ++i)
+        {
+            const float t = (N_train == 1)
+                ? x_min
+                : x_min + static_cast<float>(i) * (x_max - x_min) / static_cast<float>(N_train - 1);
+            X_train(i, 0) = static_cast<cum::cumeric_t>(t);
+            Y_train(i, 0) = static_cast<cum::cumeric_t>(std::sin(t));
+        }
+
+        cum::Matrix X_eval(N_eval, 1);
+        for (std::size_t i = 0; i < N_eval; ++i)
+        {
+            const float t = (N_eval == 1)
+                ? x_min
+                : x_min + static_cast<float>(i) * (x_max - x_min) / static_cast<float>(N_eval - 1);
+            X_eval(i, 0) = static_cast<cum::cumeric_t>(t);
+        }
+
+        // divide x_eval and x_train by x_max
+        X_train /= x_max;
+        X_eval /= x_max;
 
         session.setTrainingData(std::move(X_train), std::move(Y_train));
         session.setEvalInputs(std::move(X_eval));
@@ -46,7 +86,7 @@ namespace
 Application::Application()
     : window_(1920, 1080, "Brainscape")
     , gui_(window_)
-    , session_(makeDefaultModel())
+    , session_(makeDefaultModel(), makeDefaultOptimizer())
 {
     yann::runtime_config::set_verbosity(0);
     setupSessionData(session_);
@@ -149,7 +189,27 @@ void Application::drawControlPanel(const NetworkSnapshot& snap, bool training, i
 
     ImGui::Spacing();
     ImGui::Separator();
-    ImGui::TextWrapped("Nodes: activation. Edges: weight (red -, green +). Curve: last vs input neuron.");
+    ImGui::TextUnformatted("Weight");
+    if (const auto& h = visualizer_.hoveredWeight())
+    {
+        ImGui::Text("hover L%zu  %d -> %d", h->layer, h->fromNeuron, h->toNeuron);
+        ImGui::Text("w = %.6f", h->weight);
+    }
+    else if (const auto& s = visualizer_.selectedWeight())
+    {
+        ImGui::Text("pin   L%zu  %d -> %d", s->layer, s->fromNeuron, s->toNeuron);
+        ImGui::Text("w = %.6f", s->weight);
+        if (ImGui::SmallButton("Clear pin"))
+            visualizer_.clearSelection();
+    }
+    else
+    {
+        ImGui::TextDisabled("hover an edge");
+    }
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::TextWrapped("Hover edge = weight. Click to pin. Nodes: activation. Curve: train vs model.");
 
     ImGui::EndChild();
     ImGui::PopStyleColor();
@@ -164,11 +224,13 @@ void Application::drawViewport(const NetworkSnapshot& snap, const ImVec2& origin
 
     const ResponseCurve& curve = session_.responseCurve();
     constexpr float gap = 8.0f;
+    const ImVec2 mouse = ImGui::GetIO().MousePos;
+    const ImVec2* mousePtr = &mouse;
 
     switch (viewMode_)
     {
     case ViewMode::Network:
-        visualizer_.draw(drawList, origin, size, snap);
+        visualizer_.draw(drawList, origin, size, snap, mousePtr);
         break;
     case ViewMode::Curve:
         visualizer_.drawResponseCurve(drawList, origin, size, curve);
@@ -178,7 +240,7 @@ void Application::drawViewport(const NetworkSnapshot& snap, const ImVec2& origin
     {
         const float curveH = std::clamp(size.y * 0.34f, 160.0f, 320.0f);
         const float netH = std::max(80.0f, size.y - curveH - gap);
-        visualizer_.draw(drawList, origin, ImVec2(size.x, netH), snap);
+        visualizer_.draw(drawList, origin, ImVec2(size.x, netH), snap, mousePtr);
         visualizer_.drawResponseCurve(drawList,
                                       ImVec2(origin.x, origin.y + netH + gap),
                                       ImVec2(size.x, curveH),

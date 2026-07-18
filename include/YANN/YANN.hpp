@@ -1,6 +1,5 @@
 #pragma once
 
-#include "math_api.hpp"
 #include "runtime_config.hpp"
 #include "Models/Sequential.hpp"
 #include "Models/Layers/Layers.hpp"
