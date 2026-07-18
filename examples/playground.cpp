@@ -19,18 +19,21 @@ int main()
 {
     cum::cum(cum::CUM_DEVICE::CPU);
 
-    yann::runtime_config::set_verbosity(5);
+    yann::runtime_config::set_verbosity(1);
     
     yann::models::Sequential model({
         yann::models::layers::Input::createUnique(1),
-        yann::models::layers::Dense::createUnique(32, "tanh"),
-        // yann::models::layers::Dense::createUnique(32, "tanh"),
+        yann::models::layers::Dense::createUnique(48, "leaky_relu"),
+        yann::models::layers::Dense::createUnique(48, "leaky_relu"),
+        // yann::models::layers::Dense::createUnique(48, "leaky_relu"),
+        // yann::models::layers::Dense::createUnique(48, "leaky_relu"),
+        // yann::models::layers::Dense::createUnique(128, "tanh"),
         yann::models::layers::Dense::createUnique(1, "tanh"),
     });
 
-    cum::cumeric_t x_min = -8.0 * M_PIf;
-    cum::cumeric_t x_max =  8.0 * M_PIf;
-    std::size_t N_train = 8;
+    cum::cumeric_t x_min = -4.0 * M_PIf;
+    cum::cumeric_t x_max =  4.0 * M_PIf;
+    std::size_t N_train = 64;
     std::size_t N_eval = 512;
 
     cum::Matrix X_train = cum::Matrix::Linspace(x_min, x_max, N_train).transpose();
@@ -42,9 +45,12 @@ int main()
 
     // model.setLossFunction(yann::utils::loss::LossFunction::binary_cross_entropy);
     // model.setLossFunction(yann::utils::loss::LossFunction::mse);
-    model.fit(X_train, Y_train, 0.01_c, 1);
-    return 0;
+    // yann::optimizers::OptimizerBase* o
+    // model.fit(X_train, Y_train, 0.01_c, 50);
+
     cum::Matrix Y_pred_pretrain = cum::Matrix(N_eval, 1);
+
+    yann::runtime_config::set_verbosity(0);
     for (std::size_t i = 0 ; i < N_eval ; ++i)
     {
         cum::Matrix x(1, 1, {X_eval(i, 0)});

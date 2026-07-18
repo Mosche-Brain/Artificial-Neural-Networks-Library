@@ -121,7 +121,7 @@ namespace yann::models
             // perm.setIdentity();
             // cum::Matrix perm(X.rows(), X.rows());
             // std::random_shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size());
-            // std::shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size(), 
+            // std::shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size(),
                         // std::mt19937(std::random_device{}()));
             // cum::Matrix X_shuffled = perm * X;
             // cum::Matrix Y_shuffled = perm * Y;
@@ -160,9 +160,9 @@ namespace yann::models
                     // std::cout << "\t\t" << "resutl: " << math_api::matrixTranspose(result) << '\n';
                     std::cout << "\t\t" << "Computing loss and gradient...\n";
                 }
-                #endif            
+                #endif
                 utils::loss::LossType error = utils::loss::computeLoss(result, y, this->loss_function);
-                
+
                 cum::Matrix gradient = error.gradient;
 
                 #if defined(ENABLE_DEBUG_OUTPUT)
@@ -175,14 +175,14 @@ namespace yann::models
                 #if defined(ENABLE_DEBUG_OUTPUT)
                 if(runtime_config::verbosity_level() >= 2)
                     std::cout << "\t\t" << "Updating parameters...\n";
-                #endif              
+                #endif
 
                 this->updateParams(rate);
                 totalLoss += error.loss;
             }
             // totalLoss /= X.rows();
             cum::cumeric_t avarageLoss = totalLoss / X.rows();
-            
+
             #if defined(ENABLE_DEBUG_OUTPUT)
             if(runtime_config::verbosity_level() >= 1) {
                 std::cout << "\t" << "Avarage epoch loss: " << avarageLoss << '\n';
@@ -190,6 +190,11 @@ namespace yann::models
             }
             #endif
         }
+    }
+
+    void Sequential::fit(const cum::Matrix& X, const cum::Matrix& Y, optimizers::OptimizerBase* optimizer, size_t epochs)
+    {
+
     }
 
     void Sequential::updateParams(cum::cumeric_t rate)
@@ -209,6 +214,11 @@ namespace yann::models
     cum::Matrix& Sequential::getBiases(size_t layer) const
     {
         return topology[layer]->Biases();
+    }
+
+    cum::Matrix& Sequential::getOutputs(size_t layer) const
+    {
+        return topology[layer]->Outputs();
     }
 
     cum::functions::activation_t Sequential::getActivation(size_t layer) const
@@ -234,5 +244,10 @@ namespace yann::models
     size_t Sequential::getLayersCount() const
     {
         return topology.size();
+    }
+
+    int Sequential::getLayerSize(size_t layer) const
+    {
+        return topology[layer]->size();
     }
 }

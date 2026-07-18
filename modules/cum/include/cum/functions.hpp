@@ -10,6 +10,7 @@ namespace cum::functions
         linear,
         gelu,
         relu,
+        leaky_relu,
         tanh,
         sigmoid
     };
@@ -32,6 +33,7 @@ namespace cum::functions
     };
     void linear(cumeric_t* r, const cumeric_t* v, const std::size_t N);
     void linearInPlace(cumeric_t* v, const std::size_t N);
+    void linear_derivative(cumeric_t* r, const cumeric_t* v, const std::size_t N);
 
 
     cumeric_t gelu(cumeric_t x);
@@ -48,6 +50,16 @@ namespace cum::functions
     void relu(cumeric_t* r, const cumeric_t* v, const std::size_t N);
     void reluInPlace(cumeric_t* v, const std::size_t N);
     void relu_derivative(cumeric_t* r, const cumeric_t* v, const std::size_t N);
+
+    const cumeric_t leaky_relu_alpha = 0.01;
+    cumeric_t leaky_relu(cumeric_t x);
+    struct leaky_ReLU
+    {
+        cumeric_t operator()(cumeric_t x) const;
+    };
+    void leaky_relu(cumeric_t* r, const cumeric_t* v, const std::size_t N);
+    void leaky_reluInPlace(cumeric_t* v, const std::size_t N);
+    void leaky_relu_derivative(cumeric_t* r, const cumeric_t* v, const std::size_t N);
 
 
     cumeric_t tanh(cumeric_t x);

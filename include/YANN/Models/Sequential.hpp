@@ -6,7 +6,7 @@
 
 #include "Layers/Layers.hpp"
 #include "Utility/loss.hpp"
-
+#include "optimizers//OptimizerBase.hpp"
 /* # Used conventions
  * - Layer indexing starts from 0
  * - Vectors are 1D matrices
@@ -31,6 +31,7 @@ namespace yann::models
         cum::Matrix forward(const cum::Matrix& input);
         
         void fit(const cum::Matrix& X, const cum::Matrix& Y, cum::cumeric_t rate, size_t epochs);
+        void fit(const cum::Matrix& X, const cum::Matrix& Y, optimizers::OptimizerBase* optimizer, size_t epochs);
         void addLayer(LayerPtr layer);
         void clear();
 
@@ -39,10 +40,12 @@ namespace yann::models
         /* Getters */
         cum::Matrix& getWeights(size_t layer) const;
         cum::Matrix& getBiases(size_t layer) const;
+        cum::Matrix& getOutputs(size_t layer) const;
         cum::functions::activation_t getActivation(size_t layer) const;
         auto getTopology() const -> Topology;
         auto getLayer(size_t layer) const -> LayerPtr;
         size_t getLayersCount() const;
+        int getLayerSize(size_t layer) const;
         
     protected:
         void backward(const cum::Matrix& d_output);

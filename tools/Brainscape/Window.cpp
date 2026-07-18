@@ -1,10 +1,8 @@
-//
-// Created by jaro on 7/17/26.
-//
-
 #include "Window.hpp"
 
-Window::Window(int width, int height, const char* title) : width_(width), height_(height)
+Window::Window(int width, int height, const char* title)
+    : width_(width)
+    , height_(height)
 {
     window = glfwCreateWindow(width, height, title, nullptr, nullptr);
     glfwMakeContextCurrent(window);
@@ -12,7 +10,8 @@ Window::Window(int width, int height, const char* title) : width_(width), height
 
 Window::~Window()
 {
-
+    if (window)
+        glfwDestroyWindow(window);
 }
 
 void Window::InitBackend()
@@ -36,7 +35,6 @@ int Window::getHeight()
     return height_;
 }
 
-
 void Window::setWidth(int width)
 {
     glfwSetWindowSize(window, width, height_);
@@ -55,7 +53,6 @@ void Window::setSize(int width, int height)
     width_ = width;
     height_ = height;
 }
-
 
 void Window::swapBuffers()
 {

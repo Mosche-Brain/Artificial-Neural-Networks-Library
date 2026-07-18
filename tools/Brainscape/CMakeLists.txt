@@ -1,4 +1,11 @@
-add_executable(Brainscape main.cpp Window.cpp)
+add_executable(Brainscape
+    main.cpp
+    Window.cpp
+    Gui.cpp
+    ModelSession.cpp
+    NetworkVisualizer.cpp
+    Application.cpp
+)
 
 set_target_properties(Brainscape PROPERTIES
     CXX_STANDARD 23
@@ -7,6 +14,7 @@ set_target_properties(Brainscape PROPERTIES
 )
 
 target_include_directories(Brainscape PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/include
 )

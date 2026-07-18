@@ -6,3 +6,8 @@
 /modules/cum/build/
 /build/
 thirdparty/*
+thirdparty/Easy3D
+thirdparty/imgui
+thirdparty/matplotplusplus
+thirdparty/rapidcsv
+thirdparty/Catch2

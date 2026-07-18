@@ -75,6 +75,28 @@ namespace cum::functions
     cumeric_t sigmoid_derivative_from_result(cumeric_t x) { return x * (1.0_c - x); }
     /* Parallel Functions */
 
+    void linear(cumeric_t* r, const cumeric_t* v, const std::size_t N)
+    {
+        library::getQueue().copy(v, r, N);
+    }
+
+    void linearInPlace(cumeric_t* v, const std::size_t N)
+    {
+        // literally do nothing
+    }
+
+    void linear_derivative(cumeric_t* r, const cumeric_t* v, const std::size_t N)
+    {
+        // library::getQueue().copy(library::getOnes(), r, N);
+        library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            const std::size_t i = idx[0];
+            r[i] = 1;
+            // r[i] = v[i] > 0_c ? v[i] : 0_c;
+        }).wait();
+    }
+
+
     void relu(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
         library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
@@ -109,6 +131,24 @@ namespace cum::functions
         }).wait();
     }
 
+    void leaky_relu(cumeric_t* r, const cumeric_t* v, const std::size_t N)
+    {
+        library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            const std::size_t i = idx[0];
+            r[i] = v[i] > 0_c ? v[i] : v[i] * leaky_relu_alpha;
+        }).wait();
+    }
+
+    void leaky_relu_derivative(cumeric_t* r, const cumeric_t* v, const std::size_t N)
+    {
+        library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            const std::size_t i = idx[0];
+            r[i] = v[i] > 0_c ? 1_c : leaky_relu_alpha;
+        }).wait();
+    }
+
     void tanh(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
         oneapi::mkl::vm::tanh(library::getQueue(), N, v, r).wait();
@@ -120,12 +160,23 @@ namespace cum::functions
 
     void tanh_derivative(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        oneapi::mkl::vm::tanh(library::getQueue(), N, v, r).wait();
-        library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
-        {
-            const std::size_t i = idx[0];
-            r[i] = 1 - v[i] * v[i];
-        }).wait();
+        // oneapi::mkl::vm::tanh(library::getQueue(), N, v, r).wait();
+        // library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        // {
+            // const std::size_t i = idx[0];
+            // r[i] = 1 - r[i] * r[i];
+        // }).wait();
+
+        auto queue = library::getQueue();
+        auto e = oneapi::mkl::vm::tanh(queue, N, v, r);
+
+        queue.parallel_for(
+            sycl::range<1>(N),
+            {e},
+            [=](sycl::id<1> idx)
+            {
+                r[idx] = 1 - r[idx] * r[idx];
+            });
     }
     void tanh_devivativeInPlace(cumeric_t* v, const std::size_t N)
     {
@@ -224,6 +275,10 @@ namespace cum::functions
         {
             *activation = { ActivationFunction::relu, relu, relu_derivative };
         }
+        else if(strcmp(name, "leaky_relu") == 0)
+        {
+            *activation = { ActivationFunction::leaky_relu, relu, relu_derivative };
+        }
         else if(strcmp(name, "tanh") == 0)
         {
             *activation = { ActivationFunction::tanh, tanh, tanh_derivative };
@@ -246,12 +301,17 @@ namespace cum::functions
             {
                 // copy v to r (use queue beceuse r and v are pointing to Unified Shared Memory)
                 // std::cout << "linear activation\n";
-                library::getQueue().copy(v, r, N);
+                // library::getQueue().copy(v, r, N);
                 break;
             }
             case ActivationFunction::relu:
             {
                 relu(r, v, N);
+                break;
+            }
+            case ActivationFunction::leaky_relu:
+            {
+                leaky_relu(r, v, N);
                 break;
             }
             case ActivationFunction::sigmoid:
@@ -295,12 +355,17 @@ namespace cum::functions
             case ActivationFunction::linear:
             {
                 // copy v to r (use queue beceuse r and v are pointing to Unified Shared Memory)
-                library::getQueue().copy(library::getOnes(), r, N);
+                linear_derivative(r, v, N);
                 break;
             }
             case ActivationFunction::relu:
             {
                 relu_derivative(r, v, N);
+                break;
+            }
+            case ActivationFunction::leaky_relu:
+            {
+                leaky_relu_derivative(r, v, N);
                 break;
             }
             case ActivationFunction::sigmoid:
