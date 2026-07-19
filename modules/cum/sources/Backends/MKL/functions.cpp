@@ -2,7 +2,7 @@
 #include "cum/LinearAlgebra.hpp"
 #include "cum/memory.hpp"
 
-#include "cumMKL.hpp"
+#include "internal/cumMKL.hpp"
 
 #include <oneapi/mkl/vm/buffer.hpp>
 #include <sycl/sycl.hpp>
@@ -77,7 +77,7 @@ namespace cum::functions
 
     void linear(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        library::getQueue().copy(v, r, N);
+        internal::getQueue().copy(v, r, N);
     }
 
     void linearInPlace(cumeric_t* v, const std::size_t N)
@@ -87,8 +87,8 @@ namespace cum::functions
 
     void linear_derivative(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        // library::getQueue().copy(library::getOnes(), r, N);
-        library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        // internal::getQueue().copy(internal::getOnes(), r, N);
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             const std::size_t i = idx[0];
             r[i] = 1;
@@ -99,7 +99,7 @@ namespace cum::functions
 
     void relu(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             const std::size_t i = idx[0];
             r[i] = v[i] > 0_c ? v[i] : 0_c;
@@ -107,7 +107,7 @@ namespace cum::functions
     }
     void reluInPlace(cumeric_t* v, const std::size_t N)
     {
-        library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             const std::size_t i = idx[0];
             v[i] = v[i] > 0_c ? v[i] : 0_c;
@@ -116,7 +116,7 @@ namespace cum::functions
 
     void relu_derivative(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             const std::size_t i = idx[0];
             r[i] = v[i] > 0_c ? 1_c : 0_c;
@@ -124,7 +124,7 @@ namespace cum::functions
     }
     void relu_derivativeInPlace(cumeric_t* v, const std::size_t N)
     {
-        library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             const std::size_t i = idx[0];
             v[i] = v[i] > 0_c ? 1_c : 0_c;
@@ -133,7 +133,7 @@ namespace cum::functions
 
     void leaky_relu(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             const std::size_t i = idx[0];
             r[i] = v[i] > 0_c ? v[i] : v[i] * leaky_relu_alpha;
@@ -142,32 +142,23 @@ namespace cum::functions
 
     void leaky_relu_derivative(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             const std::size_t i = idx[0];
             r[i] = v[i] > 0_c ? 1_c : leaky_relu_alpha;
         }).wait();
     }
 
-    void tanh(cumeric_t* r, const cumeric_t* v, const std::size_t N)
-    {
-        oneapi::mkl::vm::tanh(library::getQueue(), N, v, r).wait();
-    }
-    void tanhInPlace(cumeric_t* v, const std::size_t N)
-    {
-        oneapi::mkl::vm::tanh(library::getQueue(), N, v, v).wait();
-    }
-
     void tanh_derivative(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        // oneapi::mkl::vm::tanh(library::getQueue(), N, v, r).wait();
-        // library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        // oneapi::mkl::vm::tanh(internal::getQueue(), N, v, r).wait();
+        // internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         // {
             // const std::size_t i = idx[0];
             // r[i] = 1 - r[i] * r[i];
         // }).wait();
 
-        auto queue = library::getQueue();
+        auto queue = internal::getQueue();
         auto e = oneapi::mkl::vm::tanh(queue, N, v, r);
 
         queue.parallel_for(
@@ -180,8 +171,8 @@ namespace cum::functions
     }
     void tanh_devivativeInPlace(cumeric_t* v, const std::size_t N)
     {
-        oneapi::mkl::vm::tanh(library::getQueue(), N, v, v).wait();
-        library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        oneapi::mkl::vm::tanh(internal::getQueue(), N, v, v).wait();
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             const std::size_t i = idx[0];
             v[i] = 1 - v[i] * v[i];
@@ -192,8 +183,8 @@ namespace cum::functions
     {
 
         // LinearAlgebra::scale(r, v, -1.0_c, N);
-        // oneapi::mkl::vm::exp(library::getQueue(), N, r, r).wait();
-        library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        // oneapi::mkl::vm::exp(internal::getQueue(), N, r, r).wait();
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             const std::size_t i = idx[0];
             // r[i] = 1.f / (1.f + r[i]);
@@ -208,10 +199,10 @@ namespace cum::functions
     void sigmoid_derivative(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
         // LinearAlgebra::scale(r, v, -1.0_c, N);
-        // oneapi::mkl::vm::exp(library::getQueue(), N, r, r).wait();
+        // oneapi::mkl::vm::exp(internal::getQueue(), N, r, r).wait();
         cumeric_t* temp = cum::memory::allocate(N);
         cum::functions::sigmoid(temp, v, N);
-        library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             const std::size_t i = idx[0];
             r[i] = temp[i] * (1 - temp[i]);
@@ -239,7 +230,7 @@ namespace cum::functions
 
     void fill(cumeric_t* v, cumeric_t val, const std::size_t N)
     {
-        library::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             const std::size_t i = idx[0];
             v[i] = val;
@@ -301,7 +292,7 @@ namespace cum::functions
             {
                 // copy v to r (use queue beceuse r and v are pointing to Unified Shared Memory)
                 // std::cout << "linear activation\n";
-                // library::getQueue().copy(v, r, N);
+                // internal::getQueue().copy(v, r, N);
                 linear(r, v, N);
                 break;
             }

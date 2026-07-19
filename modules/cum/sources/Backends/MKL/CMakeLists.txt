@@ -17,7 +17,7 @@ add_library(${PROJECT_NAME}_MKL STATIC
 )
 
 target_include_directories(${PROJECT_NAME}_MKL PRIVATE
-    /opt/intel/oneapi/compiler/latest/include/ /opt/intel/oneapi/tbb/latest/include/ /opt/intel/oneapi/compiler/latest/include/  
+    /opt/intel/oneapi/compiler/latest/include/ /opt/intel/oneapi/tbb/latest/include/ /opt/intel/oneapi/compiler/latest/include/ ${CMAKE_SOURCE_DIR}/modules/cum/sources/Backends/MKL/
 )
 
 target_link_libraries(${PROJECT_NAME}_MKL 

@@ -4,7 +4,7 @@ namespace yann::models::layers
 {
     void LayerBase::initParameters(int layerSize, int inputLenght)
     {
-        this->weights = Parameter::He(layerSize, inputLenght);
+        this->weights = Parameter::Uniform(layerSize, inputLenght);
         this->biases  = Parameter::Zeros(layerSize, 1); /* Column-Vector */
         this->outputs = cum::Matrix::Zeros(layerSize, 1); /* Column-Vector */
         this->inputs  = cum::Matrix::Zeros(layerSize, inputLenght); /* Column-Vector */

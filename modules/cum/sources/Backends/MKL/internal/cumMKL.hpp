@@ -9,7 +9,7 @@
 
 #include "cum/Core.hpp"
 
-namespace cum::library
+namespace cum::internal
 {
     struct Context
     {

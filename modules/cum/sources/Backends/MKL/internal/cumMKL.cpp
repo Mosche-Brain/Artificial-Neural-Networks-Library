@@ -4,7 +4,7 @@
 
 namespace cum
 {
-    library::Context::Context() // : queue(sycl::default_selector{})
+    internal::Context::Context() // : queue(sycl::default_selector{})
     {
         // this->setDevice(CUM_DEVICE::AUTO);
         // zeros = sycl::malloc_shared<cumeric_t>(2048*2048, queue);
@@ -16,13 +16,13 @@ namespace cum
         // });
     }
 
-    library::Context::~Context()
+    internal::Context::~Context()
     {              
         sycl::free(zeros, queue);
         sycl::free(ones, queue);
     }
 
-    void library::Context::setDevice(CUM_DEVICE device)
+    void internal::Context::setDevice(CUM_DEVICE device)
     {
         sycl::free(zeros, queue);
         sycl::free(ones, queue);
@@ -44,17 +44,17 @@ namespace cum
         std::cout << "Selected device: " << queue.get_device().get_info<sycl::info::device::name>() << '\n';
     }
 
-    library::Context& library::getContext()
+    internal::Context& internal::getContext()
     {
         static Context context{};
         return context;
     }
 
-    sycl::queue& library::getQueue()
+    sycl::queue& internal::getQueue()
     {
         return getContext().queue;
     }
 
-    cumeric_t* library::getZeros() { return getContext().zeros; }
-    cumeric_t* library::getOnes() { return getContext().ones; }
+    cumeric_t* internal::getZeros() { return getContext().zeros; }
+    cumeric_t* internal::getOnes() { return getContext().ones; }
 }

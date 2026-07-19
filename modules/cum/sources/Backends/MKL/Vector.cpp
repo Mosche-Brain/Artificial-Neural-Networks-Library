@@ -2,13 +2,13 @@
 #include "cum/Matrix.hpp"
 
 #include "cum/LinearAlgebra.hpp"
-#include "cumMKL.hpp"
+#include "internal/cumMKL.hpp"
 
 namespace cum
 {
     Vector::Vector(std::size_t lenght, cumeric_t value) : lenght_(lenght)
     {
-        data_ = sycl::malloc_shared<cumeric_t>(lenght, library::getQueue());
+        data_ = sycl::malloc_shared<cumeric_t>(lenght, internal::getQueue());
     }
 
     Vector::operator Matrix() const

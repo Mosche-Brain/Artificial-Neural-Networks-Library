@@ -1,0 +1,63 @@
+//
+// Created by jaro on 7/19/26.
+//
+
+#pragma once
+
+#include "cum/Core.hpp"
+
+#include <cstddef>
+
+namespace cum::functions::exponential
+{
+    /* ========================== Base Functions ========================== */
+
+    /* Scalar versions */
+
+    cumeric_t exp(cumeric_t x);
+    cumeric_t exp2(cumeric_t x);
+    cumeric_t exp10(cumeric_t x);
+
+    cumeric_t log(cumeric_t x);   // base e
+    cumeric_t log2(cumeric_t x);
+    cumeric_t log10(cumeric_t x);
+
+    /* Parallel versions */
+
+    void exp(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    void exp2(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    void exp10(cumeric_t* r, const cumeric_t* v, std::size_t N);
+
+    void log(cumeric_t* r, const cumeric_t* v, std::size_t N);   // base e
+    void log2(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    void log10(cumeric_t* r, const cumeric_t* v, std::size_t N);
+
+    /* ========================== Derivatives ========================== */
+
+    /* Scalar versions */
+
+    cumeric_t exp_deriv(cumeric_t x);
+    cumeric_t exp_deriv_from_result(cumeric_t x);
+
+    cumeric_t exp2_deriv(cumeric_t x);
+    cumeric_t exp2_deriv_from_result(cumeric_t x);
+
+    cumeric_t exp10_deriv(cumeric_t x);
+    cumeric_t exp10_deriv_from_result(cumeric_t x);
+
+    cumeric_t log_derivative(cumeric_t x);
+    cumeric_t log2_derivative(cumeric_t x);
+    cumeric_t log10_derivative(cumeric_t x);
+
+    /* Parallel versions */
+
+    void exp_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    void exp_deriv_in_place(cumeric_t* v, std::size_t N);
+
+    void exp2_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    void exp2_deriv_in_place(cumeric_t* v, std::size_t N);
+
+    void exp10_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    void exp10_deriv_in_place(cumeric_t* v, std::size_t N);
+
+} // namespace cum::functions::exponential

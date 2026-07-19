@@ -1,5 +1,5 @@
 #include "cum/random.hpp"
-#include "cumMKL.hpp"
+#include "internal/cumMKL.hpp"
 
 #include <oneapi/mkl/rng.hpp>
 #include <oneapi/mkl/rng/device.hpp>
@@ -16,7 +16,7 @@ namespace cum
             buff[i] = (cumeric_t)oneapi::mkl::rng::device::generate(dist, engine);
         }
         //
-        // cum::library::getQueue().submit([&](sycl::handler& h) {
+        // cum::internal::getQueue().submit([&](sycl::handler& h) {
         //     h.parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx) {
         //         oneapi::mkl::rng::device::philox4x32x10<> engine(69, idx[0]);
         //         oneapi::mkl::rng::device::uniform<float> distr(min, max);
@@ -30,11 +30,11 @@ namespace cum
 
     void random::normal(cumeric_t* buff, size_t N, cumeric_t sigma, std::size_t seed)
     {
-        // oneapi::mkl::rng::device::philox4x32x10 engine(library::getQueue(), 777);
+        // oneapi::mkl::rng::device::philox4x32x10 engine(internal::getQueue(), 777);
         // oneapi::mkl::rng::device::gaussian<> dist((float)0, (float)sigma);
 
         constexpr int VecSize = 4;
-        library::getQueue().parallel_for(sycl::range<1>(N + VecSize - 1), [=](sycl::item<1> item) {
+        internal::getQueue().parallel_for(sycl::range<1>(N + VecSize - 1), [=](sycl::item<1> item) {
 
             // constexpr int VecSize = 1;
 

@@ -1,15 +1,15 @@
 #include "cum/cum.hpp"
 
-#include "cumMKL.hpp"
+#include "internal/cumMKL.hpp"
 
 void cum::cum(CUM_DEVICE device)
 {
-    cum::library::getContext().setDevice(device);
+    cum::internal::getContext().setDevice(device);
 }
 
 void cum::recum(CUM_DEVICE device)
 {
-    cum::library::getContext().setDevice(device);
+    cum::internal::getContext().setDevice(device);
 }
 
 void cum::decum()
