@@ -4,8 +4,8 @@
 #include <memory>
 #include <vector>
 
-#include "Layers/Layers.hpp"
-#include "Utility/loss.hpp"
+#include "layers/Layers.hpp"
+#include "utils/loss.hpp"
 #include "optimizers//OptimizerBase.hpp"
 
 /* # Used conventions

@@ -98,7 +98,7 @@ namespace yann::utils::loss
 
                 cum::cumeric_t p = result(i, j);
 
-                cum::functions::clipInPlace(&p, eps, 1 - eps, 1);
+                cum::functions::various::clipInPlace(&p, eps, 1 - eps, 1);
 
 
                 loss += -(
