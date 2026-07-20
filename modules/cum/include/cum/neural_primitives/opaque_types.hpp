@@ -2,7 +2,13 @@
 // Created by jaro on 7/19/26.
 //
 
-#ifndef YANN_OPAQUE_TYPES_HPP
-#define YANN_OPAQUE_TYPES_HPP
+#pragma once
 
-#endif //YANN_OPAQUE_TYPES_HPP
+namespace cum::neural_primitives
+{
+    typedef struct Memory Memory;
+    typedef struct Engine Engine;
+    typedef struct Stream Stream;
+}
+
+// #endif //YANN_OPAQUE_TYPES_HPP

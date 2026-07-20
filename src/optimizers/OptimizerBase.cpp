@@ -2,7 +2,7 @@
 // Created by jaro on 7/17/26.
 //
 
-#include "../../include/YANN/optimizers/OptimizerBase.hpp"
+#include "../../include/yann/optimizers/OptimizerBase.hpp"
 
 namespace yann
 {

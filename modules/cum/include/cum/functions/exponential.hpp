@@ -45,9 +45,9 @@ namespace cum::functions::exponential
     cumeric_t exp10_deriv(cumeric_t x);
     cumeric_t exp10_deriv_from_result(cumeric_t x);
 
-    cumeric_t log_derivative(cumeric_t x);
-    cumeric_t log2_derivative(cumeric_t x);
-    cumeric_t log10_derivative(cumeric_t x);
+    cumeric_t log_deriv(cumeric_t x);
+    cumeric_t log2_deriv(cumeric_t x);
+    cumeric_t log10_deriv(cumeric_t x);
 
     /* Parallel versions */
 
@@ -59,5 +59,14 @@ namespace cum::functions::exponential
 
     void exp10_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
     void exp10_deriv_in_place(cumeric_t* v, std::size_t N);
+
+    void log_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    void log_deriv_in_place(cumeric_t* v, std::size_t N);
+
+    void log2_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    void log2_deriv_in_place(cumeric_t* v, std::size_t N);
+
+    void log10_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    void log10_deriv_in_place(cumeric_t* v, std::size_t N);
 
 } // namespace cum::functions::exponential

@@ -2,7 +2,7 @@
 // Created by jaro on 7/5/26.
 //
 
-#include <YANN/Models/Sequential.hpp>
+#include <yann/models/Sequential.hpp>
 #include <cum/cum.hpp>
 #include <cum/random.hpp>
 

@@ -1,3 +1,85 @@
-//
-// Created by jaro on 7/19/26.
-//
+/* Created by jaro on 7/19/26. */
+
+#include "internal/cumMKL.hpp"
+#include "cum/functions/logistic.hpp"
+
+#include "cum/functions/exponential.hpp"
+
+namespace cum::functions::logistic
+{
+    /* ========================== Base Functions ========================== */
+
+    /* Scalar versions */
+
+    cumeric_t sigmoid(cumeric_t x)
+    {
+        return static_cast<cumeric_t>(1.0) / (static_cast<cumeric_t>(1.0) + sycl::exp(-x));
+    }
+
+    /* Parallel versions */
+
+    void sigmoid(cumeric_t* r, const cumeric_t* v, const std::size_t N)
+    {
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            r[idx] = sigmoid(v[idx]);
+        });
+    }
+
+    void sigmoid_in_place(cumeric_t* v, const std::size_t N)
+    {
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            v[idx] = sigmoid(v[idx]);
+        });
+    }
+
+    /* ========================== Derivatives ========================== */
+
+    /* Scalar versions */
+
+    cumeric_t sigmoid_deriv(cumeric_t x)
+    {
+        return sigmoid(x) * (static_cast<cumeric_t>(1.0) - sigmoid(x));
+    }
+
+    cumeric_t sigmoid_deriv_from_result(cumeric_t x)
+    {
+        return x * (static_cast<cumeric_t>(1.0) - x);
+    }
+
+    /* Parallel versions */
+
+    void sigmoid_deriv(cumeric_t* r, const cumeric_t* v, const std::size_t N)
+    {
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            r[idx] = sigmoid_deriv(v[idx]);
+        });
+    }
+
+    void sigmoid_deriv_from_result(cumeric_t* r, const cumeric_t* v, const std::size_t N)
+    {
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            r[idx] = sigmoid_deriv_from_result(v[idx]);
+        });
+    }
+
+    void sigmoid_deriv_in_place(cumeric_t* v, const std::size_t N)
+    {
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            v[idx] = sigmoid_deriv(v[idx]);
+        });
+    }
+
+    void sigmoid_deriv_from_result_in_place(cumeric_t* v, const std::size_t N)
+    {
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            v[idx] = sigmoid_deriv(v[idx]);
+        });
+    }
+
+}

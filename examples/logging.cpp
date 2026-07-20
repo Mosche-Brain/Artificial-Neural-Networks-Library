@@ -2,7 +2,7 @@
 // Created by jaro on 6/25/26.
 //
 
-#include <YANN/Utility/logs.hpp>
+#include <yann/utils/logs.hpp>
 
 #include <cum/Matrix.hpp>
 

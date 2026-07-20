@@ -3,7 +3,7 @@
 #include "NetworkSnapshot.hpp"
 #include "ResponseCurve.hpp"
 
-#include <YANN/Models/Sequential.hpp>
+#include <yann/models/Sequential.hpp>
 
 #include <atomic>
 #include <mutex>

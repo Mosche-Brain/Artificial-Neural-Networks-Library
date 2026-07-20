@@ -4,9 +4,9 @@
 #include <cum/Matrix.hpp>
 #include <cum/LinearAlgebra.hpp>
 
-#include <YANN//Models/Sequential.hpp>
-#include <YANN/optimizers/SGD.hpp>
-#include <YANN/runtime_config.hpp>
+#include <yann/models/Sequential.hpp>
+#include <yann/optimizers/SGD.hpp>
+#include <yann/runtime_config.hpp>
 
 #include <matplot/matplot.h>
 
@@ -40,7 +40,7 @@ int main()
     cum::Matrix Y_train = cum::Matrix::Linspace(x_min, x_max, N_train).transpose();
     cum::Matrix Y_eval = cum::Matrix::Linspace(x_min, x_max, N_eval);
 
-    cum::LinearAlgebra::sinInPlace(Y_train.data(), N_train);
+    cum::functions::trigonometric::sin_in_place(Y_train.data(), N_train);
 
     // normalize data
 

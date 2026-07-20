@@ -9,7 +9,7 @@
 
 #include "imgui.h"
 
-#include <YANN/optimizers/SGD.hpp>
+#include <yann/optimizers/SGD.hpp>
 
 namespace
 {

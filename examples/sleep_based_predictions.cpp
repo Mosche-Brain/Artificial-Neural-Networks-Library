@@ -1,4 +1,4 @@
-#include <YANN/Models/Sequential.hpp>
+#include <yann/models/Sequential.hpp>
 
 // #include "lazycsv/lazycsv.hpp"
 

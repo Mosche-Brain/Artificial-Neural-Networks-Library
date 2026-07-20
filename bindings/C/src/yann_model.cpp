@@ -1,6 +1,6 @@
 #include "yann_internal.hpp"
 
-#include "Models/Layers/Dense.hpp"
+#include "models/layers/Dense.hpp"
 
 extern "C" {
 

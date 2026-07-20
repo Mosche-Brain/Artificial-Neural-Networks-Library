@@ -5,14 +5,26 @@
 #ifndef YANN_TENSOR_MEMORY_HPP
 #define YANN_TENSOR_MEMORY_HPP
 
-namespace cum
+#include "tensor_descriptor.hpp"
+#include "opaque_types.hpp"
+
+namespace cum::neural_primitives
 {
-    namespace neural_primitives
+    class tensor_memory
     {
-        class tensor_memory
-        {
-        };
-    } // neural_primitives
+    public:
+        tensor_memory(const tensor_descriptor& desc, Engine& engine);
+        tensor_memory(const tensor_descriptor& desc, Engine& engine, void* data);
+
+        void* data() const;
+        void  set_data(void* data);
+
+        const tensor_descriptor& descriptor() const;
+    private:
+        struct Impl;
+        Impl* impl;
+    };
+
 } // cum
 
 #endif //YANN_TENSOR_MEMORY_HPP

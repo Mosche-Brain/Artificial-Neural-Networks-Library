@@ -1,6 +1,6 @@
 
 // #define fsycl
-#include <YANN/Models/Perceptron.hpp>
+#include <yann/models/Perceptron.hpp>
 #include <cum/cum.hpp>
 
 int main()

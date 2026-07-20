@@ -6,10 +6,10 @@ add_library(${PROJECT_NAME} ${PROJECT_SOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/YANN>
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/YANN/Models>
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/YANN/Models/Layers>
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/YANN/Utility>
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/yann>
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/yann/models>
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/yann/models/layers>
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/yann/utils>
     $<INSTALL_INTERFACE:include>
 )
 

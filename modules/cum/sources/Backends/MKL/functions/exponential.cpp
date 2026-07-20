@@ -63,7 +63,7 @@ namespace cum::functions::exponential
 
     void log(cumeric_t* r, const cumeric_t* v, const std::size_t N) // base e
     {
-        oneapi::mkl::vm::log(internal::getQueue(), N, v, r, {});
+        oneapi::mkl::vm::ln(internal::getQueue(), N, v, r, {});
     }
 
     void log2(cumeric_t* r, const cumeric_t* v, const std::size_t N)
@@ -110,17 +110,17 @@ namespace cum::functions::exponential
         return sycl::log(10.0_c) * x;
     }
 
-    cumeric_t log_derivative(cumeric_t x)
+    cumeric_t log_deriv(cumeric_t x)
     {
         return 1._c / x;
     }
 
-    cumeric_t log2_derivative(cumeric_t x)
+    cumeric_t log2_deriv(cumeric_t x)
     {
         return 1._c / (sycl::log(2._c)*x);
     }
 
-    cumeric_t log10_derivative(cumeric_t x)
+    cumeric_t log10_deriv(cumeric_t x)
     {
         return 1._c / (sycl::log(10._c)*x);
     }
@@ -141,7 +141,7 @@ namespace cum::functions::exponential
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
-            r[idx] = sycl::log(2._c) * exp2(v[idx]);
+            r[idx] = sycl::log(static_cast<cumeric_t>(2)) * exp2(v[idx]);
         });
     }
 
@@ -149,7 +149,7 @@ namespace cum::functions::exponential
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
-            v[idx] = sycl::log(2._c) * exp2(v[idx]);
+            v[idx] = sycl::log(static_cast<cumeric_t>(2)) * exp2(v[idx]);
         });
     }
 
@@ -157,7 +157,7 @@ namespace cum::functions::exponential
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
-            r[idx] = sycl::log(2._c) * exp10(v[idx]);
+            r[idx] = sycl::log(static_cast<cumeric_t>(2)) * exp10(v[idx]);
         });
     }
 
@@ -165,7 +165,55 @@ namespace cum::functions::exponential
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
-            v[idx] = sycl::log(10._c) * exp10(v[idx]);
+            v[idx] = sycl::log(static_cast<cumeric_t>(10)) * exp10(v[idx]);
+        });
+    }
+
+    void log_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    {
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            r[idx] = log_deriv(v[idx]);
+        });
+    }
+
+    void log_deriv_in_place(cumeric_t* v, std::size_t N)
+    {
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            v[idx] = log_deriv(v[idx]);
+        });
+    }
+
+    void log2_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    {
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            r[idx] = log2_deriv(v[idx]);
+        });
+    }
+
+    void log2_deriv_in_place(cumeric_t* v, std::size_t N)
+    {
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            v[idx] = log2_deriv(v[idx]);
+        });
+    }
+
+    void log10_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    {
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            r[idx] = log10_deriv(v[idx]);
+        });
+    }
+
+    void log10_deriv_in_place(cumeric_t* v, std::size_t N)
+    {
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            v[idx] = log10_deriv(v[idx]);
         });
     }
 }

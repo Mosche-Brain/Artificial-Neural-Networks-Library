@@ -1,7 +1,7 @@
 #include <cum/Matrix.hpp>
 #include <cum/cum.hpp>
 
-#include <YANN/Utility/logs.hpp>
+#include <yann/utils/logs.hpp>
 #include <iostream>
 
 int main()

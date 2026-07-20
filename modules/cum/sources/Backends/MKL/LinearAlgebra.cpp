@@ -382,37 +382,18 @@ namespace cum::LinearAlgebra
     //     }).wait();
     // }
 
-    void exp(cumeric_t* r, const cumeric_t* v, const std::size_t& N)
-    {
-        auto& q = internal::getQueue();
-        oneapi::mkl::vm::exp(q, N, v, r, {});
-        q.wait();
-    }
 
-    void expInPlace(cumeric_t* v, const std::size_t& N)
-    {
-        auto& q = internal::getQueue();
-        oneapi::mkl::vm::exp(q, N, v, v, {});
-        q.wait();
-    }
+    //
+    // void relu(cumeric_t* r, const cumeric_t* v, const std::size_t& N)
+    // {
+    //     auto& q = internal::getQueue();
+    //     cumeric_t* temp = (cumeric_t*)calloc(N, sizeof(cumeric_t));
+    //     oneapi::mkl::vm::fmax(q, N, v, temp, r, {});
+    //     free(temp);
+    //     q.wait();
+    // }
 
-    void relu(cumeric_t* r, const cumeric_t* v, const std::size_t& N)
-    {
-        auto& q = internal::getQueue();
-        cumeric_t* temp = (cumeric_t*)calloc(N, sizeof(cumeric_t));
-        oneapi::mkl::vm::fmax(q, N, v, temp, r, {});
-        free(temp);
-        q.wait();
-    }
 
-    void reluInPlace(cumeric_t* v, const std::size_t& N)
-    {
-        auto& q = internal::getQueue();
-        cumeric_t* temp = (cumeric_t*)calloc(N, sizeof(cumeric_t));
-        oneapi::mkl::vm::fmax(q, N, v, temp, v, {});
-        free(temp);
-        q.wait();
-    }
 
     void norm(cumeric_t& r, const cumeric_t* v, std::size_t N)
     {

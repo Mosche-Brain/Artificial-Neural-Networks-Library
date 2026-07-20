@@ -2,15 +2,19 @@
 #include <cum/functions.hpp>
 #include <cum/LinearAlgebra.hpp>
 #include <cum/memory.hpp>
+#include <cum/neural_primitives/neural_kernels.hpp>
 
 #if defined(ENABLE_DEBUG_OUTPUT)
     #include <iostream>
-    #include "Utility/logs.hpp"
+    #include "utils/logs.hpp"
 #endif
 
 #include "runtime_config.hpp"
+#include "cum/functions/transform.hpp"
 
 #define ENABLE_RUNTIME_CHECKS // this macro will be moved to runtime config soon
+// #define USE_FUSED_KERNELS // this also
+#define ENABLE_CACHED_PREACTIVATION
 
 namespace yann::models::layers
 {
@@ -54,17 +58,26 @@ namespace yann::models::layers
             std::cout << "Performing (weights * input) + biases\n";
         #endif
 
+        #if defined(USE_FUSED_KERNELS)
+            #if defined(ENABLE_CACHED_PREACTIVATION)
+            cum::neural_primitives::neural_kernels::feed_forward(preactivatedOutputs.data(), weights().data(), input.data(), biases().data(), weights().cols(), weights().rows());
+            cum::functions::transform(result.data(), preactivatedOutputs.data(), preactivatedOutputs.size(), activation);
+            #else
+            cum::neural_primitives::neural_kernels::feed_forward(outputs.data(), weights().data(), input.data(), biases().data(), weights().cols(), weights().rows(), activation.name);
+            #endif
+        #else
         preactivatedOutputs = (weights() * input) + biases();
-
-        #if defined(ENABLE_DEBUG_OUTPUT)    
+        #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::verbosity_level() >= 4)
             std::cout << "Performing activation\n";
         #endif
 
         cum::Matrix result(preactivatedOutputs.rows(), preactivatedOutputs.cols());
-        cum::functions::transform(result.data(), preactivatedOutputs.data(), activation, preactivatedOutputs.size());
+        cum::functions::transform(result.data(), preactivatedOutputs.data(), preactivatedOutputs.size(), activation);
         outputs = result;
-        #if defined(ENABLE_DEBUG_OUTPUT)   
+        #endif
+
+        #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::verbosity_level() >= 4) 
             std::cout << "forward pass succed\n";
         #endif
@@ -87,13 +100,15 @@ namespace yann::models::layers
             std::cout << "\t\t\t\t" << "d_pre_activation = derivative.cwiseProcut(deltaOutput)\n";
         #endif
 
-        cum::Matrix d_pre_activation = derivative.cwiseProduct(deltaOutput);
+        // cum::Matrix d_pre_activation = derivative.cwiseProduct(deltaOutput);
+        biases.gradient = derivative.cwiseProduct(deltaOutput);
 
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::verbosity_level() >= 4)
             std::cout << "\t\t\t\t" << "deltaWeights = matrixMultiply(d_pre_activation, matrixTranspose(inputs))\n";
         #endif
-        weights.gradient = d_pre_activation * inputs.transpose(); // input is col
+        weights.gradient = biases.gradient * inputs.transpose(); // input is col
+        // weights.gradient = d_pre_activation * inputs.transpose(); // input is col
         // deltaWeights = inputs.transpose() * d_pre_activation; // input is row
 
         #if defined(ENABLE_DEBUG_OUTPUT)
@@ -102,20 +117,21 @@ namespace yann::models::layers
         #endif
 
         // deltaBiases = d_pre_activation.colwiseSum();
-        biases.gradient = d_pre_activation;
+        // biases.gradient = d_pre_activation;
 
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::verbosity_level() >= 4)
             std::cout << "\t\t\t\t" << "deltaInput = matrixMultiply(matrixTranspose(weights), d_pre_activation)\n";
         #endif
 
-        cum::Matrix deltaInput = weights().transpose() * d_pre_activation;
+        // cum::Matrix deltaInput = weights().transpose() * biases.gradient;
+        // cum::Matrix deltaInput = weights().transpose() * d_pre_activation;
         // cum::Matrix deltaInput = d_pre_activation * weights.transpose();
 
-        return deltaInput;
+        return weights().transpose() * biases.gradient;
     }
 
-    void Dense::update_weights(cum::cumeric_t rate)
+    void Dense::update_weights(cum::cumeric_t rate) // currently depraced, now we are using external optimizer - not fixed SGD
     {
     //     #if defined(ENABLE_DEBUG_OUTPUT)
     //         cum::Matrix oldWeights = this->weights;

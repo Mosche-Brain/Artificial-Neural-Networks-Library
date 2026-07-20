@@ -6,7 +6,7 @@
 
 #if defined(ENABLE_DEBUG_OUTPUT)
     #include <iostream>
-    #include "Utility/logs.hpp"
+    #include "utils/logs.hpp"
 #endif
 
 #include "runtime_config.hpp"

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # ============================================================================
-# cYANN - Stable C API for YANN
+# cYANN - Stable C API for yann
 # ============================================================================
 
 if(NOT DEFINED PROJECT_NAME OR NOT TARGET ${PROJECT_NAME})
@@ -10,7 +10,7 @@ if(NOT DEFINED PROJECT_NAME OR NOT TARGET ${PROJECT_NAME})
         "Please configure the root project with -DBUILD_C_API=ON")
 endif()
 
-# === CRITICAL: Save the real YANN target name BEFORE calling project(cYANN) ===
+# === CRITICAL: Save the real yann target name BEFORE calling project(cYANN) ===
 set(YANN_MAIN_TARGET ${PROJECT_NAME})
 
 project(cYANN LANGUAGES CXX)
@@ -52,7 +52,7 @@ target_include_directories(${CYANN_TARGET}
 # ------------------------------------------------------------------
 target_link_libraries(${CYANN_TARGET}
     PRIVATE
-        ${YANN_MAIN_TARGET}          # ← This is the original "YANN" target
+        ${YANN_MAIN_TARGET}          # ← This is the original "yann" target
         OpenMP::OpenMP_CXX
         cum::Core
 )

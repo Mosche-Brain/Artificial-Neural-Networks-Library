@@ -9,7 +9,7 @@
 #include <cum/functions.hpp>
 
 #include "LayerType.hpp"
-#include "YANN/Parameter.hpp"
+#include "yann/Parameter.hpp"
 
 namespace yann::models::layers
 {

@@ -9,6 +9,8 @@
 #include <utility>
 #include <random>
 
+#include "cum/memory.hpp"
+
 #if defined(BUILD_ENABLE_IO_OVERLOADS)
 #include <iostream>
 #endif
@@ -17,15 +19,16 @@ namespace cum
 {
     Matrix::Matrix(size_t rows, size_t cols, cumeric_t value) : rows_(rows), cols_(cols)
     {
-        data_ = sycl::malloc_shared<cumeric_t>(rows * cols, internal::getQueue());
+        data_ = memory::allocate(rows * cols);
         // for(size_t i = 0 ; i < rows * cols ; i++)
         //     data_[i] = value;
-        cum::functions::fill(data_, value, rows * cols);
+        cum::functions::various::fill(data_, value, rows * cols);
     }
 
     Matrix::Matrix(std::size_t rows, std::size_t cols, cumeric_t* source) : rows_(rows), cols_(cols)
     {
-        data_ = sycl::malloc_shared<cumeric_t>(rows * cols, internal::getQueue());
+        // data_ = sycl::malloc_shared<cumeric_t>(rows * cols, internal::getQueue());
+        data_ = memory::allocate(rows * cols);
 
         // sycl::memc
         for(size_t i = 0 ; i < rows * cols ; i++)
@@ -57,13 +60,14 @@ namespace cum
 
     Matrix::~Matrix()
     {
-        sycl::free(data_, internal::getQueue());
+        // sycl::free(data_, internal::getQueue());
+        memory::free(data_);
     }
 
     Matrix Matrix::Random(std::size_t rows, std::size_t cols, cumeric_t min, cumeric_t max)
     {
         Matrix temp;
-        temp.data_ = sycl::malloc_shared<cumeric_t>(rows * cols, internal::getQueue());
+        temp.data_ = memory::allocate(rows * cols);
         temp.rows_ = rows;
         temp.cols_ = cols;
 
@@ -75,7 +79,7 @@ namespace cum
     Matrix Matrix::Zeros(std::size_t rows, std::size_t cols)
     {
         Matrix temp;
-        temp.data_ = sycl::malloc_shared<cumeric_t>(rows * cols, internal::getQueue());
+        temp.data_ = memory::allocate(rows * cols);
         temp.rows_ = rows;
         temp.cols_ = cols;
 
@@ -85,7 +89,8 @@ namespace cum
     Matrix Matrix::Ones(std::size_t rows, std::size_t cols)
     {
         Matrix temp;
-        temp.data_ = sycl::malloc_shared<cumeric_t>(rows * cols, internal::getQueue());
+        // temp.data_ = sycl::malloc_shared<cumeric_t>(rows * cols, internal::getQueue());
+        temp.data_ = memory::allocate(rows * cols);
         temp.rows_ = rows;
         temp.cols_ = cols;
 
@@ -101,7 +106,8 @@ namespace cum
     {
 
 
-        cumeric_t* buff = sycl::malloc_shared<cumeric_t>(num, internal::getQueue());
+        // cumeric_t* buff = sycl::malloc_shared<cumeric_t>(num, internal::getQueue());
+        cumeric_t* buff = memory::allocate(num);
         internal::getQueue().parallel_for(sycl::range<1>(num), [=](sycl::id<1> idx)
         {
             const std::size_t i = idx[0];
@@ -140,7 +146,7 @@ namespace cum
 
     void Matrix::fill(cumeric_t value)
     {
-        functions::fill(data_, value, rows_ * cols_);
+        functions::various::fill(data_, value, rows_ * cols_);
     }
 
     /* ============================== Accessors ================================ */
@@ -176,19 +182,22 @@ namespace cum
 
         if(data_ != nullptr)
         {
-            sycl::free(data_, internal::getQueue());
-            data_ =        nullptr;
+            // sycl::free(data_, internal::getQueue());
+            memory::free(data_);
+            data_ = nullptr;
         }
-        data_ = sycl::malloc_shared<cumeric_t>(other.rows_ * other.cols_, internal::getQueue());
+        data_ = memory::allocate(other.rows_ * other.cols_);
 
-        internal::getQueue().memcpy(other.data_, data_, other.rows_ * other.cols_ * sizeof(cumeric_t)).wait();
+        // internal::getQueue().memcpy(other.data_, data_, other.rows_ * other.cols_ * sizeof(cumeric_t)).wait();
+        memory::memcopy(other.data_, data_, rows_ * cols_ * sizeof(cumeric_t));
         return *this;
     }
 
     Matrix& Matrix::operator = (Matrix other) noexcept
     {
         if(data_ == nullptr)
-            data_ = sycl::malloc_shared<cumeric_t>(other.rows_ * other.cols_, internal::getQueue());
+            data_ = cum::memory::allocate(other.rows_ * other.cols_);
+            // data_ = sycl::malloc_shared<cumeric_t>(other.rows_ * other.cols_, internal::getQueue());
         swap(other);
         return *this;
     }
@@ -441,13 +450,13 @@ namespace cum
     Matrix Matrix::clip(const cumeric_t min, const cumeric_t max) const
     {
         Matrix temp(rows_, cols_);
-        cum::functions::clip(temp.data(), data_, min, max, rows_ * cols_);
+        cum::functions::various::clip(temp.data(), data_, min, max, rows_ * cols_);
         return temp;
     }
 
     Matrix& Matrix::clipInPlace(const cumeric_t min, const cumeric_t max)
     {
-        cum::functions::clipInPlace(data_, min, max, rows_ * cols_);
+        cum::functions::various::clipInPlace(data_, min, max, rows_ * cols_);
         return *this;
     }
 

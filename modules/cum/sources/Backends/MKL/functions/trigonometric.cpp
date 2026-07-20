@@ -19,6 +19,7 @@ namespace cum::functions::trigonometric
         return sycl::sin(x);
     }
 
+
     cumeric_t cos(cumeric_t x)
     {
         return sycl::cos(x);
@@ -35,28 +36,28 @@ namespace cum::functions::trigonometric
     {
         auto& q = internal::getQueue();
         oneapi::mkl::vm::sin(q, N, v, r, {});
-        q.wait();
+        // q.wait();
     }
 
-    void sin_in_place(cumeric_t* v, const std::size_t& N)
+    void sin_in_place(cumeric_t* v, const std::size_t N)
     {
         auto& q = internal::getQueue();
         oneapi::mkl::vm::sin(q, N, v, v, {});
-        q.wait();
+        // q.wait();
     }
 
     void cos(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
         auto& q = internal::getQueue();
         oneapi::mkl::vm::cos(q, N, v, r, {});
-        q.wait();
+        // q.wait();
     }
 
-    void cos_in_place(cumeric_t* v, const std::size_t& N)
+    void cos_in_place(cumeric_t* v, const std::size_t N)
     {
         auto& q = internal::getQueue();
         oneapi::mkl::vm::cos(q, N, v, v, {});
-        q.wait();
+        // q.wait();
     }
 
     void tan(cumeric_t* r, const cumeric_t* v, std::size_t N)
@@ -127,7 +128,7 @@ namespace cum::functions::trigonometric
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             cumeric_t t = tan(v[idx]);
-            r[idx] = 1._c + t * t;
+            r[idx] = 1 + t * t;
         });
     }
 
@@ -136,7 +137,7 @@ namespace cum::functions::trigonometric
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             cumeric_t t = tan(v[idx]);
-            v[idx] = 1._c + t * t;
+            v[idx] = 1 + t * t;
         });
     }
 
@@ -144,7 +145,7 @@ namespace cum::functions::trigonometric
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
-            r[idx] = 1._c + v[idx] * v[idx];
+            r[idx] = 1 + v[idx] * v[idx];
         });
     }
 
@@ -152,7 +153,7 @@ namespace cum::functions::trigonometric
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
-            v[idx] = 1._c + v[idx] * v[idx];
+            v[idx] = 1 + v[idx] * v[idx];
         });
     }
 }

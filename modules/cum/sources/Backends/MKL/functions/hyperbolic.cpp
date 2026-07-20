@@ -67,12 +67,12 @@ namespace cum::functions::hyperbolic
 
     cumeric_t tanh_deriv(cumeric_t x)
     {
-        return 1 - sycl::tanh(x) * sycl::tanh(x);
+        return static_cast<cumeric_t>(1) - hyperbolic::tanh(x) * hyperbolic::tanh(x);
     }
 
     cumeric_t tanh_deriv_from_result(cumeric_t x)
     {
-        return 1 - x * x;
+        return static_cast<cumeric_t>(1) - x * x;
     }
 
     cumeric_t sinh_deriv(cumeric_t x)
@@ -106,6 +106,14 @@ namespace cum::functions::hyperbolic
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = 1 - v[idx] * v[idx];
+        });
+    }
+
+    void tanh_deriv_from_result_in_place(cumeric_t* v, const std::size_t N)
+    {
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            v[idx] = 1 - v[idx] * v[idx];
         });
     }
 

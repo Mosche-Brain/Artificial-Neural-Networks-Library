@@ -24,7 +24,7 @@ namespace cum::functions::trigonometric
     void sin_in_place(cumeric_t* v, std::size_t N);
 
     void cos(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void cos_in_place(cumeric_t* v, std::size_t N);
+    void cos_in_place(cumeric_t* v, const std::size_t N);
 
     void tan(cumeric_t* r, const cumeric_t* v, std::size_t N);
     void tan_in_place(cumeric_t* v, std::size_t N);

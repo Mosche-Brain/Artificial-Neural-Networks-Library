@@ -8,7 +8,7 @@
 #include <cum/Matrix.hpp>
 #include <cum/random.hpp>
 
-#include <YANN/Utility/logs.hpp>
+#include <yann/utils/logs.hpp>
 
 static void print_matrix_info(const std::string& name, cum::Matrix& m)
 {

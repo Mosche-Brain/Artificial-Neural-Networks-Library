@@ -6,10 +6,10 @@
 #include <cum/cum.hpp>
 #include <cum/Matrix.hpp>
 
-#include <YANN/Models/Sequential.hpp>
-#include <YANN/Utility/FileIO.hpp>
-#include <YANN/Utility/logs.hpp>
-#include <YANN/runtime_config.hpp>
+#include <yann/models/Sequential.hpp>
+#include <yann/utils/FileIO.hpp>
+#include <yann/utils/logs.hpp>
+#include <yann/runtime_config.hpp>
 
 #include "helpers/surface_visualisation.hpp"
 

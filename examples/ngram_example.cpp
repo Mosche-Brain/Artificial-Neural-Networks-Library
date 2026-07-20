@@ -1,4 +1,4 @@
-#include <YANN/Models/NGram.hpp>
+#include <yann/models/NGram.hpp>
 
 #include <iostream>
 

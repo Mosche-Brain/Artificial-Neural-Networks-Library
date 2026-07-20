@@ -56,21 +56,6 @@ namespace cum::LinearAlgebra /* LATK */
     void transform(cumeric_t* mat, const cumeric_t* old, cumeric_t (*func)(cumeric_t x), std::size_t N);
     void transformInPlace(cumeric_t* mat, cumeric_t (*func)(cumeric_t x), std::size_t N);
 
-    void sin(cumeric_t* r, const cumeric_t* v, const std::size_t& N);
-    void sinInPlace(cumeric_t* v, const std::size_t& N);
-    
-    void cos(cumeric_t* r, const cumeric_t* v, const std::size_t& N);
-    void cosInPlace(cumeric_t* v, const std::size_t& N);
-
-    void tanh(cumeric_t* r, const cumeric_t* v, const std::size_t& N);
-    void tanhInPlace(cumeric_t* v, const std::size_t& N);
-
-    void exp(cumeric_t* r, const cumeric_t* v, const std::size_t& N);
-    void expInPlace(cumeric_t* v, const std::size_t& N);
-
-    void relu(cumeric_t* r, const cumeric_t* v, const std::size_t& N);
-    void reluInPlace(cumeric_t* v, const std::size_t& N);
-
     void norm(cumeric_t& r, const cumeric_t* v, std::size_t N);
     void normInplace(cumeric_t* v, std::size_t N);
 

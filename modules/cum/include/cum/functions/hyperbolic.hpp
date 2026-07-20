@@ -43,6 +43,7 @@ namespace cum::functions::hyperbolic
 
     void tanh_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
     void tanh_deriv_from_result(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    void tanh_deriv_from_result_in_place(cumeric_t* v, std::size_t N);
 
     void sinh_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
     void sinh_deriv_in_place(cumeric_t* v, std::size_t N);

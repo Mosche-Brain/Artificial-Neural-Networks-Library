@@ -1,8 +1,8 @@
 #include <iostream>
 #include <fstream>
 
-#include <YANN/Models/Sequential.hpp>
-#include <YANN/Utility/FileIO.hpp>
+#include <yann/models/Sequential.hpp>
+#include <yann/utils/FileIO.hpp>
 // #include <matplot/matplot.h>
 
 // void plot(YANN::vector_t x, YANN::vector_t y_true, YANN::vector_t y_pred);
