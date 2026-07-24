@@ -3,7 +3,7 @@
 
 namespace cum { class Matrix; }
 
-namespace yann::utils::logs
+namespace yann::utils::formating
 {
     std::string show_matrix_dimensions(const cum::Matrix &mat);
 

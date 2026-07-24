@@ -23,6 +23,7 @@ namespace cum::internal
 
         cumeric_t* zeros;
         cumeric_t* ones;
+        cumeric_t* cache;
 
         void setDevice(CUM_DEVICE device);
 

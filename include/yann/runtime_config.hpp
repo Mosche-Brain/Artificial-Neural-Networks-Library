@@ -1,19 +1,33 @@
 #pragma once
 
 #include <stdint.h>
+#include "yann/utils/Logger.hpp"
 
 namespace yann::runtime_config
 {
-    extern int DEBUG_VEBOSITY; // every + 1 is one more indentation level in debug output, 0 means no debug output, 1 means only layer level output, 2 means layer and operation level output, and so on
+    unsigned char verbosity_level();
 
-    bool cached_preactivations();
-    void set_cached_preactivations(bool cached_preactivations);
+    /*
+     * 1 - Training Level
+     * 2 - Epoch level
+     * 3 - Sample level
+     * 4 - Layer level
+     * 5 - Operation level
+     */
+    void set_verbosity(unsigned char level);
+
+    bool async_mode();
+    void set_async_mode(bool mode);
 
     bool fused_kernels();
     void set_fused_kernels(bool fused_kernels);
 
-    int8_t verbosity_level();
-    void set_verbosity(unsigned int level);
+    bool cached_preactivations();
+    void set_cached_preactivations(bool cached_preactivations);
+
+    bool telemetry_enabled();
+    void enable_telemetry(bool enable);
+
 }
 
 namespace yann
@@ -21,23 +35,32 @@ namespace yann
     class RuntimeConfig    
     {   
     private:
-        int8_t debug_verbosity; // every + 1 is one more indentation level in debug output, 0 means no debug output, 1 means only layer level output, 2 means layer and operation level output, and so on
         bool async_mode;
         bool fused_kernels;
         bool cached_preactivations;
         bool enable_telemetry;
 
-        RuntimeConfig() : debug_verbosity(1), enable_telemetry(true) {};
+        // utils::Logger logger;
+
+        RuntimeConfig();
     public:
         RuntimeConfig(const RuntimeConfig&) = delete;
         RuntimeConfig& operator = (const RuntimeConfig&) = delete;
 
-        void setDebugVerbosity(int verbosity) { debug_verbosity = verbosity; }
-        unsigned char getDebugVerbosity()     { return debug_verbosity; }
+        void setAsyncMode(bool mode);
+        bool getAsyncMode() const;
 
-        void setIsTelemetryEnabled(bool enable) { enable_telemetry = enable; }
-        bool getIsTelemetryEnabled()            { return enable_telemetry; }
+        void setFusedKernels(bool mode);
+        bool getFusedKernels() const;
+
+        void setCachedPreactivations(bool mode);
+        bool getCachedPreactivations() const;
+
+        void setIsTelemetryEnabled(bool enable);
+        bool getIsTelemetryEnabled() const;
 
         static RuntimeConfig& getInstance();
     };
+
+    utils::Logger& logger();
 }

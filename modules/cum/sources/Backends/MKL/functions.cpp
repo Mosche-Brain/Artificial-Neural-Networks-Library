@@ -26,13 +26,9 @@ namespace cum::functions
 
     cumeric_t Sigmoid::operator()(cumeric_t x) const { return logistic::sigmoid(x); }
 
-    void getFunctionByName(activation_t* activation, const char* name)
+    void get_function_by_name(activation_t* activation, const char* name)
     {
-        if(strcmp(name, "linear") == 0)
-        {
-            *activation = { function_id::linear, linear_units::identity, linear_units::identity_deriv };
-        }
-        if(strcmp(name, "identity") == 0)
+        if(strcmp(name, "linear") == 0 || strcmp(name, "identity") == 0)
         {
             *activation = { function_id::linear, linear_units::identity, linear_units::identity_deriv };
         }
@@ -72,9 +68,9 @@ namespace cum::functions
         {
             *activation = { function_id::log2, exponential::log2, exponential::log2_deriv };
         }
-        else if(strcmp(name, "exp10") == 0)
+        else if(strcmp(name, "log10") == 0)
         {
-            *activation = { function_id::exp10, exponential::exp10, exponential::exp10_deriv };
+            *activation = { function_id::log10, exponential::log10, exponential::log10_deriv };
         }
         else if(strcmp(name, "sin") == 0)
         {

@@ -8,16 +8,17 @@
 
 #include <yann/models/Sequential.hpp>
 #include <yann/utils/FileIO.hpp>
-#include <yann/utils/logs.hpp>
+#include <yann/utils/formating.hpp>
 #include <yann/runtime_config.hpp>
 
 #include "helpers/surface_visualisation.hpp"
+#include "optimizers/SGD.hpp"
 
 int main()
 {
     cum::cum(cum::CUM_DEVICE::CPU);
     std::cout << "sizeof cumeric_t in bytes: " << sizeof(cum::cumeric_t) << '\n';
-    yann::runtime_config::set_verbosity(0);
+    yann::runtime_config::set_verbosity(2);
 
 
     // easy3d::initialize();
@@ -32,7 +33,7 @@ int main()
     // Display weights for each layer
     for (int i = 0 ; i < sequential.getLayersCount() ; i++)
     {
-        std::cout << yann::utils::logs::matrixToString(sequential.getWeights(i)) << '\n';
+        std::cout << yann::utils::formating::matrixToString(sequential.getWeights(i)) << '\n';
     }
 
 
@@ -62,7 +63,7 @@ int main()
     cum::Matrix y_eval(4, 1);
 
     cum::cumeric_t rate = 0.1_c;
-    size_t epochs = 3000;
+    size_t epochs = 300;
 
     for(int i = 0 ; i < 4 ; i++)
         y_eval(i, 0) = sequential.forward(x_train.row(i).transpose())(0,0);
@@ -73,9 +74,11 @@ int main()
     std::cout << '[' << x_train(2, 0) << ',' << x_train(2, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 2) << "\n";
     std::cout << '[' << x_train(3, 0) << ',' << x_train(3, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 3) << "\n";
 
-    sequential.setLossFunction(yann::utils::loss::LossFunction::binary_cross_entropy);
+    sequential.setLossFunction(yann::loss::LossFunction::binary_cross_entropy);
 
-    sequential.fit(x_train, y_train, rate, epochs);
+    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(rate);
+
+    sequential.fit(x_train, y_train, *optimizer, epochs);
 
     cum::Matrix sample(1, 2, 1._c);
 
@@ -92,7 +95,7 @@ int main()
 
     for (int i = 0 ; i < sequential.getLayersCount() ; i++)
     {
-        std::cout << yann::utils::logs::matrixToString(sequential.getWeights(i)) << '\n';
+        std::cout << yann::utils::formating::matrixToString(sequential.getWeights(i)) << '\n';
     }
     //
     //

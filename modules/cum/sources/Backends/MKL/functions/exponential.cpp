@@ -92,37 +92,37 @@ namespace cum::functions::exponential
 
     cumeric_t exp2_deriv(cumeric_t x)
     {
-        return sycl::log(2._c) * exp2(x);
+        return sycl::log(static_cast<cumeric_t>(2)) * exp2(x);
     }
 
     cumeric_t exp2_deriv_from_result(cumeric_t x)
     {
-        return sycl::log(2._c) * x;
+        return sycl::log(static_cast<cumeric_t>(2)) * x;
     }
 
     cumeric_t exp10_deriv(cumeric_t x)
     {
-        return sycl::log(10.0_c) * exp10(x);
+        return sycl::log(static_cast<cumeric_t>(10)) * exp10(x);
     }
 
     cumeric_t exp10_deriv_from_result(cumeric_t x)
     {
-        return sycl::log(10.0_c) * x;
+        return sycl::log(static_cast<cumeric_t>(10)) * x;
     }
 
     cumeric_t log_deriv(cumeric_t x)
     {
-        return 1._c / x;
+        return static_cast<cumeric_t>(1) / x;
     }
 
     cumeric_t log2_deriv(cumeric_t x)
     {
-        return 1._c / (sycl::log(2._c)*x);
+        return static_cast<cumeric_t>(1) / (sycl::log(static_cast<cumeric_t>(2))*x);
     }
 
     cumeric_t log10_deriv(cumeric_t x)
     {
-        return 1._c / (sycl::log(10._c)*x);
+        return static_cast<cumeric_t>(1) / (sycl::log(static_cast<cumeric_t>(10))*x);
     }
 
     /* Parallel versions */

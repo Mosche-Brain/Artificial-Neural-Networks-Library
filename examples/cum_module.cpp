@@ -1,7 +1,7 @@
 #include <cum/Matrix.hpp>
 #include <cum/cum.hpp>
 
-#include <yann/utils/logs.hpp>
+#include <yann/utils/formating.hpp>
 #include <iostream>
 
 int main()
@@ -10,11 +10,11 @@ int main()
 
     cum::Matrix mat(2, 2, {1, 2, 3, 4});
 
-    std::cout << "before transpose:\n" << yann::utils::logs::matrixToString(mat);
+    std::cout << "before transpose:\n" << yann::utils::formating::matrixToString(mat);
 
     mat.transposeInPlace();
 
-    std::cout << "after transpose:\n" << yann::utils::logs::matrixToString(mat);
+    std::cout << "after transpose:\n" << yann::utils::formating::matrixToString(mat);
 
     cum::decum();
 

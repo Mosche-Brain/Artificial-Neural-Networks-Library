@@ -14,7 +14,7 @@ namespace cum
     {
     public:
         Matrix(std::size_t rows, std::size_t cols, cumeric_t value=0);
-        Matrix(std::size_t rows, std::size_t cols, cumeric_t* source);
+        Matrix(std::size_t rows, std::size_t cols, cumeric_t* source); // this constructor is used for copying data from source, not set source as a data handle
         Matrix(std::size_t rows, std::size_t cols, std::initializer_list<cumeric_t> elements);
         Matrix(const Matrix& other);
         Matrix(Matrix&& other) noexcept;
@@ -78,6 +78,7 @@ namespace cum
         Matrix transpose();
         Matrix& transposeInPlace();
         Vector flatten() const;
+        Matrix reshape(const std::size_t rows, const std::size_t cols) const;
         
         friend Matrix activation(const Matrix& mat, const char* name);
         friend Matrix activationInPlace(Matrix& mat, const char* name);

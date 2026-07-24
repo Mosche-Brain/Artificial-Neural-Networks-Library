@@ -5,7 +5,7 @@
 
 #if defined(ENABLE_DEBUG_OUTPUT)
     #include <iostream>
-    #include "utils/logs.hpp"
+    #include "utils/formating.hpp"
 #endif
 
 namespace yann::models::layers
@@ -20,7 +20,7 @@ namespace yann::models::layers
         #if defined(ENABLE_DEBUG_OUTPUT)
             std::cout << "Initializing activation function: linear\n";
         #endif
-        cum::functions::getFunctionByName(&this->activation, "linear");
+        cum::functions::get_function_by_name(&this->activation, "linear");
         #if defined(ENABLE_DEBUG_OUTPUT)
             std::cout << "Activation function initialized: " << '\n';
         #endif

@@ -26,6 +26,7 @@ int main()
         yann::models::layers::Dense::createUnique(20, "tanh"),
         // yann::models::layers::Dense::createUnique(48, "leaky_relu"),
         // yann::models::layers::Dense::createUnique(48, "leaky_relu"),
+        // yann::models::layers::Dense::createUnique(48, "leaky_relu"),
         // yann::models::layers::Dense::createUnique(128, "tanh"),
         yann::models::layers::Dense::createUnique(1, "linear"),
     });
@@ -44,12 +45,12 @@ int main()
 
     // normalize data
 
-    // X_train /= x_max;
-    // X_eval /= x_max;
+    X_train /= x_max;
+    X_eval /= x_max;
 
     // model.setLossFunction(yann::utils::loss::LossFunction::binary_cross_entropy);
     // model.setLossFunction(yann::utils::loss::LossFunction::mse);
-    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.1);
+    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.01);
     // model.fit(X_train, Y_train, 0.01_c, 50);
     model.fit(X_train, Y_train, *optimizer, 50);
 

@@ -6,12 +6,13 @@
 
 #if defined(ENABLE_DEBUG_OUTPUT)
     #include <iostream>
-    #include "utils/logs.hpp"
+    #include "utils/formating.hpp"
 #endif
 
 #include "runtime_config.hpp"
+// #include "utils/Logger.hpp"
 
-#define DEFAULT_LOSS_FUNC utils::loss::LossFunction::mse
+#define DEFAULT_LOSS_FUNC loss::LossFunction::mse
 
 namespace yann::models
 {
@@ -66,7 +67,7 @@ namespace yann::models
         topology.clear();
     }
 
-    void Sequential::setLossFunction(utils::loss::LossFunction new_loss_function)
+    void Sequential::setLossFunction(loss::LossFunction new_loss_function)
     {
         loss_function = new_loss_function;
     }
@@ -87,8 +88,11 @@ namespace yann::models
     {
         cum::Matrix curr_gradient = d_output;
         #if defined(ENABLE_DEBUG_OUTPUT)
-        if(runtime_config::verbosity_level() >= 3)
-            std::cout << "\t\t\t" << "layer output gradient: " << yann::utils::logs::matrixToString(curr_gradient.transpose()) << '\n';
+        // if(runtime_config::verbosity_level() >= 3)
+            // std::cout << "\t\t\t" << "layer output gradient: " << yann::utils::formating::matrixToString(curr_gradient.transpose()) << '\n';
+
+        // yann::logger().log
+
         #endif
         for(size_t i = topology.size() - 1 ; i > 0 ; --i)
         {
@@ -97,14 +101,14 @@ namespace yann::models
 
             curr_gradient = topology[i]->backward(curr_gradient);
             #if defined(ENABLE_DEBUG_OUTPUT)     
-            if(runtime_config::verbosity_level() >= 3)
-                std::cout << "\t\t\t" << "layer " << i << " gradient: " << utils::logs::matrixToString(curr_gradient.transpose()) << '\n';
+            // if(runtime_config::verbosity_level() >= 3)
+                // std::cout << "\t\t\t" << "layer " << i << " gradient: " << utils::formating::matrixToString(curr_gradient.transpose()) << '\n';
             #endif
         }        
         #if defined(ENABLE_DEBUG_OUTPUT)
         // if(runtime_config::verbosity_level() >= 3)
         // {
-        //     std::cout << "\t\t\t" << "layer 0 gradient: " << utils::logs::matrixToString(curr_gradient.transpose()) << '\n';
+        //     std::cout << "\t\t\t" << "layer 0 gradient: " << utils::formating::matrixToString(curr_gradient.transpose()) << '\n';
         // }
         #endif
     }
@@ -112,8 +116,9 @@ namespace yann::models
     void Sequential::fit(const cum::Matrix& X, const cum::Matrix& Y, cum::cumeric_t rate, size_t epochs)
     {
         #if defined(ENABLE_DEBUG_OUTPUT)
-        if(runtime_config::verbosity_level() >= 1)
-            std::cout << "Started training for " << epochs << " epochs...\n";
+        // if(runtime_config::verbosity_level() >= 1)
+            // std::cout << "Started training for " << epochs << " epochs...\n";
+        yann::logger().log(1, "Started training for {} epochs...", epochs);
         #endif
         for(size_t epoch = 0 ; epoch < epochs ; epoch++)
         {
@@ -161,7 +166,7 @@ namespace yann::models
                     std::cout << "\t\t" << "Computing loss and gradient...\n";
                 }
                 #endif
-                utils::loss::LossType error = utils::loss::computeLoss(result, y, this->loss_function);
+                loss::LossType error = loss::computeLoss(result, y, this->loss_function);
 
                 cum::Matrix gradient = error.gradient;
 
@@ -233,7 +238,7 @@ namespace yann::models
                     std::cout << "\t\t" << "Computing loss and gradient...\n";
                 }
                 #endif
-                utils::loss::LossType error = utils::loss::computeLoss(result, y, this->loss_function);
+                loss::LossType error = loss::computeLoss(result, y, this->loss_function);
 
                 cum::Matrix gradient = error.gradient;
 

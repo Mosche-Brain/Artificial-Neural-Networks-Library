@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "layers/Layers.hpp"
-#include "utils/loss.hpp"
+#include "../loss.hpp"
 #include "optimizers//OptimizerBase.hpp"
 
 /* # Used conventions
@@ -36,7 +36,7 @@ namespace yann::models
         void addLayer(LayerPtr layer);
         void clear();
 
-        void setLossFunction(utils::loss::LossFunction new_loss_function);
+        void setLossFunction(loss::LossFunction new_loss_function);
 
         /* Getters */
         cum::Matrix& getWeights(size_t layer) const;
@@ -55,6 +55,6 @@ namespace yann::models
 
         Topology topology;
         // utils::loss::LossFunction loss_function = utils::loss::LossFunction::binary_cross_entropy;
-        utils::loss::LossFunction loss_function;
+        loss::LossFunction loss_function;
     };
 }

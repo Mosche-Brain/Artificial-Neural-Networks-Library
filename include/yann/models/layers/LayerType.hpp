@@ -6,6 +6,7 @@ namespace yann::models::layers
     {
         INPUT,
         DENSE,
-        CONV2
+        CONV2,
+        FLATTEN
     };
 }

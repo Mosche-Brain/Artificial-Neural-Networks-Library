@@ -2,22 +2,25 @@
 
 namespace yann::runtime_config
 {
-    int DEBUG_VEBOSITY = 1; // every + 1 is one more indentation level in debug output, 0 means no debug output, 1 means only layer level output, 2 means layer and operation level output, and so on
-
-    unsigned int verbosity_level() 
+    unsigned char verbosity_level()
     { 
-        return RuntimeConfig::getInstance().getDebugVerbosity(); 
+        return utils::Logger::getInstance().getDebugVerbosity();
     }
 
-    void set_verbosity(unsigned int level)
+    void set_verbosity(unsigned char level)
     {
-        RuntimeConfig::getInstance().setDebugVerbosity(level); 
+        utils::Logger::getInstance().setDebugVerbosity(level);
     }
 }
 
 namespace yann
 {
     static RuntimeConfig* runtime_config_instance = nullptr;
+
+    RuntimeConfig::RuntimeConfig() : async_mode(false), fused_kernels(false), cached_preactivations(true), enable_telemetry(true)
+    {
+
+    };
 
     RuntimeConfig& RuntimeConfig::getInstance()
     {
@@ -27,4 +30,52 @@ namespace yann
         }
         return *runtime_config_instance;
     }
+
+
+
+    void RuntimeConfig::setAsyncMode(bool mode)
+    {
+        async_mode = mode;
+    }
+
+    bool RuntimeConfig::getAsyncMode() const
+    {
+        return async_mode;
+    }
+
+    void RuntimeConfig::setFusedKernels(bool mode)
+    {
+        fused_kernels = mode;
+    }
+
+    bool RuntimeConfig::getFusedKernels() const
+    {
+        return fused_kernels;
+    }
+
+    void RuntimeConfig::setCachedPreactivations(bool mode)
+    {
+        cached_preactivations = mode;
+    }
+
+    bool RuntimeConfig::getCachedPreactivations() const
+    {
+        return cached_preactivations;
+    }
+
+    void RuntimeConfig::setIsTelemetryEnabled(bool enable)
+    {
+        enable_telemetry = enable;
+    }
+
+    bool RuntimeConfig::getIsTelemetryEnabled() const
+    {
+        return enable_telemetry;
+    }
+
+    utils::Logger& logger()
+    {
+        return utils::Logger::getInstance();
+    }
+
 } // namespace YANN

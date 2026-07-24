@@ -6,7 +6,7 @@
 
 #if defined(ENABLE_DEBUG_OUTPUT)
     #include <iostream>
-    #include "utils/logs.hpp"
+    #include "utils/formating.hpp"
 #endif
 
 #include "runtime_config.hpp"
@@ -19,13 +19,13 @@
 namespace yann::models::layers
 {
     // Dense::Dense(int layerSize, int inputWidth, const char* func) : LayerBase()
-    Dense::Dense(int layerSize, const char* func)
+    Dense::Dense(const int layerSize, const char* func)
     {
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::verbosity_level() >= 1)
             std::cout << "\t" << "Initializing Dense layer with " << layerSize << " neurons and " << func << " activation function...\n";
         #endif
-        cum::functions::getFunctionByName(&activation, func);
+        cum::functions::get_function_by_name(&activation, func);
         _layerSize_ = layerSize;
 
         this->_layerType_ = LAYER_TYPE::DENSE;
@@ -37,8 +37,8 @@ namespace yann::models::layers
         {
             #if defined(ENABLE_RUNTIME_CHECKS)
                 // std::cout << "\x1B[31minput size doesn't match with weights\x1B[37m\n";
-                // std::cout << "input " << utils::logs::show_matrix_dimensions(input) << ", "
-                //           << "weights " << utils::logs::show_matrix_dimensions(weights) << '\n';
+                // std::cout << "input " << utils::formating::show_matrix_dimensions(input) << ", "
+                //           << "weights " << utils::formating::show_matrix_dimensions(weights) << '\n';
             // if(input.cols() != weights.rows())
             if(input.rows() != weights.cols())
             {
@@ -93,7 +93,7 @@ namespace yann::models::layers
                 std::cout << "\t\t\t\t" << "computing activation derviative\n";
         #endif
 
-        cum::functions::activationDerivative(derivative.data(), preactivatedOutputs.data(), activation, preactivatedOutputs.size());
+        cum::functions::transform_deriv(derivative.data(), preactivatedOutputs.data(), preactivatedOutputs.size(), activation);
 
         #if defined(ENABLE_DEBUG_OUTPUT)
         if(runtime_config::verbosity_level() >= 4)
@@ -142,7 +142,7 @@ namespace yann::models::layers
     //
     //     #if defined(ENABLE_DEBUG_OUTPUT)
     //     if(runtime_config::verbosity_level() >= 4)
-    //         std::cout << utils::logs::matricesWithArrowToString(oldWeights, weights, 4, 16) << '\n';
+    //         std::cout << utils::formating::matricesWithArrowToString(oldWeights, weights, 4, 16) << '\n';
     //     #endif
     //
     //     this->deltaWeights = cum::Matrix(this->deltaWeights.rows(), this->deltaWeights.cols(), 0_c);

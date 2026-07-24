@@ -1,10 +1,10 @@
-#include "logs.hpp"
+#include "formating.hpp"
 
 #include <cum/Matrix.hpp>
 
 #include <iomanip>
 
-namespace yann::utils::logs
+namespace yann::utils::formating
 {
     std::string show_matrix_dimensions(const cum::Matrix& mat)
     {

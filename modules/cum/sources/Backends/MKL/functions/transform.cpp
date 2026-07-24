@@ -14,31 +14,43 @@
 
 namespace cum::functions
 {
-    void transform(cumeric_t* r, const cumeric_t* v, std::size_t N, const activation_t& activation)
+    void transform(cumeric_t* r, const cumeric_t* v, const std::size_t N, const activation_t& activation)
     {
         if (activation.name != function_id::undefined)
+        {
             transform(r, v, N, activation.name);
+        }
         else if (activation.function != nullptr)
+        {
             #pragma omp parallel for
             for (std::size_t i = 0; i < N; ++i)
                 r[i] = activation.function(v[i]);
+        }
         else
-            throw std::runtime_error("Unknown activation type");
+        {
+            throw std::runtime_error("Unknown activation type (transform), used " + std::to_string(static_cast<unsigned char>(activation.name)));
+        }
     }
 
-    void transform_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N, const activation_t& activation)
+    void transform_deriv(cumeric_t* r, const cumeric_t* v, const std::size_t N, const activation_t& activation)
     {
         if (activation.name != function_id::undefined)
+        {
             transform_deriv(r, v, N, activation.name);
+        }
         else if (activation.derivative != nullptr)
+        {
             #pragma omp parallel for
             for (std::size_t i = 0; i < N; ++i)
                 r[i] = activation.derivative(v[i]);
+        }
         else
-            throw std::runtime_error("Unknown activation type");
+        {
+            throw std::runtime_error("Unknown activation type (transform_deriv)");
+        }
     }
 
-    void transform(cumeric_t* r, const cumeric_t* v, std::size_t N, function_id activation)
+    void transform(cumeric_t* r, const cumeric_t* v, const std::size_t N, const function_id activation)
     {
         switch (activation)
         {
@@ -149,6 +161,8 @@ namespace cum::functions
             }
             default:
             {
+                throw std::runtime_error("Unknown activation function (transform(cumeric_t*, const cumeric_t*, std::size_t, function_id))");
+
                 // if (func.derivative == nullptr)
                 //     break;
                 //
@@ -160,7 +174,7 @@ namespace cum::functions
         }
     }
 
-    void transform_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N, function_id activation)
+    void transform_deriv(cumeric_t* r, const cumeric_t* v, const std::size_t N, const function_id activation)
     {
         switch (activation)
         {
@@ -271,9 +285,10 @@ namespace cum::functions
             }
             default:
             {
+                throw std::runtime_error("Unknown activation function (in transform_deriv(cumeric_t*, const cumeric_t*, std::size_t, function_id))");
                 // Apply with naive loop
-                if (func.derivative == nullptr)
-                    break;
+                // if (activation == nullptr)
+                //     break;
 
                 // #pragma omp parallel for
                 // for (std::size_t i = 0; i < N; ++i)

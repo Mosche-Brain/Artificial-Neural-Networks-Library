@@ -49,10 +49,10 @@ namespace cum::functions
 
 
     // return function object due to passed const char*
-    void getFunctionByName(activation_t* activation, const char* name);
+    void get_function_by_name(activation_t* activation, const char* name);
     void transformInPlace(cumeric_t* v, activation_t& func, std::size_t N);
 
     // compute gradient of activation function for backpropagation
-    void activationDerivative(cumeric_t* r, const cumeric_t* v, activation_t& func, std::size_t N);
-    void activationDerivativeInPlace(cumeric_t* v, activation_t& func, std::size_t N);
+    // void activationDerivative(cumeric_t* r, const cumeric_t* v, activation_t& func, std::size_t N);
+    // void activationDerivativeInPlace(cumeric_t* v, activation_t& func, std::size_t N);
 } // namespace cum::functions

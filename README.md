@@ -72,13 +72,11 @@ endif()
     * `CUM_USE_F64`
     * `CUM_USE_F32` (defining it is optional)
     * `CUM_USE_F16`
-    * `CUM_USE_BF16`
+    * `CUM_USE_BF16` (it might not compile properly)
     * `CUM_USE_Q8` (didn't tested yet )
 * Currently supported backends
     * `BUILD_USE_MKL`
 ```cpp
-#define CUM_USE_F16
-#define BUILD_USE_MKL
 #include <cum/cum.hpp>
 
 int main()
@@ -93,9 +91,9 @@ int main()
 
 
 ### Creating and fitting sequential model
-* In constructor of `yann::models::Sequential` class your can put initializer list with 
+* In constructor of `yann::models::Sequential` class your can put initializer list filled with fabric methods of various layers types. 
 ```cpp
-#include <YANN/Models/Sequential.hpp>
+#include <yann/models/Sequential.hpp>
 
 using namespace yann::models;
 
@@ -107,7 +105,6 @@ int main()
     Sequential model({layers::Input::createUnique(input_layer_size),
              layers::Dense::createUnique(hidden_layer_size, "relu"),
              layers::Dense::createUnique(outut_layer_size, "sigmoid")}); 
-                      /* you can also put tanh, gelu, softmax, etc */
 
     int number_of_samples = 4;
     cum::Matrix x_train(number_of_samples, input_layer_size);
@@ -118,7 +115,13 @@ int main()
     cum::cumeric_t learning_rate = 0.1_c;
     int epochs = 200;
 
-    model.fit(x_train, y_train, learning_rate, epochs);
+    // old way - not recommended
+    // model.fit(x_train, y_train, learning_rate, epochs); 
+    
+    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(learning_rate);
+    
+    model.fit(x_train, y_train, *optimizer, epochs);
+    
     return 0;
 }
 ```
@@ -126,7 +129,7 @@ int main()
 ### Creating and fitting perceptron
 
 ```cpp
-#include <YANN/Models/Perceptron.hpp>
+#include <yann/models/Perceptron.hpp>
 
 using namespace yann::models;
 
@@ -166,12 +169,12 @@ cum::Matrix MyLayer::forward(const cum::Matrix& input)
     /* your implementation of forward pass */
 }
 
-cum::Matrix MyLayer::backward(const cum::Matrix deltaOutput)
+cum::Matrix MyLayer::backward(const cum::Matrix deltaOutput) 
 {
     /* your implementation of backward pass */
 }
 
-void MyLayer::update_weights(cum::cumeric_t rate)
+void MyLayer::update_weights(cum::cumeric_t rate) // This method is obsolete, now we are using dedicated optimizer class
 {
     /* Your method to updating weights */
 }
@@ -189,20 +192,21 @@ You can find full API documentation [there (currently not avaible)](www.amogus.o
 
 * ✅ Sequential models
 * ✅ Dense layers
-* ✅ Working backward pass
-* ✅ Adjustable numbers precision
-* ✅ FP16 and BF16 supported
-* ✅ Parallel CPU computations
-* ✅ Own template-free Vector and Matrix classes
-* ✅ GPU support
+* ✅ Working backward pass (Yes, this is insane)
+* ✅ Compile time precision selections
+* ✅ FP16 support
+* ✅ Runtime device selection
+* ✅ Multicore CPU acceleration
+* ✅ GPU acceleration
+* ✅ Templates-free math framework classes
 * ✅ OneAPI support
 * ⚠️ [Dedicated graphical envionment](https://github.com/Czuowuek-SOS/MLStudio) (work in progress)
 * ❌ CUDA support
 * ❌ ROCm support
-* ❌ Q8 and Q4 quantization support
+* ❌ BF16, Q8 support
 * ❌ Dynamic computational graphs
 * ❌ Fully working Python binding
-* ❌ Recurent Neural Networks
+* ❌ Recurrent Neural Networks
 * ❌ Transformers
 * ❌ Outperform TensorFlow
 * ❌ Built in telemetry

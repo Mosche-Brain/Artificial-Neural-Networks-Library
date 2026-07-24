@@ -9,7 +9,7 @@ namespace yann::models
 {
     Perceptron::Perceptron(int inputLenght, const char* func) : _inputWidth_(inputLenght)
     {
-        cum::functions::getFunctionByName(&activation, func);
+        cum::functions::get_function_by_name(&activation, func);
         init();
     }
 

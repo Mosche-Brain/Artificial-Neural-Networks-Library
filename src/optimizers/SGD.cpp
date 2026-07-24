@@ -21,7 +21,7 @@ namespace yann::optimizers
     {
         for(Parameter* param : params)
         {
-            param->values -= param->gradient * learning_rate;
+            param->values -= (param->gradient * learning_rate);
             param->clear_gradient();
         }
     }

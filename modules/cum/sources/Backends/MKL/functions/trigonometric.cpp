@@ -32,7 +32,7 @@ namespace cum::functions::trigonometric
 
     /* Parallelized versions */
 
-    void sin(cumeric_t* r, const cumeric_t* v, const std::size_t& N)
+    void sin(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
         auto& q = internal::getQueue();
         oneapi::mkl::vm::sin(q, N, v, r, {});

@@ -446,6 +446,10 @@ namespace cum
         return temp;
     }
 
+    Matrix Matrix::reshape(const std::size_t rows, const std::size_t cols) const
+    {
+        return {rows, cols, data_};
+    }
 
     Matrix Matrix::clip(const cumeric_t min, const cumeric_t max) const
     {
