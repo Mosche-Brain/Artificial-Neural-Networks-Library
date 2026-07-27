@@ -4,6 +4,10 @@
 
 #include "optimizers/SGD.hpp"
 
+// #include <print>
+
+#include "cum/runtime.hpp"
+
 namespace yann::optimizers
 {
 
@@ -19,10 +23,23 @@ namespace yann::optimizers
 
     void SGD::step(std::vector<Parameter*>& params)
     {
+        // std::println("params count: {}", params.size());
         for(Parameter* param : params)
         {
-            param->values -= (param->gradient * learning_rate);
+            // std::println("updating param");
+            param->values -= param->gradient * learning_rate;
+            cum::runtime::sync();
+
+            // add small random offset
+            // cum::Matrix offset = cum::Matrix::Random(param->values.rows(), param->values.cols(), -0.01_c, 0.01_c);
+            // cum::runtime::sync();
+
+            // param->values += offset;
+            // cum::runtime::sync();
+            // param->values -= (param->gradient * learning_rate);
+            // std::println("clearing grad");
             param->clear_gradient();
+            cum::runtime::sync();
         }
     }
 

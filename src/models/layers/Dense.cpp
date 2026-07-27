@@ -10,6 +10,7 @@
 #endif
 
 #include "runtime_config.hpp"
+#include "cum/runtime.hpp"
 #include "cum/functions/transform.hpp"
 
 #define ENABLE_RUNTIME_CHECKS // this macro will be moved to runtime config soon
@@ -21,10 +22,7 @@ namespace yann::models::layers
     // Dense::Dense(int layerSize, int inputWidth, const char* func) : LayerBase()
     Dense::Dense(const int layerSize, const char* func)
     {
-        #if defined(ENABLE_DEBUG_OUTPUT)
-        if(runtime_config::verbosity_level() >= 1)
-            std::cout << "\t" << "Initializing Dense layer with " << layerSize << " neurons and " << func << " activation function...\n";
-        #endif
+        YANN_LOG(1, "Initializing Dense layer with {} neurons and {} activation function...", layerSize, func);
         cum::functions::get_function_by_name(&activation, func);
         _layerSize_ = layerSize;
 
@@ -47,16 +45,10 @@ namespace yann::models::layers
             #endif
         }
 
-        #if defined(ENABLE_DEBUG_OUTPUT) 
-        if(runtime_config::verbosity_level() >= 4)
-            std::cout << "copying inputs\n";
-        #endif
+        YANN_LOG(4, "Copying inputs", "");
         this->inputs = input;
+        cum::runtime::sync();
 
-        #if defined(ENABLE_DEBUG_OUTPUT) 
-        if(runtime_config::verbosity_level() >= 4)
-            std::cout << "Performing (weights * input) + biases\n";
-        #endif
 
         #if defined(USE_FUSED_KERNELS)
             #if defined(ENABLE_CACHED_PREACTIVATION)
@@ -66,63 +58,46 @@ namespace yann::models::layers
             cum::neural_primitives::neural_kernels::feed_forward(outputs.data(), weights().data(), input.data(), biases().data(), weights().cols(), weights().rows(), activation.name);
             #endif
         #else
-        preactivatedOutputs = (weights() * input) + biases();
-        #if defined(ENABLE_DEBUG_OUTPUT)
-        if(runtime_config::verbosity_level() >= 4)
-            std::cout << "Performing activation\n";
+
+            YANN_LOG(4, "Performing (weights * input) + biases", "");
+            preactivatedOutputs = (weights() * input) + biases();
+            cum::runtime::sync();
+
+            // cum::Matrix result(preactivatedOutputs.rows(), preactivatedOutputs.cols());
+            // cum::runtime::sync();
+
+            YANN_LOG(4, "Performing activation", "");
+            cum::functions::transform(outputs.data(), preactivatedOutputs.data(), preactivatedOutputs.size(), activation);
+            cum::runtime::sync();
         #endif
 
-        cum::Matrix result(preactivatedOutputs.rows(), preactivatedOutputs.cols());
-        cum::functions::transform(result.data(), preactivatedOutputs.data(), preactivatedOutputs.size(), activation);
-        outputs = result;
-        #endif
-
-        #if defined(ENABLE_DEBUG_OUTPUT)
-        if(runtime_config::verbosity_level() >= 4) 
-            std::cout << "forward pass succed\n";
-        #endif
+        YANN_LOG(4, "forward pass succeed", "");
         return outputs;
     }
 
     cum::Matrix Dense::backward(const cum::Matrix& deltaOutput)
     {
         cum::Matrix derivative(preactivatedOutputs.rows(), preactivatedOutputs.cols());
+        cum::runtime::sync();
 
-        #if defined(ENABLE_DEBUG_OUTPUT)
-            if(runtime_config::verbosity_level() >= 4)
-                std::cout << "\t\t\t\t" << "computing activation derviative\n";
-        #endif
-
+        YANN_LOG(4, "computing activation derviative", "");
         cum::functions::transform_deriv(derivative.data(), preactivatedOutputs.data(), preactivatedOutputs.size(), activation);
+        cum::runtime::sync();
 
-        #if defined(ENABLE_DEBUG_OUTPUT)
-        if(runtime_config::verbosity_level() >= 4)
-            std::cout << "\t\t\t\t" << "d_pre_activation = derivative.cwiseProcut(deltaOutput)\n";
-        #endif
-
-        // cum::Matrix d_pre_activation = derivative.cwiseProduct(deltaOutput);
+        YANN_LOG(4, "td_pre_activation = derivative.cwiseProcut(deltaOutput)\n", "");
         biases.gradient = derivative.cwiseProduct(deltaOutput);
+        cum::runtime::sync();
 
-        #if defined(ENABLE_DEBUG_OUTPUT)
-        if(runtime_config::verbosity_level() >= 4)
-            std::cout << "\t\t\t\t" << "deltaWeights = matrixMultiply(d_pre_activation, matrixTranspose(inputs))\n";
-        #endif
+        YANN_LOG(4, "deltaWeights = matrixMultiply(d_pre_activation, matrixTranspose(inputs))\n", "");
         weights.gradient = biases.gradient * inputs.transpose(); // input is col
-        // weights.gradient = d_pre_activation * inputs.transpose(); // input is col
-        // deltaWeights = inputs.transpose() * d_pre_activation; // input is row
+        cum::runtime::sync();
 
-        #if defined(ENABLE_DEBUG_OUTPUT)
-        if(runtime_config::verbosity_level() >= 4)
-            std::cout << "\t\t\t\t" << "deltaBiases = matrixRowwiseSum(d_pre_activation)\n";
-        #endif
+        // YANN_LOG(4, "deltaBiases = matrixRowwiseSum(d_pre_activation)\n", "");
 
         // deltaBiases = d_pre_activation.colwiseSum();
         // biases.gradient = d_pre_activation;
 
-        #if defined(ENABLE_DEBUG_OUTPUT)
-        if(runtime_config::verbosity_level() >= 4)
-            std::cout << "\t\t\t\t" << "deltaInput = matrixMultiply(matrixTranspose(weights), d_pre_activation)\n";
-        #endif
+        // YANN_LOG(4, "deltaInput = matrixMultiply(matrixTranspose(weights), d_pre_activation)\n", "");
 
         // cum::Matrix deltaInput = weights().transpose() * biases.gradient;
         // cum::Matrix deltaInput = weights().transpose() * d_pre_activation;

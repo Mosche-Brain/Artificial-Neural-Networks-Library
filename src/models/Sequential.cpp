@@ -10,6 +10,7 @@
 #endif
 
 #include "runtime_config.hpp"
+#include "cum/runtime.hpp"
 // #include "utils/Logger.hpp"
 
 #define DEFAULT_LOSS_FUNC loss::LossFunction::mse
@@ -23,10 +24,7 @@ namespace yann::models
 
     Sequential::Sequential(std::initializer_list<std::unique_ptr<layers::LayerBase>> newTopology) : loss_function(DEFAULT_LOSS_FUNC)
     {
-        #if defined(ENABLE_DEBUG_OUTPUT)
-        if(runtime_config::verbosity_level() >= 1)
-            std::cout << "Initializing Sequential model with " << newTopology.size() << " layers...\n";
-        #endif
+        YANN_LOG(1, "Initializing Sequential model with {} layers...", newTopology.size());
 
         topology.reserve(newTopology.size()); 
         for(auto& ptr : newTopology) 
@@ -37,7 +35,6 @@ namespace yann::models
         topology[0]->initParameters(topology[0]->size(), 1);
         for(size_t i = 1 ; i < topology.size() ; i++)
         {
-            std::cout << "uh\n";
             int previous_layer_size = topology[i - 1]->size();
             int current_layer_size  = topology[  i  ]->size();
 
@@ -86,190 +83,74 @@ namespace yann::models
 
     void Sequential::backward(const cum::Matrix& d_output)
     {
-        cum::Matrix curr_gradient = d_output;
-        #if defined(ENABLE_DEBUG_OUTPUT)
-        // if(runtime_config::verbosity_level() >= 3)
-            // std::cout << "\t\t\t" << "layer output gradient: " << yann::utils::formating::matrixToString(curr_gradient.transpose()) << '\n';
+        cum::Matrix& curr_gradient = const_cast<cum::Matrix&>(d_output);
 
-        // yann::logger().log
-
-        #endif
         for(size_t i = topology.size() - 1 ; i > 0 ; --i)
         {
             // if(topology[i]->layerType() == layers::LAYER_TYPE::INPUT)
             //     continue;
 
             curr_gradient = topology[i]->backward(curr_gradient);
-            #if defined(ENABLE_DEBUG_OUTPUT)     
-            // if(runtime_config::verbosity_level() >= 3)
-                // std::cout << "\t\t\t" << "layer " << i << " gradient: " << utils::formating::matrixToString(curr_gradient.transpose()) << '\n';
-            #endif
-        }        
-        #if defined(ENABLE_DEBUG_OUTPUT)
+        }
         // if(runtime_config::verbosity_level() >= 3)
         // {
         //     std::cout << "\t\t\t" << "layer 0 gradient: " << utils::formating::matrixToString(curr_gradient.transpose()) << '\n';
         // }
-        #endif
     }
 
-    void Sequential::fit(const cum::Matrix& X, const cum::Matrix& Y, cum::cumeric_t rate, size_t epochs)
-    {
-        #if defined(ENABLE_DEBUG_OUTPUT)
-        // if(runtime_config::verbosity_level() >= 1)
-            // std::cout << "Started training for " << epochs << " epochs...\n";
-        yann::logger().log(1, "Started training for {} epochs...", epochs);
-        #endif
-        for(size_t epoch = 0 ; epoch < epochs ; epoch++)
-        {
-            // Eigen::PermutationMatrix<Eigen::Dynamic> perm(X.rows());
-            // perm.setIdentity();
-            // cum::Matrix perm(X.rows(), X.rows());
-            // std::random_shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size());
-            // std::shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size(),
-                        // std::mt19937(std::random_device{}()));
-            // cum::Matrix X_shuffled = perm * X;
-            // cum::Matrix Y_shuffled = perm * Y;
-            cum::cummulative_t totalLoss = 0;
 
-            #if defined(ENABLE_DEBUG_OUTPUT)
-            if(runtime_config::verbosity_level() >= 1)
-                std::cout << "\t" << "Epoch " << epoch << "\n";
-            #endif
-            for(int i = 0 ; i < X.rows() ; i++)
-            {
-                #if defined(ENABLE_DEBUG_OUTPUT)
-                if(runtime_config::verbosity_level() >= 2)
-                    std::cout << "\t\t" << "Sample " << i << "\n";
-                #endif
-
-                // cum::Vector x = math_api::matrixTranspose(math_api::matrixRow(X, i));
-                // cum::Vector y = math_api::matrixTranspose(math_api::matrixRow(Y, i)); // Todo: check what is shuffling
-                // cum::Matrix x = X.row(i).transpose();
-                // cum::Matrix y = Y.row(i).transpose();
-
-                cum::Matrix x = X.row(i).transpose();
-                cum::Matrix y = Y.row(i).transpose();
-
-                #if defined(ENABLE_DEBUG_OUTPUT)
-                if(runtime_config::verbosity_level() >= 2) {
-                    // std::cout << "\t\t" << "input: "  << x << '\n';
-                    // std::cout << "\t\t" << "target: " << math_api::matrixTranspose(y) << '\n';
-                }
-                #endif
-
-                cum::Matrix result = this->forward(x);
-                #if defined(ENABLE_DEBUG_OUTPUT)
-                if(runtime_config::verbosity_level() >= 2)
-                {
-                    // std::cout << "\t\t" << "resutl: " << math_api::matrixTranspose(result) << '\n';
-                    std::cout << "\t\t" << "Computing loss and gradient...\n";
-                }
-                #endif
-                loss::LossType error = loss::computeLoss(result, y, this->loss_function);
-
-                cum::Matrix gradient = error.gradient;
-
-                #if defined(ENABLE_DEBUG_OUTPUT)
-                if(runtime_config::verbosity_level() >= 2)
-                    std::cout << "\t\t" << "Performing backpropagation...\n";
-                #endif
-
-                this->backward(gradient);
-
-                #if defined(ENABLE_DEBUG_OUTPUT)
-                if(runtime_config::verbosity_level() >= 2)
-                    std::cout << "\t\t" << "Updating parameters...\n";
-                #endif
-
-                // this->updateParams(rate);
-                totalLoss += error.loss;
-            }
-            // totalLoss /= X.rows();
-            cum::cumeric_t avarageLoss = totalLoss / X.rows();
-
-            #if defined(ENABLE_DEBUG_OUTPUT)
-            if(runtime_config::verbosity_level() >= 1) {
-                std::cout << "\t" << "Avarage epoch loss: " << avarageLoss << '\n';
-                std::cout << "\t" << "Total epoch loss: " << totalLoss << '\n';
-            }
-            #endif
-        }
-    }
-
-    void Sequential::fit(const cum::Matrix& X, const cum::Matrix& Y, optimizers::OptimizerBase& optimizer, size_t epochs)
+    void Sequential::fit(const cum::Matrix& X, const cum::Matrix& Y, optimizers::OptimizerBase& optimizer, size_t epochs, std::span<logging::ITrainingCallback*> callbacks)
     {
         std::vector<Parameter*> params = this->parameters();
 
-        #if defined(ENABLE_DEBUG_OUTPUT)
-        if(runtime_config::verbosity_level() >= 1)
-            std::cout << "Started training for " << epochs << " epochs...\n";
-        #endif
+        YANN_LOG(1, "Started training for {} epochs...", epochs);
         for(size_t epoch = 0 ; epoch < epochs ; epoch++)
         {
             cum::cummulative_t totalLoss = 0;
 
-            #if defined(ENABLE_DEBUG_OUTPUT)
-            if(runtime_config::verbosity_level() >= 1)
-                std::cout << "\t" << "Epoch " << epoch << "\n";
-            #endif
+            YANN_LOG(1, "Epoch {}", epoch);
+
             for(int i = 0 ; i < X.rows() ; i++)
             {
-                #if defined(ENABLE_DEBUG_OUTPUT)
-                if(runtime_config::verbosity_level() >= 2)
-                    std::cout << "\t\t" << "Sample " << i << "\n";
-                #endif
+                YANN_LOG(2, "{} sample", i);
 
                 cum::Matrix x = X.row(i).transpose();
                 cum::Matrix y = Y.row(i).transpose();
-
-                #if defined(ENABLE_DEBUG_OUTPUT)
-                if(runtime_config::verbosity_level() >= 2) {
-                    // std::cout << "\t\t" << "input: "  << x << '\n';
-                    // std::cout << "\t\t" << "target: " << math_api::matrixTranspose(y) << '\n';
-                }
-                #endif
+                cum::runtime::sync();
 
                 cum::Matrix result = this->forward(x);
-                #if defined(ENABLE_DEBUG_OUTPUT)
-                if(runtime_config::verbosity_level() >= 2)
-                {
-                    // std::cout << "\t\t" << "resutl: " << math_api::matrixTranspose(result) << '\n';
-                    std::cout << "\t\t" << "Computing loss and gradient...\n";
-                }
-                #endif
+                YANN_LOG(2, "Computing loss and output gradient...", "");
+
                 loss::LossType error = loss::computeLoss(result, y, this->loss_function);
 
-                cum::Matrix gradient = error.gradient;
+                YANN_LOG(2, "Performing backard pass...", "");
 
-                #if defined(ENABLE_DEBUG_OUTPUT)
-                if(runtime_config::verbosity_level() >= 2)
-                    std::cout << "\t\t" << "Performing backpropagation...\n";
-                #endif
+                this->backward(error.gradient);
+                cum::runtime::sync();
 
-                this->backward(gradient);
-
-                #if defined(ENABLE_DEBUG_OUTPUT)
-                if(runtime_config::verbosity_level() >= 2)
-                    std::cout << "\t\t" << "Updating parameters...\n";
-                #endif
+                YANN_LOG(2, "Updating parameters...", "");
 
                 optimizer.step(params);
+                YANN_LOG(2, "parameters are updated...", "");
+
                 totalLoss += error.loss;
             }
-            // totalLoss /= X.rows();
             cum::cumeric_t avarageLoss = totalLoss / X.rows();
+            cum::runtime::sync();
 
-            #if defined(ENABLE_DEBUG_OUTPUT)
-            if(runtime_config::verbosity_level() >= 1) {
-                std::cout << "\t" << "Avarage epoch loss: " << avarageLoss << '\n';
-                std::cout << "\t" << "Total epoch loss: " << totalLoss << '\n';
+
+            YANN_LOG(2, "Average epoch loss: ", static_cast<float>(avarageLoss));
+            YANN_LOG(2, "Total epoch loss: ", static_cast<float>(totalLoss));
+
+            logging::TrainingContext ctx(*this, avarageLoss, epoch, 1);
+            for(auto& callback : callbacks)
+            {
+                callback->afterEpoch(ctx);
             }
-            #endif
         }
     }
 
-    void Sequential::updateParams(cum::cumeric_t rate)
+    void Sequential::updateParams(cum::cumeric_t rate) // depraced
     {
         for(size_t i = 0 ; i < topology.size() ; i++)
         {
@@ -298,12 +179,12 @@ namespace yann::models
         return topology[layer]->activation;
     }
 
-    auto Sequential::getLayer(size_t layer) const -> LayerPtr
+    auto Sequential::getLayer(size_t layer) const -> LayerPtr // currently not used
     {
         // return std::move(topology[layer]);
     }
 
-    auto Sequential::getTopology() const -> Topology
+    auto Sequential::getTopology() const -> Topology // currently not used
     {
         // Topology temp;
         // for(size_t i = 0 ; i < topology.size() ; i++)

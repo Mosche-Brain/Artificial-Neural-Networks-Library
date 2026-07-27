@@ -20,9 +20,9 @@ public:
 
     void setTrainingData(cum::Matrix X, cum::Matrix Y);
     void setEvalInputs(cum::Matrix X);
-    void setLossFunction(yann::utils::loss::LossFunction loss);
+    void setLossFunction(yann::loss::LossFunction loss);
     void setLearningRate(cum::cumeric_t rate);
-    yann::utils::loss::LossFunction lossFunction() const { return lossFunction_; }
+    yann::loss::LossFunction lossFunction() const { return lossFunction_; }
 
     void reset(yann::models::Sequential model);
 
@@ -47,7 +47,7 @@ private:
     cum::Matrix X_train_;
     cum::Matrix Y_train_;
     cum::Matrix X_eval_;
-    yann::utils::loss::LossFunction lossFunction_ = yann::utils::loss::LossFunction::mse;
+    yann::loss::LossFunction lossFunction_ = yann::loss::LossFunction::mse;
 
     mutable std::mutex mutex_;
     std::atomic<bool> isTraining_{false};

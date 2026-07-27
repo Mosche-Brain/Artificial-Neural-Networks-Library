@@ -32,6 +32,7 @@ foreach(EXAMPLE_SOURCE ${EXAMPLE_SOURCES})
         -march=native
         -Wall
         -O3
+#        -g
         -ffast-math
         # ${YANN_COMPILE_DEFINITIONS}
     )

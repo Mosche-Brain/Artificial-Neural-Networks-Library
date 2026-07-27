@@ -12,12 +12,15 @@
 #include <cum/Matrix.hpp>
 #include <cum/memory.hpp>
 
+#include "cum/cum.hpp"
+#include "cum/runtime.hpp"
 #include "helpers/conversion_helpers.hpp"
 
 int main()
 {
     using namespace matplot;
 
+    cum::cum(cum::CUM_DEVICE::CPU);
     // fplot([](double x){
         // return (double)cum::functions::tanh_derivative((cum::cumeric_t)x);
     // }, std::array<double, 2>{-10, 10}, "b");
@@ -26,7 +29,8 @@ int main()
     cum::Matrix X = cum::Matrix::Linspace(-10, 10, 100);
     cum::Matrix Y = cum::Matrix::Linspace(-10, 10, 100);
 
-    cum::functions::linear(Y.data(), X.data(), 100);
+    cum::functions::logistic::sigmoid_deriv(Y.data(), X.data(), 100);
+    cum::runtime::sync();
     // cum::functions::tanh_derivative(Y.data(), X.data(), 100);
     // cum::functions::tanh(Y.data(), X.data(), 100);
 
@@ -35,17 +39,6 @@ int main()
 
     plot(X_plot, Y_plot);
 
-    // fplot([](double x){
-    //     // return (double)cum::functions::tanh((cum::cumeric_t)x);
-    //     cum::cumeric_t* temp = cum::memory::allocate(1);
-    //     cum::cumeric_t* rslt = cum::memory::allocate(1);
-    //     temp[0] = (cum::cumeric_t)x;
-    //     cum::functions::tanh_derivative(rslt, temp, 1);
-    //     cum::cumeric_t y = rslt[0];
-    //     cum::memory::free(temp);
-    //     cum::memory::free(rslt);
-    //     return (double)y;
-    // }, std::array<double, 2>{-10, 10}, "b");
     hold(off);
     grid(on);
 

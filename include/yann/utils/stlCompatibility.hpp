@@ -6,7 +6,7 @@
 // #include <Eigen/Dense>
 // #include <Eigen/Core>
 
- /*  this code is stoled from here:
+ /*  this code is stolen from here:
      https://gist.github.com/ialhashim/14db82926cdab2575508 */
 
 // namespace YANN::Utils::stlCompatibility

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "yann/utils/Logger.hpp"
+#include "logging/Logger.hpp"
 
 namespace yann::runtime_config
 {
@@ -62,5 +62,5 @@ namespace yann
         static RuntimeConfig& getInstance();
     };
 
-    utils::Logger& logger();
+    logging::Logger& logger();
 }

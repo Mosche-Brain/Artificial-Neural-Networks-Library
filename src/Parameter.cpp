@@ -26,7 +26,7 @@ namespace yann
 
     Parameter Parameter::Uniform(std::size_t rows, std::size_t cols)
     {
-        cum::cumeric_t ampl = 0.1;
+        constexpr cum::cumeric_t ampl = 0.1;
 
         Parameter param;
         param.values = cum::Matrix::Random(rows, cols, -ampl, ampl);
@@ -69,6 +69,6 @@ namespace yann
 
     void Parameter::clear_gradient()
     {
-        gradient.fill(0);
+        gradient.fill(static_cast<cum::cumeric_t>(0));
     }
 } // yann

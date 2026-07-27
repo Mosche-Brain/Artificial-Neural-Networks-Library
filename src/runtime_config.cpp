@@ -4,12 +4,12 @@ namespace yann::runtime_config
 {
     unsigned char verbosity_level()
     { 
-        return utils::Logger::getInstance().getDebugVerbosity();
+        return logging::Logger::getInstance().getDebugVerbosity();
     }
 
     void set_verbosity(unsigned char level)
     {
-        utils::Logger::getInstance().setDebugVerbosity(level);
+        logging::Logger::getInstance().setDebugVerbosity(level);
     }
 }
 
@@ -73,9 +73,9 @@ namespace yann
         return enable_telemetry;
     }
 
-    utils::Logger& logger()
+    logging::Logger& logger()
     {
-        return utils::Logger::getInstance();
+        return logging::Logger::getInstance();
     }
 
 } // namespace YANN

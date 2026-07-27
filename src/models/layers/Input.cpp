@@ -8,31 +8,23 @@
     #include "utils/formating.hpp"
 #endif
 
+#include "yann/runtime_config.hpp"
+
 namespace yann::models::layers
 {
     Input::Input(int layerSize)
     {
         #if defined(ENABLE_DEBUG_OUTPUT)
-        // if(runtime_config::DEBUG_VEBOSITY >= 3)
-            std::cout << "\t\t\t" << "Initializing Input layer with " << layerSize << " neurons...\n";
+        YANN_LOG(3, "Initializing Input layer with {} neurons...", layerSize);
         #endif
-        // this->activation = utils::Activation("linear");
-        #if defined(ENABLE_DEBUG_OUTPUT)
-            std::cout << "Initializing activation function: linear\n";
-        #endif
-        cum::functions::get_function_by_name(&this->activation, "linear");
-        #if defined(ENABLE_DEBUG_OUTPUT)
-            std::cout << "Activation function initialized: " << '\n';
-        #endif
+
+        // cum::functions::get_function_by_name(&this->activation, "linear");
+
         // this->weights = cum::Matrix(2, 1, 1);
-        this->weights = Parameter::Ones(layerSize, 1);
-        #if defined(ENABLE_DEBUG_OUTPUT)
-            std::cout << "Weights initialized with dimensions: " << '\n';
-        #endif
-        this->biases  = Parameter::Zeros(layerSize, 1);
-        #if defined(ENABLE_DEBUG_OUTPUT)
-            std::cout << "Biases initialized with dimensions: " << '\n';
-        #endif
+        // this->weights = Parameter::Ones(layerSize, 1);
+
+        // this->biases  = Parameter::Zeros(layerSize, 1);
+
         this->_layerSize_   = layerSize;
         this->_layerType_   = LAYER_TYPE::INPUT;
         this->_initialized_ = true;

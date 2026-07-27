@@ -31,7 +31,7 @@ void ModelSession::setEvalInputs(cum::Matrix X)
     curveDirty_ = true;
 }
 
-void ModelSession::setLossFunction(yann::utils::loss::LossFunction loss)
+void ModelSession::setLossFunction(yann::loss::LossFunction loss)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     lossFunction_ = loss;

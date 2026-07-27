@@ -144,7 +144,7 @@ namespace cum
         return temp;
     }
 
-    void Matrix::fill(cumeric_t value)
+    void Matrix::fill(const cumeric_t value)
     {
         functions::various::fill(data_, value, rows_ * cols_);
     }

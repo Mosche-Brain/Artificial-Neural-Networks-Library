@@ -101,10 +101,10 @@ void Application::drawControlPanel(const NetworkSnapshot& snap, bool training, i
         "cross_entropy",
         "binary_cross_entropy",
     };
-    static constexpr yann::utils::loss::LossFunction kLossValues[] = {
-        yann::utils::loss::LossFunction::mse,
-        yann::utils::loss::LossFunction::cross_entropy,
-        yann::utils::loss::LossFunction::binary_cross_entropy,
+    static constexpr yann::loss::LossFunction kLossValues[] = {
+        yann::loss::LossFunction::mse,
+        yann::loss::LossFunction::cross_entropy,
+        yann::loss::LossFunction::binary_cross_entropy,
     };
 
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.07f, 0.07f, 0.08f, 1.0f));

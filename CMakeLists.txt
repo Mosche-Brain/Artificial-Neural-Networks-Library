@@ -125,6 +125,7 @@ add_subdirectory(modules/cum)
 add_subdirectory(src)
 
 if(BUILD_EXAMPLES)
+    target_compile_options(${PROJECT_NAME} PUBLIC -g)
     add_subdirectory(examples)
     add_subdirectory(thirdparty/rapidcsv)
     add_subdirectory(thirdparty/matplotplusplus)

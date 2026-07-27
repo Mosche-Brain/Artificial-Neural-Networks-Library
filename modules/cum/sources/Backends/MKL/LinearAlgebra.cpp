@@ -1,7 +1,8 @@
-#include "cum/LinearAlgebra.hpp"
-#include "internal/cumMKL.hpp"
-#include <cstring>
 #include <oneapi/mkl/blas.hpp>
+// #include <print>
+
+#include "internal/cumMKL.hpp"
+#include "cum/LinearAlgebra.hpp"
 
 namespace cum::LinearAlgebra
 {

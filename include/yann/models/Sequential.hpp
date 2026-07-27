@@ -6,6 +6,7 @@
 
 #include "layers/Layers.hpp"
 #include "../loss.hpp"
+#include "logging/ITrainingCallback.hpp"
 #include "optimizers//OptimizerBase.hpp"
 
 /* # Used conventions
@@ -32,7 +33,7 @@ namespace yann::models
         cum::Matrix forward(const cum::Matrix& input);
         
         void fit(const cum::Matrix& X, const cum::Matrix& Y, cum::cumeric_t rate, size_t epochs);
-        void fit(const cum::Matrix& X, const cum::Matrix& Y, optimizers::OptimizerBase& optimizer, size_t epochs);
+        void fit(const cum::Matrix& X, const cum::Matrix& Y, optimizers::OptimizerBase& optimizer, size_t epochs, std::span<logging::ITrainingCallback*> callbacks = {});
         void addLayer(LayerPtr layer);
         void clear();
 
@@ -54,7 +55,6 @@ namespace yann::models
         void updateParams(cum::cumeric_t rate);
 
         Topology topology;
-        // utils::loss::LossFunction loss_function = utils::loss::LossFunction::binary_cross_entropy;
         loss::LossFunction loss_function;
     };
 }

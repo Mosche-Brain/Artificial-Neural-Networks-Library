@@ -47,25 +47,22 @@ namespace yann::loss
                 "), target(" + std::to_string(target.rows()) + "x" + std::to_string(target.cols()) + ")");
         }
 
-        if (result.cols() == 0) {
+        if (result.cols() == 0)
             throw std::runtime_error("Number of columns in result is zero");
-        }
 
-        std::size_t N = result.rows() * result.cols(); // It sould be number of rows
+        std::size_t N = result.rows() * result.cols(); // It should be number of rows
         // if (!result.allFinite() || !target.allFinite()) {
         //     throw std::runtime_error("Input matrices contain NaN or inf values");
         // }
 
         cum::Matrix diff = result - target;
 
-        cum::cumeric_t loss = diff.squaredNorm() / N;
-        cum::Matrix grad = (diff * 2) / N;
-        // cum::functions::clipInPlace(grad.data(), -1000, 1000, N);
+        cum::cumeric_t loss = diff.squaredNorm() / static_cast<cum::cumeric_t>(N);
+        cum::Matrix grad = (diff * 2) / static_cast<cum::cumeric_t>(N);
+        // cum::functions::various::clipInPlace(grad.data(), -1024, 1024, N);
 
 
         return { loss, 1, grad };
-
-
     }
 
     LossType binary_cross_entropy(const cum::Matrix& result, const cum::Matrix& target)
@@ -87,7 +84,8 @@ namespace yann::loss
         // const cum::cummulative_t eps = static_cast<cum::cummulative_t>(1e-4f);
         const cum::cumeric_t eps = 1e-3_c;
 
-        cum::cumeric_t loss = 0;
+        // cum::cumeric_t loss = 0;
+        float loss = 0;
         cum::Matrix gradient(rows, cols);
 
         for (std::size_t i = 0; i < rows; ++i)
@@ -120,9 +118,10 @@ namespace yann::loss
         }
 
         // loss /= static_cast<cum::cummulative_t>(size);
-        loss /= static_cast<cum::cumeric_t>(size);
+        // loss /= static_cast<cum::cumeric_t>(size);
+        loss /= static_cast<float>(size);
 
-        return LossType{ loss, 1 ,gradient, }; // nie zwracaj usagi na 1 jako drugi argument
+        return LossType{ loss, 1 ,gradient, };
     }
 
     LossType cross_entropy(const cum::Matrix& result, const cum::Matrix& target)

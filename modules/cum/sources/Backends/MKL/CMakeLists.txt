@@ -32,6 +32,9 @@ target_link_libraries(${PROJECT_NAME}_MKL
 target_compile_definitions(${PROJECT_NAME}_MKL 
     PRIVATE fsycl fPIC
 )
+target_compile_options(${PROJECT_NAME}_MKL
+    PUBLIC -g
+)
 
 add_library(${PROJECT_NAME}::MKL ALIAS ${PROJECT_NAME}_MKL)
 

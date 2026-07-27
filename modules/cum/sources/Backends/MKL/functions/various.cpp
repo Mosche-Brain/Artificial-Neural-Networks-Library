@@ -9,13 +9,17 @@
 
 namespace cum::functions::various
 {
-    void fill(cumeric_t* v, cumeric_t val, const std::size_t N)
+    void fill(cumeric_t* v, const cumeric_t val, const std::size_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
-        {
-            const std::size_t i = idx[0];
-            v[i] = val;
-        }).wait();
+        // internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        // {
+            // const std::size_t i = idx[0];
+            // v[idx] = val;
+        // }).wait();
+
+        if (N == 0) return;
+
+        sycl::ext::oneapi::experimental::fill(internal::getQueue(), v, val, N);
     }
 
     cumeric_t min(const cumeric_t a, const cumeric_t b) { return sycl::min(a, b); }

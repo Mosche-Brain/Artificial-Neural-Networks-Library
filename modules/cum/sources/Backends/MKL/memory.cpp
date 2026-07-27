@@ -8,6 +8,7 @@ namespace cum::memory
     cumeric_t* allocate(std::size_t size)
     {
         return sycl::malloc_shared<cumeric_t>(size, internal::getQueue());
+        // return sycl::malloc_device<cumeric_t>(size, internal::getQueue());
     }
 
     void free(void* chunk)
