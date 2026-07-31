@@ -11,6 +11,7 @@
 
 #include "runtime_config.hpp"
 #include "cum/runtime.hpp"
+#include "loss/LossBase.hpp"
 // #include "utils/Logger.hpp"
 
 #define DEFAULT_LOSS_FUNC loss::LossFunction::mse
@@ -64,10 +65,7 @@ namespace yann::models
         topology.clear();
     }
 
-    void Sequential::setLossFunction(loss::LossFunction new_loss_function)
-    {
-        loss_function = new_loss_function;
-    }
+
 
     cum::Matrix Sequential::forward(const cum::Matrix& input)
     {
@@ -110,9 +108,30 @@ namespace yann::models
     }
 
 
-    void Sequential::fit(const cum::Matrix& X, const cum::Matrix& Y, optimizers::OptimizerBase& optimizer, size_t epochs, std::span<logging::ITrainingCallback*> callbacks)
+    void Sequential::fit(const cum::Matrix& X, const cum::Matrix& Y, loss::LossBase& loss, optimizers::OptimizerBase& optimizer, size_t epochs, std::span<logging::ITrainingCallback*> callbacks)
     {
         std::vector<Parameter*> params = this->parameters();
+
+        size_t batchSize = 64;
+        constexpr bool batched = false;
+
+        cum::Matrix data = X.transpose();
+        cum::Matrix target = Y.transpose();
+
+        std::vector<cum::Matrix> batches_x;
+        std::vector<cum::Matrix> batches_y;
+        if constexpr (batched)
+        {
+            for(int i = 0 ; i < X.rows() ; i += batchSize)
+            {
+                size_t samples = std::min(X.rows() - i, batchSize);
+                cum::Matrix x_batch(X.cols(), samples, X.data() + i * X.cols());
+                cum::Matrix y_batch(Y.cols(), samples, Y.data() + i * Y.cols());
+
+                batches_x.push_back(x_batch);
+                batches_y.push_back(y_batch);
+            }
+        }
 
         YANN_LOG(1, "Started training for {} epochs...", epochs);
         for(size_t epoch = 0 ; epoch < epochs ; epoch++)
@@ -121,31 +140,58 @@ namespace yann::models
 
             YANN_LOG(1, "Epoch {}", epoch);
 
-            for(int i = 0 ; i < X.rows() ; i++)
+            if constexpr (!batched)
             {
-                YANN_LOG(2, "{} sample", i);
+                for(int i = 0 ; i < X.rows() ; i++)
+                {
+                    YANN_LOG(2, "{} sample", i);
 
-                cum::Matrix x = X.row(i).transpose();
-                cum::Matrix y = Y.row(i).transpose();
-                cum::runtime::sync();
+                    // cum::Matrix x = X.row(i).transpose();
+                    // cum::Matrix y = Y.row(i).transpose();
+                    cum::Matrix x = data.col(i);
+                    cum::Matrix y = target.col(i);
+                    cum::runtime::sync();
 
-                cum::Matrix result = this->forward(x);
-                YANN_LOG(2, "Computing loss and output gradient...", "");
+                    cum::Matrix result = this->forward(x);
+                    YANN_LOG(2, "Computing loss and output gradient...", "");
 
-                loss::LossType error = loss::computeLoss(result, y, this->loss_function);
+                    // loss::LossType error = loss::computeLoss(result, y, this->loss_function);
 
-                YANN_LOG(2, "Performing backward pass...", "");
+                    loss.compute(result, y);
+                    loss::loss_t error = loss.result();
 
-                this->backward(error.gradient);
-                cum::runtime::sync();
+                    YANN_LOG(2, "Performing backward pass...", "");
 
-                YANN_LOG(2, "Updating parameters...", "");
+                    this->backward(error.gradient);
+                    cum::runtime::sync();
 
-                optimizer.step(params);
-                YANN_LOG(2, "parameters are updated...", "");
+                    YANN_LOG(2, "Updating parameters...", "");
 
-                totalLoss += error.loss;
+                    optimizer.step(params);
+                    YANN_LOG(2, "parameters are updated...", "");
+
+                    totalLoss += error.value;
+                }
             }
+            else // batch
+            {
+                for(int i = 0 ; i < batches_x.size() ; i++)
+                {
+                    YANN_LOG(2, "{} batch", i);
+
+                    cum::Matrix results = this->forward(batches_x[i]);
+
+
+
+                }
+
+
+
+                // cum::Matrix x_batch(data.rows(), batchSize);
+
+            }
+
+
             cum::cumeric_t avarageLoss = totalLoss / X.rows();
             cum::runtime::sync();
 

@@ -33,6 +33,14 @@ namespace cum
         // sycl::memc
         for(size_t i = 0 ; i < rows * cols ; i++)
             data_[i] = source[i];
+    }    Matrix::Matrix(std::size_t rows, std::size_t cols, const cumeric_t* source) : rows_(rows), cols_(cols)
+    {
+        // data_ = sycl::malloc_shared<cumeric_t>(rows * cols, internal::getQueue());
+        data_ = memory::allocate(rows * cols);
+
+        // sycl::memc
+        for(size_t i = 0 ; i < rows * cols ; i++)
+            data_[i] = source[i];
     }
 
     Matrix::Matrix(std::size_t rows, std::size_t cols, std::initializer_list<cumeric_t> elements) : rows_(rows), cols_(cols)
@@ -316,7 +324,7 @@ namespace cum
         return temp;
     }
 
-    Matrix Matrix::transpose()
+    Matrix Matrix::transpose() const
     {
         Matrix temp(cols_, rows_);
         LinearAlgebra::transpose(temp.data_, data_, rows_, cols_);

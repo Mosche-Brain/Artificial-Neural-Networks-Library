@@ -93,36 +93,37 @@ namespace yann::loss
         float loss = 0;
         cum::Matrix gradient(rows, cols);
 
+        //
         for (std::size_t i = 0; i < rows; ++i)
-        {
-            for (std::size_t j = 0; j < cols; ++j)
-            {
-                const cum::cumeric_t y = target(i, j);
+        // {
+        //     for (std::size_t j = 0; j < cols; ++j)
+        //     {
+        //         const cum::cumeric_t y = target(i, j);
+        //
+        //         cum::cumeric_t p = result(i, j);
+        //
+        //         cum::functions::various::clipInPlace(&p, eps, 1 - eps, 1);
+        //
+        //
+        //         loss += -(
+        //             y * std::log(p)
+        //             + (1 - y) * std::log(1 - p)
+        //         );
+        //
+        //         // cum::cummulative_t deriv = ((1 - y) / (1 - p) - y / p) / static_cast<cum::cummulative_t>(1e-4);
+        //         // cum::cumeric_t deriv = ((1 - y) / (1 - p) - y / p);
+        //         // gradient(i, j) = deriv;
+        //         // gradient(i, j) =
+        //         //     (
+        //         //         (1_c - y) / (1_c - p)
+        //         //         - y / p
+        //         //     ) / static_cast<cum::cumeric_t>(size);
+        //
+        //         // gradient(i, j) = (y / p - (1_c - y) / (1_c - p)) / static_cast<cum::cumeric_t>(size);
+        //     }
+        // }
 
-                cum::cumeric_t p = result(i, j);
-
-                cum::functions::various::clipInPlace(&p, eps, 1 - eps, 1);
-
-
-                loss += -(
-                    y * std::log(p)
-                    + (1 - y) * std::log(1 - p)
-                );
-
-                // cum::cummulative_t deriv = ((1 - y) / (1 - p) - y / p) / static_cast<cum::cummulative_t>(1e-4);
-                // cum::cumeric_t deriv = ((1 - y) / (1 - p) - y / p);
-                // gradient(i, j) = deriv;
-                // gradient(i, j) =
-                //     (
-                //         (1_c - y) / (1_c - p)
-                //         - y / p
-                //     ) / static_cast<cum::cumeric_t>(size);
-
-                // gradient(i, j) = (y / p - (1_c - y) / (1_c - p)) / static_cast<cum::cumeric_t>(size);
-            }
-        }
-
-        cum::neural_primitives::neural_kernels::BCE(gradient.data(), result.data(), target.data(), result.size());
+        cum::neural_primitives::neural_kernels::BCE(gradient.data(), &loss, result.data(), target.data(), result.size());
 
         // loss /= static_cast<cum::cummulative_t>(size);
         // loss /= static_cast<cum::cumeric_t>(size);

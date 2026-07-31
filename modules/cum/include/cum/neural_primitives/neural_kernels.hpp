@@ -28,6 +28,6 @@ namespace cum::neural_primitives::neural_kernels
 
     // Matrix& binary_cross_entropy(const cum::Matrix& result, const cum::Matrix& target);
 
-    void BCE(cumeric_t* grad, const cumeric_t* P, const cumeric_t* Y, dim_t N);
+    void BCE(cumeric_t* grad, cumeric_t* loss, const cumeric_t* P, const cumeric_t* Y, dim_t N, dim_t batch=1);
 
 }

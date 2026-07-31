@@ -9,6 +9,7 @@
 #include "cum/neural_primitives/neural_kernels.hpp"
 
 #include "cum/runtime.hpp"
+#include "cum/functions/exponential.hpp"
 #include "cum/functions/logistic.hpp"
 #include "cum/functions/various.hpp"
 
@@ -93,8 +94,6 @@ namespace cum::neural_primitives::neural_kernels
                                            oneapi::mkl::blas::compute_mode::standard,  {event_to_wait});
 
         functions::transform(Y, R, out_features * batch, activation);
-
-
         runtime::sync();
     }
 
@@ -103,16 +102,24 @@ namespace cum::neural_primitives::neural_kernels
         feed_forward_cached_raw(Y, R, W, X, B, in_features, out_features, 1, activation);
     }
 
-
-    void BCE(cumeric_t* grad, const cumeric_t* P, const cumeric_t* Y, const dim_t N)
+    // void BCE(cumeric_t* grad, const cumeric_t* P, const cumeric_t* Y, const dim_t N)
+    void BCE(cumeric_t* grad, cumeric_t* loss, const cumeric_t* P, const cumeric_t* Y, const dim_t N, const dim_t batch)
     {
         constexpr cumeric_t eps = static_cast<cumeric_t>(1e-5);
 
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx) -> void
+        auto reduction = sycl::reduction(loss, static_cast<cumeric_t>(0.0), sycl::plus<>());
+
+        internal::getQueue().parallel_for(sycl::range<2>(N, batch), reduction, [=](sycl::id<2> idx, auto& sum) -> void
         {
-            cumeric_t p = sycl::clamp(P[idx], eps, static_cast<cumeric_t>(1) - eps); // predicted value
-            cumeric_t y = sycl::clamp(Y[idx], eps, static_cast<cumeric_t>(1) - eps); // target value
-            grad[idx] = ((1 - y) / (1 - p) - y / p);
-        });
+            size_t i = idx[0];
+            size_t sample = idx[1];
+            size_t offset = i + sample * N;
+
+            cumeric_t p = sycl::clamp(P[offset], eps, static_cast<cumeric_t>(1) - eps); // predicted value
+            cumeric_t y = Y[offset]; // target value
+            sum += -(y * sycl::log(p) + (1 - y) * sycl::log(1 - p));
+            grad[offset] = ((1 - y) / (1 - p) - y / p);
+        }).wait();
+        loss[0] /= static_cast<cumeric_t>(batch);
     }
 }

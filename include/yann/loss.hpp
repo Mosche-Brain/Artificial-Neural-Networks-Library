@@ -13,7 +13,7 @@ namespace yann::loss
         cum::Matrix gradient;
     } LossType;
 
-    using loss_t = std::pair<cum::cummulative_t, cum::Matrix>;
+    // using loss_t = std::pair<cum::cummulative_t, cum::Matrix>;
     
     enum class LossFunction { mse, cross_entropy, binary_cross_entropy };
 

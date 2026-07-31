@@ -22,6 +22,16 @@ namespace cum::functions::various
         sycl::ext::oneapi::experimental::fill(internal::getQueue(), v, val, N);
     }
 
+    cumeric_t clamp(cumeric_t a, cumeric_t min, cumeric_t max)
+    {
+        return sycl::clamp(a, min, max);
+    }
+
+    // cummulative_t clamp(cummulative_t a, cummulative_t min, cummulative_t max)
+    // {
+    //     return sycl::clamp(a, min, max);
+    // }
+
     cumeric_t min(const cumeric_t a, const cumeric_t b) { return sycl::min(a, b); }
 
     cumeric_t max(const cumeric_t a, const cumeric_t b) { return sycl::max(a, b); }

@@ -7,6 +7,7 @@
 #include "layers/Layers.hpp"
 #include "../loss.hpp"
 #include "logging/ITrainingCallback.hpp"
+#include "loss/LossBase.hpp"
 #include "optimizers//OptimizerBase.hpp"
 
 /* # Used conventions
@@ -32,12 +33,9 @@ namespace yann::models
         
         cum::Matrix forward(const cum::Matrix& input);
         
-        void fit(const cum::Matrix& X, const cum::Matrix& Y, cum::cumeric_t rate, size_t epochs);
-        void fit(const cum::Matrix& X, const cum::Matrix& Y, optimizers::OptimizerBase& optimizer, size_t epochs, std::span<logging::ITrainingCallback*> callbacks = {});
+        void fit(const cum::Matrix& X, const cum::Matrix& Y, loss::LossBase& loss, optimizers::OptimizerBase& optimizer, size_t epochs, std::span<logging::ITrainingCallback*> callbacks = {});
         void addLayer(LayerPtr layer);
         void clear();
-
-        void setLossFunction(loss::LossFunction new_loss_function);
 
         /* Getters */
         cum::Matrix& getWeights(size_t layer) const;

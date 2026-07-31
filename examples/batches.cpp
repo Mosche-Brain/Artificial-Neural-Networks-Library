@@ -20,12 +20,19 @@ int main()
 
     yann::models::Sequential sequential({
         yann::models::layers::Input::createUnique(8),
-        yann::models::layers::Dense::createUnique(16, "tanh"),
-        yann::models::layers::Dense::createUnique(16, "tanh"),
-        yann::models::layers::Dense::createUnique(16, "tanh"),
-        yann::models::layers::Dense::createUnique(16, "tanh"),
-        yann::models::layers::Dense::createUnique(16, "tanh"),
-        yann::models::layers::Dense::createUnique(16, "tanh"),
+        yann::models::layers::Dense::createUnique(128, "tanh"),
+        yann::models::layers::Dense::createUnique(128, "tanh"),
+        yann::models::layers::Dense::createUnique(128, "tanh"),
+        yann::models::layers::Dense::createUnique(128, "tanh"),
+        yann::models::layers::Dense::createUnique(128, "tanh"),
+        yann::models::layers::Dense::createUnique(128, "tanh"),
+        yann::models::layers::Dense::createUnique(128, "tanh"),
+        yann::models::layers::Dense::createUnique(128, "tanh"),
+        // yann::models::layers::Dense::createUnique(64, "tanh"),
+        // yann::models::layers::Dense::createUnique(16, "tanh"),
+        // yann::models::layers::Dense::createUnique(16, "tanh"),
+        // yann::models::layers::Dense::createUnique(16, "tanh"),
+        // yann::models::layers::Dense::createUnique(16, "tanh"),
         yann::models::layers::Dense::createUnique(1, "sigmoid")
     });
 

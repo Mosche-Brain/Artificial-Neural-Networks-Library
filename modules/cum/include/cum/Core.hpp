@@ -64,7 +64,12 @@ namespace cum
     #endif
 
     using dim_t = std::uint64_t;
+
+    #if defined(CUM_USE_F32)
     using cummulative_t = float;
+    #else
+    using cummulative_t = double;
+    #endif
 } // namespace cum
 
 

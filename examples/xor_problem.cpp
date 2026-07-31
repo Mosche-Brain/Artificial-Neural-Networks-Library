@@ -17,6 +17,7 @@
 
 #include "helpers/surface_visualisation.hpp"
 #include "helpers/conversion_helpers.hpp"
+#include "loss/BinaryCrossEntropy.hpp"
 #include "matplot/axes_objects/surface.h"
 #include "matplot/freestanding/plot.h"
 
@@ -121,27 +122,27 @@ int main()
 
     }
 
-    sequential.setLossFunction(yann::loss::LossFunction::binary_cross_entropy);
 
+    yann::loss::Loss loss = yann::loss::BinaryCrossEntropy::create();
     yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(rate);
 
     yann::logging::LossTracker loss_tracker = yann::logging::LossTracker();
 
     std::array<yann::logging::ITrainingCallback*, 1> callbacks = { &loss_tracker };
 
-    sequential.fit(x_train, y_train, *optimizer, epochs, callbacks);
+    sequential.fit(x_train, y_train, *loss, *optimizer, epochs, callbacks);
 
 
-    std::vector<double> loss;
+    std::vector<double> loss_plot;
     std::vector<double> epoch_range;
 
     for (int i = 0 ; i < loss_tracker.getLossHistory().size() ; i++)
     {
-        loss.push_back(loss_tracker.getLossHistory()[i]);
+        loss_plot.push_back(loss_tracker.getLossHistory()[i]);
         epoch_range.push_back(i);
     }
 
-    matplot::plot(epoch_range, loss);
+    matplot::plot(epoch_range, loss_plot);
 
     matplot::hold(matplot::off);
     matplot::grid(matplot::on);
