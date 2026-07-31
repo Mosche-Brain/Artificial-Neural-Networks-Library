@@ -17,7 +17,11 @@
 
 #include "helpers/surface_visualisation.hpp"
 #include "helpers/conversion_helpers.hpp"
+#include "matplot/axes_objects/surface.h"
 #include "matplot/freestanding/plot.h"
+
+
+#include <unistd.h>
 
 int main()
 {
@@ -26,13 +30,10 @@ int main()
     yann::runtime_config::set_verbosity(0);
 
 
-    easy3d::initialize();
-    easy3d::Viewer viewer("plot");
-
     yann::models::Sequential sequential({
         yann::models::layers::Input::createUnique(2),
         yann::models::layers::Dense::createUnique(2, "tanh"),
-        yann::models::layers::Dense::createUnique(1, "sigmoid")
+        yann::models::layers::Dense::createUnique(1, "linear")
     });
 
     // Display weights for each layer
@@ -42,22 +43,24 @@ int main()
     }
 
 
-    SurfaceFunc f = [&](cum::cumeric_t x, cum::cumeric_t y) -> cum::cumeric_t {
+    SurfaceFunc f = [&](cum::cumeric_t x, cum::cumeric_t y) -> cum::cumeric_t
+    {
+        // usleep(100);
         cum::Matrix sample(2, 1);
         sample(0, 0) = x;
         sample(1, 0) = y;
-        cum::runtime::sync();
+        // cum::runtime::sync();
         return sequential.forward(sample)(0,0);
     };
     //
-    // auto* surface1 = make_function_surface(
-    // f,
-    // -5.0f, 5.0f,
-    // -5.0f, 5.0f,
-    // 150, 150
-    // );
+    auto* surface1 = make_function_surface(
+    f,
+    -5.0f, 5.0f,
+    -5.0f, 5.0f,
+    150, 150
+    );
 
-    // viewer.add_model(surface1, false);
+
 
     cum::Matrix x_train(4, 2,
                        {0, 0,
@@ -68,8 +71,9 @@ int main()
     cum::Matrix y_train(4, 1, {0, 1, 1, 0});
     cum::Matrix y_eval(4, 1);
 
-    cum::cumeric_t rate = 0.04_c;
-    size_t epochs = 2500;
+    cum::cumeric_t rate = 0.1_c;
+    size_t epochs = 3000;
+    // size_t epochs = 2500;
 
     for(int i = 0 ; i < 4 ; i++)
     {
@@ -82,6 +86,31 @@ int main()
     std::cout << '[' << x_train(1, 0) << ',' << x_train(1, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 1) << "\n";
     std::cout << '[' << x_train(2, 0) << ',' << x_train(2, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 2) << "\n";
     std::cout << '[' << x_train(3, 0) << ',' << x_train(3, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 3) << "\n";
+
+
+
+
+    auto [X, Y] = matplot::meshgrid(matplot::iota(-5, .2, +5));
+
+    auto Z = matplot::transform(
+            X, Y, [=](double x, double y) { return static_cast<double>(f(static_cast<cum::cumeric_t>(x), static_cast<cum::cumeric_t>(y))); });
+
+
+    // return 0;
+    auto sc = matplot::meshc(X, Y, Z);
+    // sc->edge_color("r");
+    // sc->contour_line_spec().color("b");
+
+
+
+    matplot::show();
+
+    cum::decum();
+
+
+
+
+    return 0;
 
     sequential.setLossFunction(yann::loss::LossFunction::binary_cross_entropy);
 
@@ -141,9 +170,6 @@ int main()
     150, 150
     );
 
-    viewer.add_model(surface2, true);
-
-    viewer.run();
 
     cum::decum();
 

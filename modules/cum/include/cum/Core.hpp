@@ -63,6 +63,7 @@ namespace cum
     // #error "Data type didn't specified"
     #endif
 
+    using dim_t = std::uint64_t;
     using cummulative_t = float;
 } // namespace cum
 

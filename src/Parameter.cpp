@@ -18,7 +18,7 @@
 
 namespace yann
 {
-    Parameter::Parameter(std::size_t cols, std::size_t rows)
+    Parameter::Parameter(std::size_t cols, std::size_t rows) /* init with zeros by default */
     {
         values   = cum::Matrix(rows, cols);
         gradient = cum::Matrix(rows, cols);
@@ -30,7 +30,7 @@ namespace yann
 
         Parameter param;
         param.values = cum::Matrix::Random(rows, cols, -ampl, ampl);
-        param.gradient = cum::Matrix(rows, cols);
+        param.gradient = cum::Matrix::Zeros(rows, cols);
         return param;
     }
 
@@ -50,7 +50,7 @@ namespace yann
     {
         Parameter param;
         param.values = cum::Matrix::Zeros(rows, cols);
-        param.gradient = cum::Matrix(rows, cols);
+        param.gradient = cum::Matrix::Zeros(rows, cols);
         return param;
     }
 
@@ -62,7 +62,7 @@ namespace yann
         return param;
     }
 
-    Parameter Parameter::Xavery(std::size_t rows, std::size_t cols)
+    Parameter Parameter::Xavier(std::size_t rows, std::size_t cols)
     {
 
     }

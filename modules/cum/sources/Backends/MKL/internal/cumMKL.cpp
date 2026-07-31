@@ -37,12 +37,15 @@ namespace cum
         else
             throw std::runtime_error("Invalid device type");
 
+
+
         zeros = sycl::malloc_shared<cumeric_t>(2048*2048, queue);
         ones  = sycl::malloc_shared<cumeric_t>(2048*2048, queue);
         cache = sycl::malloc_shared<cumeric_t>(2048*2048, queue);
         queue.wait();
         // queue = sycl::queue(selected_device);
-        std::cout << "Selected device: " << queue.get_device().get_info<sycl::info::device::name>() << '\n';
+        std::cout << "Selected device: " << queue.get_device().get_info<sycl::info::device::name>() << '\n';;
+        std::cout << "Used backend: " << queue.get_device().get_info<sycl::info::device::name>() << '\n';;
     }
 
     internal::Context& internal::getContext()
@@ -54,6 +57,11 @@ namespace cum
     sycl::queue& internal::getQueue()
     {
         return getContext().queue;
+    }
+
+    oneapi::mkl::rng::device::philox4x32x10<1>& internal::getRNG()
+    {
+        return getContext().rng;
     }
 
     cumeric_t* internal::getZeros() { return getContext().zeros; }

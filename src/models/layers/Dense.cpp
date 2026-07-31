@@ -12,10 +12,13 @@
 #include "runtime_config.hpp"
 #include "cum/runtime.hpp"
 #include "cum/functions/transform.hpp"
-
-#define ENABLE_RUNTIME_CHECKS // this macro will be moved to runtime config soon
+//
+// #define ENABLE_RUNTIME_CHECKS // this macro will be moved to runtime config soon
 // #define USE_FUSED_KERNELS // this also
-#define ENABLE_CACHED_PREACTIVATION
+// #define ENABLE_CACHED_PREACTIVATION//
+#define ENABLE_RUNTIME_CHECKS true// this macro will be moved to runtime config soon
+#define USE_FUSED_KERNELS true // this also
+#define ENABLE_CACHED_PREACTIVATION true
 
 namespace yann::models::layers
 {
@@ -50,15 +53,19 @@ namespace yann::models::layers
         cum::runtime::sync();
 
 
-        #if defined(USE_FUSED_KERNELS)
-            #if defined(ENABLE_CACHED_PREACTIVATION)
-            cum::neural_primitives::neural_kernels::feed_forward(preactivatedOutputs.data(), weights().data(), input.data(), biases().data(), weights().cols(), weights().rows());
-            cum::functions::transform(result.data(), preactivatedOutputs.data(), preactivatedOutputs.size(), activation);
-            #else
-            cum::neural_primitives::neural_kernels::feed_forward(outputs.data(), weights().data(), input.data(), biases().data(), weights().cols(), weights().rows(), activation.name);
-            #endif
-        #else
-
+        if constexpr (USE_FUSED_KERNELS)
+        {
+            if constexpr (ENABLE_CACHED_PREACTIVATION) // must be enabled for proper training in most of cases
+            {
+                cum::neural_primitives::neural_kernels::feed_forward_cached_raw(outputs.data(), preactivatedOutputs.data(), weights().data(), inputs.data(), biases().data(), weights().cols(), weights().rows(), activation.name);
+            }
+            else // optional for a bit faster inference speed
+            {
+                cum::neural_primitives::neural_kernels::feed_forward(outputs.data(), weights().data(), inputs.data(), biases().data(), weights().cols(), weights().rows(), activation.name);
+            }
+        }
+        else
+        {
             YANN_LOG(4, "Performing (weights * input) + biases", "");
             preactivatedOutputs = (weights() * input) + biases();
             cum::runtime::sync();
@@ -69,7 +76,7 @@ namespace yann::models::layers
             YANN_LOG(4, "Performing activation", "");
             cum::functions::transform(outputs.data(), preactivatedOutputs.data(), preactivatedOutputs.size(), activation);
             cum::runtime::sync();
-        #endif
+        }
 
         YANN_LOG(4, "forward pass succeed", "");
         return outputs;

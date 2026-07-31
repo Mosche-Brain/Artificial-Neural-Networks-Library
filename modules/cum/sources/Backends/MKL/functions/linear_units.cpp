@@ -47,17 +47,18 @@ namespace cum::functions::linear_units
 
     void identity(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
-        cum::memory::memcopy(r, v, N * sizeof(cumeric_t));
+        cum::memory::memcopy(r, v, N);
+        // cum::memory::memcopy(r, v, N * sizeof(cumeric_t));
     }
 
-    void relu(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    void relu(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        oneapi::mkl::vm::fmax(internal::getQueue(), N, v, r, {});
+        oneapi::mkl::vm::fmax(internal::getQueue(), N, v, internal::getZeros(), r, {});
     }
 
     void relu_in_place(cumeric_t* v, std::size_t N)
     {
-        oneapi::mkl::vm::fmax(internal::getQueue(), N, v, v, {});
+        oneapi::mkl::vm::fmax(internal::getQueue(), N, v, internal::getZeros(), v, {});
     }
 
     void leaky_relu(cumeric_t* r, const cumeric_t* v, std::size_t N)

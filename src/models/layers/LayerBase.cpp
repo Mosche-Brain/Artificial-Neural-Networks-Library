@@ -7,6 +7,7 @@ namespace yann::models::layers
         this->weights = Parameter::Uniform(layerSize, inputLenght);
         this->biases  = Parameter::Zeros(layerSize, 1); /* Column-Vector */
         this->outputs = cum::Matrix::Zeros(layerSize, 1); /* Column-Vector */
+        this->preactivatedOutputs = cum::Matrix::Zeros(layerSize, 1);
         this->inputs  = cum::Matrix::Zeros(layerSize, inputLenght); /* Column-Vector */
         this->_initialized_ = true;
         // this->weights = cum::Matrix::Random(layerSize, inputLenght) * 0.1_c;

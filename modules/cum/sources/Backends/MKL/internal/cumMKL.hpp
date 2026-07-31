@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <mutex>
+#include <oneapi/mkl/rng/device.hpp>
 
 #include "cum/Core.hpp"
 
@@ -18,6 +19,7 @@ namespace cum::internal
         sycl::device device;
         dnnl::engine engine;
         dnnl::stream stream;
+        oneapi::mkl::rng::device::philox4x32x10<1> rng;
 
         std::once_flag initialized;
 
@@ -38,6 +40,8 @@ namespace cum::internal
     sycl::queue& getQueue();
     dnnl::engine& getEngine();
     dnnl::stream& getStream();
+
+    oneapi::mkl::rng::device::philox4x32x10<1>& getRNG();
 
     cumeric_t* getZeros();
     cumeric_t* getOnes();

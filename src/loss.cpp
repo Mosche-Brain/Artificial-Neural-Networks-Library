@@ -6,10 +6,12 @@
 #include <limits>
 
 #include "cum/functions.hpp"
+#include "cum/runtime.hpp"
+#include "cum/neural_primitives/neural_kernels.hpp"
 
 namespace yann::loss
 {
-    LossType computeLoss(const cum::Matrix& result, const cum::Matrix& target, LossFunction loss_function)
+    LossType computeLoss(cum::Matrix& result, cum::Matrix& target, LossFunction loss_function)
     {
         if(result.size() != target.size())
         {
@@ -56,16 +58,19 @@ namespace yann::loss
         // }
 
         cum::Matrix diff = result - target;
+        cum::runtime::sync();
 
         cum::cumeric_t loss = diff.squaredNorm() / static_cast<cum::cumeric_t>(N);
         cum::Matrix grad = (diff * 2) / static_cast<cum::cumeric_t>(N);
+        cum::runtime::sync();
         // cum::functions::various::clipInPlace(grad.data(), -1024, 1024, N);
 
 
         return { loss, 1, grad };
     }
 
-    LossType binary_cross_entropy(const cum::Matrix& result, const cum::Matrix& target)
+    // LossType binary_cross_entropy(const cum::Matrix& result, const cum::Matrix& target)
+    LossType binary_cross_entropy(cum::Matrix& result, cum::Matrix& target)
     {
         if (result.rows() != target.rows() || result.cols() != target.cols())
         {
@@ -105,8 +110,8 @@ namespace yann::loss
                 );
 
                 // cum::cummulative_t deriv = ((1 - y) / (1 - p) - y / p) / static_cast<cum::cummulative_t>(1e-4);
-                cum::cumeric_t deriv = ((1 - y) / (1 - p) - y / p);
-                gradient(i, j) = deriv;
+                // cum::cumeric_t deriv = ((1 - y) / (1 - p) - y / p);
+                // gradient(i, j) = deriv;
                 // gradient(i, j) =
                 //     (
                 //         (1_c - y) / (1_c - p)
@@ -116,6 +121,8 @@ namespace yann::loss
                 // gradient(i, j) = (y / p - (1_c - y) / (1_c - p)) / static_cast<cum::cumeric_t>(size);
             }
         }
+
+        cum::neural_primitives::neural_kernels::BCE(gradient.data(), result.data(), target.data(), result.size());
 
         // loss /= static_cast<cum::cummulative_t>(size);
         // loss /= static_cast<cum::cumeric_t>(size);

@@ -27,7 +27,7 @@ namespace yann
         static Parameter He(std::size_t rows, std::size_t cols);
         static Parameter Zeros(std::size_t rows, std::size_t cols);
         static Parameter Ones(std::size_t rows, std::size_t cols);
-        static Parameter Xavery(std::size_t rows, std::size_t cols);
+        static Parameter Xavier(std::size_t rows, std::size_t cols);
 
         cum::Matrix& operator()() { return values; }
     };

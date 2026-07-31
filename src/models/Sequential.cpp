@@ -123,7 +123,7 @@ namespace yann::models
 
                 loss::LossType error = loss::computeLoss(result, y, this->loss_function);
 
-                YANN_LOG(2, "Performing backard pass...", "");
+                YANN_LOG(2, "Performing backward pass...", "");
 
                 this->backward(error.gradient);
                 cum::runtime::sync();
@@ -147,6 +147,12 @@ namespace yann::models
             {
                 callback->afterEpoch(ctx);
             }
+
+            // // temporary line for debug
+            // if (avarageLoss < 0.55)
+            // {
+            //     break;
+            // }
         }
     }
 

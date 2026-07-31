@@ -22,6 +22,7 @@ namespace cum::functions
         }
         else if (activation.function != nullptr)
         {
+            std::cout << "Using activation function with naive loop\n";
             #pragma omp parallel for
             for (std::size_t i = 0; i < N; ++i)
                 r[i] = activation.function(v[i]);

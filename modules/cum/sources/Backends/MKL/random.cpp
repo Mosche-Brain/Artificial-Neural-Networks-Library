@@ -6,14 +6,16 @@
 
 namespace cum
 {
-    void random::uniform(cumeric_t* buff, size_t N, cumeric_t min, cumeric_t max)
+    void random::uniform(cumeric_t* buff, size_t N, cumeric_t min, cumeric_t max, dim_t seed)
     {
-        oneapi::mkl::rng::device::philox4x32x10 engine;
+        // oneapi::mkl::rng::device::philox4x32x10 engine(internal::getQueue(), seed);
+        // oneapi::mkl::rng::device::philox4x32x10 engine;
+        oneapi::mkl::rng::device::philox4x32x10<1>& engine = internal::getRNG();
         oneapi::mkl::rng::device::uniform dist((float)min, (float)max);
 
         for(size_t i = 0 ; i < N ; i++)
         {
-            buff[i] = (cumeric_t)oneapi::mkl::rng::device::generate(dist, engine);
+            buff[i] = (cumeric_t)(oneapi::mkl::rng::device::generate(dist, engine));
         }
         //
         // cum::internal::getQueue().submit([&](sycl::handler& h) {
