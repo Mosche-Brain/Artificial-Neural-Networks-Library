@@ -21,19 +21,19 @@
 #include "matplot/freestanding/plot.h"
 
 
-#include <unistd.h>
-
 int main()
 {
-    cum::cum(cum::CUM_DEVICE::CPU);
+    cum::cum(cum::CUM_DEVICE::GPU);
     std::cout << "sizeof cumeric_t in bytes: " << sizeof(cum::cumeric_t) << '\n';
-    yann::runtime_config::set_verbosity(0);
+    yann::runtime_config::set_verbosity(1);
 
+    bool plot_before_training = true;
+    bool plot_after_training = true;
 
     yann::models::Sequential sequential({
         yann::models::layers::Input::createUnique(2),
         yann::models::layers::Dense::createUnique(2, "tanh"),
-        yann::models::layers::Dense::createUnique(1, "linear")
+        yann::models::layers::Dense::createUnique(1, "sigmoid")
     });
 
     // Display weights for each layer
@@ -42,23 +42,34 @@ int main()
         std::cout << yann::utils::formating::matrixToString(sequential.getWeights(i)) << '\n';
     }
 
-
+    cum::Matrix sample(2, 1);
     SurfaceFunc f = [&](cum::cumeric_t x, cum::cumeric_t y) -> cum::cumeric_t
     {
-        // usleep(100);
-        cum::Matrix sample(2, 1);
         sample(0, 0) = x;
         sample(1, 0) = y;
-        // cum::runtime::sync();
         return sequential.forward(sample)(0,0);
     };
-    //
-    auto* surface1 = make_function_surface(
-    f,
-    -5.0f, 5.0f,
-    -5.0f, 5.0f,
-    150, 150
-    );
+
+    cum::cumeric_t min = -5;
+    cum::cumeric_t max = 5;
+    size_t resulution = 100;
+    cum::Matrix samples_batch(2, resulution * resulution);
+    cum::Matrix result_batch(1, resulution * resulution);
+
+
+    // linear grid
+    for (int i = 0 ; i < resulution ; i++)
+    {
+        cum::cumeric_t x = min + (max - min) * i / (resulution - 1);
+        for (int j = 0 ; j < resulution ; j++)
+        {
+            cum::cumeric_t y = min + (max - min) * j / (resulution - 1);
+            samples_batch(0, i * resulution + j) = x;
+            samples_batch(1, i * resulution + j) = y;
+        }
+    }
+
+    sequential.forward(samples_batch);
 
 
 
@@ -72,13 +83,13 @@ int main()
     cum::Matrix y_eval(4, 1);
 
     cum::cumeric_t rate = 0.1_c;
-    size_t epochs = 3000;
-    // size_t epochs = 2500;
+    // size_t epochs = 500;
+    size_t epochs = 500;
 
     for(int i = 0 ; i < 4 ; i++)
     {
         y_eval(i, 0) = sequential.forward(x_train.row(i).transpose())(0,0);
-        cum::runtime::sync();
+        // cum::runtime::sync();
     }
 
     std::cout << "pretrain:\n";
@@ -88,32 +99,29 @@ int main()
     std::cout << '[' << x_train(3, 0) << ',' << x_train(3, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 3) << "\n";
 
 
+    // easy3d::initialize();
 
+    if (plot_before_training)
+    {
+        auto [X, Y] = matplot::meshgrid(matplot::iota(-5, .2, 5));
+        auto Z = matplot::transform(X, Y, [=](double x, double y) { return static_cast<double>(f(static_cast<cum::cumeric_t>(x), static_cast<cum::cumeric_t>(y))); });
+        auto sc = matplot::meshc(X, Y, Z);
+        matplot::show();
 
-    auto [X, Y] = matplot::meshgrid(matplot::iota(-5, .2, +5));
+        // auto* surface = make_function_surface(
+        //     f,
+        // -5.0f, 5.0f,
+        // -5.0f, 5.0f,
+        // 150, 150
+        // );
+        // easy3d::Viewer viewer;
+        //
+        // viewer.add_model(surface);
+        // viewer.run();
 
-    auto Z = matplot::transform(
-            X, Y, [=](double x, double y) { return static_cast<double>(f(static_cast<cum::cumeric_t>(x), static_cast<cum::cumeric_t>(y))); });
-
-
-    // return 0;
-    auto sc = matplot::meshc(X, Y, Z);
-    // sc->edge_color("r");
-    // sc->contour_line_spec().color("b");
-
-
-
-    matplot::show();
-
-    cum::decum();
-
-
-
-
-    return 0;
+    }
 
     sequential.setLossFunction(yann::loss::LossFunction::binary_cross_entropy);
-
 
     yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(rate);
 
@@ -121,12 +129,7 @@ int main()
 
     std::array<yann::logging::ITrainingCallback*, 1> callbacks = { &loss_tracker };
 
-    std::getchar();
     sequential.fit(x_train, y_train, *optimizer, epochs, callbacks);
-
-    cum::Matrix sample(1, 2, 1._c);
-
-
 
 
     std::vector<double> loss;
@@ -149,6 +152,29 @@ int main()
     for(int i = 0 ; i < 4 ; i++)
         y_eval(i, 0) = sequential.forward(x_train.row(i).transpose())(0,0);
 
+
+
+
+
+    if (plot_after_training)
+    {
+        auto [X, Y] = matplot::meshgrid(matplot::iota(-5, .2, +5));
+        auto Z = matplot::transform(X, Y, [=](double x, double y) { return static_cast<double>(f(static_cast<cum::cumeric_t>(x), static_cast<cum::cumeric_t>(y))); });
+        auto sc = matplot::meshc(X, Y, Z);
+        matplot::show();
+
+
+        // auto* surface = make_function_surface(
+        //     f,
+        // -5.0f, 5.0f,
+        // -5.0f, 5.0f,
+        // 150, 150
+        // );
+        // easy3d::Viewer viewer;
+        //
+        // viewer.add_model(surface);
+        // viewer.run();
+    }
     std::cout << "aftertrain:\n";
     std::cout << '[' << x_train(0, 0) << ',' << x_train(0, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 0) << "\n";
     std::cout << '[' << x_train(1, 0) << ',' << x_train(1, 1) << ']' << ' ' << "->" << ' ' << y_eval(0, 1) << "\n";
@@ -160,15 +186,6 @@ int main()
     {
         std::cout << yann::utils::formating::matrixToString(sequential.getWeights(i)) << '\n';
     }
-
-
-
-    auto* surface2 = make_function_surface(
-    f,
-    -5.0f, 5.0f,
-    -5.0f, 5.0f,
-    150, 150
-    );
 
 
     cum::decum();

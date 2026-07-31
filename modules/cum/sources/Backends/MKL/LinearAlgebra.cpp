@@ -223,9 +223,10 @@ namespace cum::LinearAlgebra
         oneapi::mkl::blas::row_major::gemm(q,
                                            oneapi::mkl::transpose::nontrans, // transpose A
                                            oneapi::mkl::transpose::nontrans, // transpose B
-                                           m, n, k, 1.0, A, // m=matrix A rows, n=matrix B cols, k=matrix A cols = matrix B rows
-                                           k, B, n, 1.0, C, // k=matrix A cols = matrix B rows, n=matrix B cols, n=matrix C cols
-                                           n, {});          //
+                                           m, n, k, // m=matrix A rows, n=matrix B cols
+                                           1.0f, A, k,  // k=matrix A cols = matrix B rows
+                                           B, n, 0.0f, C, // k=matrix A cols = matrix B rows, n=matrix B cols, n=matrix C cols
+                                           n, oneapi::mkl::blas::compute_mode::standard, {});          //
         // q.wait();
     }
 

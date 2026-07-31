@@ -25,7 +25,7 @@ namespace yann::models::layers
         // virtual cum::Vector forward(const cum::Vector& input) = 0;
         virtual cum::Matrix forward(const cum::Matrix& input) = 0;
         virtual cum::Matrix backward(const cum::Matrix& deltaOutput) = 0;
-        virtual void update_weights(const cum::cumeric_t rate) = 0;
+        virtual void update_weights(cum::cumeric_t rate) = 0;
 
         // std::vector<Parameter*> collect_params();
 
@@ -48,7 +48,7 @@ namespace yann::models::layers
         // cum::Matrix weights;
         // cum::Matrix biases;
         cum::Matrix outputs;
-        cum::Matrix preactivatedOutputs;
+        cum::Matrix raw_outputs;
         cum::Matrix inputs;
            
         int _layerSize_;

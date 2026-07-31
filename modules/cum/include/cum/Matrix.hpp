@@ -40,6 +40,7 @@ namespace cum
         
         /* Accesors */
         cumeric_t* data() { return data_; };
+        const cumeric_t* data() const { return data_; };
 
         cumeric_t& at(const std::size_t row, const std::size_t col) { return data_[get_idx(row, col)]; }
         const cumeric_t& at(const std::size_t row, const std::size_t col) const { return data_[get_idx(row, col)]; }

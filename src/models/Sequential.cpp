@@ -71,16 +71,27 @@ namespace yann::models
 
     cum::Matrix Sequential::forward(const cum::Matrix& input)
     {
-        topology[0]->forward(input);
-
-        for(size_t i = 1 ; i < topology.size() ; ++i)
+        if (input.cols() == 1) // single sample
         {
-            topology[i]->forward(topology[i - 1]->Outputs());
+            topology[0]->forward(input);
+
+            for(size_t i = 1 ; i < topology.size() ; ++i)
+            {
+                topology[i]->forward(topology[i - 1]->Outputs());
+            }
+
+            return topology.back()->Outputs();
         }
-
-        return topology.back()->Outputs();
+        else // batch
+        {
+            cum::Matrix result = input;
+            for(size_t i = 0 ; i < topology.size() ; ++i)
+            {
+                result = topology[i]->forward(result);
+            }
+            return result;
+        }
     }
-
     void Sequential::backward(const cum::Matrix& d_output)
     {
         cum::Matrix& curr_gradient = const_cast<cum::Matrix&>(d_output);

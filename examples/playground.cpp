@@ -12,19 +12,21 @@
 
 #include "cum/runtime.hpp"
 #include "helpers/conversion_helpers.hpp"
+#include "logging/LossTracker.hpp"
 
 namespace plt = matplot;
 
 int main()
 {
-    cum::cum(cum::CUM_DEVICE::GPU);
+    cum::cum(cum::CUM_DEVICE::CPU);
 
     yann::runtime_config::set_verbosity(0);
     
     yann::models::Sequential model({
         yann::models::layers::Input::createUnique(1),
-        yann::models::layers::Dense::createUnique(24, "sigmoid"),
-        yann::models::layers::Dense::createUnique(24, "sigmoid"),
+        yann::models::layers::Dense::createUnique(24, "tanh"),
+        yann::models::layers::Dense::createUnique(24, "tanh"),
+        yann::models::layers::Dense::createUnique(24, "tanh"),
         // yann::models::layers::Dense::createUnique(48, "leaky_relu"),
         // yann::models::layers::Dense::createUnique(48, "leaky_relu"),
         // yann::models::layers::Dense::createUnique(48, "leaky_relu"),
@@ -64,7 +66,28 @@ int main()
     // model.setLossFunction(yann::utils::loss::LossFunction::mse);
     yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.01);
     // model.fit(X_train, Y_train, 0.01_c, 50);
-    // model.fit(X_train, Y_train, *optimizer, 50);
+
+
+
+    yann::logging::LossTracker loss_tracker = yann::logging::LossTracker();
+
+    std::array<yann::logging::ITrainingCallback*, 1> callbacks = { &loss_tracker };
+
+    model.fit(X_train, Y_train, *optimizer, 800, callbacks);
+
+    // cum::Matrix sample(1, 2, 1._c);
+
+
+    std::vector<double> loss;
+    std::vector<double> epoch_range;
+
+    for (int i = 0 ; i < loss_tracker.getLossHistory().size() ; i++)
+    {
+        loss.push_back(loss_tracker.getLossHistory()[i]);
+        epoch_range.push_back(i);
+    }
+
+
 
     // cum::Matrix Y_pred = cum::Matrix(N_eval, 1);
 
@@ -90,7 +113,9 @@ int main()
     // plt::scatter(X_eval_plot, Y_pred_plot);
 
 
-    plt::plot(X_eval_plot, Y_pred_plot);
+    // plt::plot(X_eval_plot, Y_pred_plot);
+    // plt::plot(epoch_range, loss);
+    plt::plot(epoch_range, loss);
     // plt::plot(X_train_plot, Y_pred_plot);
     plt::show();
 

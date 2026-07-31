@@ -83,6 +83,8 @@ namespace cum
         temp.rows_ = rows;
         temp.cols_ = cols;
 
+        functions::various::fill(temp.data_, 0._c, rows * cols);
+
         return temp;
     }
 
@@ -94,10 +96,12 @@ namespace cum
         temp.rows_ = rows;
         temp.cols_ = cols;
 
-        for(size_t i = 0 ; i < rows * cols ; i++)
-        {
-            temp.data_[i] = 1._c;
-        }
+        functions::various::fill(temp.data_, 1._c, rows * cols);
+
+        // for(size_t i = 0 ; i < rows * cols ; i++)
+        // {
+        //     temp.data_[i] = 1._c;
+        // }
 
         return temp;
     }
@@ -478,14 +482,6 @@ namespace cum
         return result;
     }
 
-    Matrix activation(const Matrix& mat, const char* name)
-    {
-        Matrix temp(mat.rows_, mat.cols_);
-        memcpy(temp.data_, mat.data_, mat.rows_ * mat.cols_ * sizeof(cumeric_t));
-        // functions:: activationInPlace(temp, name);
-        return temp;
-    }
-    Matrix activationInPlace(Matrix& mat, const char* name);
 
     Matrix Matrix::shuffleRows() const
     {

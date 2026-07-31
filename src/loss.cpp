@@ -87,7 +87,7 @@ namespace yann::loss
         // const cum::cumeric_t eps = cum::EPSILON;
         // const cum::cummulative_t eps = std::numeric_limits<cum::cummulative_t>::epsilon();
         // const cum::cummulative_t eps = static_cast<cum::cummulative_t>(1e-4f);
-        const cum::cumeric_t eps = 1e-3_c;
+        const cum::cumeric_t eps = 1e-7_c;
 
         // cum::cumeric_t loss = 0;
         float loss = 0;
