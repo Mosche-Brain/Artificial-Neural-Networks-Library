@@ -49,13 +49,19 @@ namespace yann::models::layers
             }
         }
 
+        if (input.cols() != inputs.cols())
+        {
+            inputs = input;
+            raw_outputs = cum::Matrix(outputs.rows(), input.cols());
+            outputs(outputs.rows(), outputs.cols());
+        }
 
 
         cum::runtime::sync();
         if(input.cols() == 1) // single sample
         {
             YANN_LOG(4, "Copying inputs", "");
-            this->inputs = input;
+            // this->inputs = input;
             if constexpr (USE_FUSED_KERNELS)
             {
                 if constexpr (ENABLE_CACHED_PREACTIVATION) // must be enabled for proper training in most of cases
@@ -94,34 +100,74 @@ namespace yann::models::layers
         }
         else // batch
         {
-            cum::Matrix results_raw(outputs.rows(), input.cols()); // every column is one batch
-            cum::Matrix results_activated(outputs.rows(), input.cols()); // every column is one batch
+            // cum::Matrix results_raw(outputs.rows(), input.cols()); // every column is one batch
+            // cum::Matrix results_activated(outputs.rows(), input.cols()); // every column is one batch
 
-            cum::neural_primitives::neural_kernels::feed_forward_cached_raw(results_activated.data(), results_raw.data(), weights.values.data(), input.data(), biases.values.data(), weights.values.cols(), weights.values.rows(), input.cols(), activation.name);
+            // realocate internal outputs and inputs cache if dimensions mismatch
+
+
+            // cum::neural_primitives::neural_kernels::feed_forward_cached_raw(results_activated.data(), results_raw.data(), weights.values.data(), input.data(), biases.values.data(), weights.values.cols(), weights.values.rows(), input.cols(), activation.name);
+            cum::neural_primitives::neural_kernels::feed_forward_cached_raw(outputs.data(), raw_outputs.data(), weights.values.data(), input.data(), biases.values.data(), weights.values.cols(), weights.values.rows(), input.cols(), activation.name);
+
+
 
             cum::runtime::sync();
-            return results_activated;
+
+            // inputs = input;
+            // raw_outputs = results_raw;
+            // outputs = results_activated;
+
+            // return results_activated;
+            return outputs;
         }
 
     }
 
     cum::Matrix Dense::backward(const cum::Matrix& deltaOutput)
     {
-        cum::Matrix derivative(raw_outputs.rows(), raw_outputs.cols());
-        cum::runtime::sync();
+        constexpr bool batched = true;
+        if constexpr (batched)
+        {
+            cum::Matrix activation_derivative(raw_outputs.rows(), raw_outputs.cols());
+            cum::functions::transform_deriv(activation_derivative.data(), raw_outputs.data(), raw_outputs.size(), activation);
 
-        YANN_LOG(4, "computing activation derivative", "");
-        cum::functions::transform_deriv(derivative.data(), raw_outputs.data(), raw_outputs.size(), activation);
-        cum::runtime::sync();
+            cum::Matrix cached_somewhat = activation_derivative.cwiseProduct(deltaOutput);
 
-        YANN_LOG(4, "td_pre_activation = derivative.cwiseProcut(deltaOutput)\n", "");
-        biases.gradient = derivative.cwiseProduct(deltaOutput);
-        cum::runtime::sync();
+            // for (int i = 0 ; i < inputs.cols() ; i++)
+            // {
+            //     weights.gradient += cached_somewhat.col(i) * inputs.col(i).transpose();
+            //     biases.gradient += cached_somewhat.col(i);
+            // }
 
-        YANN_LOG(4, "deltaWeights = matrixMultiply(d_pre_activation, matrixTranspose(inputs))\n", "");
-        weights.gradient = biases.gradient * inputs.transpose(); // input is col
-        cum::runtime::sync();
+            weights.gradient = cached_somewhat * inputs.transpose();
+            weights.gradient /= inputs.cols();
 
+            biases.gradient = cached_somewhat.rowwiseSum();      
+            biases.gradient /= inputs.cols();
+
+            return weights().transpose() * cached_somewhat;
+            // biases.gradient = cached_somewhat.rowwiseSum();
+        }
+        else
+        {
+            cum::Matrix derivative(raw_outputs.rows(), raw_outputs.cols());
+            cum::runtime::sync();
+
+            YANN_LOG(4, "computing activation derivative", "");
+            cum::functions::transform_deriv(derivative.data(), raw_outputs.data(), raw_outputs.size(), activation);
+            cum::runtime::sync();
+
+            YANN_LOG(4, "td_pre_activation = derivative.cwiseProcut(deltaOutput)\n", "");
+            biases.gradient = derivative.cwiseProduct(deltaOutput);
+            cum::runtime::sync();
+
+            YANN_LOG(4, "deltaWeights = matrixMultiply(d_pre_activation, matrixTranspose(inputs))\n", "");
+            weights.gradient = biases.gradient * inputs.transpose(); // input is col
+            cum::runtime::sync();
+
+            return weights().transpose() * biases.gradient;
+
+        }
         // YANN_LOG(4, "deltaBiases = matrixRowwiseSum(d_pre_activation)\n", "");
 
         // deltaBiases = d_pre_activation.colwiseSum();
@@ -133,7 +179,6 @@ namespace yann::models::layers
         // cum::Matrix deltaInput = weights().transpose() * d_pre_activation;
         // cum::Matrix deltaInput = d_pre_activation * weights.transpose();
 
-        return weights().transpose() * biases.gradient;
     }
 
     void Dense::update_weights(cum::cumeric_t rate) // currently deprecated, now we are using external optimizer - not fixed SGD

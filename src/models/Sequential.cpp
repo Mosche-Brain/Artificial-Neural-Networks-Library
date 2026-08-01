@@ -112,8 +112,8 @@ namespace yann::models
     {
         std::vector<Parameter*> params = this->parameters();
 
-        size_t batchSize = 64;
-        constexpr bool batched = false;
+        size_t batchSize = 4;
+        constexpr bool batched = true;
 
         cum::Matrix data = X.transpose();
         cum::Matrix target = Y.transpose();
@@ -181,8 +181,17 @@ namespace yann::models
 
                     cum::Matrix results = this->forward(batches_x[i]);
 
+                    loss.compute(results, batches_y[i]);
 
+                    loss::loss_t error = loss.result();
 
+                    this->backward(error.gradient);
+
+                    cum::runtime::sync();
+
+                    optimizer.step(params);
+
+                    totalLoss += error.value;
                 }
 
 

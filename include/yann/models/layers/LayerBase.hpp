@@ -13,11 +13,15 @@
 
 namespace yann::models::layers
 {
+    struct ForwardCasche
+    {
+        cum::Matrix z;
+        cum::Matrix a;
+    };
+
     class LayerBase
     {
     public:
-
-
         virtual ~LayerBase() = default;
 
         virtual void initParameters(int layerSize, int inputLenght);
