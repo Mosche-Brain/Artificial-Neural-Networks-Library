@@ -32,8 +32,8 @@ namespace yann::models::layers
 
     cum::Matrix Input::forward(const cum::Matrix& input)
     {
-        this->outputs = input;
-        return this->inputs;
+        this->cache.x = input;
+        return this->cache.x;
     }
 
     cum::Matrix Input::backward(const cum::Matrix& deltaOutput)

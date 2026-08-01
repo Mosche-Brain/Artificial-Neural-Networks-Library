@@ -44,6 +44,11 @@ namespace cum::functions::trigonometric
         auto& q = internal::getQueue();
         oneapi::mkl::vm::sin(q, N, v, v, {});
         // q.wait();
+
+        // internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        // {
+            // v[idx] = sycl::sin(v[idx]);
+        // });
     }
 
     void cos(cumeric_t* r, const cumeric_t* v, const std::size_t N)

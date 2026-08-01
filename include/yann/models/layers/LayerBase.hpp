@@ -13,10 +13,25 @@
 
 namespace yann::models::layers
 {
-    struct ForwardCasche
+    struct ForwardCache
     {
+        cum::Matrix x;
         cum::Matrix z;
         cum::Matrix a;
+
+        void clear()
+        {
+            x.fill(0);
+            z.fill(0);
+            a.fill(0);
+        }
+
+        void resize(cum::dim_t in_features, cum::dim_t out_features, cum::dim_t batch_size)
+        {
+            x = cum::Matrix(in_features, batch_size);
+            z = cum::Matrix(out_features, batch_size);
+            a = cum::Matrix(out_features, batch_size);
+        }
     };
 
     class LayerBase
@@ -49,11 +64,10 @@ namespace yann::models::layers
     protected:
         Parameter weights;
         Parameter biases;
-        // cum::Matrix weights;
-        // cum::Matrix biases;
-        cum::Matrix outputs;
-        cum::Matrix raw_outputs;
-        cum::Matrix inputs;
+        ForwardCache cache;
+        // cum::Matrix outputs;
+        // cum::Matrix raw_outputs;
+        // cum::Matrix inputs;
            
         int _layerSize_;
         bool _initialized_ = false;

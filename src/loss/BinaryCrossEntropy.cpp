@@ -12,7 +12,7 @@ namespace yann::loss
 {
     void BinaryCrossEntropy::compute(const cum::Matrix& predicted, const cum::Matrix& target)
     {
-        constexpr bool fused_kernels = false;
+        constexpr bool fused_kernels = true;
 
         loss.value = 0;
         loss.gradient = cum::Matrix::Zeros(predicted.rows(), predicted.cols());

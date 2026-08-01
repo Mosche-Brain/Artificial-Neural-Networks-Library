@@ -6,9 +6,9 @@ namespace yann::models::layers
     {
         this->weights       = Parameter::Uniform(layerSize, inputLenght);   /* neurons * input_length */
         this->biases        = Parameter::Zeros(layerSize, 1);               /* Column-Vector */
-        this->outputs       = cum::Matrix::Zeros(layerSize, 1);             /* Column-Vector */
-        this->raw_outputs   = cum::Matrix::Zeros(layerSize, 1);             /* Column-Vector */
-        this->inputs        = cum::Matrix::Zeros(layerSize, inputLenght);   /* Column-Vector */
+        this->cache.a       = cum::Matrix::Zeros(layerSize, 1);             /* Column-Vector */
+        this->cache.z   = cum::Matrix::Zeros(layerSize, 1);             /* Column-Vector */
+        this->cache.x        = cum::Matrix::Zeros(layerSize, inputLenght);   /* Column-Vector */
         this->_initialized_ = true;
     }
 
@@ -25,12 +25,14 @@ namespace yann::models::layers
 
     cum::Matrix& LayerBase::Outputs()
     {
-        return this->outputs;
+        // return this->outputs;
+        return this->cache.a;
     }
 
     cum::Matrix& LayerBase::Inputs()
     {
-        return this->inputs;
+        // return this->inputs;
+        return this->cache.x;
     }
     
     cum::Matrix& LayerBase::Weights()

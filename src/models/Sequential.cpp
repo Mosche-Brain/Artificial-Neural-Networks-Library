@@ -14,7 +14,6 @@
 #include "loss/LossBase.hpp"
 // #include "utils/Logger.hpp"
 
-#define DEFAULT_LOSS_FUNC loss::LossFunction::mse
 
 namespace yann::models
 {
@@ -23,7 +22,7 @@ namespace yann::models
 
     }
 
-    Sequential::Sequential(std::initializer_list<std::unique_ptr<layers::LayerBase>> newTopology) : loss_function(DEFAULT_LOSS_FUNC)
+    Sequential::Sequential(std::initializer_list<std::unique_ptr<layers::LayerBase>> newTopology, bool build)
     {
         YANN_LOG(1, "Initializing Sequential model with {} layers...", newTopology.size());
 
@@ -32,7 +31,14 @@ namespace yann::models
         {
             topology.push_back(std::move(const_cast<std::unique_ptr<layers::LayerBase>&>(ptr)));
         }
+
+        if(!build) return;
         
+        this->build();
+    }
+
+    void Sequential::build()
+    {
         topology[0]->initParameters(topology[0]->size(), 1);
         for(size_t i = 1 ; i < topology.size() ; i++)
         {
@@ -46,26 +52,12 @@ namespace yann::models
     void Sequential::addLayer(LayerPtr layer)
     {
         topology.push_back(std::move(layer));
-
-        if(topology.size() == 1)
-        {
-            size_t layerSize = topology.back()->size();
-            topology.back()->initParameters(layerSize, 1);
-        }
-        else
-        {
-            size_t layerSize  = topology.back()->size();
-            size_t inputWidth = topology[topology.size() - 1]->size();
-            topology.back()->initParameters(layerSize, inputWidth );
-        }
     }
 
     void Sequential::clear()
     {
         topology.clear();
     }
-
-
 
     cum::Matrix Sequential::forward(const cum::Matrix& input)
     {
@@ -112,7 +104,7 @@ namespace yann::models
     {
         std::vector<Parameter*> params = this->parameters();
 
-        size_t batchSize = 4;
+        size_t batchSize = 32;
         constexpr bool batched = true;
 
         cum::Matrix data = X.transpose();
@@ -181,29 +173,26 @@ namespace yann::models
 
                     cum::Matrix results = this->forward(batches_x[i]);
 
+                    YANN_LOG(2, "computing loss", "");
                     loss.compute(results, batches_y[i]);
 
                     loss::loss_t error = loss.result();
 
+                    YANN_LOG(2, "Performing backward pass", "");
                     this->backward(error.gradient);
 
                     cum::runtime::sync();
 
+                    YANN_LOG(2, "Updating parameters", "");
                     optimizer.step(params);
 
                     totalLoss += error.value;
                 }
-
-
-
                 // cum::Matrix x_batch(data.rows(), batchSize);
-
             }
 
-
-            cum::cumeric_t avarageLoss = totalLoss / X.rows();
+            cum::cumeric_t avarageLoss = totalLoss / std::max(static_cast<cum::cumeric_t>(batches_x.size()), static_cast<cum::cumeric_t>(1.0));
             cum::runtime::sync();
-
 
             YANN_LOG(2, "Average epoch loss: ", static_cast<float>(avarageLoss));
             YANN_LOG(2, "Total epoch loss: ", static_cast<float>(totalLoss));

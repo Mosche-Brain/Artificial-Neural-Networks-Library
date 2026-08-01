@@ -1,36 +1,32 @@
-#include <iostream>
-#include <math.h>
 #include <cum/cum.hpp>
 #include <cum/Matrix.hpp>
-#include <cum/LinearAlgebra.hpp>
+#include <cum/runtime.hpp>
 
 #include <yann/models/Sequential.hpp>
 #include <yann/optimizers/SGD.hpp>
 #include <yann/runtime_config.hpp>
+#include <yann/loss/MeanSquaredError.hpp>
+#include <yann/logging/LossTracker.hpp>
+
 
 #include <matplot/matplot.h>
-
-#include "cum/runtime.hpp"
 #include "helpers/conversion_helpers.hpp"
-#include "logging/LossTracker.hpp"
+
+#include <iostream>
+#include <math.h>
 
 namespace plt = matplot;
 
 int main()
 {
-    cum::cum(cum::CUM_DEVICE::CPU);
+    cum::cum(cum::CUM_DEVICE::GPU);
 
     yann::runtime_config::set_verbosity(0);
     
     yann::models::Sequential model({
         yann::models::layers::Input::createUnique(1),
-        yann::models::layers::Dense::createUnique(24, "tanh"),
-        yann::models::layers::Dense::createUnique(24, "tanh"),
-        yann::models::layers::Dense::createUnique(24, "tanh"),
-        // yann::models::layers::Dense::createUnique(48, "leaky_relu"),
-        // yann::models::layers::Dense::createUnique(48, "leaky_relu"),
-        // yann::models::layers::Dense::createUnique(48, "leaky_relu"),
-        // yann::models::layers::Dense::createUnique(128, "tanh"),
+        yann::models::layers::Dense::createUnique(64, "tanh"),
+        // yann::models::layers::Dense::createUnique(32, "relu"),
         yann::models::layers::Dense::createUnique(1, "tanh"),
     });
 
@@ -39,66 +35,53 @@ int main()
     std::size_t N_train = 32;
     std::size_t N_eval = 512;
 
-    cum::Matrix X_train = cum::Matrix::Linspace(x_min, x_max, N_train).transpose();
-    cum::Matrix X_eval = cum::Matrix::Linspace(x_min, x_max, N_eval).transpose();
+    cum::Matrix X_train = cum::Matrix::Linspace(x_min, x_max, N_train).transpose(); // linspace in row vector
     cum::Matrix Y_train = cum::Matrix::Linspace(x_min, x_max, N_train).transpose();
+
+
+    cum::Matrix X_eval = cum::Matrix::Linspace(x_min, x_max, N_eval);
     cum::Matrix Y_eval = cum::Matrix::Linspace(x_min, x_max, N_eval);
-    cum::Matrix Y_pred = cum::Matrix(N_eval, 1);
 
     cum::runtime::sync();
+    cum::functions::trigonometric::sin_in_place(Y_eval.data(), N_eval);
     cum::functions::trigonometric::sin_in_place(Y_train.data(), N_train);
     cum::runtime::sync();
 
-    // normalize data
+    // X_train /= x_max;
+    // X_eval /= x_max;
 
-    X_train /= x_max;
-    X_eval /= x_max;
+    cum::Matrix Y_pred_pretrained = model.forward(X_eval); // batch
 
-    //
-    // for (std::size_t i = 0 ; i < N_eval ; ++i)
-    // {
-    //     cum::Matrix x(1, 1, {X_eval(i, 0)});
-    //     Y_pred(i, 0) = model.forward(x)(0,0);
-    // }
-
-
-    // model.setLossFunction(yann::utils::loss::LossFunction::binary_cross_entropy);
-    // model.setLossFunction(yann::utils::loss::LossFunction::mse);
-    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.01);
-    // model.fit(X_train, Y_train, 0.01_c, 50);
-
+    yann::loss::Loss loss = yann::loss::MeanSquaredError::create();
+    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.05);
 
 
     yann::logging::LossTracker loss_tracker = yann::logging::LossTracker();
 
     std::array<yann::logging::ITrainingCallback*, 1> callbacks = { &loss_tracker };
 
-    model.fit(X_train, Y_train, *optimizer, 800, callbacks);
+    yann::runtime_config::set_verbosity(1);
+    model.fit(X_train, Y_train, *loss, *optimizer, 600, callbacks);
+    cum::runtime::sync();
 
-    // cum::Matrix sample(1, 2, 1._c);
 
-
-    std::vector<double> loss;
+    std::vector<double> loss_history;
     std::vector<double> epoch_range;
 
     for (int i = 0 ; i < loss_tracker.getLossHistory().size() ; i++)
     {
-        loss.push_back(loss_tracker.getLossHistory()[i]);
+        loss_history.push_back(loss_tracker.getLossHistory()[i]);
         epoch_range.push_back(i);
     }
 
 
-
-    // cum::Matrix Y_pred = cum::Matrix(N_eval, 1);
-
     yann::runtime_config::set_verbosity(0);
-    for (std::size_t i = 0 ; i < N_eval ; ++i)
-    {
-        cum::Matrix x(1, 1, {X_eval(i, 0)});
-        cum::runtime::sync();
-        Y_pred(i, 0) = model.forward(x)(0,0);
-        cum::runtime::sync();
-    }
+
+
+    cum::runtime::sync();
+
+    cum::Matrix Y_pred = model.forward(X_eval); // batch
+
     cum::runtime::sync();
 
     /* Plotting results */
@@ -106,17 +89,36 @@ int main()
     std::vector<double> Y_train_plot = toStdVector<double>(Y_train);
 
     std::vector<double> X_eval_plot = toStdVector<double>(X_eval);
+    std::vector<double> Y_eval_plot = toStdVector<double>(Y_eval);
     std::vector<double> Y_pred_plot = toStdVector<double>(Y_pred);
-    // std::vector<float> y_pred = toStdVector(model.predict(X_train));
+    std::vector<double> Y_pred_pretrained_plot = toStdVector<double>(Y_pred_pretrained);
 
-    plt::scatter(X_train_plot, Y_train_plot);
-    // plt::scatter(X_eval_plot, Y_pred_plot);
+    plt::gcf()->size(1400, 900);
 
+    plt::tiledlayout(2, 2);
+    auto ax1 = plt::nexttile();
+    plt::plot(ax1, X_eval_plot, Y_eval_plot);
+    plt::title(ax1, "Target");
+    plt::ylabel(ax1, "sin(x)");
 
-    // plt::plot(X_eval_plot, Y_pred_plot);
-    // plt::plot(epoch_range, loss);
-    plt::plot(epoch_range, loss);
-    // plt::plot(X_train_plot, Y_pred_plot);
+    auto ax2 = plt::nexttile();
+    plt::plot(ax2, X_eval_plot, Y_pred_plot);
+    plt::title(ax2, "Predictions (after training)");
+    plt::ylabel(ax2, "forward(x)");
+    plt::ylim(ax2, {-1.0, 1.0});
+
+    auto ax3 = plt::nexttile();
+    plt::plot(ax3, epoch_range, loss_history);
+    plt::title(ax3, "loss history");
+    plt::ylabel(ax3, "loss)");
+    plt::xlabel(ax3, "epoch");
+
+    auto ax4 = plt::nexttile();
+    plt::plot(ax4, X_eval_plot, Y_pred_pretrained_plot);
+    plt::title(ax4, "Predictions (before training)");
+    plt::ylabel(ax4, "forward(x)");
+    // plt::xlabel(ax3, "epoch");
+
     plt::show();
 
     cum::decum();

@@ -4,11 +4,18 @@
 
 #ifndef YANN_MEANABSOLUTEERROR_HPP
 #define YANN_MEANABSOLUTEERROR_HPP
+#include <memory>
+
+#include "LossBase.hpp"
+#include "cum/Matrix.hpp"
 
 namespace yann::loss
 {
-    class MeanAbsoluteError
+    class MeanAbsoluteError : public LossBase
     {
+    public:
+        void compute(const cum::Matrix& predicted, const cum::Matrix& target) override;
+        static std::unique_ptr<LossBase> create();
     };
 } // yann
 

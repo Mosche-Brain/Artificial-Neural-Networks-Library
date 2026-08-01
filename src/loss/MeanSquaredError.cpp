@@ -18,6 +18,7 @@ namespace yann::loss
         }
         else
         {
+            // if (predicted.rows() != target.rows())
             if (predicted.rows() != target.rows() || predicted.cols() != target.cols())
             {
                 throw std::runtime_error("Matrix dimensions do not match: result(" +

@@ -27,7 +27,7 @@ namespace yann::models
 
         /* Constructors */
         Sequential() ;
-        Sequential(std::initializer_list<LayerPtr> newTopology);
+        Sequential(std::initializer_list<LayerPtr> newTopology, bool build=true);
 
         /* Methods */
         
@@ -37,6 +37,7 @@ namespace yann::models
         void addLayer(LayerPtr layer);
         void clear();
 
+        void build();
         /* Getters */
         cum::Matrix& getWeights(size_t layer) const;
         cum::Matrix& getBiases(size_t layer) const;
