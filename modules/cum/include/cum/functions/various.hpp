@@ -16,6 +16,8 @@ namespace cum::functions::various
     void clip(cumeric_t* r, const cumeric_t* v, cumeric_t min, cumeric_t max, std::size_t N);
     void clipInPlace(cumeric_t* v, cumeric_t min, cumeric_t max, std::size_t N);
 
+    cumeric_t abs(cumeric_t x);
+
     cumeric_t min(cumeric_t a, cumeric_t b);
     cumeric_t max(cumeric_t a, cumeric_t b);
 }

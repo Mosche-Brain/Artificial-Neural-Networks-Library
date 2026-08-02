@@ -36,6 +36,11 @@ namespace cum::functions::various
 
     cumeric_t max(const cumeric_t a, const cumeric_t b) { return sycl::max(a, b); }
 
+    cumeric_t abs(cumeric_t x)
+    {
+        return sycl::fabs(x);
+    }
+
     // temporary naive implementation
     void clip(cumeric_t* r, const cumeric_t* v, const cumeric_t min, const cumeric_t max, const std::size_t N)
     {

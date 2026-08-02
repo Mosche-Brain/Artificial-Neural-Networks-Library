@@ -33,34 +33,28 @@ namespace yann::models::layers
         {
             if(input.rows() != weights.cols())
             {
-                // std::cout << "\x1B[31minput size doesn't match with weights\x1B[37m\n";
-                // std::cout << "input " << utils::formating::show_matrix_dimensions(input) << ", "
-                //           << "weights " << utils::formating::show_matrix_dimensions(weights) << '\n';
-                // if(input.cols() != weights.rows())
-
                 throw std::runtime_error("Input dimension mismatch: " + std::to_string(input.rows()) + " != " + std::to_string(weights.cols()));
             }
         }
 
-        if (input.cols() != cache.x.cols())
+        if (input.cols() != cache.x.cols()) // sprawdza czy batch jest taki sam
         {
             cache.resize(cache.x.rows(), cache.z.rows(), input.cols());
         }
-        cache.x = input;
 
+        YANN_LOG(4, "Copying inputs", "");
+        cache.x = input;
 
         cum::runtime::sync();
         if(input.cols() == 1) // single sample
         {
-            YANN_LOG(4, "Copying inputs", "");
-            // this->inputs = input;
             if constexpr (USE_FUSED_KERNELS)
             {
                 if constexpr (ENABLE_CACHED_PREACTIVATION) // must be enabled for proper training in most of cases
                 {
                     cum::neural_primitives::neural_kernels::feed_forward_cached_raw(cache.a.data(), cache.z.data(), weights.values.data(), input.data(), biases.values.data(), weights.values.cols(), weights.values.rows(), activation.name);
                 }
-                else // optional for a bit faster inference speed
+                else //or a bit faster inference speed (training may not be posible in some cases
                 {
                     cum::neural_primitives::neural_kernels::feed_forward(cache.a.data(), weights().data(), input.data(), biases().data(), weights().cols(), weights().rows(), activation.name);
                 }
@@ -68,20 +62,11 @@ namespace yann::models::layers
             else
             {
                 YANN_LOG(4, "Performing (weights * input) + biases", "");
+                cache.z = (weights() * input) += biases();;
 
-
-
-                // raw_outputs = (weights() * input) + biases();
-                cache.z = (weights() * input);
                 cum::runtime::sync();
-                cache.z += biases();
-                cum::runtime::sync();
-
-                // cum::Matrix result(raw_outputs.rows(), raw_outputs.cols());
-                // cum::runtime::sync();
 
                 YANN_LOG(4, "Performing activation", "");
-                // cum::functions::transform(outputs.data(), raw_outputs.data(), raw_outputs.size(), activation);
                 cum::functions::transform(cache.a.data(), cache.z.data(), cache.z.size(), activation.name);
             }
 
@@ -105,8 +90,7 @@ namespace yann::models::layers
 
             // return results_activated;
             return cache.a;
-        }
-
+        } // baych narazie jest jako osobny branch, ale to raczej nie docelowy stan
     }
 
     cum::Matrix Dense::backward(const cum::Matrix& deltaOutput)
