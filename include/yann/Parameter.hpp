@@ -19,6 +19,7 @@ namespace yann
         std::size_t rows() const { return values.rows(); }
 
         void clear_gradient();
+        void scale_gradient(cum::cumeric_t scalar);
 
         Parameter() = default;
         Parameter(std::size_t cols, std::size_t rows);

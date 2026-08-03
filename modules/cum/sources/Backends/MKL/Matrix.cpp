@@ -234,6 +234,12 @@ namespace cum
         return *this;
     }
 
+    Matrix& Matrix::operator += (const cumeric_t& scalar)
+    {
+        LinearAlgebra::addInPlace(this->data_, scalar, rows_ * cols_);
+        return *this;
+    }
+
     Matrix& Matrix::operator -= (const Matrix& other)
     {
         LinearAlgebra::matSubInPlace(this->data_, other.data_, this->rows_, this->cols_);

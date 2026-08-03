@@ -29,7 +29,9 @@ namespace cum::neural_primitives::neural_kernels
      * X cols - batch size (currently not supported)
      * B rows - out features
      */
-    void feed_forward(cumeric_t* Y, const cumeric_t* W, const cumeric_t* X, const cumeric_t* B, const std::size_t in_features, const std::size_t out_features, const functions::function_id activation)
+
+
+    void feed_forward(cumeric_t* Y, const cumeric_t* W, const cumeric_t* X, const cumeric_t* B, const std::size_t in_features, const std::size_t out_features, const dim_t batch, const functions::function_id activation)
     {
         // sycl::event copy_event = internal::getQueue().copy(B, Y, out_features);
         // copy_event.wait();
@@ -61,7 +63,10 @@ namespace cum::neural_primitives::neural_kernels
 
     }
 
-
+    void feed_forward(cumeric_t* Y, const cumeric_t* W, const cumeric_t* X, const cumeric_t* B, const std::size_t in_features, const std::size_t out_features, const functions::function_id activation)
+    {
+        feed_forward(Y, W, X, B, in_features, out_features, 1, activation);
+    }
 
     void feed_forward_cached_raw(cumeric_t* Y, cumeric_t* R, const cumeric_t* W, const cumeric_t* X, const cumeric_t* B, const std::size_t in_features, const std::size_t out_features, const size_t batch, const functions::function_id activation)
     {
@@ -105,7 +110,7 @@ namespace cum::neural_primitives::neural_kernels
     // void BCE(cumeric_t* grad, const cumeric_t* P, const cumeric_t* Y, const dim_t N)
     void BCE(cumeric_t* grad, cumeric_t* loss, const cumeric_t* P, const cumeric_t* Y, const dim_t N, const dim_t batch)
     {
-        constexpr cumeric_t eps = static_cast<cumeric_t>(1e-5);
+        constexpr cumeric_t eps = static_cast<cumeric_t>(1e-7);
 
         auto reduction = sycl::reduction(loss, static_cast<cumeric_t>(0.0), sycl::plus<>());
 
@@ -116,7 +121,8 @@ namespace cum::neural_primitives::neural_kernels
             size_t offset = i + sample * N;
 
             cumeric_t p = sycl::clamp(P[offset], eps, static_cast<cumeric_t>(1) - eps); // predicted value
-            cumeric_t y = Y[offset]; // target value
+            cumeric_t y = sycl::clamp(Y[offset], eps, static_cast<cumeric_t>(1) - eps); // predicted value
+            // cumeric_t y = Y[offset]; // target value
             sum += -(y * sycl::log(p) + (1 - y) * sycl::log(1 - p));
             grad[offset] = ((1 - y) / (1 - p) - y / p);
         }).wait();

@@ -104,7 +104,7 @@ namespace yann::models
     {
         std::vector<Parameter*> params = this->parameters();
 
-        size_t batchSize = 32;
+        size_t batchSize = 48;
         constexpr bool batched = true;
 
         cum::Matrix data = X.transpose();

@@ -31,8 +31,6 @@ namespace yann
         return *runtime_config_instance;
     }
 
-
-
     void RuntimeConfig::setAsyncMode(bool mode)
     {
         async_mode = mode;

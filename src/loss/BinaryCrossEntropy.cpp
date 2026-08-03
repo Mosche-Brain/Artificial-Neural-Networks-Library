@@ -33,9 +33,9 @@ namespace yann::loss
             const std::size_t rows = predicted.rows();
             const std::size_t cols = predicted.cols();
             // const std::size_t size = predicted.size();
-            const cum::cumeric_t eps = 1e-7_c;
+            const cum::cumeric_t eps = 1e-7_c; // epsilon nie powinien być hardcoded wewnątrz funkcji, tylko raczej być globalnym makrem lub zmienną, ale nie dałem to na potrzeby debug
 
-            for (std::size_t i = 0; i < rows; ++i)
+            for (std::size_t i = 0; i < rows; ++i)  // iterowanie osobno po kolumnach i wierszach jest właściwie nie potrzebne, ale jeszcze nie chciiało mi się tego zmieniać
             {
                 for (std::size_t j = 0; j < cols; ++j)
                 {

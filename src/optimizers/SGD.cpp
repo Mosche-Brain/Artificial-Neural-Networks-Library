@@ -18,7 +18,7 @@ namespace yann::optimizers
 
     void SGD::step(cum::Matrix& params, cum::Matrix& grad)
     {
-
+        // tą funkcje prawdopodobnie zlikwiduje
     }
 
     void SGD::step(std::vector<Parameter*>& params)
@@ -39,8 +39,11 @@ namespace yann::optimizers
             // param->values -= (param->gradient * learning_rate);
             // std::println("clearing grad");
             param->clear_gradient();
+            // param->scale_gradient(0.999_c);
             cum::runtime::sync();
         }
+        // learning_rate *= 0.99999f;
+        // kod w komentarzach był do debugowania
     }
 
     std::unique_ptr<SGD> SGD::create(cum::cumeric_t learning_rate)

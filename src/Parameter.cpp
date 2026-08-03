@@ -70,5 +70,11 @@ namespace yann
     void Parameter::clear_gradient()
     {
         gradient.fill(static_cast<cum::cumeric_t>(0));
+        // gradient *= 0.1;
+    }
+
+    void Parameter::scale_gradient(cum::cumeric_t scalar)
+    {
+        gradient *= scalar;
     }
 } // yann

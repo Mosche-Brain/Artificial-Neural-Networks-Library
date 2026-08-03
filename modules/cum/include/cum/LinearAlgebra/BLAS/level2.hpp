@@ -5,4 +5,9 @@
 #ifndef YANN_LEVEL2_HPP
 #define YANN_LEVEL2_HPP
 
+namespace cum::blas
+{
+
+}
+
 #endif //YANN_LEVEL2_HPP

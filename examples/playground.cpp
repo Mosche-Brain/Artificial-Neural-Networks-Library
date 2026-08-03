@@ -15,6 +15,8 @@
 #include <iostream>
 #include <math.h>
 
+#include "loss/BinaryCrossEntropy.hpp"
+
 namespace plt = matplot;
 
 int main()
@@ -26,13 +28,14 @@ int main()
     yann::models::Sequential model({
         yann::models::layers::Input::createUnique(1),
         yann::models::layers::Dense::createUnique(64, "tanh"),
+        // yann::models::layers::Dense::createUnique(16, "tanh"),
         // yann::models::layers::Dense::createUnique(32, "relu"),
-        yann::models::layers::Dense::createUnique(1, "tanh"),
+        yann::models::layers::Dense::createUnique(1, "linear"),
     });
 
-    cum::cumeric_t x_min = -4.0 * M_PIf;
-    cum::cumeric_t x_max =  4.0 * M_PIf;
-    std::size_t N_train = 32;
+    cum::cumeric_t x_min = -6.0 * M_PIf;
+    cum::cumeric_t x_max =  6.0 * M_PIf;
+    std::size_t N_train = 48;
     std::size_t N_eval = 512;
 
     cum::Matrix X_train = cum::Matrix::Linspace(x_min, x_max, N_train).transpose(); // linspace in row vector
@@ -47,13 +50,19 @@ int main()
     cum::functions::trigonometric::sin_in_place(Y_train.data(), N_train);
     cum::runtime::sync();
 
+    Y_train *= 0.5_c;
+    Y_train += 0.5_c;
+
+    Y_eval *= 0.5_c;
+    Y_eval += 0.5_c;
+
     // X_train /= x_max;
     // X_eval /= x_max;
 
     cum::Matrix Y_pred_pretrained = model.forward(X_eval); // batch
 
     yann::loss::Loss loss = yann::loss::MeanSquaredError::create();
-    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.05);
+    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.01);
 
 
     yann::logging::LossTracker loss_tracker = yann::logging::LossTracker();
@@ -61,7 +70,7 @@ int main()
     std::array<yann::logging::ITrainingCallback*, 1> callbacks = { &loss_tracker };
 
     yann::runtime_config::set_verbosity(1);
-    model.fit(X_train, Y_train, *loss, *optimizer, 600, callbacks);
+    model.fit(X_train, Y_train, *loss, *optimizer, 1200, callbacks);
     cum::runtime::sync();
 
 
@@ -105,7 +114,7 @@ int main()
     plt::plot(ax2, X_eval_plot, Y_pred_plot);
     plt::title(ax2, "Predictions (after training)");
     plt::ylabel(ax2, "forward(x)");
-    plt::ylim(ax2, {-1.0, 1.0});
+    // plt::ylim(ax2, {-1.0, 1.0});
 
     auto ax3 = plt::nexttile();
     plt::plot(ax3, epoch_range, loss_history);

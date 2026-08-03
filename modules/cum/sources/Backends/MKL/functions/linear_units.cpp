@@ -47,8 +47,11 @@ namespace cum::functions::linear_units
 
     void identity(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
-        cum::memory::memcopy(r, v, N);
-        // cum::memory::memcopy(r, v, N * sizeof(cumeric_t));
+        // memory::memcopy(r, v, N);
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            r[idx] = v[idx];
+        });
     }
 
     void relu(cumeric_t* r, const cumeric_t* v, const std::size_t N)
@@ -144,12 +147,20 @@ namespace cum::functions::linear_units
 
     void identity_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
-        memory::memcopy(r, internal::getZeros(), N);
+        // memory::memcopy(r, internal::getOnes(), N);
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            r[idx] = static_cast<cumeric_t>(1);
+        });
     }
 
     void identity_deriv_in_place(cumeric_t* v, std::size_t N)
     {
-        memory::memcopy(v, internal::getZeros(), N);
+        // memory::memcopy(v, internal::getOnes(), N);
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            v[idx] = static_cast<cumeric_t>(1);
+        });
     }
 
     void relu_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)

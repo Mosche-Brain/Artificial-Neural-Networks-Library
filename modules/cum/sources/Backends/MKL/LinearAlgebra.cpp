@@ -26,6 +26,13 @@ namespace cum::LinearAlgebra
         q.wait();
     }
 
+    // void addInPlace(cumeric_t* v, const cumeric_t a, std::size_t N)
+    // {
+    //     auto& q = internal::getQueue();
+    //     oneapi::mkl::blas::row_major::axpy(q, N, 1.0, u, 1, v, 1);
+    //     q.wait();
+    // }
+
     void add(cumeric_t* r, const cumeric_t* v, const cumeric_t& a, std::size_t N)
     {
         auto& q = internal::getQueue();
@@ -217,7 +224,7 @@ namespace cum::LinearAlgebra
         subInPlace(A, B, rows * cols);
     }
 
-    void matMul(cumeric_t* C, const cumeric_t* A, const cumeric_t* B, std::size_t m, std::size_t n, std::size_t k)
+    void matMul(cumeric_t* C, const cumeric_t* A, const cumeric_t* B, const std::size_t m, const std::size_t n, const std::size_t k)
     {
         auto& q = internal::getQueue();
         oneapi::mkl::blas::row_major::gemm(q,
@@ -290,7 +297,7 @@ namespace cum::LinearAlgebra
                     {
                         const std::size_t a = r * cols + c;
                         // const std::size_t b = c * cols + r;
-                        const std::size_t b = c * rows + r;  // ✓ POPRAWNIE
+                        const std::size_t b = c * rows + r;  
 
                         cumeric_t tmp = mat[a];
                         mat[a] = mat[b];

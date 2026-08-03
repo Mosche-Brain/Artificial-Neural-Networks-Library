@@ -60,7 +60,9 @@ namespace cum
 
         /* Inplace arithmetic operator */
         Matrix& operator += (const Matrix& other);
+        Matrix& operator += (const cumeric_t& scalar); // add scalar to all elements
         Matrix& operator -= (const Matrix& other);
+        Matrix& operator -= (const cumeric_t& scalar); // substract scalar form all elements
         Matrix& operator *= (const Matrix& other);
         Matrix& operator *= (const cumeric_t& scalar);
         Matrix& operator /= (const Matrix& other);
