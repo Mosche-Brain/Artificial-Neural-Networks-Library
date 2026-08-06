@@ -25,6 +25,7 @@ A lightweight, modular minimalistic and easy to use C++ library for machine lear
 * eigen3 or oneAPI or openBLAS
 * G++ compiler or clang++
 * CPU with at least one core
+* At least one sexual crime in lifetime
 
 ### 🐧 Linux and GNU/Linux
 
