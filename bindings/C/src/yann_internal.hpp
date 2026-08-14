@@ -13,11 +13,13 @@ struct yann_context_s {
     // Reserved for future use (device, queue, etc.)
 };
 
-struct yann_matrix_s {
+struct yann_matrix_s
+{
     cum::Matrix matrix;
 };
 
-struct yann_model_s {
+struct yann_model_s
+{
     yann::models::Sequential model;
 };
 

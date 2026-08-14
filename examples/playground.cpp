@@ -70,7 +70,7 @@ int main()
     std::array<yann::logging::ITrainingCallback*, 1> callbacks = { &loss_tracker };
 
     yann::runtime_config::set_verbosity(1);
-    model.fit(X_train, Y_train, *loss, *optimizer, 1200, callbacks);
+    model.fit(X_train, Y_train, *loss, *optimizer, 12, callbacks);
     cum::runtime::sync();
 
 

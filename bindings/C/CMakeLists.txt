@@ -13,7 +13,7 @@ endif()
 # === CRITICAL: Save the real yann target name BEFORE calling project(cYANN) ===
 set(YANN_MAIN_TARGET ${PROJECT_NAME})
 
-project(cYANN LANGUAGES CXX)
+project(cYANN LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -99,3 +99,7 @@ install(TARGETS ${CYANN_TARGET}
 install(FILES include/yann.h
     DESTINATION include/yann
 )
+
+if(BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()

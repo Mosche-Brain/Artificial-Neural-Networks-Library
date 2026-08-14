@@ -92,12 +92,12 @@ namespace yann::models::layers
             // }
 
             // weights.gradient = cached_somewhat * cache.x.transpose();
-            weights.gradient += cached_somewhat * cache.x.transpose();
-            weights.gradient /= cache.x.cols();
+            weights.gradient += (cached_somewhat * cache.x.transpose()) / cache.x.cols();
+            //weights.gradient /= cache.x.cols();
 
             // biases.gradient = cached_somewhat.rowwiseSum();
-            biases.gradient += cached_somewhat.rowwiseSum();
-            biases.gradient /= cache.x.cols();
+            biases.gradient += (cached_somewhat.rowwiseSum()) / cache.x.cols();
+            //biases.gradient /= cache.x.cols();
 
             // dodaje gradienty zamiast przypisywać by optymalizator miał dowolność co to tego czy chce je wyzerować czy przeskalować po kroku dostrajania
 

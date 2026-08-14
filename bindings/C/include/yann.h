@@ -12,11 +12,16 @@ extern "C" {
  * ============================================================================ */
 
 #define YANN_API_VERSION_MAJOR 0
-#define YANN_API_VERSION_MINOR 1
+#define YANN_API_VERSION_MINOR 2
+
+/* ---------------------------  Scalar Types  ------------------------------- */
+typedef long long yann_dim_t;
+typedef float     yann_scalar_t;
 
 /* --------------------------- Opaque Handles ------------------------------- */
 typedef struct yann_context_s  yann_context_t;
 typedef struct yann_matrix_s   yann_matrix_t;
+typedef struct yann_vector_s   yann_vector_t;
 typedef struct yann_model_s    yann_model_t;
 
 /* --------------------------- Status & Errors ------------------------------ */
@@ -76,5 +81,9 @@ yann_status_t yann_model_fit(yann_model_t* model,
 size_t yann_model_get_layer_count(yann_model_t* model);
 
 #ifdef __cplusplus
+}
+
+inline const char* yann_get_last_error()
+{
 }
 #endif

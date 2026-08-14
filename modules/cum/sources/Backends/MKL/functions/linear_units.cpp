@@ -145,7 +145,7 @@ namespace cum::functions::linear_units
 
     /* Parallel versions */
 
-    void identity_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    void identity_deriv(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
         // memory::memcopy(r, internal::getOnes(), N);
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
