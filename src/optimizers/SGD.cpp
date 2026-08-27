@@ -27,6 +27,9 @@ namespace yann::optimizers
         for(Parameter* param : params)
         {
             // std::println("updating param");
+
+            param->scale_gradient(1._c/param->cols());
+
             param->values -= param->gradient * learning_rate;
             cum::runtime::sync();
 
@@ -39,7 +42,7 @@ namespace yann::optimizers
             // param->values -= (param->gradient * learning_rate);
             // std::println("clearing grad");
             param->clear_gradient();
-            // param->scale_gradient(0.999_c);
+            // param->scale_gradient(0.1_c);
             cum::runtime::sync();
         }
         // learning_rate *= 0.99999f;

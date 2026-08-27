@@ -84,19 +84,21 @@ namespace yann::models
     }
     void Sequential::backward(const cum::Matrix& d_output)
     {
-        cum::Matrix& curr_gradient = const_cast<cum::Matrix&>(d_output);
+        // cum::Matrix& curr_gradient = const_cast<cum::Matrix&>(d_output);
+        if (topology.size() <= 1)
+            return;
 
-        for(size_t i = topology.size() - 1 ; i > 0 ; --i)
+        cum::Matrix curr_gradient = topology.back()->backward(d_output);
+        for (size_t i = topology.size() - 1; i > 0; --i)
         {
-            // if(topology[i]->layerType() == layers::LAYER_TYPE::INPUT)
-            //     continue;
+            cum::Matrix next_gradient = topology[i]->backward(curr_gradient);
 
-            curr_gradient = topology[i]->backward(curr_gradient);
+            cum::runtime::sync();
+
+            curr_gradient = std::move(next_gradient);
+
+            cum::runtime::sync();
         }
-        // if(runtime_config::verbosity_level() >= 3)
-        // {
-        //     std::cout << "\t\t\t" << "layer 0 gradient: " << utils::formating::matrixToString(curr_gradient.transpose()) << '\n';
-        // }
     }
 
 

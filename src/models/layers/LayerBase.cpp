@@ -8,7 +8,8 @@ namespace yann::models::layers
         this->biases        = Parameter::Zeros(layerSize, 1);               /* Column-Vector */
         this->cache.a       = cum::Matrix::Zeros(layerSize, 1);             /* Column-Vector */
         this->cache.z   = cum::Matrix::Zeros(layerSize, 1);             /* Column-Vector */
-        this->cache.x        = cum::Matrix::Zeros(layerSize, inputLenght);   /* Column-Vector */
+        this->cache.x        = cum::Matrix::Zeros(inputLenght, 1);   /* Column-Vector */
+        // this->cache.x        = cum::Matrix::Zeros(layerSize, inputLenght);   /* Column-Vector */
         this->_initialized_ = true;
     }
 

@@ -29,13 +29,16 @@ namespace yann::loss
             if (predicted.cols() == 0)
                 throw std::runtime_error("Number of columns in result is zero");
 
-            const std::size_t N = predicted.rows();
+            const std::size_t N = predicted.cols();
+            // const std::size_t N = predicted.rows() * predicted.cols()                        ;
             // if (!result.allFinite() || !target.allFinite()) {
             //     throw std::runtime_error("Input matrices contain NaN or inf values");
             // }
 
             cum::Matrix diff = predicted - target;
 
+            // loss.value = diff.squaredNorm();
+            // loss.gradient = (diff * 2);
             loss.value = diff.squaredNorm() / static_cast<cum::cumeric_t>(N);
             loss.gradient = (diff * 2) / static_cast<cum::cumeric_t>(N);
         }

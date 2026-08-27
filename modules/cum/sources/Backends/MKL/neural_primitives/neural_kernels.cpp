@@ -39,7 +39,7 @@ namespace cum::neural_primitives::neural_kernels
         int64_t m = out_features;
         int64_t n = 1; // fixed batch size
         int64_t k = in_features;
-        sycl::event gemm_event = oneapi::mkl::blas::row_major::gemm(internal::getQueue(),
+        sycl::event gemm_event = oneapi::mkl::blas::row_major::gemm(internal::getQueue(), // for some reason if we add gemm result to Y and
                                            oneapi::mkl::transpose::nontrans, // transpose W
                                            oneapi::mkl::transpose::nontrans, // transpose X
                                            m, n, k, 1.0, W,
@@ -80,7 +80,9 @@ namespace cum::neural_primitives::neural_kernels
         {
             event_to_wait = internal::getQueue().parallel_for(sycl::range<1>(out_features * batch), [=](sycl::id<1> idx) -> void
             {
-                R[idx] = B[idx % out_features];
+                // R[idx] = B[idx % out_features];
+                const std::size_t row = idx / batch;
+                R[idx] = B[row];
             });
         }
 
@@ -98,7 +100,10 @@ namespace cum::neural_primitives::neural_kernels
                                            R, n,
                                            oneapi::mkl::blas::compute_mode::standard,  {event_to_wait});
 
-        functions::transform(Y, R, out_features * batch, activation);
+
+        // tymczasowo fixed tanh dla debugowania przyklładu examples
+        oneapi::mkl::vm::tanh(internal::getQueue(), m * n, R, Y, {gemm_event});
+        // functions::transform(Y, R, out_features * batch, activation);
         runtime::sync();
     }
 

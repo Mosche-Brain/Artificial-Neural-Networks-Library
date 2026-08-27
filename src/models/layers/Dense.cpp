@@ -62,7 +62,9 @@ namespace yann::models::layers
         else
         {
             YANN_LOG(4, "Performing (weights * input) + biases", "");
-            cache.z = (weights() * input) += biases();;
+            // cache.z = (weights() * input) += biases();;
+            cache.z = weights() * input;
+            cache.z += biases();
 
             cum::runtime::sync();
 
@@ -81,8 +83,9 @@ namespace yann::models::layers
         if constexpr (batched)
         {
             cum::Matrix activation_derivative(cache.z.rows(), cache.z.cols()); // tą macierz mógłbym przenieść do struktury cache by uniknąć alokacji w trakcie wykonywania propagacji wstecznej
+            cum::runtime::sync();
             cum::functions::transform_deriv(activation_derivative.data(), cache.z.data(), cache.z.size(), activation);
-
+            cum::runtime::sync();
             cum::Matrix cached_somewhat = activation_derivative.cwiseProduct(deltaOutput); // tą też
 
             // for (int i = 0 ; i < inputs.cols() ; i++)
@@ -90,16 +93,18 @@ namespace yann::models::layers
             //     weights.gradient += cached_somewhat.col(i) * inputs.col(i).transpose();
             //     biases.gradient += cached_somewhat.col(i);
             // }
-
-            // weights.gradient = cached_somewhat * cache.x.transpose();
-            weights.gradient += (cached_somewhat * cache.x.transpose()) / cache.x.cols();
+            cum::runtime::sync();
+            weights.gradient = cached_somewhat * cache.x.transpose();
+            // weights.gradient += (cached_somewhat * cache.x.transpose()) / cache.x.cols();
             //weights.gradient /= cache.x.cols();
+            cum::runtime::sync();
 
-            // biases.gradient = cached_somewhat.rowwiseSum();
-            biases.gradient += (cached_somewhat.rowwiseSum()) / cache.x.cols();
+            biases.gradient = cached_somewhat.rowwiseSum();
+            // biases.gradient += (cached_somewhat.rowwiseSum()) / cache.x.cols();
             //biases.gradient /= cache.x.cols();
 
             // dodaje gradienty zamiast przypisywać by optymalizator miał dowolność co to tego czy chce je wyzerować czy przeskalować po kroku dostrajania
+            cum::runtime::sync();
 
             return weights().transpose() * cached_somewhat;
         }

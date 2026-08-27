@@ -144,7 +144,7 @@ examples
 ├── plot.gp
 ├── ploting_activation_functions.cpp
 ├── sine_aproximation.cpp
-├── sleep_based_predictions.cpp
+├── autism_predictor.cpp
 ├── test1.cpp
 ├── tests.cpp
 └── xor_problem.cpp

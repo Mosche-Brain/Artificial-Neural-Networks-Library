@@ -3,7 +3,7 @@
 #include "yann.h"
 
 #include "cum/Matrix.hpp"
-#include "models/Sequential.hpp"
+#include "yann/models/Sequential.hpp"
 
 #include <memory>
 #include <string>

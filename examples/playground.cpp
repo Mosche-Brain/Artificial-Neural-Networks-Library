@@ -27,14 +27,23 @@ int main()
     
     yann::models::Sequential model({
         yann::models::layers::Input::createUnique(1),
-        yann::models::layers::Dense::createUnique(64, "tanh"),
-        // yann::models::layers::Dense::createUnique(16, "tanh"),
-        // yann::models::layers::Dense::createUnique(32, "relu"),
-        yann::models::layers::Dense::createUnique(1, "linear"),
+        yann::models::layers::Dense::createUnique(16, "tanh"),
+        yann::models::layers::Dense::createUnique(16, "tanh"),
+        yann::models::layers::Dense::createUnique(1, "tanh"),
     });
 
-    cum::cumeric_t x_min = -6.0 * M_PIf;
-    cum::cumeric_t x_max =  6.0 * M_PIf;
+    for (size_t i = 1; i < model.getLayersCount(); ++i)
+    {
+        std::cout
+            << "W[" << i << "] norm = "
+            << model.getWeights(i).squaredNorm()
+            << '\n';
+    }
+
+    // return 0;
+
+    cum::cumeric_t x_min = 2.f * -M_PIf;
+    cum::cumeric_t x_max = 2.f * M_PIf;
     std::size_t N_train = 48;
     std::size_t N_eval = 512;
 
@@ -50,12 +59,6 @@ int main()
     cum::functions::trigonometric::sin_in_place(Y_train.data(), N_train);
     cum::runtime::sync();
 
-    Y_train *= 0.5_c;
-    Y_train += 0.5_c;
-
-    Y_eval *= 0.5_c;
-    Y_eval += 0.5_c;
-
     // X_train /= x_max;
     // X_eval /= x_max;
 
@@ -70,12 +73,12 @@ int main()
     std::array<yann::logging::ITrainingCallback*, 1> callbacks = { &loss_tracker };
 
     yann::runtime_config::set_verbosity(1);
-    model.fit(X_train, Y_train, *loss, *optimizer, 12, callbacks);
+    model.fit(X_train, Y_train, *loss, *optimizer, 800, callbacks);
     cum::runtime::sync();
 
 
     std::vector<double> loss_history;
-    std::vector<double> epoch_range;
+    std::vector<double> epoch_range;                      
 
     for (int i = 0 ; i < loss_tracker.getLossHistory().size() ; i++)
     {
@@ -128,6 +131,7 @@ int main()
     plt::ylabel(ax4, "forward(x)");
     // plt::xlabel(ax3, "epoch");
 
+    plt::save("plots/plot", "svg");
     plt::show();
 
     cum::decum();
