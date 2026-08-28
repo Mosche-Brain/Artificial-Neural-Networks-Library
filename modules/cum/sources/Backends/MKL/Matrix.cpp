@@ -15,6 +15,9 @@
 #include <iostream>
 #endif
 
+#include <oneapi/dpl/algorithm>
+#include <oneapi/dpl/execution>
+
 namespace cum
 {
     Matrix::Matrix(size_t rows, size_t cols, cumeric_t value) : rows_(rows), cols_(cols)
@@ -330,6 +333,14 @@ namespace cum
         return temp;
     }
 
+    bool operator == (const Matrix& A, const Matrix& B)
+    {
+        // Yes, no runtime dimensions checks 💪
+
+        auto policy = oneapi::dpl::execution::make_device_policy(internal::getQueue());\
+        return std::equal(policy, A.data(), A.data() + A.rows() * B.cols(), B.data());
+    }
+
     Matrix Matrix::transpose() const
     {
         Matrix temp(cols_, rows_);
@@ -487,6 +498,28 @@ namespace cum
         cumeric_t result;
         LinearAlgebra::norm(result, data_, rows_ * cols_);
         return result;
+    }
+
+    cumeric_t Matrix::sumAbs() const
+    {
+        cumeric_t result = 0;
+        cum::LinearAlgebra::asum(result, data_, rows_ * cols_);
+        return result;
+    }
+    cumeric_t Matrix::sum() const
+    {
+        cumeric_t result = 0;
+        cum::LinearAlgebra::sum(result, data_, rows_ * cols_);
+        return result;
+    }
+
+    cumeric_t Matrix::mean() const
+    {
+        return this->sum() / static_cast<cumeric_t>(rows_ * cols_);
+    }
+    cumeric_t Matrix::amean() const
+    {
+        return this->sumAbs() / static_cast<cumeric_t>(rows_ * cols_);
     }
 
     cumeric_t Matrix::squaredNorm()

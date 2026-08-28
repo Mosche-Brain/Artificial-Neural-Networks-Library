@@ -2,7 +2,7 @@
 // Created by jaro on 7/24/26.
 //
 
-#include "Flatten.hpp"
+#include "../../../include/yann/models/layers/Flatten.hpp"
 
 #include "runtime_config.hpp"
 

@@ -11,6 +11,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 find_package(TBB CONFIG REQUIRED PATHS $ENV{TBBROOT} /opt/intel/oneapi/tbb/latest/lib/cmake/tbb/)
 find_package(MKL CONFIG REQUIRED PATHS $ENV{MKLROOT} /opt/intel/oneapi/mkl/latest/lib/cmake/mkl/)
 find_package(dnnl CONFIG REQUIRED)
+find_package(oneDPL CONFIG REQUIRED)
 
 add_library(${PROJECT_NAME}_MKL STATIC
     ${SOURCES_MKL}
@@ -26,6 +27,7 @@ target_link_libraries(${PROJECT_NAME}_MKL
     # TBB::TBB_DPCPP
     MKL::MKL
     MKL::MKL_DPCPP
+    oneDPL
     dnnl
 )
 

@@ -32,6 +32,10 @@ namespace yann::models::layers
 
     cum::Matrix Input::forward(const cum::Matrix& input)
     {
+        if (input.cols() != cache.x.cols()) // sprawdza czy batch jest taki sam
+        {
+            cache.resize(cache.x.rows(), cache.z.rows(), input.cols());
+        }
         this->cache.x = input;
         return this->cache.x;
     }

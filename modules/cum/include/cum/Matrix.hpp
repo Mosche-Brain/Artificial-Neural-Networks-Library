@@ -76,7 +76,7 @@ namespace cum
         friend Matrix operator * (const Matrix& mat, const cumeric_t& scalar);
         friend Matrix operator / (const Matrix& A, const Matrix& B);
         friend Matrix operator / (const Matrix& mat, const cumeric_t& scalar);
-
+        friend bool operator == (const Matrix& A, const Matrix& B);
         
         /* Transforming matrix dimensions */
         Matrix transpose() const;
@@ -104,6 +104,11 @@ namespace cum
 
         cumeric_t norm();
         cumeric_t squaredNorm();
+
+        cumeric_t sum() const;
+        cumeric_t sumAbs() const;
+        cumeric_t mean() const;
+        cumeric_t amean() const;
 
         Matrix colwiseSum();
         Vector colwiseSum2vec();

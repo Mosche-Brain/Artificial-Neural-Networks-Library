@@ -11,6 +11,7 @@ namespace cum::LinearAlgebra /* LATK */
     void addInPlace(cumeric_t* v, const cumeric_t& a, std::size_t N);
 
     void sum(cumeric_t& r, const cumeric_t* v, std::size_t N);
+    void asum(cumeric_t& r, const cumeric_t* v, std::size_t N);
 
     void cwiseProduct(cumeric_t* r, const cumeric_t* v, const cumeric_t* u, std::size_t N);
     void cwiseProductInPlace(cumeric_t* v, const cumeric_t* u, std::size_t N);

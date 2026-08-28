@@ -41,9 +41,19 @@ namespace yann::models::layers
         return this->weights();
     }
 
+    cum::Matrix& LayerBase::WeightsGrad()
+    {
+        return this->weights.gradient;
+    }
+
     cum::Matrix& LayerBase::Biases()
     {
         return this->biases();
+    }
+
+    cum::Matrix& LayerBase::BiasesGrad()
+    {
+        return this->biases.gradient;
     }
 
     LAYER_TYPE LayerBase::layerType()

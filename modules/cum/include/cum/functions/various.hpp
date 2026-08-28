@@ -20,4 +20,9 @@ namespace cum::functions::various
 
     cumeric_t min(cumeric_t a, cumeric_t b);
     cumeric_t max(cumeric_t a, cumeric_t b);
+
+    bool equal(const cumeric_t* v, const  cumeric_t* u, std::size_t N);
+    void linespace(cumeric_t* v, cumeric_t start, cumeric_t end, std::size_t N);
+
+
 }

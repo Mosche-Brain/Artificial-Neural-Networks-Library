@@ -35,6 +35,7 @@ namespace yann::logging
         virtual ~ITrainingCallback() = default;
         virtual void beforeEpoch(TrainingContext& context) = 0;
         virtual void afterEpoch(TrainingContext& context) = 0;
+        virtual void afterBackprop(TrainingContext& context) {};
     };
 
 } // yann

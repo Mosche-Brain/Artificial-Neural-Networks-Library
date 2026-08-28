@@ -61,8 +61,8 @@ namespace yann::models
 
     cum::Matrix Sequential::forward(const cum::Matrix& input)
     {
-        if (input.cols() == 1) // single sample
-        {
+        // if (input.cols() == 1) // single sample
+        // {
             topology[0]->forward(input);
 
             for(size_t i = 1 ; i < topology.size() ; ++i)
@@ -71,17 +71,17 @@ namespace yann::models
             }
 
             return topology.back()->Outputs();
-        }
-        else // batch
-        {
-            cum::Matrix result = input;
-            for(size_t i = 0 ; i < topology.size() ; ++i)
-            {
-                result = topology[i]->forward(result);
-            }
-            return result;
-        }
+        // }
+        // else // batch
+        // {
+        //     cum::Matrix result = input;
+        //     for(size_t i = 0 ; i < topology.size() ; ++i)
+        //     {
+        //         result = topology[i]->forward(result);
+        //     }
+        //     return result;
     }
+
     void Sequential::backward(const cum::Matrix& d_output)
     {
         // cum::Matrix& curr_gradient = const_cast<cum::Matrix&>(d_output);
@@ -128,6 +128,7 @@ namespace yann::models
         }
 
         YANN_LOG(1, "Started training for {} epochs...", epochs);
+        logging::TrainingContext ctx(*this, 0, 0, 0);
         for(size_t epoch = 0 ; epoch < epochs ; epoch++)
         {
             cum::cummulative_t totalLoss = 0;
@@ -185,6 +186,11 @@ namespace yann::models
 
                     cum::runtime::sync();
 
+                    for(auto& callback : callbacks)
+                    {
+                        callback->afterBackprop(ctx);
+                    }
+
                     YANN_LOG(2, "Updating parameters", "");
                     optimizer.step(params);
 
@@ -199,7 +205,9 @@ namespace yann::models
             YANN_LOG(2, "Average epoch loss: ", static_cast<float>(avarageLoss));
             YANN_LOG(2, "Total epoch loss: ", static_cast<float>(totalLoss));
 
-            logging::TrainingContext ctx(*this, avarageLoss, epoch, 1);
+            ctx.loss = avarageLoss;
+            ctx.epoch = epoch;
+            ctx.batch = 1;
             for(auto& callback : callbacks)
             {
                 callback->afterEpoch(ctx);
@@ -247,14 +255,9 @@ namespace yann::models
         // return std::move(topology[layer]);
     }
 
-    auto Sequential::getTopology() const -> Topology // currently not used
+    auto Sequential::getTopology() const -> const Topology&
     {
-        // Topology temp;
-        // for(size_t i = 0 ; i < topology.size() ; i++)
-        // {
-            // temp.push_back(std::move(topology[i]));
-        // }
-        // return temp;
+        return topology;
     }
 
     size_t Sequential::getLayersCount() const

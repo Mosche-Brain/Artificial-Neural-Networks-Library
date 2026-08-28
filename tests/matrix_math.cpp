@@ -5,7 +5,7 @@
 #include <cum/Matrix.hpp>
 #include <cum/cum.hpp>
 
-TEST_CASE("Matrix multiplication on CPU")
+TEST_CASE("CPU mmul")
 {
     cum::cum(cum::CUM_DEVICE::CPU);
 
@@ -21,6 +21,30 @@ TEST_CASE("Matrix multiplication on CPU")
     cum::Matrix VALID_RESULT(2, 2,
         {19, 22,
                 43, 50});
+
+
+    REQUIRE(C == VALID_RESULT);
+
+    cum::decum();
+}
+
+TEST_CASE("GPU mmul")
+{
+    cum::cum(cum::CUM_DEVICE::GPU);
+
+    cum::Matrix A(2, 2,
+        {1, 2,
+                3, 4});
+
+    cum::Matrix B(2, 2,
+        {5, 6,
+                7, 8});
+
+    cum::Matrix C = A * B;
+    cum::Matrix VALID_RESULT(2, 2,
+        {19, 22,
+                43, 50});
+
 
     REQUIRE(C == VALID_RESULT);
 

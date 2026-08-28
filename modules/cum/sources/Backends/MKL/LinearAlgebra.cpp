@@ -66,6 +66,14 @@ namespace cum::LinearAlgebra
         q.wait();
     }
 
+    void asum(cumeric_t& r, const cumeric_t* v, std::size_t N)
+    {
+        auto& q = internal::getQueue();
+        // oneapi::mkl::blas::row_major::asum(q, N, v, 1, &r);
+        oneapi::mkl::blas::row_major::asum(q, N, v, 1, &r);
+        q.wait();
+    }
+
     void cwiseProduct(cumeric_t* r, const cumeric_t* v, const cumeric_t* u, std::size_t N)
     {
         auto& q = internal::getQueue();

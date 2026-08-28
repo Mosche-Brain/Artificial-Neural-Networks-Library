@@ -92,13 +92,17 @@ namespace cum::functions::hyperbolic
         auto queue = internal::getQueue();
         auto e = oneapi::mkl::vm::tanh(queue, N, v, r);
 
-        queue.parallel_for(
-            sycl::range<1>(N),
-            {e},
-            [=](sycl::id<1> idx)
-            {
-                r[idx] = 1 - r[idx] * r[idx];
-            });
+        // queue.parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        // {
+        //     cum::cumeric_t tanh_squared = sycl::pow(sycl::tanh(v[idx]), 2);
+        //     r[idx] = 1 - tanh_squared;
+        //     // r[idx] = 1 - sycl::tanh(v[idx]) * sycl::tanh(v[idx]);
+        // }).wait();
+        queue.parallel_for(sycl::range<1>(N), {e},
+        [=](sycl::id<1> idx)
+        {
+            r[idx] = 1 - r[idx] * r[idx];
+        });
     }
 
     void tanh_deriv_from_result(cumeric_t* r, const cumeric_t* v, const std::size_t N)

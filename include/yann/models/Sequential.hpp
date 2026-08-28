@@ -43,7 +43,7 @@ namespace yann::models
         cum::Matrix& getBiases(size_t layer) const;
         cum::Matrix& getOutputs(size_t layer) const;
         cum::functions::activation_t getActivation(size_t layer) const;
-        auto getTopology() const -> Topology;
+        auto getTopology() const -> const Topology&;
         auto getLayer(size_t layer) const -> LayerPtr;
         size_t getLayersCount() const;
         int getLayerSize(size_t layer) const;

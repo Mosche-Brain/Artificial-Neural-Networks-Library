@@ -31,9 +31,9 @@ namespace cum
         if(device == CUM_DEVICE::AUTO)
             queue = sycl::queue(sycl::default_selector_v);
         else if(device == CUM_DEVICE::CPU)
-            queue = sycl::queue(sycl::cpu_selector_v);
+            queue = sycl::queue(sycl::cpu_selector_v, sycl::property::queue::in_order{});
         else if(device == CUM_DEVICE::GPU)
-            queue = sycl::queue(sycl::gpu_selector_v);
+            queue = sycl::queue(sycl::gpu_selector_v, sycl::property::queue::in_order{});
         else
             throw std::runtime_error("Invalid device type");
 

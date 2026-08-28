@@ -18,12 +18,15 @@ namespace yann::models::layers
         cum::Matrix x;
         cum::Matrix z;
         cum::Matrix a;
+        cum::Matrix dz;
+        cum::Matrix da;
 
         void clear()
         {
             x.fill(0);
             z.fill(0);
             a.fill(0);
+            dz.fill(0);
         }
 
         void resize(cum::dim_t in_features, cum::dim_t out_features, cum::dim_t batch_size)
@@ -31,6 +34,7 @@ namespace yann::models::layers
             x = cum::Matrix(in_features, batch_size);
             z = cum::Matrix(out_features, batch_size);
             a = cum::Matrix(out_features, batch_size);
+            dz= cum::Matrix(out_features, batch_size);
         }
     };
 
@@ -54,8 +58,10 @@ namespace yann::models::layers
         virtual int size();
         virtual cum::Matrix& Outputs();
         virtual cum::Matrix& Inputs();
+        virtual cum::Matrix& WeightsGrad();
         virtual cum::Matrix& Weights();
         virtual cum::Matrix& Biases();
+        virtual cum::Matrix& BiasesGrad();
         // utils::Activation activation;
         cum::functions::activation_t activation;
         

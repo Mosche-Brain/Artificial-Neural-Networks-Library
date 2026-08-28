@@ -7,6 +7,11 @@
 #include "internal/cumMKL.hpp"
 #include "cum/functions/various.hpp"
 
+#include <oneapi/dpl/algorithm>
+#include <oneapi/dpl/execution>
+
+#include "cum/memory.hpp"
+
 namespace cum::functions::various
 {
     void fill(cumeric_t* v, const cumeric_t val, const std::size_t N)
@@ -53,4 +58,28 @@ namespace cum::functions::various
         for(size_t i = 0 ; i < N ; i++) { v[i] = v[i] > min && v[i] < max ? v[i] : v[i] < min ? min : max; };
     }
 
+
+    bool equal(const cumeric_t* v, const  cumeric_t* u, const std::size_t N)
+    {
+        auto policy = oneapi::dpl::execution::make_device_policy(internal::getQueue());
+        return std::equal(policy, v, v + N, u);
+    }
+
+    void linespace(cumeric_t* v, const cumeric_t start, const cumeric_t end, const std::size_t N)
+    {
+        // cumeric_t* buff = cum::memory::allocate(N);
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            const std::size_t i = idx[0];
+
+            if (N == 1)
+            {
+                v[i] = start;
+            }
+            else
+            {
+                v[i] = start + static_cast<cumeric_t>(i) * (end - start) / static_cast<cumeric_t>(N - 1);
+            }
+        }).wait();
+    }
 }
