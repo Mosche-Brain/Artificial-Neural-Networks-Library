@@ -3,8 +3,8 @@
 #include <algorithm>
 
 #if defined(ENABLE_DEBUG_OUTPUT)
-    #include <iostream>
-    #include "utils/formating.hpp"
+#include <iostream>
+#include "utils/formating.hpp"
 #endif
 
 #include "runtime_config.hpp"
@@ -25,14 +25,14 @@ namespace yann::models
     {
         YANN_LOG(1, "Initializing Sequential model with {} layers...", newTopology.size());
 
-        topology.reserve(newTopology.size()); 
-        for(auto& ptr : newTopology) 
+        topology.reserve(newTopology.size());
+        for(auto& ptr : newTopology)
         {
             topology.push_back(std::move(const_cast<std::unique_ptr<layers::LayerBase>&>(ptr)));
         }
 
         if(!build) return;
-        
+
         this->build();
     }
 
@@ -91,19 +91,17 @@ namespace yann::models
     }
 
 
-    void Sequential::fit(const cum::Matrix& X, const cum::Matrix& Y, loss::LossBase& loss, optimizers::OptimizerBase& optimizer, size_t epochs, std::span<logging::ITrainingCallback*> callbacks)
+    void Sequential::fit(const cum::Matrix& X, const cum::Matrix& Y, loss::LossBase& loss, optimizers::OptimizerBase& optimizer, size_t epochs, size_t batch_size, std::span<logging::ITrainingCallback*> callbacks)
     {
         std::vector<Parameter*> params = this->parameters();
-
-        size_t batchSize = 64;
-        constexpr bool batched = true;
+        bool batched = batch_size > 1;
 
         cum::Matrix data = X.transpose();
         cum::Matrix target = Y.transpose();
 
         std::vector<cum::Matrix> batches_x;
         std::vector<cum::Matrix> batches_y;
-        if constexpr (batched)
+        if (batched)
         {
             for(int i = 0 ; i < X.rows() ; i += batchSize)
             {
@@ -124,7 +122,7 @@ namespace yann::models
 
             YANN_LOG(1, "Epoch {}", epoch);
 
-            if constexpr (!batched)
+            if(!batched)
             {
                 for(int i = 0 ; i < X.rows() ; i++)
                 {
@@ -210,14 +208,14 @@ namespace yann::models
         }
     }
 
-    void Sequential::updateParams(cum::cumeric_t rate) // depraced
-    {
-        for(size_t i = 0 ; i < topology.size() ; i++)
-        {
-            if(topology[i]->layerType() != layers::LAYER_TYPE::INPUT)
-                topology[i]->update_weights(rate);
-        }
-    }
+    //void Sequential::updateParams(cum::cumeric_t rate) // depraced
+    //{
+    //    for(size_t i = 0 ; i < topology.size() ; i++)
+    //    {
+    //        if(topology[i]->layerType() != layers::LAYER_TYPE::INPUT)
+    //            topology[i]->update_weights(rate);
+    //    }
+    //}
 
     cum::Matrix& Sequential::getWeights(size_t layer) const
     {

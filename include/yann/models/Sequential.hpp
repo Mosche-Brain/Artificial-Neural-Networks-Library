@@ -4,8 +4,8 @@
 #include <memory>
 #include <vector>
 
+#include "cum/Core.hpp"
 #include "layers/Layers.hpp"
-#include "../loss.hpp"
 #include "logging/ITrainingCallback.hpp"
 #include "loss/LossBase.hpp"
 #include "optimizers//OptimizerBase.hpp"
@@ -19,6 +19,59 @@
 
 namespace yann::models
 {
+	struct Sample
+	{
+		cum::Matrix X;
+		cum::Matrix Y;
+	};
+
+	struct SampleRef
+	{
+		cum::Matrix& X;
+		cum::Matrix& Y;
+	};
+
+	struct Batch
+	{
+		enum class ORIENTATION { ROW_SAMPLE, COLUMN_SAMPLE };
+		ORIENTATION orientation = ORIENTATION::COLUMN_SAMPLE;
+
+		cum::Matrix X;
+		cum::Matrix Y;
+		cum::dim_t size;
+
+		const cum::Matrix& inputs() const noexcept
+		{
+			return X;
+		}
+
+		const cum::Matrix& targets() const noexcept
+		{
+			return Y;
+		}
+
+		Sample sample(size_t index)
+		{
+			return orientation == ORIENTATION::ROW_SAMPLE ? Sample{ X.row(index), Y.row(index) } : Sample{ X.col(index), Y.col(index) };
+		}
+
+		cum::Matrix x(size_t index)
+		{
+			return orientation == ORIENTATION::ROW_SAMPLE ? X.row(index) : X.col(index);
+		}
+
+		cum::Matrix y(size_t index)
+		{
+			return orientation == ORIENTATION::ROW_SAMPLE ? Y.row(index) : Y.col(index);
+		}
+
+		Batch(cum::Matrix X, cum::Matrix Y, ORIENTATION orientation=ORIENTATION::ROW_SAMPLE) : X(X), Y(Y), orientation(orientation)
+		{
+			// jeszcze tutaj sprawdzanie wymiarow powinno być
+			size = orientation == ORIENTATION::ROW_SAMPLE ? X.rows() : X.cols(); 
+		}
+	};
+
     class Sequential
     {
     public:
@@ -33,7 +86,7 @@ namespace yann::models
         
         cum::Matrix forward(const cum::Matrix& input);
         
-        void fit(const cum::Matrix& X, const cum::Matrix& Y, loss::LossBase& loss, optimizers::OptimizerBase& optimizer, size_t epochs, std::span<logging::ITrainingCallback*> callbacks = {});
+        void fit(const cum::Matrix& X, const cum::Matrix& Y, loss::LossBase& loss, optimizers::OptimizerBase& optimizer, size_t epochs, size_t batch_size=1, std::span<logging::ITrainingCallback*> callbacks = {});
         void addLayer(LayerPtr layer);
         void clear();
 
@@ -51,9 +104,7 @@ namespace yann::models
         std::vector<Parameter*> parameters();
     protected:
         void backward(const cum::Matrix& d_output);
-        void updateParams(cum::cumeric_t rate);
 
         Topology topology;
-        loss::LossFunction loss_function;
     };
 }
