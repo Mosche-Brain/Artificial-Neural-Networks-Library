@@ -180,8 +180,9 @@ namespace cum
 
     Matrix Matrix::col(size_t i) const
     {
-        Matrix temp(rows_, 1); 
-        for(size_t j = 0 ; j < rows_ ; j++)
+        Matrix temp(rows_, 1);
+        internal::getQueue().wait();
+        for (size_t j = 0; j < rows_; ++j)
         {
             temp.data_[j] = data_[j * cols_ + i];
         }

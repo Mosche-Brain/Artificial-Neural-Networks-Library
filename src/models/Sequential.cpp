@@ -170,7 +170,7 @@ namespace yann::models
                     YANN_LOG(2, "{} sample", i);
 
                     cum::Matrix x = data.col(i);
-                    cum::Matrix y = target.col(i);
+                    cum::Matrix y = Y.row(i).transpose();
                     cum::runtime::sync();
 
                     cum::Matrix result = this->forward(x);
