@@ -2,6 +2,7 @@
 
 #include <initializer_list>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "cum/Core.hpp"
@@ -50,26 +51,31 @@ namespace yann::models
 			return Y;
 		}
 
-		Sample sample(size_t index)
-		{
-			return orientation == ORIENTATION::ROW_SAMPLE ? Sample{ X.row(index), Y.row(index) } : Sample{ X.col(index), Y.col(index) };
-		}
+        Sample sample(size_t index) const
+        {
+            return orientation == ORIENTATION::ROW_SAMPLE ? Sample{ X.row(index), Y.row(index) } : Sample{ X.col(index), Y.col(index) };
+        }
 
-		cum::Matrix x(size_t index)
-		{
-			return orientation == ORIENTATION::ROW_SAMPLE ? X.row(index) : X.col(index);
-		}
+        cum::Matrix x(size_t index) const
+        {
+            return orientation == ORIENTATION::ROW_SAMPLE ? X.row(index) : X.col(index);
+        }
 
-		cum::Matrix y(size_t index)
-		{
-			return orientation == ORIENTATION::ROW_SAMPLE ? Y.row(index) : Y.col(index);
-		}
+        cum::Matrix y(size_t index) const
+        {
+            return orientation == ORIENTATION::ROW_SAMPLE ? Y.row(index) : Y.col(index);
+        }
 
-		Batch(cum::Matrix X, cum::Matrix Y, ORIENTATION orientation=ORIENTATION::ROW_SAMPLE) : X(X), Y(Y), orientation(orientation)
-		{
-			// jeszcze tutaj sprawdzanie wymiarow powinno być
-			size = orientation == ORIENTATION::ROW_SAMPLE ? X.rows() : X.cols(); 
-		}
+        Batch(
+            cum::Matrix X,
+            cum::Matrix Y,
+            ORIENTATION orientation = ORIENTATION::ROW_SAMPLE)
+            : orientation(orientation),
+              X(std::move(X)),
+              Y(std::move(Y)),
+              size(orientation == ORIENTATION::ROW_SAMPLE ? this->X.rows() : this->X.cols())
+        {
+        }
 	};
 
     class Sequential

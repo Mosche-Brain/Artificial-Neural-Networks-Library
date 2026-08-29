@@ -4,54 +4,82 @@
 
 #include "optimizers/SGD.hpp"
 
-// #include <print>
-
 #include "cum/runtime.hpp"
+
+#include <fstream>
+#include <string>
+
+namespace
+{
+    void dump_matrix(
+        const cum::Matrix& matrix,
+        const char* name,
+        std::size_t step,
+        std::size_t parameter)
+    {
+        std::ofstream file(
+            "plots/sgd_" + std::to_string(step) + "_parameter_" +
+            std::to_string(parameter) + "_" + name + ".txt");
+        file << "# rows " << matrix.rows() << " cols " << matrix.cols() << '\n';
+        for (std::size_t row = 0; row < matrix.rows(); ++row)
+        {
+            for (std::size_t col = 0; col < matrix.cols(); ++col)
+            {
+                if (col != 0)
+                {
+                    file << ' ';
+                }
+                file << static_cast<double>(matrix(row, col));
+            }
+            file << '\n';
+        }
+    }
+}
 
 namespace yann::optimizers
 {
-
-    SGD::SGD(cum::cumeric_t learning_rate)  : OptimizerBase(learning_rate)
+    SGD::SGD(cum::cumeric_t learning_rate)
+        : OptimizerBase(learning_rate)
     {
-
     }
 
     void SGD::step(cum::Matrix& params, cum::Matrix& grad)
     {
-        // tą funkcje prawdopodobnie zlikwiduje
     }
 
     void SGD::step(std::vector<Parameter*>& params)
     {
-        // std::println("params count: {}", params.size());
-        for(Parameter* param : params)
+        static std::size_t update_step = 0;
+        for (std::size_t parameter = 0; parameter < params.size(); ++parameter)
         {
-            // std::println("updating param");
-
-            param->scale_gradient(1._c/param->cols());
+            Parameter* param = params[parameter];
+            const std::size_t step = update_step++;
+            if (step < 16)
+            {
+                std::ofstream metadata(
+                    "plots/sgd_" + std::to_string(step) + "_parameter_" +
+                    std::to_string(parameter) + "_metadata.txt");
+                metadata << "learning_rate "
+                         << static_cast<double>(learning_rate) << '\n';
+                dump_matrix(param->values, "values_before", step, parameter);
+                dump_matrix(param->gradient, "gradient", step, parameter);
+            }
 
             param->values -= param->gradient * learning_rate;
             cum::runtime::sync();
 
-            // add small random offset
-            // cum::Matrix offset = cum::Matrix::Random(param->values.rows(), param->values.cols(), -0.01_c, 0.01_c);
-            // cum::runtime::sync();
+            if (step < 16)
+            {
+                dump_matrix(param->values, "values_after", step, parameter);
+            }
 
-            // param->values += offset;
-            // cum::runtime::sync();
-            // param->values -= (param->gradient * learning_rate);
-            // std::println("clearing grad");
             param->clear_gradient();
-            // learning_rate *= 0.995;
-            // param->scale_gradient(0.1_c);
             cum::runtime::sync();
         }
-        // learning_rate *= 0.99999f;
-        // kod w komentarzach był do debugowania
     }
 
     std::unique_ptr<SGD> SGD::create(cum::cumeric_t learning_rate)
     {
         return std::make_unique<SGD>(learning_rate);
     }
-} // yann
+} // namespace yann::optimizers

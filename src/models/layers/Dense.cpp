@@ -8,6 +8,34 @@
 #include "runtime_config.hpp"
 #include "cum/runtime.hpp"
 #include "cum/functions/transform.hpp"
+#include <fstream>
+
+namespace
+{
+    void dump_backward_stage(
+        const cum::Matrix& matrix,
+        std::size_t call,
+        const char* stage)
+    {
+        std::ofstream file(
+            "plots/dense_backward_trace_" +
+            std::to_string(call) + "_" + stage + ".txt");
+        file << "# rows " << matrix.rows()
+             << " cols " << matrix.cols() << '\n';
+        for (std::size_t row = 0; row < matrix.rows(); ++row)
+        {
+            for (std::size_t col = 0; col < matrix.cols(); ++col)
+            {
+                if (col != 0)
+                {
+                    file << ' ';
+                }
+                file << static_cast<double>(matrix(row, col));
+            }
+            file << '\n';
+        }
+    }
+}
 
 #define ENABLE_RUNTIME_CHECKS true
 #define USE_FUSED_KERNELS false
@@ -87,29 +115,44 @@ namespace yann::models::layers
     cum::Matrix Dense::backward(const cum::Matrix& deltaOutput)
     {
         constexpr bool batched = true;
+        static std::size_t trace_call = 0;
+        const std::size_t call = trace_call++;
+        if (call < 8)
+        {
+            dump_backward_stage(deltaOutput, call, "delta_output");
+        }
         if constexpr (batched)
         {
-            // cum::Matrix activation_derivative(cache.z.rows(), cache.z.cols()); // tą macierz mógłbym przenieść do struktury cache by uniknąć alokacji w trakcie wykonywania propagacji wstecznej
             cum::runtime::sync();
-            cum::functions::transform_deriv(cache.dz.data(), cache.z.data(), cache.z.size(), activation.name);
+            cum::functions::transform_deriv(
+                cache.dz.data(), cache.z.data(), cache.z.size(), activation.name);
             cum::runtime::sync();
+            if (call < 8)
+            {
+                dump_backward_stage(cache.dz, call, "activation_derivative");
+            }
 
-
-            cum::Matrix cached_somewhat = cache.dz.cwiseProduct(deltaOutput); // tą też
+            cum::Matrix cached_somewhat = cache.dz.cwiseProduct(deltaOutput);
             cum::runtime::sync();
+            if (call < 8)
+            {
+                dump_backward_stage(cached_somewhat, call, "preactivation_gradient");
+            }
 
-            // for (int i = 0 ; i < inputs.cols() ; i++)
-            // {
-            //     weights.gradient += cached_somewhat.col(i) * inputs.col(i).transpose();
-            //     biases.gradient += cached_somewhat.col(i);
-            // }
             weights.gradient += cached_somewhat * cache.x.transpose();
             cum::runtime::sync();
+            if (call < 8)
+            {
+                dump_backward_stage(weights.gradient, call, "weights_gradient");
+            }
 
             biases.gradient += cached_somewhat.rowwiseSum();
             cum::runtime::sync();
+            if (call < 8)
+            {
+                dump_backward_stage(biases.gradient, call, "biases_gradient");
+            }
 
-            // dodaje gradienty zamiast przypisywać by optymalizator miał dowolność co to tego czy chce je wyzerować czy przeskalować po kroku dostrajania
 
             return weights().transpose() * cached_somewhat;
         }
@@ -127,11 +170,10 @@ namespace yann::models::layers
             cum::runtime::sync();
 
             YANN_LOG(4, "deltaWeights = matrixMultiply(d_pre_activation, matrixTranspose(inputs))\n", "");
-            weights.gradient = biases.gradient * cache.x.transpose(); // input is col
+            weights.gradient = biases.gradient * cache.x.transpose();
             cum::runtime::sync();
 
             return weights().transpose() * biases.gradient;
-
         }
     }
 

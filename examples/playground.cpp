@@ -111,8 +111,8 @@ int main()
     cum::functions::trigonometric::sin_in_place(Y_train.data(), N_train);
     cum::runtime::sync();
 
-	X_train /= x_max;
-    X_eval /= x_max;
+	//X_train /= x_max;
+    //X_eval /= x_max;
 
     cum::Matrix Y_pred_pretrained = model.forward(X_eval); // batch
 
@@ -126,7 +126,7 @@ int main()
     std::array<yann::logging::ITrainingCallback*, 2> callbacks = { &loss_tracker, &grad_tracker };
 
     yann::runtime_config::set_verbosity(1);
-    model.fit(X_train, Y_train, *loss, *optimizer, 4000, callbacks);
+    model.fit(X_train, Y_train, *loss, *optimizer, 4000, 64, callbacks);
     cum::runtime::sync();
 
 
