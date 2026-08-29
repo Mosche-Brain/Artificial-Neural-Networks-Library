@@ -6,6 +6,7 @@
 
 #include "internal/cumMKL.hpp"
 
+#include <stdexcept>
 #include <utility>
 #include <random>
 
@@ -193,26 +194,17 @@ namespace cum
     Matrix& Matrix::set(const Matrix& other)
     {
         if (this == &other)
-            return *this;
-
-        if(data_ != nullptr)
         {
-            // sycl::free(data_, internal::getQueue());
-            memory::free(data_);
-            data_ = nullptr;
+            return *this;
         }
-        data_ = memory::allocate(other.rows_ * other.cols_);
 
-        // internal::getQueue().memcpy(other.data_, data_, other.rows_ * other.cols_ * sizeof(cumeric_t)).wait();
-        memory::memcopy(other.data_, data_, rows_ * cols_ * sizeof(cumeric_t));
+        Matrix replacement(other);
+        swap(replacement);
         return *this;
     }
 
     Matrix& Matrix::operator = (Matrix other) noexcept
     {
-        if(data_ == nullptr)
-            data_ = cum::memory::allocate(other.rows_ * other.cols_);
-            // data_ = sycl::malloc_shared<cumeric_t>(other.rows_ * other.cols_, internal::getQueue());
         swap(other);
         return *this;
     }
@@ -251,6 +243,11 @@ namespace cum
 
     Matrix& Matrix::operator *= (const Matrix& other)
     {
+        if (cols_ != other.rows_ || other.cols_ != cols_)
+        {
+            throw std::invalid_argument("In-place matrix multiplication dimension mismatch");
+        }
+
         LinearAlgebra::matMulInPlace(this->data_, other.data_, this->rows_, other.cols_, this->cols_);
         return *this;
     }
@@ -293,10 +290,15 @@ namespace cum
 
     Matrix operator * (const Matrix& A, const Matrix& B)
     {
+        if (A.cols_ != B.rows_)
+        {
+            throw std::invalid_argument("Matrix multiplication dimension mismatch");
+        }
+
         Matrix mat(A.rows_, B.cols_);
 
         LinearAlgebra::matMul(mat.data_, A.data_, B.data_, A.rows_, B.cols_, A.cols_);
-        return mat; 
+        return mat;
     }
 
     // Matrix operator * (const Matrix& A, const Vector& v)
@@ -307,13 +309,30 @@ namespace cum
     //     return mat; 
     // }
 
-    Matrix operator * (const Matrix& mat, const cumeric_t& scalar)
+    Matrix operator * (const Matrix& mat, const cumeric_t scalar)
     {
         Matrix temp(mat.rows_, mat.cols_);
-        memcpy(temp.data_, mat.data_, mat.rows_ * mat.cols_ * sizeof(cumeric_t));
-        
-        LinearAlgebra::scaleInPlace(temp.data_, scalar, mat.rows_ * mat.cols_);
+        internal::getQueue().memcpy(
+            temp.data_, mat.data_, mat.size() * sizeof(cumeric_t)).wait();
+        LinearAlgebra::scaleInPlace(temp.data_, scalar, mat.size());
         return temp;
+    }
+
+    Matrix operator * (const cumeric_t scalar, const Matrix& mat)
+    {
+        return mat * scalar;
+    }
+
+    Matrix operator + (const Matrix& mat, const cumeric_t scalar)
+    {
+        Matrix temp(mat);
+        temp += scalar;
+        return temp;
+    }
+
+    Matrix operator + (const cumeric_t scalar, const Matrix& mat)
+    {
+        return mat + scalar;
     }
 
     Matrix operator / (const Matrix& A, const Matrix& B)
@@ -389,24 +408,193 @@ namespace cum
     
     Matrix Matrix::transform(void (*func)(cumeric_t* data, const std::size_t size)) const
     {
-        Matrix temp(rows_, cols_);
-        memcpy(temp.data_, data_, rows_ * cols_ * sizeof(cumeric_t));
+        Matrix temp(*this);
         temp.transformInPlace(func);
         return temp;
     }
 
     Matrix& Matrix::transformInPlace(void (*func)(cumeric_t* data, const std::size_t size))
     {
-        // cum::functions::transformInPlace(data_, func, rows_ * cols_);
+        if (func == nullptr)
+        {
+            throw std::invalid_argument("Matrix transform requires a function");
+        }
+        internal::getQueue().wait();
+        func(data_, size());
+        internal::getQueue().wait();
+        return *this;
     }
 
     Matrix Matrix::transform(cumeric_t (*func)(cumeric_t x)) const
     {
-
+        Matrix temp(*this);
+        temp.transformInPlace(func);
+        return temp;
     }
 
     Matrix& Matrix::transformInPlace(cumeric_t (*func)(cumeric_t x))
-    {}
+    {
+        if (func == nullptr)
+        {
+            throw std::invalid_argument("Matrix transform requires a function");
+        }
+        internal::getQueue().wait();
+        for (std::size_t i = 0; i < size(); ++i)
+        {
+            data_[i] = func(data_[i]);
+        }
+        internal::getQueue().wait();
+        return *this;
+    }
+
+    Matrix Matrix::sin()
+    {
+        Matrix temp(*this);
+        return temp.sinInPlace();
+    }
+
+    Matrix& Matrix::sinInPlace()
+    {
+        functions::trigonometric::sin(data_, data_, size());
+        internal::getQueue().wait();
+        return *this;
+    }
+
+    Matrix Matrix::cos()
+    {
+        Matrix temp(*this);
+        return temp.cosInPlace();
+    }
+
+    Matrix& Matrix::cosInPlace()
+    {
+        functions::trigonometric::cos(data_, data_, size());
+        internal::getQueue().wait();
+        return *this;
+    }
+
+    Matrix Matrix::tan()
+    {
+        Matrix temp(*this);
+        return temp.tanInPlace();
+    }
+
+    Matrix& Matrix::tanInPlace()
+    {
+        functions::trigonometric::tan(data_, data_, size());
+        internal::getQueue().wait();
+        return *this;
+    }
+
+    Matrix Matrix::sinh()
+    {
+        Matrix temp(*this);
+        return temp.sinhInPlace();
+    }
+
+    Matrix& Matrix::sinhInPlace()
+    {
+        functions::hyperbolic::sinh(data_, data_, size());
+        internal::getQueue().wait();
+        return *this;
+    }
+
+    Matrix Matrix::cosh()
+    {
+        Matrix temp(*this);
+        return temp.coshInPlace();
+    }
+
+    Matrix& Matrix::coshInPlace()
+    {
+        functions::hyperbolic::cosh(data_, data_, size());
+        internal::getQueue().wait();
+        return *this;
+    }
+
+    Matrix Matrix::tanh()
+    {
+        Matrix temp(*this);
+        return temp.tanhInPlace();
+    }
+
+    Matrix& Matrix::tanhInPlace()
+    {
+        functions::hyperbolic::tanh(data_, data_, size());
+        internal::getQueue().wait();
+        return *this;
+    }
+
+    Matrix Matrix::sqrt()
+    {
+        Matrix temp(*this);
+        return temp.sqrtInPlace();
+    }
+
+    Matrix& Matrix::sqrtInPlace()
+    {
+        auto& q = internal::getQueue();
+        q.parallel_for(sycl::range<1>(size()), [data = data_](sycl::id<1> index)
+        {
+            data[index] = sycl::sqrt(data[index]);
+        }).wait();
+        return *this;
+    }
+
+    Matrix Matrix::square()
+    {
+        Matrix temp(*this);
+        return temp.squareInPlace();
+    }
+
+    Matrix& Matrix::squareInPlace()
+    {
+        auto& q = internal::getQueue();
+        q.parallel_for(sycl::range<1>(size()), [data = data_](sycl::id<1> index)
+        {
+            data[index] *= data[index];
+        }).wait();
+        return *this;
+    }
+
+    Matrix Matrix::exp()
+    {
+        Matrix temp(*this);
+        return temp.expInPlace();
+    }
+
+    Matrix& Matrix::expInPlace()
+    {
+        functions::exponential::exp(data_, data_, size());
+        internal::getQueue().wait();
+        return *this;
+    }
+
+    Matrix Matrix::log()
+    {
+        Matrix temp(*this);
+        return temp.logInPlace();
+    }
+
+    Matrix& Matrix::logInPlace()
+    {
+        functions::exponential::log(data_, data_, size());
+        internal::getQueue().wait();
+        return *this;
+    }
+
+    Matrix Matrix::relu()
+    {
+        Matrix temp(*this);
+        return temp.reluInPlace();
+    }
+
+    Matrix& Matrix::reluInPlace()
+    {
+        functions::linear_units::relu(data_, data_, size());
+        internal::getQueue().wait();
+        return *this;
+    }
 
     Matrix Matrix::cwiseProduct(const Matrix& other)
     {

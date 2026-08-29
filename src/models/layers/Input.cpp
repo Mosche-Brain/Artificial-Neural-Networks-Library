@@ -37,7 +37,8 @@ namespace yann::models::layers
             cache.resize(cache.x.rows(), cache.z.rows(), input.cols());
         }
         this->cache.x = input;
-        return this->cache.x;
+        this->cache.a = input;
+        return this->cache.a;
     }
 
     cum::Matrix Input::backward(const cum::Matrix& deltaOutput)

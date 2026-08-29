@@ -221,6 +221,23 @@ namespace cum::LinearAlgebra
     {
         addInPlace(A, B, rows * cols);
     }
+    void addRowVectorInPlace(cumeric_t* matrix, const cumeric_t* row_vector, std::size_t rows, std::size_t cols)
+    {
+        if (rows == 0 || cols == 0)
+        {
+            return;
+        }
+
+        auto& q = internal::getQueue();
+        q.parallel_for(
+            sycl::range<2>(rows, cols),
+            [matrix, row_vector, cols](sycl::id<2> index)
+            {
+                const std::size_t row = index[0];
+                const std::size_t col = index[1];
+                matrix[row * cols + col] += row_vector[row];
+            }).wait();
+    }
 
     void matSub(cumeric_t* C, const cumeric_t* A, const cumeric_t* B, std::size_t rows, std::size_t cols)
     {
@@ -242,7 +259,7 @@ namespace cum::LinearAlgebra
                                            1.0f, A, k,  // k=matrix A cols = matrix B rows
                                            B, n, 0.0f, C, // k=matrix A cols = matrix B rows, n=matrix B cols, n=matrix C cols
                                            n, oneapi::mkl::blas::compute_mode::standard, {});          //
-        // q.wait();
+        q.wait();
     }
 
     void matMulInPlace(cumeric_t* A, const cumeric_t* B, std::size_t m, std::size_t n, std::size_t k)
@@ -254,7 +271,7 @@ namespace cum::LinearAlgebra
                                            m, n, k, 1.0, A, // m=matrix A rows, n=matrix B cols, k=matrix A cols = matrix B rows
                                            k, B, n, 1.0, A, // k=matrix A cols = matrix B rows, n=matrix B cols, n=matrix A cols
                                            n, {});          //
-        // q.wait();
+        q.wait();
     }
 
     void matScale(cumeric_t* mat, const cumeric_t* old, const cumeric_t& a, const std::size_t& rows, const std::size_t& cols)

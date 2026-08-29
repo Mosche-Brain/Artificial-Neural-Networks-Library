@@ -70,10 +70,12 @@ namespace cum
   
         /* Outplace arithmetic operator */
         friend Matrix operator + (const Matrix& A, const Matrix& B);
+		friend Matrix operator + (const Matrix& mat, const cumeric_t scalar);
+		friend Matrix operator + (const cumeric_t scalar, const Matrix& mat);
         friend Matrix operator - (const Matrix& A, const Matrix& B);
         friend Matrix operator * (const Matrix& A, const Matrix& B);
-        // friend Matrix operator * (const Matrix& A, const Vector& v);
-        friend Matrix operator * (const Matrix& mat, const cumeric_t& scalar);
+        friend Matrix operator * (const Matrix& mat, const cumeric_t scalar);
+        friend Matrix operator * (const cumeric_t scalar, const Matrix& mat);
         friend Matrix operator / (const Matrix& A, const Matrix& B);
         friend Matrix operator / (const Matrix& mat, const cumeric_t& scalar);
         friend bool operator == (const Matrix& A, const Matrix& B);
@@ -90,11 +92,47 @@ namespace cum
         Matrix cwiseProduct(const Matrix& other);
         Matrix& cwiseProductInPlace();
 
+		/* Elementwise functions */
         Matrix transform(void (*func)(cumeric_t* data, const std::size_t size)) const;
         Matrix& transformInPlace(void (*func)(cumeric_t* data, const std::size_t size));
 
         Matrix transform(cumeric_t (*func)(cumeric_t x)) const;
         Matrix& transformInPlace(cumeric_t (*func)(cumeric_t x));
+
+		Matrix sin();
+		Matrix& sinInPlace();
+
+		Matrix cos();
+		Matrix& cosInPlace();
+
+		Matrix tan();
+		Matrix& tanInPlace();
+
+		Matrix sinh();
+		Matrix& sinhInPlace();
+
+		Matrix cosh();
+		Matrix& coshInPlace();
+
+		Matrix tanh();
+		Matrix& tanhInPlace();
+
+		Matrix sqrt();
+		Matrix& sqrtInPlace();
+
+		Matrix square();
+		Matrix& squareInPlace();
+
+		Matrix exp(); // e^{x} for each element
+		Matrix& expInPlace();
+
+		Matrix log(); // ln(x) for each element
+		Matrix& logInPlace();
+
+		Matrix relu();
+		Matrix& reluInPlace();
+
+		/* idk how to name it */
 
         Matrix& rowwiseOpInPlace(void (*op)(cumeric_t* row, const cumeric_t* v, const std::size_t cols), const cumeric_t* arr);
         Matrix& colwiseOpInPlace(void (*op)(cumeric_t* col, const cumeric_t* v, const std::size_t rows), const cumeric_t* arr);
@@ -102,14 +140,17 @@ namespace cum
         Matrix clip(const cumeric_t min, const cumeric_t max) const;
         Matrix& clipInPlace(const cumeric_t min, const cumeric_t max);
 
+
+
+		/* Scalar reductions */
         cumeric_t norm();
         cumeric_t squaredNorm();
-
         cumeric_t sum() const;
         cumeric_t sumAbs() const;
         cumeric_t mean() const;
         cumeric_t amean() const;
 
+		/* Vector reductions */
         Matrix colwiseSum();
         Vector colwiseSum2vec();
         Matrix rowwiseSum();
@@ -121,8 +162,9 @@ namespace cum
     private:
         std::size_t get_idx(const std::size_t row, const std::size_t col) const { return row * cols_ + col; }
 
-        std::size_t rows_, cols_;
-        cumeric_t* data_=nullptr;
+        std::size_t rows_ = 0;
+        std::size_t cols_ = 0;
+        cumeric_t* data_ = nullptr;
     };
 
 } // namespace cum

@@ -30,6 +30,7 @@ namespace cum::LinearAlgebra /* LATK */
 
     void matAdd(cumeric_t* C, const cumeric_t* A, const cumeric_t* B, std::size_t rows, std::size_t cols);
     void matAddInPlace(cumeric_t* A, const cumeric_t* B, std::size_t rows, std::size_t cols);
+    void addRowVectorInPlace(cumeric_t* matrix, const cumeric_t* row_vector, std::size_t rows, std::size_t cols);
 
     void matSub(cumeric_t* C, const cumeric_t* A, const cumeric_t* B, std::size_t rows, std::size_t cols);
     void matSubInPlace(cumeric_t* A, const cumeric_t* B, std::size_t rows, std::size_t cols);

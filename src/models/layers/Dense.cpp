@@ -1,3 +1,4 @@
+
 #include "Dense.hpp"
 #include <cum/functions.hpp>
 #include <cum/LinearAlgebra.hpp>
@@ -23,6 +24,7 @@ namespace yann::models::layers
 
         this->_layerType_ = LAYER_TYPE::DENSE;
     }
+
 
     cum::Matrix Dense::forward(const cum::Matrix& input) // rozważył bym przekazywanie referencji do wyniku zamiast kopii
     {
@@ -63,14 +65,17 @@ namespace yann::models::layers
         {
             YANN_LOG(4, "Performing (weights * input) + biases", "");
             // cache.z = (weights() * input) += biases();;
-            cache.z = weights() * input;
+            cache.z = weights() * cache.x;
             cum::runtime::sync();
-            cache.z += biases();
+            cum::LinearAlgebra::addRowVectorInPlace(
+                cache.z.data(),
+                biases().data(),
+                cache.z.rows(),
+                cache.z.cols());
 
             cum::runtime::sync();
 
             YANN_LOG(4, "Performing activation", "");
-            // cum::functions::transform(cache.a.data(), cache.z.data(), cache.z.size(), activation.name);
             cum::functions::transform(cache.a.data(), cache.z.data(), cache.z.size(), activation.name);
         }
 

@@ -4,6 +4,7 @@
 
 #include <yann/models/Sequential.hpp>
 #include <yann/optimizers/SGD.hpp>
+#include <yann/optimizers/ADAM.hpp>
 #include <yann/runtime_config.hpp>
 #include <yann/loss/MeanSquaredError.hpp>
 #include <yann/logging/LossTracker.hpp>
@@ -72,8 +73,12 @@ int main()
 
     yann::models::Sequential model;
     model.addLayer(yann::models::layers::Input::createUnique(1));
-    model.addLayer(yann::models::layers::Dense::createUnique(8, "tanh"));
-    model.addLayer(yann::models::layers::Dense::createUnique(1, "tanh"));
+    model.addLayer(yann::models::layers::Dense::createUnique(64, "tanh"));
+    model.addLayer(yann::models::layers::Dense::createUnique(32, "tanh"));
+    // model.addLayer(yann::models::layers::Dense::createUnique(128, "leaky_relu"));
+    // model.addLayer(yann::models::layers::Dense::createUnique(32, "relu"));
+    // model.addLayer(yann::models::layers::Dense::createUnique(32, "relu"));
+    model.addLayer(yann::models::layers::Dense::createUnique(1, "linear"));
 
     model.build();
 
@@ -87,9 +92,9 @@ int main()
 
     // return 0;
 
-    cum::cumeric_t x_min = 2.f * -M_PIf;
-    cum::cumeric_t x_max = 2.f * M_PIf;
-    std::size_t N_train = 48;
+    cum::cumeric_t x_min = 3.f * -M_PIf;
+    cum::cumeric_t x_max = 3.f * M_PIf;
+    std::size_t N_train = 64;
     std::size_t N_eval = 512;
 
     cum::Matrix X_train = cum::Matrix::Linspace(x_min, x_max, N_train).transpose(); // linspace in row vector
@@ -100,17 +105,19 @@ int main()
     cum::Matrix Y_eval = cum::Matrix::Linspace(x_min, x_max, N_eval);
 
     cum::runtime::sync();
+    // cum::functions::hyperbolic::tanh_in_place(Y_eval.data(), N_eval);
+    // cum::functions::hyperbolic::tanh_in_place(Y_train.data(), N_train);
     cum::functions::trigonometric::sin_in_place(Y_eval.data(), N_eval);
     cum::functions::trigonometric::sin_in_place(Y_train.data(), N_train);
     cum::runtime::sync();
 
-    X_train /= x_max;
+	X_train /= x_max;
     X_eval /= x_max;
 
     cum::Matrix Y_pred_pretrained = model.forward(X_eval); // batch
 
     yann::loss::Loss loss = yann::loss::MeanSquaredError::create();
-    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.01);
+    yann::optimizers::Optimizer optimizer = yann::optimizers::ADAM::create(0.001);
 
 
     yann::logging::LossTracker loss_tracker = yann::logging::LossTracker();
@@ -119,7 +126,7 @@ int main()
     std::array<yann::logging::ITrainingCallback*, 2> callbacks = { &loss_tracker, &grad_tracker };
 
     yann::runtime_config::set_verbosity(1);
-    model.fit(X_train, Y_train, *loss, *optimizer, 0, callbacks);
+    model.fit(X_train, Y_train, *loss, *optimizer, 4000, callbacks);
     cum::runtime::sync();
 
 
@@ -139,6 +146,12 @@ int main()
     cum::runtime::sync();
 
     cum::Matrix Y_pred = model.forward(X_eval); // batch
+
+    //saveMatrixToFile(X_train, "plots/X_train.txt");
+    //saveMatrixToFile(X_eval, "plots/X_eval.txt");
+    //saveMatrixToFile(Y_train, "plots/Y_train.txt");
+    //saveMatrixToFile(Y_pred_pretrained, "plots/Y_pred_pretrained.txt");
+    //saveMatrixToFile(Y_pred, "plots/Y_pred.txt");
 
     cum::runtime::sync();
 

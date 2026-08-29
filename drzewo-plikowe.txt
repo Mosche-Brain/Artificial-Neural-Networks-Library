@@ -1,0 +1,252 @@
+.
+├── AGENTS.md
+├── bindings
+│   ├── C
+│   │   ├── CMakeLists.txt
+│   │   ├── examples
+│   │   │   ├── CMakeLists.txt
+│   │   │   └── mlp.c
+│   │   ├── include
+│   │   │   └── yann.h
+│   │   └── src
+│   │       ├── yann_c_api.cpp
+│   │       ├── yann_context.cpp
+│   │       ├── yann_internal.hpp
+│   │       ├── yann_matrix.cpp
+│   │       └── yann_model.cpp
+│   ├── pyproject.toml
+│   └── setup.py
+├── BUILD_SYSTEM_REVIEW.md
+├── CMakeLists.txt
+├── docs
+│   ├── C_API.md
+│   ├── project_overview.md
+│   └── USING-MATH-API.md
+├── drzewko-plikow.txt
+├── drzewo-plikowe.txt
+├── drzewo.txt
+├── examples
+│   ├── autism_predictor.cpp
+│   ├── batches.cpp
+│   ├── CMakeLists.txt
+│   ├── cum_module.cpp
+│   ├── fitting_surface_to_3d_points.cpp
+│   ├── helpers
+│   │   ├── conversion_helpers.hpp
+│   │   └── surface_visualisation.hpp
+│   ├── inference_reference.cpp
+│   ├── inference_reference_numpy.py
+│   ├── iris.cpp
+│   ├── logging.cpp
+│   ├── mmul.cpp
+│   ├── mnist.cpp
+│   ├── ngram_example.cpp
+│   ├── nn_primitives.cpp
+│   ├── playground.cpp
+│   ├── plot.gp
+│   ├── ploting_activation_functions.cpp
+│   ├── sine_aproximation.cpp
+│   ├── test1.cpp
+│   ├── tests.cpp
+│   └── xor_problem.cpp
+├── include
+│   └── yann
+│       ├── build_config.hpp
+│       ├── logging
+│       │   ├── GradientTracker.hpp
+│       │   ├── ITrainingCallback.hpp
+│       │   ├── Logger.hpp
+│       │   └── LossTracker.hpp
+│       ├── loss
+│       │   ├── BinaryCrossEntropy.hpp
+│       │   ├── LossBase.hpp
+│       │   ├── MeanAbsoluteError.hpp
+│       │   └── MeanSquaredError.hpp
+│       ├── loss.hpp
+│       ├── models
+│       │   ├── layers
+│       │   │   ├── Conv2D.hpp
+│       │   │   ├── Dense.hpp
+│       │   │   ├── Flatten.hpp
+│       │   │   ├── Input.hpp
+│       │   │   ├── LayerBase.hpp
+│       │   │   ├── LayerData.hpp
+│       │   │   ├── Layer.hpp
+│       │   │   ├── Layers.hpp
+│       │   │   └── LayerType.hpp
+│       │   ├── ModelBase.hpp
+│       │   ├── NGram.hpp
+│       │   ├── Perceptron.hpp
+│       │   └── Sequential.hpp
+│       ├── optimizers
+│       │   ├── AdaGrad.hpp
+│       │   ├── ADAM.hpp
+│       │   ├── OptimizerBase.hpp
+│       │   └── SGD.hpp
+│       ├── Parameter.hpp
+│       ├── runtime_config.hpp
+│       ├── utils
+│       │   ├── Activation.hpp
+│       │   ├── FileIO.hpp
+│       │   ├── formating.hpp
+│       │   ├── functions.hpp
+│       │   ├── OneHot.hpp
+│       │   └── stlCompatibility.hpp
+│       └── YANN.hpp
+├── LICENSE-APACHE-2.0
+├── modules
+│   ├── cum
+│   │   ├── CMakeLists.txt
+│   │   ├── examples
+│   │   │   └── test.cpp
+│   │   ├── include
+│   │   │   └── cum
+│   │   │       ├── Core.hpp
+│   │   │       ├── cum.hpp
+│   │   │       ├── detail
+│   │   │       │   ├── detail.hpp
+│   │   │       │   └── vendor
+│   │   │       │       ├── cuda
+│   │   │       │       │   └── float16.hpp
+│   │   │       │       ├── native
+│   │   │       │       │   └── float16.hpp
+│   │   │       │       └── oneapi
+│   │   │       │           └── float16.hpp
+│   │   │       ├── functions
+│   │   │       │   ├── cyclometric.hpp
+│   │   │       │   ├── exponential.hpp
+│   │   │       │   ├── function_id.hpp
+│   │   │       │   ├── hyperbolic.hpp
+│   │   │       │   ├── linear_units.hpp
+│   │   │       │   ├── logistic.hpp
+│   │   │       │   ├── transform.hpp
+│   │   │       │   ├── trigonometric.hpp
+│   │   │       │   └── various.hpp
+│   │   │       ├── functions.hpp
+│   │   │       ├── LinearAlgebra
+│   │   │       │   ├── BLAS
+│   │   │       │   │   ├── level1.hpp
+│   │   │       │   │   ├── level2.hpp
+│   │   │       │   │   ├── level3.hpp
+│   │   │       │   │   └── types.hpp
+│   │   │       │   ├── BLAS.hpp
+│   │   │       │   └── reductions.hpp
+│   │   │       ├── LinearAlgebra.hpp
+│   │   │       ├── Matrix.hpp
+│   │   │       ├── MatrixView.hpp
+│   │   │       ├── memory.hpp
+│   │   │       ├── neural_primitives
+│   │   │       │   ├── neural_kernels.hpp
+│   │   │       │   ├── opaque_types.hpp
+│   │   │       │   ├── tensor_descriptor.hpp
+│   │   │       │   └── tensor_memory.hpp
+│   │   │       ├── neural_primitives.hpp
+│   │   │       ├── random.hpp
+│   │   │       ├── runtime.hpp
+│   │   │       ├── Tensor.hpp
+│   │   │       └── Vector.hpp
+│   │   └── sources
+│   │       ├── Backends
+│   │       │   ├── CBLAS
+│   │       │   │   └── CMakeLists.txt
+│   │       │   ├── MKL
+│   │       │   │   ├── CMakeLists.txt
+│   │       │   │   ├── cum.cpp
+│   │       │   │   ├── functions
+│   │       │   │   │   ├── cyclometric.cpp
+│   │       │   │   │   ├── exponential.cpp
+│   │       │   │   │   ├── hyperbolic.cpp
+│   │       │   │   │   ├── linear_units.cpp
+│   │       │   │   │   ├── logistic.cpp
+│   │       │   │   │   ├── transform.cpp
+│   │       │   │   │   ├── trigonometric.cpp
+│   │       │   │   │   └── various.cpp
+│   │       │   │   ├── functions.cpp
+│   │       │   │   ├── internal
+│   │       │   │   │   ├── cumMKL.cpp
+│   │       │   │   │   └── cumMKL.hpp
+│   │       │   │   ├── LinearAlgebra
+│   │       │   │   │   ├── BLAS
+│   │       │   │   │   │   ├── level1.cpp
+│   │       │   │   │   │   ├── level2.cpp
+│   │       │   │   │   │   └── level3.cpp
+│   │       │   │   │   └── reductions.cpp
+│   │       │   │   ├── LinearAlgebra.cpp
+│   │       │   │   ├── Matrix.cpp
+│   │       │   │   ├── MatrixView.cpp
+│   │       │   │   ├── memory.cpp
+│   │       │   │   ├── neural_primitives
+│   │       │   │   │   ├── neural_kernels.cpp
+│   │       │   │   │   ├── opaque_types.cpp
+│   │       │   │   │   ├── tensor_descriptor.cpp
+│   │       │   │   │   └── tensor_memory.cpp
+│   │       │   │   ├── neural_primitives.cpp
+│   │       │   │   ├── random.cpp
+│   │       │   │   ├── runtime.cpp
+│   │       │   │   ├── Tensor.cpp
+│   │       │   │   └── Vector.cpp
+│   │       │   └── Native
+│   │       │       ├── CMakeLists.txt
+│   │       │       ├── cum.cpp
+│   │       │       ├── functions
+│   │       │       └── internal
+│   │       │           ├── cumNative.cpp
+│   │       │           └── cumNative.hpp
+│   │       ├── CMakeLists.txt
+│   │       └── Core.cpp
+│   └── dsee
+├── plots
+│   ├── cache_x_before_matmul.txt
+│   ├── cache_z_after_matmul_0.txt
+│   ├── cache_z_after_matmul_1.txt
+│   ├── dense_forward_trace.txt
+│   ├── input_before_matmul.txt
+│   ├── plot.svg
+│   ├── sequential_forward_trace.txt
+│   ├── X_eval.txt
+│   ├── X_train.txt
+│   ├── Y_pred_pretrained.txt
+│   ├── Y_pred.txt
+│   └── Y_train.txt
+├── README.md
+├── src
+│   ├── CMakeLists.txt
+│   ├── logging
+│   │   ├── GradientTracker.cpp
+│   │   ├── ITrainingCallback.cpp
+│   │   ├── Logger.cpp
+│   │   └── LossTracker.cpp
+│   ├── loss
+│   │   ├── BinaryCrossEntropy.cpp
+│   │   ├── LossBase.cpp
+│   │   ├── MeanAbsoluteError.cpp
+│   │   └── MeanSquaredError.cpp
+│   ├── loss.cpp
+│   ├── models
+│   │   ├── layers
+│   │   │   ├── Dense.cpp
+│   │   │   ├── Flatten.cpp
+│   │   │   ├── Input.cpp
+│   │   │   └── LayerBase.cpp
+│   │   ├── ModelBase.cpp
+│   │   ├── NGram.cpp
+│   │   ├── Perceptron.cpp
+│   │   └── Sequential.cpp
+│   ├── optimizers
+│   │   ├── AdaGrad.cpp
+│   │   ├── ADAM.cpp
+│   │   ├── OptimizerBase.cpp
+│   │   └── SGD.cpp
+│   ├── Parameter.cpp
+│   ├── runtime_config.cpp
+│   └── utils
+│       ├── FileIO.cpp
+│       └── formating.cpp
+└── tests
+    ├── CMakeLists.txt
+    ├── differentiation.cpp
+    ├── elementwise.cpp
+    ├── helpers.hpp
+    └── matrix_math.cpp
+
+53 directories, 197 files

@@ -1,8 +1,6 @@
 #include "Sequential.hpp"
 #include "LayerType.hpp"
-
 #include <algorithm>
-#include <random>
 
 #if defined(ENABLE_DEBUG_OUTPUT)
     #include <iostream>
@@ -13,6 +11,7 @@
 #include "cum/runtime.hpp"
 #include "loss/LossBase.hpp"
 // #include "utils/Logger.hpp"
+
 
 
 namespace yann::models
@@ -61,25 +60,15 @@ namespace yann::models
 
     cum::Matrix Sequential::forward(const cum::Matrix& input)
     {
-        // if (input.cols() == 1) // single sample
-        // {
-            topology[0]->forward(input);
+        cum::Matrix result = topology[0]->forward(input);
 
-            for(size_t i = 1 ; i < topology.size() ; ++i)
-            {
-                topology[i]->forward(topology[i - 1]->Outputs());
-            }
+        for (size_t i = 1; i < topology.size(); ++i)
+        {
+            result = topology[i]->forward(result);
+            cum::runtime::sync();
+        }
 
-            return topology.back()->Outputs();
-        // }
-        // else // batch
-        // {
-        //     cum::Matrix result = input;
-        //     for(size_t i = 0 ; i < topology.size() ; ++i)
-        //     {
-        //         result = topology[i]->forward(result);
-        //     }
-        //     return result;
+        return result;
     }
 
     void Sequential::backward(const cum::Matrix& d_output)
@@ -89,9 +78,9 @@ namespace yann::models
             return;
 
         cum::Matrix curr_gradient = topology.back()->backward(d_output);
-        for (size_t i = topology.size() - 1; i > 0; --i)
+        for (size_t i = topology.size() - 1; i > 1; --i)
         {
-            cum::Matrix next_gradient = topology[i]->backward(curr_gradient);
+            cum::Matrix next_gradient = topology[i-1]->backward(curr_gradient);
 
             cum::runtime::sync();
 
@@ -106,7 +95,7 @@ namespace yann::models
     {
         std::vector<Parameter*> params = this->parameters();
 
-        size_t batchSize = 48;
+        size_t batchSize = 64;
         constexpr bool batched = true;
 
         cum::Matrix data = X.transpose();

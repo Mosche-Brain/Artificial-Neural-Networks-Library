@@ -136,6 +136,7 @@ optimizers/
     OptimizerBase
     SGD
     ADAM
+    AdaGrad
 
 loss/
     LossBase

@@ -2,7 +2,6 @@
 #include <cum/Matrix.hpp>
 
 using namespace cum;
-
 void testMul(std::size_t k)
 {
     std::cout << "Testing 1x" << k

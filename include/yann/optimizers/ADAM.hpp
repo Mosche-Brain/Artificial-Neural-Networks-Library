@@ -5,10 +5,27 @@
 #ifndef YANN_ADAM_HPP
 #define YANN_ADAM_HPP
 
+#include "yann/optimizers/OptimizerBase.hpp"
+
+#include <memory>
+
 namespace yann::optimizers
 {
-    class ADAM
+    class ADAM : public OptimizerBase
     {
+    public:
+        ADAM(cum::cumeric_t learning_rate, cum::cumeric_t b1=0.9, cum::cumeric_t b2=0.999);
+
+		void step(cum::Matrix& params, cum::Matrix& grad) override {}
+        void step(std::vector<Parameter*>& params) override;
+
+		static std::unique_ptr<ADAM> create(cum::cumeric_t learning_rate, cum::cumeric_t b1=0.9, cum::cumeric_t b2=0.999);
+    private:
+		std::size_t current_step;
+        cum::cumeric_t b1;
+        cum::cumeric_t b2;
+        std::vector<cum::Matrix> momentum;
+		std::vector<cum::Matrix> second_momentum;
     };
 } // yann
 

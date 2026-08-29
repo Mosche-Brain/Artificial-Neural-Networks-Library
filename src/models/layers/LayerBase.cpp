@@ -5,7 +5,7 @@ namespace yann::models::layers
     void LayerBase::initParameters(int layerSize, int inputLenght)
     {
         this->weights       = Parameter::Uniform(layerSize, inputLenght);   /* neurons * input_length */
-        this->biases        = Parameter::Zeros(layerSize, 1);               /* Column-Vector */
+        this->biases        = Parameter::Uniform(layerSize, 1);               /* Column-Vector */
         this->cache.a       = cum::Matrix::Zeros(layerSize, 1);             /* Column-Vector */
         this->cache.z   = cum::Matrix::Zeros(layerSize, 1);             /* Column-Vector */
         this->cache.x        = cum::Matrix::Zeros(inputLenght, 1);   /* Column-Vector */

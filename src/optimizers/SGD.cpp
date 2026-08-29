@@ -42,6 +42,7 @@ namespace yann::optimizers
             // param->values -= (param->gradient * learning_rate);
             // std::println("clearing grad");
             param->clear_gradient();
+            // learning_rate *= 0.995;
             // param->scale_gradient(0.1_c);
             cum::runtime::sync();
         }
