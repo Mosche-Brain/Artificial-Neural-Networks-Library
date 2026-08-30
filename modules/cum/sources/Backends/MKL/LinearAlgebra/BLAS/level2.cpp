@@ -2,7 +2,24 @@
 // Created by jaro on 8/2/26.
 //
 
+#include <oneapi/mkl/blas.hpp>
+
+#include "internal/cumMKL.hpp"
+
+#include "cum/LinearAlgebra/BLAS/level2.hpp"
+
+#include "cum/LinearAlgebra/BLAS/types.hpp"
+
 namespace cum::blas
 {
-
+    void gemv(char transa, const dim_t m, const dim_t n, const cumeric_t alpha, const cumeric_t* A, dim_t lda, const cumeric_t* x, dim_t incx, const cumeric_t beta, cumeric_t* y, dim_t incy)
+    {
+        oneapi::mkl::blas::row_major::gemv(internal::getQueue(),
+            static_cast<oneapi::mkl::transpose>(transa),
+            m, n,alpha,
+            A, lda, x,
+            incx, beta, y,
+            incy
+        );
+    }
 }

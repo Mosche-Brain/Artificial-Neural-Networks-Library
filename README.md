@@ -193,13 +193,14 @@ You can find full API documentation [there (currently not avaible)](www.amogus.o
 
 * ✅ Sequential models
 * ✅ Dense layers
+* ✅ Polymorphic optimizers and loss functions
 * ✅ Working backward pass (Yes, this is insane)
 * ✅ Compile time precision selections
 * ✅ FP16 support
 * ✅ Runtime device selection
 * ✅ Multicore CPU acceleration
 * ✅ GPU acceleration
-* ✅ Templates-free math framework classes
+* ✅ Templates-free math framework
 * ✅ OneAPI support
 * ⚠️ [Dedicated graphical envionment](https://github.com/Czuowuek-SOS/MLStudio) (work in progress)
 * ❌ CUDA support
@@ -207,6 +208,7 @@ You can find full API documentation [there (currently not avaible)](www.amogus.o
 * ❌ BF16, Q8 support
 * ❌ Dynamic computational graphs
 * ❌ Fully working Python binding
+* ❌ Convolutional neural network
 * ❌ Recurrent Neural Networks
 * ❌ Transformers
 * ❌ Outperform TensorFlow

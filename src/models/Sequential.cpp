@@ -1,6 +1,5 @@
 #include "Sequential.hpp"
 #include "LayerType.hpp"
-#include <fstream>
 #include <stdexcept>
 
 #if defined(ENABLE_DEBUG_OUTPUT)
@@ -15,45 +14,6 @@
 
 
 
-namespace
-{
-    void dump_loss_target(
-        const cum::Matrix& target,
-        const cum::Matrix& prediction,
-        std::size_t epoch,
-        std::size_t sample)
-    {
-        if (epoch != 0)
-        {
-            return;
-        }
-
-        std::ofstream file(
-            "plots/loss_input_" + std::to_string(sample) + ".txt");
-        file << "# target rows " << target.rows()
-             << " cols " << target.cols() << '\n';
-        for (std::size_t row = 0; row < target.rows(); ++row)
-        {
-            for (std::size_t col = 0; col < target.cols(); ++col)
-            {
-                if (col != 0) file << ' ';
-                file << static_cast<double>(target(row, col));
-            }
-            file << '\n';
-        }
-        file << "# prediction rows " << prediction.rows()
-             << " cols " << prediction.cols() << '\n';
-        for (std::size_t row = 0; row < prediction.rows(); ++row)
-        {
-            for (std::size_t col = 0; col < prediction.cols(); ++col)
-            {
-                if (col != 0) file << ' ';
-                file << static_cast<double>(prediction(row, col));
-            }
-            file << '\n';
-        }
-    }
-}
 
 namespace yann::models
 {
@@ -174,7 +134,6 @@ namespace yann::models
                     cum::runtime::sync();
 
                     cum::Matrix result = this->forward(x);
-                    dump_loss_target(y, result, epoch, i);
                     loss.compute(result, y);
                     loss::loss_t error = loss.result();
 

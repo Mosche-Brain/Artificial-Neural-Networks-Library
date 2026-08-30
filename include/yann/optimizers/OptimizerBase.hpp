@@ -17,6 +17,7 @@ namespace yann::optimizers
         explicit OptimizerBase(cum::cumeric_t learning_rate) : learning_rate(learning_rate) {}
         virtual ~OptimizerBase() = default;
         virtual void step(cum::Matrix& params, cum::Matrix& grad) = 0;
+        virtual void step(Parameter& param) {};
         virtual void step(std::vector<Parameter*>& params) = 0;
 
         cum::cumeric_t learning_rate;

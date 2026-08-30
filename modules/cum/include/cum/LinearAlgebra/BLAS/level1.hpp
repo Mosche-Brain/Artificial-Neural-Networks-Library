@@ -29,6 +29,7 @@ namespace cum::blas
     void amax(dim_t n, const cumeric_t* x, dim_t incx, cumeric_t* result);
     void amin(dim_t n, const cumeric_t* x, dim_t incx, cumeric_t* result);
 
+	void scal(dim_t n, cumeric_t alpha, cumeric_t* x, dim_t incx);
 }
 
 #endif //YANN_LEVEL1_HPP

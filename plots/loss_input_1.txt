@@ -1,4 +1,0 @@
-# target rows 1 cols 1
-1
-# prediction rows 1 cols 1
-0.433762

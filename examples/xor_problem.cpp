@@ -9,61 +9,7 @@
 #include <yann/optimizers/SGD.hpp>
 #include <yann/runtime_config.hpp>
 
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <string_view>
-#include <algorithm>
 #include <array>
-class GradientEpochTracker final : public yann::logging::ITrainingCallback
-{
-public:
-    GradientEpochTracker()
-    {
-        std::ofstream("plots/yann_gradient_trace.txt", std::ios::trunc);
-    }
-
-    void beforeEpoch(yann::logging::TrainingContext&) override
-    {
-    }
-
-    void afterBackprop(yann::logging::TrainingContext& context) override
-    {
-        const auto& topology = context.model.getTopology();
-        if (weights_sum_.size() != topology.size())
-        {
-            weights_sum_.assign(topology.size(), 0);
-            biases_sum_.assign(topology.size(), 0);
-        }
-
-        for (std::size_t layer = 1; layer < topology.size(); ++layer)
-        {
-            weights_sum_[layer] += topology[layer]->WeightsGrad().amean();
-            biases_sum_[layer] += topology[layer]->BiasesGrad().amean();
-        }
-        ++backprop_count_;
-    }
-
-    void afterEpoch(yann::logging::TrainingContext& context) override
-    {
-        std::ofstream file("plots/yann_gradient_trace.txt", std::ios::app);
-        const auto& topology = context.model.getTopology();
-        for (std::size_t layer = 1; layer < topology.size(); ++layer)
-        {
-            file << context.epoch << ' ' << layer << ' '
-                 << static_cast<double>(weights_sum_[layer] / backprop_count_) << ' '
-                 << static_cast<double>(biases_sum_[layer] / backprop_count_) << '\n';
-        }
-        std::fill(weights_sum_.begin(), weights_sum_.end(), 0);
-        std::fill(biases_sum_.begin(), biases_sum_.end(), 0);
-        backprop_count_ = 0;
-    }
-
-private:
-    std::vector<cum::cumeric_t> weights_sum_;
-    std::vector<cum::cumeric_t> biases_sum_;
-    std::size_t backprop_count_ = 0;
-};
 
 
 namespace
@@ -131,10 +77,7 @@ int main()
     yann::loss::Loss loss = yann::loss::BinaryCrossEntropy::create();
     yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(1.0_c);
     yann::logging::LossTracker loss_tracker;
-    GradientEpochTracker gradient_tracker;
-    std::array<yann::logging::ITrainingCallback*, 2> callbacks = {
-        &loss_tracker,
-        &gradient_tracker};
+    std::array<yann::logging::ITrainingCallback*, 1> callbacks = {&loss_tracker};
 
     constexpr std::size_t epochs = 100;
     model.fit(inputs, targets, *loss, *optimizer, epochs, 1, callbacks);

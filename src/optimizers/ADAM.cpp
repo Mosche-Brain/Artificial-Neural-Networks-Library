@@ -7,7 +7,7 @@
 
 #include "yann/optimizers/ADAM.hpp"
 #include "cum/Core.hpp"
-#include "cum/Matrix.hpp"
+#include "cum/runtime.hpp"
 #include "cum/cum.hpp"
 
 namespace yann::optimizers
@@ -35,11 +35,17 @@ namespace yann::optimizers
 			cum::Matrix& v = second_momentum[index];
 			cum::Matrix& g = param->gradient;
 
+			cum::runtime::sync();
+
 			m = b1 * m + (1 - b1) * g;
 			v = b2 * v + (1 - b2) * g.cwiseProduct(g);
 
+			cum::runtime::sync();
+
 			cum::Matrix mhat = m / (1 - std::pow(b1, current_step));
 			cum::Matrix vhat = v / (1 - std::pow(b2, current_step));
+
+			cum::runtime::sync();
 
 			param->values -= learning_rate * mhat / (vhat.sqrt() + cum::EPSILON);
 			param->clear_gradient();

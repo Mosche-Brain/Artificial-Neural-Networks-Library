@@ -7,7 +7,7 @@
 #include <cstdint>
 
 #include "cum/LinearAlgebra/BLAS/level1.hpp"
-#include "../../internal/cumMKL.hpp"
+#include "internal/cumMKL.hpp"
 
 namespace cum::blas
 {
@@ -63,5 +63,12 @@ namespace cum::blas
         oneapi::mkl::blas::row_major::iamin(internal::getQueue(), n, x, incx, &tmp).wait();
         result[0] = x[tmp];
     }
+
+	void scal(const dim_t n, const cumeric_t alpha, cumeric_t* x, const dim_t incx)
+	{
+		oneapi::mkl::blas::row_major::scal(internal::getQueue(),
+			n, alpha, x, incx
+		).wait();
+	}
 
 }

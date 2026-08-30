@@ -4,16 +4,18 @@
 
 #include "cum/Vector.hpp"
 
+#include <cstddef>
 #include <initializer_list>
 
 namespace cum
 {
     class Vector;
-    enum MemoryAlingment { RowMajor, ColMajor };
+    enum MemoryAlingment { RowMajor, ColMajor }; // not used yet
     class Matrix
     {
     public:
-        Matrix(std::size_t rows, std::size_t cols, cumeric_t value=0);
+		Matrix(std::size_t rows, std::size_t cols);
+        Matrix(std::size_t rows, std::size_t cols, cumeric_t value);
         Matrix(std::size_t rows, std::size_t cols, cumeric_t* source); // this constructor is used for copying data from source, not set source as a data handle
         Matrix(std::size_t rows, std::size_t cols, const cumeric_t* source); // this constructor is used for copying data from source, not set source as a data handle
         Matrix(std::size_t rows, std::size_t cols, std::initializer_list<cumeric_t> elements);
@@ -27,6 +29,10 @@ namespace cum
         static Matrix Zeros(std::size_t rows, std::size_t cols);
         static Matrix Ones(std::size_t rows, std::size_t cols);
         static Matrix Linspace(cumeric_t start, cumeric_t end, std::size_t num); /* Row Vector */
+
+		/* Conversions */
+
+		operator Vector() const;
         // operator Vector() const;
 
         void fill(cumeric_t value);
@@ -83,14 +89,15 @@ namespace cum
         /* Transforming matrix dimensions */
         Matrix transpose() const;
         Matrix& transposeInPlace();
-        Vector flatten() const;
+        Matrix flatten() const;
         Matrix reshape(const std::size_t rows, const std::size_t cols) const;
-        
+       	Matrix& reshapeInPlace(dim_t rows, dim_t cols);
+
         friend Matrix activation(const Matrix& mat, const char* name);
         friend Matrix activationInPlace(Matrix& mat, const char* name);
 
         Matrix cwiseProduct(const Matrix& other);
-        Matrix& cwiseProductInPlace();
+        Matrix& cwiseProductInPlace(const Matrix& other);
 
 		/* Elementwise functions */
         Matrix transform(void (*func)(cumeric_t* data, const std::size_t size)) const;

@@ -8,7 +8,8 @@ namespace cum
     class Vector // : Matrix
     {
     public:
-        Vector(std::size_t lenght, cumeric_t value=0);
+		Vector(dim_t lenght);
+        Vector(std::size_t lenght, cumeric_t value);
         Vector() = default;
         // Vector(Matrix& M);
 

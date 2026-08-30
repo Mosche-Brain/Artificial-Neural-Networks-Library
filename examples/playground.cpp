@@ -73,12 +73,12 @@ int main()
 
     yann::models::Sequential model;
     model.addLayer(yann::models::layers::Input::createUnique(1));
-    model.addLayer(yann::models::layers::Dense::createUnique(64, "tanh"));
+    model.addLayer(yann::models::layers::Dense::createUnique(32, "tanh"));
     model.addLayer(yann::models::layers::Dense::createUnique(32, "tanh"));
     // model.addLayer(yann::models::layers::Dense::createUnique(128, "leaky_relu"));
     // model.addLayer(yann::models::layers::Dense::createUnique(32, "relu"));
     // model.addLayer(yann::models::layers::Dense::createUnique(32, "relu"));
-    model.addLayer(yann::models::layers::Dense::createUnique(1, "linear"));
+    model.addLayer(yann::models::layers::Dense::createUnique(1, "tanh"));
 
     model.build();
 
@@ -117,7 +117,7 @@ int main()
     cum::Matrix Y_pred_pretrained = model.forward(X_eval); // batch
 
     yann::loss::Loss loss = yann::loss::MeanSquaredError::create();
-    yann::optimizers::Optimizer optimizer = yann::optimizers::ADAM::create(0.001);
+    yann::optimizers::Optimizer optimizer = yann::optimizers::ADAM::create(0.01);
 
 
     yann::logging::LossTracker loss_tracker = yann::logging::LossTracker();
@@ -126,7 +126,7 @@ int main()
     std::array<yann::logging::ITrainingCallback*, 2> callbacks = { &loss_tracker, &grad_tracker };
 
     yann::runtime_config::set_verbosity(1);
-    model.fit(X_train, Y_train, *loss, *optimizer, 4000, 64, callbacks);
+    model.fit(X_train, Y_train, *loss, *optimizer, 200, 64, callbacks);
     cum::runtime::sync();
 
 

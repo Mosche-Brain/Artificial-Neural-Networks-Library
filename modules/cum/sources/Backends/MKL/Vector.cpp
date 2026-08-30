@@ -2,21 +2,37 @@
 #include "cum/Matrix.hpp"
 
 #include "cum/LinearAlgebra.hpp"
+#include "cum/functions/various.hpp"
+#include "cum/memory.hpp"
 #include "internal/cumMKL.hpp"
 
 namespace cum
 {
+	Vector::Vector(const dim_t lenght)
+	{
+		data_ = memory::allocate(lenght_);
+	}
+
     Vector::Vector(std::size_t lenght, cumeric_t value) : lenght_(lenght)
     {
         data_ = sycl::malloc_shared<cumeric_t>(lenght, internal::getQueue());
-    }
+    	functions::various::fill(data_, value, lenght);
+	}
 
     Vector::operator Matrix() const
     {
-        Matrix temp(lenght_, 1);
-        for(size_t i = 0 ; i < lenght_ ; i++)
-            temp.at(i, 0) = data_[i];
-        return temp;
+        //Matrix temp(lenght_, 1);
+        //for(size_t i = 0 ; i < lenght_ ; i++)
+        //    temp.at(i, 0) = data_[i];
+        Matrix temp(1, lenght_, data_);
+
+		//temp.data_ = memory::allocate(lenght_);
+		//temp.rows_ = 1;
+		//temp.cols_ = lenght_;
+
+		//memory::memcopy(temp.data_(), this->data_, lenght_ * sizeof(cumeric_t));
+
+		return temp;
     }
 
     Vector& Vector::operator += (const Vector& other)

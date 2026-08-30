@@ -26,7 +26,7 @@ namespace yann
 
     Parameter Parameter::Uniform(std::size_t rows, std::size_t cols)
     {
-        constexpr cum::cumeric_t ampl = 0.2;
+        constexpr cum::cumeric_t ampl = 0.1;
 
         Parameter param;
         param.values = cum::Matrix::Random(rows, cols, -ampl, ampl);
