@@ -207,6 +207,31 @@ namespace cum
         return temp;
     }
 
+	Matrix Matrix::slice(const dim_t i, const dim_t j, const dim_t rows, const dim_t cols)
+	{
+		if(i + rows > rows_ || j + cols > rows_)
+			std::invalid_argument("Slice exceds matrix dimensions");
+
+		Matrix temp;
+
+		temp.data_ = memory::allocate(rows * cols);
+		temp.rows_ = rows_;
+		temp.cols_ = cols_;
+
+		dim_t src_cols = this->cols_; 
+		cumeric_t* src = this->data_;
+		cumeric_t* dest = temp.data_;
+		internal::getQueue().parallel_for(sycl::range<2>(rows, cols), [=](sycl::id<2> idx)
+		{
+			dim_t i_ = idx[0];
+			dim_t j_ = idx[1];
+
+			dest[i_ * cols + j_] = src[(i + i_) * src_cols + (j + j_)];
+		}).wait();
+
+		return temp;
+	}
+
     /* ============================== Asingnment operators ================================ */
 
     // Matrix& Matrix::operator = (const Matrix& other)

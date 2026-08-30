@@ -69,7 +69,7 @@ namespace yann::models
         Batch(
             cum::Matrix X,
             cum::Matrix Y,
-            ORIENTATION orientation = ORIENTATION::ROW_SAMPLE)
+            ORIENTATION orientation = ORIENTATION::COLUMN_SAMPLE)
             : orientation(orientation),
               X(std::move(X)),
               Y(std::move(Y)),

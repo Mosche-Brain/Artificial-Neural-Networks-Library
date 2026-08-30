@@ -55,6 +55,8 @@ namespace cum
         cumeric_t& operator () (const std::size_t row, const std::size_t col) { return data_[get_idx(row, col)]; };
         const cumeric_t& operator () (const std::size_t row, const std::size_t col) const { return data_[get_idx(row, col)]; };
 
+		Matrix slice(dim_t i, dim_t j, dim_t rows, dim_t cols);
+
         /* assingment operator */
         // Matrix& operator = (const Matrix& other);
         // Matrix& operator = (const Matrix& other);

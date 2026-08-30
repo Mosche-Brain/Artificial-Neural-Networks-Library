@@ -1,5 +1,6 @@
 #include "Sequential.hpp"
 #include "LayerType.hpp"
+#include "cum/Matrix.hpp"
 #include <stdexcept>
 
 #if defined(ENABLE_DEBUG_OUTPUT)
@@ -106,12 +107,15 @@ namespace yann::models
         std::vector<Batch> batches;
         if (batched)
         {
-            for (std::size_t begin = 0; begin < X.rows(); begin += batch_size)
+            for (std::size_t begin = 0; begin < data.cols(); begin += batch_size)
             {
-                const std::size_t samples = std::min(X.rows() - begin, batch_size);
+                const std::size_t samples = std::min(data.cols() - begin, batch_size);
                 batches.emplace_back(
-                    cum::Matrix(X.cols(), samples, X.data() + begin * X.cols()),
-                    cum::Matrix(Y.cols(), samples, Y.data() + begin * Y.cols()));
+					data.slice(0, begin, data.rows(), samples),
+					target.slice(0, begin, target.rows(), samples)
+				);
+                    //cum::Matrix(X.cols(), samples, X.data() + begin * X.cols()),
+                    //cum::Matrix(Y.cols(), samples, Y.data() + begin * Y.cols()));
             }
         }
 
@@ -153,8 +157,14 @@ namespace yann::models
                 {
                     YANN_LOG(2, "{} batch", i);
 
-                    cum::Matrix results = this->forward(batches[i].inputs());
-                    loss.compute(results, batches[i].targets());
+					cum::Matrix x = batches[i].inputs();
+					YANN_LOG(2, "TWARDOSC", "");
+					cum::Matrix y = batches[i].targets();
+					
+					YANN_LOG(2, "SEKS", "");
+					
+                    cum::Matrix results = this->forward(x);
+                    loss.compute(results, y);
                     loss::loss_t error = loss.result();
 
                     this->backward(error.gradient);
