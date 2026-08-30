@@ -111,11 +111,9 @@ namespace yann::models
             {
                 const std::size_t samples = std::min(data.cols() - begin, batch_size);
                 batches.emplace_back(
-					data.slice(0, begin, data.rows(), samples),
-					target.slice(0, begin, target.rows(), samples)
-				);
-                    //cum::Matrix(X.cols(), samples, X.data() + begin * X.cols()),
-                    //cum::Matrix(Y.cols(), samples, Y.data() + begin * Y.cols()));
+                    data.slice(0, begin, data.rows(), samples),
+                    target.slice(0, begin, target.rows(), samples),
+                    Batch::ORIENTATION::COLUMN_SAMPLE);
             }
         }
 
@@ -157,11 +155,10 @@ namespace yann::models
                 {
                     YANN_LOG(2, "{} batch", i);
 
-					cum::Matrix x = batches[i].inputs();
-					YANN_LOG(2, "TWARDOSC", "");
-					cum::Matrix y = batches[i].targets();
-					
-					YANN_LOG(2, "SEKS", "");
+                    const cum::Matrix& x = batches[i].inputs();
+                    //YANN_LOG(2, "TWARDOSC", "");
+                    const cum::Matrix& y = batches[i].targets();
+					//YANN_LOG(2, "SEKS", "");
 					
                     cum::Matrix results = this->forward(x);
                     loss.compute(results, y);
