@@ -66,10 +66,7 @@ namespace yann::models
             return orientation == ORIENTATION::ROW_SAMPLE ? Y.row(index) : Y.col(index);
         }
 
-        Batch(
-            cum::Matrix X,
-            cum::Matrix Y,
-            ORIENTATION orientation = ORIENTATION::COLUMN_SAMPLE)
+        Batch(cum::Matrix X, cum::Matrix Y, ORIENTATION orientation = ORIENTATION::COLUMN_SAMPLE)
             : orientation(orientation),
               X(std::move(X)),
               Y(std::move(Y)),

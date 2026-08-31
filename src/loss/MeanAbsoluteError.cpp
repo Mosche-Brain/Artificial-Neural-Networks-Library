@@ -12,7 +12,7 @@ namespace yann::loss
 
         if constexpr (fused_kernels)
         {
-
+            // TODO:
         }
         else
         {

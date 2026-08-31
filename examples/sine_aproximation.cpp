@@ -45,8 +45,8 @@ int main()
     std::size_t N_train = 64;
     std::size_t N_eval = 512;
 
-    cum::Matrix X_train = cum::Matrix::Linspace(x_min, x_max, N_train).transpose(); // linspace in row vector
-    cum::Matrix Y_train = cum::Matrix::Linspace(x_min, x_max, N_train).transpose();
+    cum::Matrix X_train = cum::Matrix::Linspace(x_min, x_max, N_train); // linspace in row vector
+    cum::Matrix Y_train = cum::Matrix::Linspace(x_min, x_max, N_train);
 
     cum::Matrix X_eval = cum::Matrix::Linspace(x_min, x_max, N_eval);
     cum::Matrix Y_eval = cum::Matrix::Linspace(x_min, x_max, N_eval);
@@ -69,7 +69,7 @@ int main()
     std::array<yann::logging::ITrainingCallback*, 2> callbacks = { &loss_tracker, &grad_tracker };
 
     yann::runtime_config::set_verbosity(1);
-    model.fit(X_train, Y_train, *loss, *optimizer, 8000, 64, callbacks);
+    model.fit(X_train, Y_train, *loss, *optimizer, 10000, 64, callbacks);
 
     std::vector<double> loss_history;
     std::vector<double> epoch_range;

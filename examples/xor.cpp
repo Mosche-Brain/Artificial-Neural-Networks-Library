@@ -50,18 +50,21 @@ int main()
     model.build();
 
     // Four samples are stored as rows for fit(); forward receives their transpose.
-    const cum::Matrix inputs(4, 2, {
+    cum::Matrix inputs(4, 2, {
         0.0_c, 0.0_c,
         0.0_c, 1.0_c,
         1.0_c, 0.0_c,
         1.0_c, 1.0_c
     });
-    const cum::Matrix targets(4, 1, {
+    cum::Matrix targets(4, 1, {
         0.0_c,
         1.0_c,
         1.0_c,
         0.0_c
     });
+
+    inputs.transposeInPlace();
+    targets.transposeInPlace();
 
     // Same deterministic start as examples/xor_gradient_reference.py.
     set_values(model.getWeights(1), {
@@ -71,11 +74,11 @@ int main()
     set_values(model.getWeights(2), {0.67214078_c, -1.45004952_c});
     set_values(model.getBiases(2), {0.0_c});
 
-    const cum::Matrix predictions_before = model.forward(inputs.transpose());
-    print_predictions("before training:", inputs, predictions_before);
+    const cum::Matrix predictions_before = model.forward(inputs);
+    print_predictions("before training:", inputs.transpose(), predictions_before);
 
     yann::loss::Loss loss = yann::loss::BinaryCrossEntropy::create();
-    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(1.0_c);
+    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.1_c);
     yann::logging::LossTracker loss_tracker;
     std::array<yann::logging::ITrainingCallback*, 1> callbacks = {&loss_tracker};
 
@@ -83,8 +86,8 @@ int main()
     model.fit(inputs, targets, *loss, *optimizer, epochs, 1, callbacks);
     cum::runtime::sync();
 
-    const cum::Matrix predictions_after = model.forward(inputs.transpose());
-    print_predictions("after training:", inputs, predictions_after);
+    const cum::Matrix predictions_after = model.forward(inputs);
+    print_predictions("after training:", inputs.transpose(), predictions_after);
 
     std::cout << "loss: "
               << loss_tracker.getLossHistory().front()

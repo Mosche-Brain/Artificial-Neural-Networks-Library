@@ -24,7 +24,7 @@ namespace yann
         Parameter() = default;
         Parameter(std::size_t cols, std::size_t rows);
 
-        static Parameter Uniform(std::size_t rows, std::size_t cols);
+        static Parameter Uniform(std::size_t rows, std::size_t cols); // +-0.1
         static Parameter He(std::size_t rows, std::size_t cols);
         static Parameter Zeros(std::size_t rows, std::size_t cols);
         static Parameter Ones(std::size_t rows, std::size_t cols);

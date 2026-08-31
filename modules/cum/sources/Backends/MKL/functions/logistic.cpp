@@ -1,9 +1,13 @@
 /* Created by jaro on 7/19/26. */
 
+#include "cum/Core.hpp"
+
+#include "cum/LinearAlgebra/BLAS/level1.hpp"
+#include "cum/LinearAlgebra/reductions.hpp"
+#include "cum/functions/exponential.hpp"
+
 #include "internal/cumMKL.hpp"
 #include "cum/functions/logistic.hpp"
-
-#include "cum/functions/exponential.hpp"
 
 namespace cum::functions::logistic
 {
@@ -32,6 +36,22 @@ namespace cum::functions::logistic
         {
             v[idx] = sigmoid(v[idx]);
         });
+    }
+
+    void softmax(cumeric_t* r, const cumeric_t* v, const dim_t N)
+    {
+        exponential::exp(r, v, N);
+        
+        cumeric_t sum_exp_v = 0;
+        LinearAlgebra::sum(&sum_exp_v, r, N);
+
+        blas::scal(N, 1/sum_exp_v, r, 1);
+    }
+
+    void softmax_in_place(cumeric_t* v, const dim_t N)
+    {
+        exponential::exp_in_place(v, N);
+
     }
 
     /* ========================== Derivatives ========================== */
@@ -80,6 +100,27 @@ namespace cum::functions::logistic
         {
             v[idx] = sigmoid_deriv(v[idx]);
         });
+    }
+
+    void softmax_deriv(cumeric_t* r, const cumeric_t* v, const dim_t N)
+    {
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            r[idx] = sigmoid_deriv(v[idx]);
+        });
+    }
+
+    void softmax_deriv_in_place(cumeric_t* v, const dim_t N)
+    {
+        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        {
+            v[idx] = sigmoid_deriv(v[idx]);
+        });
+    }
+    
+    void softmax_deriv_from_result(cumeric_t* r, const cumeric_t* v, const dim_t N)
+    {
+
     }
 
 }

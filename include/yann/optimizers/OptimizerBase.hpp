@@ -20,6 +20,9 @@ namespace yann::optimizers
         virtual void step(Parameter& param) {};
         virtual void step(std::vector<Parameter*>& params) = 0;
 
+        virtual void scale_grads(std::vector<Parameter*>& params, cum::cumeric_t scalar);
+        virtual void clear_grads(std::vector<Parameter*>& params);
+
         cum::cumeric_t learning_rate;
     };
 

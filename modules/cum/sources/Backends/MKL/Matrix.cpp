@@ -1,16 +1,17 @@
 
 #include "cum/Core.hpp"
 #include "cum/LinearAlgebra/BLAS/level1.hpp"
-#include "cum/Vector.hpp"
 #include "cum/LinearAlgebra/matops.hpp"
 #include "cum/LinearAlgebra/vecops.hpp"
 #include "cum/LinearAlgebra.hpp"
 #include "cum/functions.hpp"
 #include "cum/functions/various.hpp"
+#include "cum/Vector.hpp"
 #include "cum/random.hpp"
 
 #include "internal/cumMKL.hpp"
 
+#include <oneapi/mkl/blas/usm.hpp>
 #include <stdexcept>
 #include <utility>
 #include <random>
@@ -26,6 +27,12 @@
 #include <oneapi/dpl/execution>
 
 #include "cum/Matrix.hpp"
+
+/* TODO:
+ * Usunąć jawne zapisy z hosta
+ * W większej ilości miejsc sprawdzać wymiary
+ * Przenieść kernele w funkcjach członkowskich do funkcji cum::functions
+ */
 
 namespace cum
 {
@@ -139,16 +146,16 @@ namespace cum
         //internal::getQueue().parallel_for(sycl::range<1>(num), [=](sycl::id<1> idx)
         //{
         //    const std::size_t i = idx[0];
-//
-//            if (num == 1)
-//            {
-//                buff[i] = start;
-//            }
-//            else
-//            {
-//                buff[i] = start + static_cast<cumeric_t>(i) * (end - start) / static_cast<cumeric_t>(num - 1);
-//            }
-//        }).wait();
+        //
+        //    if (num == 1)
+        //    {
+        //        buff[i] = start;
+        //    }
+        //    else
+        //    {
+        //        buff[i] = start + static_cast<cumeric_t>(i) * (end - start) / static_cast<cumeric_t>(num - 1);
+        //    }
+        //}).wait();
 
         Matrix temp;
 
@@ -157,6 +164,24 @@ namespace cum
 		temp.cols_ = num;
 
 		functions::various::linespace(temp.data_, start, end, num);
+
+        return temp;
+    }
+
+    Matrix Matrix::Copy(const Matrix& mat)
+    {
+        Matrix temp = mat;
+        return temp;
+    }
+
+    // ! BE AWARE: This is unsafe
+    const Matrix Matrix::View(const Matrix& mat)
+    {
+        Matrix temp;
+
+        temp.data_ = mat.data_;
+        temp.rows_ = mat.rows_;
+        temp.cols_ = mat.cols_;
 
         return temp;
     }
@@ -197,21 +222,20 @@ namespace cum
        
 		dim_t m = this->rows_;
 		dim_t n = this->cols_;
-		cumeric_t* src = this->data_;
+		const cumeric_t* src = this->data_;
 		cumeric_t* dest = temp.data_;
-		internal::getQueue().parallel_for(sycl::range<1>(m), [=](sycl::id<1> idx)
-		{
-			dest[idx] = src[idx * n + i];
-		}).wait();
+		
+        oneapi::mkl::blas::row_major::copy(internal::getQueue(), m, src, n, dest, 1).wait();
+        
+        // internal::getQueue().parallel_for(sycl::range<1>(m), [=](sycl::id<1> idx)
+		// {
+		// 	dest[idx] = src[idx * n + i];
+		// }).wait();
 
         return temp;
     }
 
-    Matrix Matrix::slice(
-        const dim_t i,
-        const dim_t j,
-        const dim_t rows,
-        const dim_t cols)
+    Matrix Matrix::slice(const dim_t i, const dim_t j, const dim_t rows, const dim_t cols) const
     {
         if (i + rows > rows_ || j + cols > cols_)
             throw std::invalid_argument("Slice exceeds matrix dimensions");
@@ -222,19 +246,18 @@ namespace cum
         temp.cols_ = cols;
 
         const dim_t src_cols = cols_;
-        cumeric_t* src = data_;
+        const cumeric_t* src = data_;
         cumeric_t* dest = temp.data_;
 
-        internal::getQueue()
-            .parallel_for(sycl::range<2>(rows, cols), [=](sycl::id<2> index)
+        internal::getQueue().parallel_for(
+        sycl::range<2>(rows, cols), [=](sycl::id<2> index)
             {
                 const dim_t row = index[0];
                 const dim_t col = index[1];
 
                 dest[row * cols + col] =
                     src[(i + row) * src_cols + (j + col)];
-            })
-            .wait();
+            }).wait();
 
         return temp;
     }
@@ -420,7 +443,7 @@ namespace cum
     {
         // Yes, no runtime dimensions checks 💪
 
-        auto policy = oneapi::dpl::execution::make_device_policy(internal::getQueue());\
+        auto policy = oneapi::dpl::execution::make_device_policy(internal::getQueue());
         return std::equal(policy, A.data(), A.data() + A.rows() * B.cols(), B.data());
     }
 
@@ -807,13 +830,14 @@ namespace cum
     }
 
 
-    Matrix Matrix::shuffleRows() const
+    Matrix Matrix::shuffleRows() const // read comment below
     {
         Matrix temp(*this);
         temp.shuffleRowsInPlace();
         return temp;
     }
 
+    // ! DON'T USE IT! It is strange
     Matrix& Matrix::shuffleRowsInPlace()
     {
         if (rows_ <= 1 || cols_ == 0)

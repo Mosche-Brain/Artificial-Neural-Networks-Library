@@ -19,6 +19,9 @@ namespace cum::functions::logistic
     void sigmoid(cumeric_t* r, const cumeric_t* v, const std::size_t N);
     void sigmoid_in_place(cumeric_t* v, const std::size_t N);
 
+    void softmax(cumeric_t* r, const cumeric_t* v, const dim_t N);
+    void softmax_in_place(cumeric_t* v, const dim_t N);
+
     /* ========================== Derivatives ========================== */
 
     /* Scalar versions */
@@ -32,5 +35,9 @@ namespace cum::functions::logistic
     void sigmoid_deriv_from_result(cumeric_t* r, const cumeric_t* v, const std::size_t N);
     void sigmoid_deriv_in_place(cumeric_t* v, const std::size_t N);
     void sigmoid_deriv_from_result_in_place(cumeric_t* v, std::size_t N);
+
+    void softmax_deriv(cumeric_t* r, const cumeric_t* v, dim_t N);
+    void softmax_deriv_in_place(cumeric_t* v, dim_t N);
+    void softmax_deriv_from_result(cumeric_t* r, const cumeric_t* v, const std::size_t N);
 
 }

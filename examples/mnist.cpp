@@ -19,15 +19,13 @@
 #include <string>
 #include <numeric>
 #include <array>
-#include <vector>
-
 class MnistDataLoader
 {
 public:
     struct Dataset
     {
-        cum::Matrix images; // samples x 784, normalized to [0, 1]
-        cum::Matrix labels; // samples x 10, one-hot encoded
+        cum::Matrix images; // 784 x samples, normalized to [0, 1]
+        cum::Matrix labels; // 10 x samples, one-hot encoded
     };
 
     static Dataset load(const std::string& directory, const std::string& split)
@@ -74,23 +72,30 @@ public:
 
             std::vector<std::uint8_t> pixels(image_data.size());
             readBytes(images_file, pixels.data(), pixels.size(), images_path);
-            for (std::size_t i = 0; i < pixels.size(); ++i)
-                image_data[i] = static_cast<cum::cumeric_t>(pixels[i]) / 255.0f;
+            for (std::size_t sample = 0; sample < image_count; ++sample)
+            {
+                for (std::size_t feature = 0; feature < image_size; ++feature)
+                {
+                    image_data[feature * image_count + sample] =
+                        static_cast<cum::cumeric_t>(
+                            pixels[sample * image_size + feature]) / 255.0f;
+                }
+            }
 
             std::vector<std::uint8_t> labels(label_count);
             readBytes(labels_file, labels.data(), labels.size(), labels_path);
-            for (std::size_t i = 0; i < labels.size(); ++i)
+            for (std::size_t sample = 0; sample < labels.size(); ++sample)
             {
-                if (labels[i] >= 10)
+                if (labels[sample] >= 10)
                     throw std::runtime_error("MNIST label is outside [0, 9]");
-                label_data[i * 10 + labels[i]] = 1.0f;
+                label_data[labels[sample] * label_count + sample] = 1.0f;
             }
 
             gzclose(images_file);
             gzclose(labels_file);
             return {
-                cum::Matrix(image_count, image_size, image_data.data()),
-                cum::Matrix(label_count, 10, label_data.data())
+                cum::Matrix(image_size, image_count, image_data.data()),
+                cum::Matrix(10, label_count, label_data.data())
             };
         }
         catch (...)
@@ -175,8 +180,8 @@ int main(int argc, char** argv)
         const auto test = MnistDataLoader::load(mnist_directory, "test");
 
         std::cout << "MNIST loaded: "
-                  << train.images.rows() << " training samples, "
-                  << test.images.rows() << " test samples\n";
+                  << train.images.cols() << " training samples, "
+                  << test.images.cols() << " test samples\n";
         std::cout << "Images: " << train.images.rows() << " x " << train.images.cols() << "\n";
         std::cout << "Labels: " << train.labels.rows() << " x " << train.labels.cols() << "\n";
 

@@ -30,6 +30,9 @@ namespace cum
         static Matrix Ones(std::size_t rows, std::size_t cols);
         static Matrix Linspace(cumeric_t start, cumeric_t end, std::size_t num); /* Row Vector */
 
+        static Matrix Copy(const Matrix& mat);
+        static const Matrix View(const Matrix& mat);
+
 		/* Conversions */
 
 		operator Vector() const;
@@ -55,7 +58,7 @@ namespace cum
         cumeric_t& operator () (const std::size_t row, const std::size_t col) { return data_[get_idx(row, col)]; };
         const cumeric_t& operator () (const std::size_t row, const std::size_t col) const { return data_[get_idx(row, col)]; };
 
-		Matrix slice(dim_t i, dim_t j, dim_t rows, dim_t cols);
+		Matrix slice(dim_t i, dim_t j, dim_t rows, dim_t cols) const;
 
         /* assingment operator */
         // Matrix& operator = (const Matrix& other);

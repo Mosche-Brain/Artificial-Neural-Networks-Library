@@ -8,6 +8,8 @@
 
 #include <cstddef>
 
+// TODO: Dodać przeładowania in_place
+
 namespace cum::functions::exponential
 {
     /* ========================== Base Functions ========================== */
@@ -25,6 +27,7 @@ namespace cum::functions::exponential
     /* Parallel versions */
 
     void exp(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    void exp_in_place(cumeric_t* v, std::size_t N);
     void exp2(cumeric_t* r, const cumeric_t* v, std::size_t N);
     void exp10(cumeric_t* r, const cumeric_t* v, std::size_t N);
 

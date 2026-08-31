@@ -75,7 +75,6 @@ namespace yann::models
 
     void Sequential::backward(const cum::Matrix& d_output)
     {
-        // cum::Matrix& curr_gradient = const_cast<cum::Matrix&>(d_output);
         if (topology.size() <= 1)
             return;
 
@@ -92,36 +91,45 @@ namespace yann::models
         }
     }
 
+    /* TODO:
+     * Przenieść budowaniu batcht do wyspecjalizowanej funkcji/klasy
+     * Dodać przeładowanie pozwalające na przyjęcie zamiast X i Y zbioru batchy
+     */
 
     void Sequential::fit(const cum::Matrix& X, const cum::Matrix& Y, loss::LossBase& loss, optimizers::OptimizerBase& optimizer, size_t epochs, size_t batch_size, std::span<logging::ITrainingCallback*> callbacks)
     {
         if (batch_size == 0)
             throw std::invalid_argument("batch_size must be greater than zero");
+        if (X.cols() != Y.cols())
+            throw std::invalid_argument("X and Y must contain the same number of samples");
 
         std::vector<Parameter*> params = this->parameters();
         const bool batched = batch_size > 1;
 
-        cum::Matrix data = X.transpose(); // zrobiłem tak bo wygodniej mi się podawało sample jako row, ale pewnie to usune
-        cum::Matrix target = Y.transpose(); // w sumie niepotrzebne to
-
         std::vector<Batch> batches;
         if (batched)
         {
-            for (std::size_t begin = 0; begin < data.cols(); begin += batch_size) // przeniósł bym tą pętle do osobnej funkcji
+            for (std::size_t begin = 0; begin < X.cols(); begin += batch_size) // przeniósł bym tą pętle do osobnej funkcji
             {
-                const std::size_t samples = std::min(data.cols() - begin, batch_size);
+                const std::size_t samples = std::min(X.cols() - begin, batch_size);
                 batches.emplace_back(
-                    data.slice(0, begin, data.rows(), samples),
-                    target.slice(0, begin, target.rows(), samples),
+                    X.slice(0, begin, X.rows(), samples),
+                    Y.slice(0, begin, Y.rows(), samples),
                     Batch::ORIENTATION::COLUMN_SAMPLE);
             }
         }
 
         YANN_LOG(1, "Started training for {} epochs...", epochs);
-        logging::TrainingContext ctx(*this, 0, 0, 0); // TODO: obecnie batch jest ignorowany, lepiej zrobię by ctx miał referencje do lossu, epoki, batcha, a nie kopie
-        for(cum::dim_t epoch = 0 ; epoch < epochs ; epoch++)
+
+        cum::cumeric_t mean_loss = 0;
+        cum::dim_t epoch = 0;
+        cum::dim_t batch = 0;
+
+
+        logging::TrainingContext ctx(*this, mean_loss, epoch, batch); // TODO: obecnie batch jest ignorowany, lepiej zrobię by ctx miał referencje do lossu, epoki, batcha, a nie kopie
+        for(epoch = 0 ; epoch < epochs ; epoch++)
         {
-            cum::cummulative_t totalLoss = 0;
+            cum::cummulative_t total_loss = 0;
 
             YANN_LOG(1, "Epoch {}", epoch);
 
@@ -129,21 +137,22 @@ namespace yann::models
             cum::Matrix x;
             cum::Matrix y;
 
-            cum::dim_t n = batched ? batches.size() : X.rows();
+            cum::dim_t n = batched ? batches.size() : X.cols();
 
-            for (cum::dim_t i = 0; i < n; ++i)
+            for (batch = 0; batch < n; batch++)
             {
-                YANN_LOG(2, "{} batch", i);
+                cum::dim_t current_batch_size = batched ? batches[batch].size : 1;
+                YANN_LOG(2, "{} batch, {} samples", batch, current_batch_size);
 
                 if (batched)
                 {
-                    x = batches[i].inputs();
-                    y = batches[i].targets();
+                    x = batches[batch].inputs();
+                    y = batches[batch].targets();
                 }
                 else
                 {
-                    x = data.col(i);
-                    y = target.col(i);
+                    x = X.col(batch);
+                    y = Y.col(batch);
                 }
 
                 cum::Matrix results = this->forward(x);
@@ -152,41 +161,27 @@ namespace yann::models
 
                 loss::loss_t error = loss.result();
 
-                this->backward(error.gradient); // loss sam skaluje gradient
+                this->backward(error.gradient);
 
-                if (batched)
-                    for (Parameter* param : params) { param->scale_gradient(static_cast<cum::cumeric_t>(1) / static_cast<cum::cumeric_t>(batches[i].size));
-
-                for (auto& callback : callbacks)
+                for (logging::ITrainingCallback*&  callback : callbacks)
                     callback->afterBackprop(ctx);
 
+                optimizer.scale_grads(params, 1 / static_cast<cum::cumeric_t>(current_batch_size));
                 optimizer.step(params); // zerowanie gradientów jest dokonywanie niejawnie w kroku optymalizatora
-                totalLoss += error.value;
+                total_loss += error.value;
             }
 
-            cum::cumeric_t avarageLoss = totalLoss / static_cast<cum::cumeric_t>(batched ? batches.size() : X.rows()));
+            mean_loss = total_loss / static_cast<cum::cumeric_t>(batched ? batches.size() : X.cols());
 
-            YANN_LOG(2, "Average epoch loss: ", static_cast<float>(avarageLoss));
-            YANN_LOG(2, "Total epoch loss: ", static_cast<float>(totalLoss));
+            YANN_LOG(2, "Average epoch loss: ", static_cast<float>(mean_loss));
+            YANN_LOG(2, "Total epoch loss: ", static_cast<float>(total_loss));
 
-            ctx.loss = avarageLoss;
-            ctx.epoch = epoch;
-            // ctx.batch = 1;
-            for(auto& callback : callbacks)
-            {
+
+            for(logging::ITrainingCallback*& callback : callbacks)
                 callback->afterEpoch(ctx);
-            }
         }
     }
 
-    //void Sequential::updateParams(cum::cumeric_t rate) // depraced
-    //{
-    //    for(size_t i = 0 ; i < topology.size() ; i++)
-    //    {
-    //        if(topology[i]->layerType() != layers::LAYER_TYPE::INPUT)
-    //            topology[i]->update_weights(rate);
-    //    }
-    //}
 
     cum::Matrix& Sequential::getWeights(size_t layer) const
     {

@@ -51,6 +51,11 @@ namespace cum::functions::exponential
         oneapi::mkl::vm::exp(internal::getQueue(), N, v, r, {});
     }
 
+    void exp_in_place(cumeric_t* v, const std::size_t N)
+    {
+        oneapi::mkl::vm::exp(internal::getQueue(), N, v, v, {});
+    }
+
     void exp2(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
         oneapi::mkl::vm::exp2(internal::getQueue(), N, v, r, {});
