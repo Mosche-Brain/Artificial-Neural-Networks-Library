@@ -1,3 +1,110 @@
+#include "yann/utils/filesystem.hpp"
+
+#include <cstdint>
+#include <cstdio>
+#include <stdexcept>
+
+namespace yann::utils::filesystem
+{
+	uint8_t dtype_bytes_count(DTYPE dtype)
+	{
+		switch(dtype)
+		{
+			case INT8: return 1;
+			case UINT8: return 1;
+			case FP32: return 4;
+
+			default: return 0; // unknown
+		}
+	}
+
+	void dump_matrix(const cum::Matrix& mat, const char* path)
+	{
+		MatrixHeader metadata;
+		metadata.meta = 67;
+		metadata.type = FP32;
+		metadata.rows = mat.rows();
+		metadata.cols = mat.cols();
+	
+		FILE* fp = fopen(path, "wb");
+		if(fp == NULL)
+		{
+			std::runtime_error("Couldn't open file");
+			return;
+		}
+
+		fputc(metadata.meta, fp);
+		fputc(metadata.type, fp);
+
+		fwrite(&metadata.rows, sizeof(uint64_t), 1, fp);
+		fwrite(&metadata.cols, sizeof(uint64_t), 1, fp);
+
+		fwrite(mat.data(), sizeof(cum::cumeric_t), mat.size(), fp);
+
+
+		if(fclose(fp) != 0)
+		{
+			std::runtime_error("fclose");
+		}
+	}
+
+	cum::Matrix read_matrix(const char* path)
+	{
+
+	}
+
+	void dump_buffer(const cum::cumeric_t* buffer, const cum::dim_t size, const char* path)
+	{
+		FILE* fptr = fopen(path, "wb");
+		if(fptr == NULL)
+		{
+			std::runtime_error("Couldn't open file");
+		}
+
+		
+		
+
+
+
+		if(fclose(fptr) != 0)
+		{
+			std::runtime_error("fclose(fptr)");
+		}
+	}
+
+	void read_buffer(cum::cumeric_t* buffer, const cum::dim_t size, const char* path)
+	{
+		FILE* fptr = fopen(path, "rb");
+		if(fptr == NULL)
+		{
+			std::runtime_error("Couldn't open file");
+			fclose(fptr);
+		}
+		
+		MatrixHeader metadata;
+
+		if (fread(&metadata.meta, sizeof(uint8_t),  1, fptr) != 1 ||
+    		fread(&metadata.type, sizeof(DTYPE),    1, fptr) != 1 ||
+    		fread(&metadata.rows, sizeof(uint64_t), 1, fptr) != 1 ||
+			fread(&metadata.cols, sizeof(uint64_t), 1, fptr) != 1)
+		{
+			fclose(fptr);
+			return;
+		}
+
+		if(metadata.rows * metadata.cols != size)
+		{
+			std::runtime_error("invalid size");
+			fclose(fptr);
+		}
+
+		if(fclose(fptr) != 0)
+		{
+			std::runtime_error("Couldn't close fptr");
+		}
+	}
+}
+
 /*
  * Temporarely commented out
  */

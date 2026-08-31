@@ -2,16 +2,16 @@
 // Created by jaro on 8/31/26.
 //
 
-#ifndef YANN_CONV2D_HPP
-#define YANN_CONV2D_HPP
+#ifndef YANN_POOL_HPP
+#define YANN_POOL_HPP
 
 #include "yann/models/layers/LayerBase.hpp"
 
 namespace yann::models::layers
 {
-    class Conv2D : public LayerBase
+    class Pool : public LayerBase
     {
     };
 } // yann
 
-#endif //YANN_CONV2D_HPP
+#endif //YANN_POOL_HPP

@@ -9,7 +9,7 @@
 #include <yann/loss/MeanSquaredError.hpp>
 #include <yann/logging/LossTracker.hpp>
 #include <yann/logging/GradientTracker.hpp>
-
+#include <yann/utils/filesystem.hpp>
 
 #include <matplot/matplot.h>
 #include "helpers/conversion_helpers.hpp"
@@ -22,8 +22,15 @@ namespace plt = matplot;
 
 int main()
 {
+
     cum::cum(cum::CUM_DEVICE::CPU);
 
+
+	cum::Matrix mat = cum::Matrix::Ones(6, 9);
+	yann::utils::filesystem::dump_matrix(mat, "macierx.tensor");
+
+	return 0;
+	//
     yann::runtime_config::set_verbosity(0);
 
     yann::models::Sequential model({
