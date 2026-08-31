@@ -25,14 +25,23 @@ namespace yann::models::layers
         this->_layerType_ = LAYER_TYPE::DENSE;
     }
 
+    void Dense::initParameters(int output_features, int input_features)
+    {
+        this->weights_       = Parameter::Uniform(output_features, input_features);   /* neurons * input_length */
+        this->biases_        = Parameter::Zeros(output_features, 1);               /* Column-Vector */
+        this->cache.a       = cum::Matrix::Zeros(output_features, 1);             /* Column-Vector */
+        this->cache.z   	= cum::Matrix::Zeros(output_features, 1);             /* Column-Vector */
+        this->cache.x       = cum::Matrix::Zeros(input_features, 1);   /* Column-Vector */
+        this->_initialized_ = true;
+    }
 
     cum::Matrix Dense::forward(const cum::Matrix& input) // rozważył bym przekazywanie referencji do wyniku zamiast kopii
     {
         if constexpr(ENABLE_RUNTIME_CHECKS) // może zmienie obecne constexpr na runtime config
         {
-            if(input.rows() != weights.cols())
+            if(input.rows() != weights_.cols())
             {
-                throw std::runtime_error("Input dimension mismatch: " + std::to_string(input.rows()) + " != " + std::to_string(weights.cols()));
+                throw std::runtime_error("Input dimension mismatch: " + std::to_string(input.rows()) + " != " + std::to_string(weights_.cols()));
             }
         }
 
@@ -51,25 +60,25 @@ namespace yann::models::layers
             if constexpr (ENABLE_CACHED_PREACTIVATION) // must be enabled for proper training in most of cases
             {
                 YANN_LOG(4, "Running feed forward kernel (cached raw)", "");
-                // cum::neural_primitives::neural_kernels::feed_forward_cached_raw(cache.a.data(), cache.z.data(), weights.values.data(), input.data(), biases.values.data(), weights.values.cols(), weights.values.rows(), activation.name);
-                cum::neural_primitives::neural_kernels::feed_forward_cached_raw(cache.a.data(), cache.z.data(), weights.values.data(), input.data(), biases.values.data(), weights.values.cols(), weights.values.rows(), input.cols(), activation.name);
+                // cum::neural_primitives::neural_kernels::feed_forward_cached_raw(cache.a.data(), cache.z.data(), weights_.values.data(), input.data(), biases_.values.data(), weights_.values.cols(), weights_.values.rows(), activation.name);
+                cum::neural_primitives::neural_kernels::feed_forward_cached_raw(cache.a.data(), cache.z.data(), weights_.values.data(), input.data(), biases_.values.data(), weights_.values.cols(), weights_.values.rows(), input.cols(), activation.name);
 
             }
             else // for a bit faster inference speed (training may not be posible in some cases)
             {
                 YANN_LOG(4, "Running feed forward kernel", "");
-                cum::neural_primitives::neural_kernels::feed_forward(cache.a.data(), weights().data(), input.data(), biases().data(), weights().cols(), weights().rows(), input.cols(), activation.name);
+                cum::neural_primitives::neural_kernels::feed_forward(cache.a.data(), weights_().data(), input.data(), biases_().data(), weights_().cols(), weights_().rows(), input.cols(), activation.name);
             }
         }
         else
         {
-            YANN_LOG(4, "Performing (weights * input) + biases", "");
-            // cache.z = (weights() * input) += biases();;
-            cache.z = weights() * cache.x;
+            YANN_LOG(4, "Performing (weights_ * input) + biases_", "");
+            // cache.z = (weights_() * input) += biases_();;
+            cache.z = weights_() * cache.x;
             cum::runtime::sync();
             cum::LinearAlgebra::addRowVectorInPlace(
                 cache.z.data(),
-                biases().data(),
+                biases_().data(),
                 cache.z.rows(),
                 cache.z.cols());
 
@@ -97,14 +106,14 @@ namespace yann::models::layers
             cum::Matrix cached_somewhat = cache.dz.cwiseProduct(deltaOutput);
             cum::runtime::sync();
 
-            weights.gradient += cached_somewhat * cache.x.transpose();
+            weights_.gradient += cached_somewhat * cache.x.transpose();
             cum::runtime::sync();
 
-            biases.gradient += cached_somewhat.rowwiseSum();
+            biases_.gradient += cached_somewhat.rowwiseSum();
             cum::runtime::sync();
 
 
-            return weights().transpose() * cached_somewhat;
+            return weights_().transpose() * cached_somewhat;
         }
         else
         {
@@ -116,40 +125,24 @@ namespace yann::models::layers
             cum::runtime::sync();
 
             YANN_LOG(4, "td_pre_activation = derivative.cwiseProcut(deltaOutput)\n", "");
-            biases.gradient = derivative.cwiseProduct(deltaOutput);
+            biases_.gradient = derivative.cwiseProduct(deltaOutput);
             cum::runtime::sync();
 
             YANN_LOG(4, "deltaWeights = matrixMultiply(d_pre_activation, matrixTranspose(inputs))\n", "");
-            weights.gradient = biases.gradient * cache.x.transpose();
+            weights_.gradient = biases_.gradient * cache.x.transpose();
             cum::runtime::sync();
 
-            return weights().transpose() * biases.gradient;
+            return weights_().transpose() * biases_.gradient;
         }
-    }
-
-    void Dense::update_weights(cum::cumeric_t rate) // currently deprecated, now we are using external optimizer - not fixed SGD - raczej usunę tą funcje
-    {
-    //     #if defined(ENABLE_DEBUG_OUTPUT)
-    //         cum::Matrix oldWeights = this->weights;
-    //     #endif
-    //
-    //     this->weights -= this->deltaWeights * rate;
-    //     this->biases  -= this->deltaBiases  * rate;
-    //
-    //     #if defined(ENABLE_DEBUG_OUTPUT)
-    //     if(runtime_config::verbosity_level() >= 4)
-    //         std::cout << utils::formating::matricesWithArrowToString(oldWeights, weights, 4, 16) << '\n';
-    //     #endif
-    //
-    //     this->deltaWeights = cum::Matrix(this->deltaWeights.rows(), this->deltaWeights.cols(), 0_c);
-    //     this->deltaBiases = cum::Matrix(this->deltaBiases.rows(), this->deltaBiases.cols(), 0_c);
     }
 
     void Dense::collect_parameters(std::vector<Parameter*>& params)
     {
-        params.push_back(&weights);
-        params.push_back(&biases);
+        params.push_back(&weights_);
+        params.push_back(&biases_);
     }
+
+
 
     std::unique_ptr<LayerBase> Dense::createUnique(int layerSize, const char* func)
     {

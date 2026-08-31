@@ -7,7 +7,7 @@ def load_dump(path):
     return np.array([[float(value) for value in line.split()] for line in lines[1:]], dtype=np.float32)
 
 
-# Same parameters and first sample as xor_problem.cpp.
+# Same parameters and first sample as xor.cpp.
 W1 = np.array([[1.0, -1.0], [-1.0, 2.0]], dtype=np.float32)
 b1 = np.array([[-0.5], [0.5]], dtype=np.float32)
 W2 = np.array([[1.0, -1.0]], dtype=np.float32)

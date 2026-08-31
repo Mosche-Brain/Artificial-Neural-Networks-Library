@@ -33,8 +33,8 @@ namespace yann::logging
             switch (mode_)
             {
                 case tracking_mode::average_absolute_value:
-                    history[i].biases.push_back(topology[i]->BiasesGrad().amean());
-                    history[i].weights.push_back(topology[i]->WeightsGrad().amean());
+                    history[i].biases.push_back(topology[i]->biases_grad().amean());
+                    history[i].weights.push_back(topology[i]->weights_grad().amean());
                     break;
 
                 case tracking_mode::sum:

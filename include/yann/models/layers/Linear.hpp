@@ -1,13 +1,18 @@
-#pragma once
+//
+// Created by jaro on 8/31/26.
+//
 
-#include "LayerBase.hpp"
+#ifndef YANN_LINEAR_HPP
+#define YANN_LINEAR_HPP
+
+#include "yann/models/layers/LayerBase.hpp"
 
 namespace yann::models::layers
 {
-    class Dense : public LayerBase
+    class Linear : public LayerBase
     {
     public:
-        Dense(int layerSize, const char* func);
+        Linear(int layerSize);
 
         void initParameters(int output_features, int input_features) override;
 
@@ -22,10 +27,12 @@ namespace yann::models::layers
         cum::Matrix& biases() override { return biases_.values; }
         cum::Matrix& biases_grad() override { return biases_.gradient; };
 
-        static std::unique_ptr<LayerBase> createUnique(int layerSize, const char* func);
+        static std::unique_ptr<LayerBase> createUnique(int layerSize);
 
     private:
         Parameter weights_;
         Parameter biases_;
     };
-}
+} // yann
+
+#endif //YANN_LINEAR_HPP

@@ -63,10 +63,11 @@ YANN/
 **Problem:** Brak przenośności — projekt wymaga specyficznej instalacji Intel oneAPI w `/opt/intel/oneapi/`
 
 **Rekomendacja:** Użyć zmiennych środowiskowych lub Find* modules:
+
 ```cmake
-find_path(INTEL_COMPILER_DIR include/sycl 
-    PATHS $ENV{CMAKE_CXX_COMPILER} 
-    PATH_SUFFIXES ..)
+find_path(INTEL_COMPILER_DIR include/sycl
+        PATHS $ENV{CMAKE_CXX_COMPILER}
+        PATH_SUFFIXES ../..)
 ```
 
 ### 4.2. Powtarzające się opcje kompilatora

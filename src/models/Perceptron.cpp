@@ -1,7 +1,5 @@
 #include "Perceptron.hpp"
 
-#include "utils/stlCompatibility.hpp"
-
 #include <cum/LinearAlgebra.hpp>
 #include <cum/functions.hpp>
 

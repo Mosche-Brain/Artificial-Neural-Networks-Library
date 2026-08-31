@@ -30,6 +30,11 @@ namespace yann::models::layers
         this->_initialized_ = true;
     }
 
+    void Input::initParameters(int output_features, int input_features)
+    {
+
+    }
+
     cum::Matrix Input::forward(const cum::Matrix& input)
     {
         if (input.cols() != cache.x.cols()) // sprawdza czy batch jest taki sam
@@ -47,11 +52,6 @@ namespace yann::models::layers
         // return cum::Matrix::Zeros(_layerSize_, 1);
         // return cum::Matrix(_layerSize_, 1, 1._c);
         // return cum::Matrix(_layerSize_, 1, 1._c);
-    }
-
-    void Input::update_weights(cum::cumeric_t rate)
-    {
-
     }
 
     void Input::collect_parameters(std::vector<Parameter*>& params)

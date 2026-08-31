@@ -2,16 +2,16 @@
 
 namespace yann::models::layers
 {
-    void LayerBase::initParameters(int layerSize, int inputLenght)
-    {
-        this->weights       = Parameter::Uniform(layerSize, inputLenght);   /* neurons * input_length */
-        this->biases        = Parameter::Zeros(layerSize, 1);               /* Column-Vector */
-        this->cache.a       = cum::Matrix::Zeros(layerSize, 1);             /* Column-Vector */
-        this->cache.z   	= cum::Matrix::Zeros(layerSize, 1);             /* Column-Vector */
-        this->cache.x       = cum::Matrix::Zeros(inputLenght, 1);   /* Column-Vector */
-        // this->cache.x        = cum::Matrix::Zeros(layerSize, inputLenght);   /* Column-Vector */
-        this->_initialized_ = true;
-    }
+    // void LayerBase::initParameters(int layerSize, int inputLenght)
+    // {
+        // this->weights       = Parameter::Uniform(layerSize, inputLenght);   /* neurons * input_length */
+        // this->biases        = Parameter::Zeros(layerSize, 1);               /* Column-Vector */
+        // this->cache.a       = cum::Matrix::Zeros(layerSize, 1);             /* Column-Vector */
+        // this->cache.z   	= cum::Matrix::Zeros(layerSize, 1);             /* Column-Vector */
+        // this->cache.x       = cum::Matrix::Zeros(inputLenght, 1);   /* Column-Vector */
+        // // this->cache.x        = cum::Matrix::Zeros(layerSize, inputLenght);   /* Column-Vector */
+        // this->_initialized_ = true;
+    // }
 
 
     bool LayerBase::initialized()
@@ -36,24 +36,24 @@ namespace yann::models::layers
         return this->cache.x;
     }
     
-    cum::Matrix& LayerBase::Weights()
+    cum::Matrix& LayerBase::weights()
     {
-        return this->weights();
+        // return this->weights();
     }
 
-    cum::Matrix& LayerBase::WeightsGrad()
+    cum::Matrix& LayerBase::weights_grad()
     {
-        return this->weights.gradient;
+        // return this->weights.gradient;
     }
 
-    cum::Matrix& LayerBase::Biases()
+    cum::Matrix& LayerBase::biases()
     {
-        return this->biases();
+        // return this->biases();
     }
 
-    cum::Matrix& LayerBase::BiasesGrad()
+    cum::Matrix& LayerBase::biases_grad()
     {
-        return this->biases.gradient;
+        // return this->biases.gradient;
     }
 
     LAYER_TYPE LayerBase::layerType()

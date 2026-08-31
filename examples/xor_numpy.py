@@ -1,7 +1,7 @@
 import numpy as np
 
 
-# The same architecture, parameters and data as xor_problem.cpp.
+# The same architecture, parameters and data as xor.cpp.
 X = np.array(
     [[0.0, 0.0],
      [0.0, 1.0],

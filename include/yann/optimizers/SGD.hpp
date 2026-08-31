@@ -26,8 +26,8 @@ namespace yann::optimizers
     private:
         // std::vector<cum::Matrix*> weights_grad;
         // std::vector<cum::Matrix*> biases_grad; // column vector
-        // std::vector<cum::Matrix*> weights;
-        // std::vector<cum::Matrix*> biases; // column vector
+        // std::vector<cum::Matrix*> weights_;
+        // std::vector<cum::Matrix*> biases_; // column vector
     };
  } // yann
 

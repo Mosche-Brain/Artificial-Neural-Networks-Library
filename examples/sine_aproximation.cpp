@@ -127,9 +127,9 @@ int main()
         std::iota(batch_range.begin(), batch_range.end(), 0.0);
 
         auto weights_line = plt::plot(ax5, batch_range, layer_history.weights);
-        weights_line->display_name("layer " + std::to_string(layer) + " weights");
+        weights_line->display_name("layer " + std::to_string(layer) + " weights_");
         auto biases_line = plt::plot(ax5, batch_range, layer_history.biases);
-        biases_line->display_name("layer " + std::to_string(layer) + " biases");
+        biases_line->display_name("layer " + std::to_string(layer) + " biases_");
     }
     plt::hold(ax5, plt::off);
     plt::title(ax5, "Average absolute gradient size");

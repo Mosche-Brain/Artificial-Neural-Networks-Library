@@ -2,7 +2,13 @@
 #include <stdexcept>
 #include <limits>
 
-#include <cum/Matrix.hpp>
+
+#include "yann/loss/LossBase.hpp"
+#include "yann/loss/MeanAbsoluteError.hpp"
+#include "yann/loss/MeanSquaredError.hpp"
+#include "yann/loss/MeanAbsoluteError.hpp"
+
+/* --------------------------------------- */
 
 namespace yann::loss
 {

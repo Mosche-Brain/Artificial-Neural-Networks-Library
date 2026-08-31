@@ -43,13 +43,12 @@ namespace yann::models::layers
     public:
         virtual ~LayerBase() = default;
 
-        virtual void initParameters(int layerSize, int inputLenght);
+        virtual void initParameters(int output_features, int input_features) = 0;
         // dofdam też inicjalizator parametrów przyjmujący referencje do poprzedniej warstwy
         
         // virtual cum::Vector forward(const cum::Vector& input) = 0;
         virtual cum::Matrix forward(const cum::Matrix& input) = 0;
         virtual cum::Matrix backward(const cum::Matrix& deltaOutput) = 0;
-        virtual void update_weights(cum::cumeric_t rate) = 0;
 
         virtual void collect_parameters(std::vector<Parameter*>& params) = 0;
         // virtual std::unique_ptr<LayerBase> getUnique() = 0;
@@ -58,17 +57,15 @@ namespace yann::models::layers
         virtual int size();
         virtual cum::Matrix& Outputs();
         virtual cum::Matrix& Inputs();
-        virtual cum::Matrix& WeightsGrad();
-        virtual cum::Matrix& Weights();
-        virtual cum::Matrix& Biases();
-        virtual cum::Matrix& BiasesGrad();
+        virtual cum::Matrix& weights_grad();
+        virtual cum::Matrix& weights();
+        virtual cum::Matrix& biases();
+        virtual cum::Matrix& biases_grad();
         // utils::Activation activation;
         cum::functions::activation_t activation;
         
         LAYER_TYPE layerType();
     protected:
-        Parameter weights;
-        Parameter biases;
         ForwardCache cache;
         // cum::Matrix outputs;
         // cum::Matrix raw_outputs;

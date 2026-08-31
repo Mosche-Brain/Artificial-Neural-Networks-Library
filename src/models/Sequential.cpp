@@ -101,13 +101,13 @@ namespace yann::models
         std::vector<Parameter*> params = this->parameters();
         const bool batched = batch_size > 1;
 
-        cum::Matrix data = X.transpose();
-        cum::Matrix target = Y.transpose();
+        cum::Matrix data = X.transpose(); // zrobiłem tak bo wygodniej mi się podawało sample jako row, ale pewnie to usune
+        cum::Matrix target = Y.transpose(); // w sumie niepotrzebne to
 
         std::vector<Batch> batches;
         if (batched)
         {
-            for (std::size_t begin = 0; begin < data.cols(); begin += batch_size)
+            for (std::size_t begin = 0; begin < data.cols(); begin += batch_size) // przeniósł bym tą pętle do osobnej funkcji
             {
                 const std::size_t samples = std::min(data.cols() - begin, batch_size);
                 batches.emplace_back(
@@ -118,91 +118,64 @@ namespace yann::models
         }
 
         YANN_LOG(1, "Started training for {} epochs...", epochs);
-        logging::TrainingContext ctx(*this, 0, 0, 0);
-        for(size_t epoch = 0 ; epoch < epochs ; epoch++)
+        logging::TrainingContext ctx(*this, 0, 0, 0); // TODO: obecnie batch jest ignorowany, lepiej zrobię by ctx miał referencje do lossu, epoki, batcha, a nie kopie
+        for(cum::dim_t epoch = 0 ; epoch < epochs ; epoch++)
         {
             cum::cummulative_t totalLoss = 0;
 
             YANN_LOG(1, "Epoch {}", epoch);
 
-            if (!batched)
+            // Mamy tutaj kopie, później można to na referencje zmiennić dla ograniczenia lokacji
+            cum::Matrix x;
+            cum::Matrix y;
+
+            cum::dim_t n = batched ? batches.size() : X.rows();
+
+            for (cum::dim_t i = 0; i < n; ++i)
             {
-                for (std::size_t i = 0; i < X.rows(); ++i)
+                YANN_LOG(2, "{} batch", i);
+
+                if (batched)
                 {
-                    YANN_LOG(2, "{} sample", i);
-
-                    cum::Matrix x = data.col(i);
-                    cum::Matrix y = Y.row(i).transpose();
-                    cum::runtime::sync();
-
-                    cum::Matrix result = this->forward(x);
-                    loss.compute(result, y);
-                    loss::loss_t error = loss.result();
-
-                    this->backward(error.gradient);
-                    cum::runtime::sync();
-                    for (auto& callback : callbacks)
-                    {
-                        callback->afterBackprop(ctx);
-                    }
-                    optimizer.step(params);
-                    totalLoss += error.value;
+                    x = batches[i].inputs();
+                    y = batches[i].targets();
                 }
-            }
-            else
-            {
-                for (std::size_t i = 0; i < batches.size(); ++i)
+                else
                 {
-                    YANN_LOG(2, "{} batch", i);
-
-                    const cum::Matrix& x = batches[i].inputs();
-                    //YANN_LOG(2, "TWARDOSC", "");
-                    const cum::Matrix& y = batches[i].targets();
-					//YANN_LOG(2, "SEKS", "");
-					
-                    cum::Matrix results = this->forward(x);
-                    loss.compute(results, y);
-                    loss::loss_t error = loss.result();
-
-                    this->backward(error.gradient);
-                    for (Parameter* param : params)
-                    {
-                        param->scale_gradient(
-                            static_cast<cum::cumeric_t>(1) /
-                            static_cast<cum::cumeric_t>(batches[i].size));
-                    }
-                    cum::runtime::sync();
-
-                    for (auto& callback : callbacks)
-                    {
-                        callback->afterBackprop(ctx);
-                    }
-
-                    optimizer.step(params);
-                    totalLoss += error.value;
+                    x = data.col(i);
+                    y = target.col(i);
                 }
+
+                cum::Matrix results = this->forward(x);
+
+                loss.compute(results, y);
+
+                loss::loss_t error = loss.result();
+
+                this->backward(error.gradient); // loss sam skaluje gradient
+
+                if (batched)
+                    for (Parameter* param : params) { param->scale_gradient(static_cast<cum::cumeric_t>(1) / static_cast<cum::cumeric_t>(batches[i].size));
+
+                for (auto& callback : callbacks)
+                    callback->afterBackprop(ctx);
+
+                optimizer.step(params); // zerowanie gradientów jest dokonywanie niejawnie w kroku optymalizatora
+                totalLoss += error.value;
             }
 
-            cum::runtime::sync();
-            cum::cumeric_t avarageLoss = totalLoss / std::max(
-                static_cast<cum::cumeric_t>(batched ? batches.size() : X.rows()),
-                static_cast<cum::cumeric_t>(1.0));
+            cum::cumeric_t avarageLoss = totalLoss / static_cast<cum::cumeric_t>(batched ? batches.size() : X.rows()));
+
             YANN_LOG(2, "Average epoch loss: ", static_cast<float>(avarageLoss));
             YANN_LOG(2, "Total epoch loss: ", static_cast<float>(totalLoss));
 
             ctx.loss = avarageLoss;
             ctx.epoch = epoch;
-            ctx.batch = 1;
+            // ctx.batch = 1;
             for(auto& callback : callbacks)
             {
                 callback->afterEpoch(ctx);
             }
-
-            // // temporary line for debug
-            // if (avarageLoss < 0.55)
-            // {
-            //     break;
-            // }
         }
     }
 
@@ -217,12 +190,12 @@ namespace yann::models
 
     cum::Matrix& Sequential::getWeights(size_t layer) const
     {
-        return topology[layer]->Weights();
+        return topology[layer]->weights();
     }
 
     cum::Matrix& Sequential::getBiases(size_t layer) const
     {
-        return topology[layer]->Biases();
+        return topology[layer]->biases();
     }
 
     cum::Matrix& Sequential::getOutputs(size_t layer) const

@@ -8,9 +8,10 @@ namespace yann::models::layers
     public:
         Input(int layerSize);
 
+        void initParameters(int output_features, int input_features) override;
+
         cum::Matrix forward(const cum::Matrix& input) override;
         cum::Matrix backward(const cum::Matrix& deltaOutput) override;
-        void update_weights(cum::cumeric_t rate) override;
 
         void collect_parameters(std::vector<Parameter*>& params) override;
 
