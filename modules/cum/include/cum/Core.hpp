@@ -22,7 +22,7 @@ namespace cum
 {
     enum class CUM_DEVICE { AUTO, CPU, GPU };
 
-    using __event__ = experimental::__event__*;
+    using __event__ = experimental::__event__;
     // using __event__ = void;
 
     // give info ABOUT used precision in compile time for each precision

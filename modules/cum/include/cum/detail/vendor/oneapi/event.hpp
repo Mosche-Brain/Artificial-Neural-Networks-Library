@@ -5,18 +5,19 @@
  * @createdOn   : 09/01/26
  * @description : Definition of opaque __event__ structure
  *----------------------------------------------**/
+#pragma once
 
 #include <sycl/event.hpp>
 
 namespace cum::experimental 
 {
-    struct __event__
-    {
-        sycl::event event;
+    // struct __event__
+    // {
+    //     sycl::event event;
 
-        sycl::event& operator ()();
+    //     sycl::event& operator ()();
         
-        void wait();
-    };
+    //     void wait();
+    // };
 } 
 

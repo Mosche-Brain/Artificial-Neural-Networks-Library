@@ -10,6 +10,10 @@
 #include <yann/runtime_config.hpp>
 
 #include <array>
+#include <matplot/matplot.h>
+
+#include <numeric>
+#include <vector>
 
 
 namespace
@@ -49,7 +53,7 @@ int main()
     model.addLayer(yann::models::layers::Dense::createUnique(1, "sigmoid"));
     model.build();
 
-    // Four samples are stored as rows for fit(); forward receives their transpose.
+    // The source literals use rows; transpose them into column-sample layout.
     cum::Matrix inputs(4, 2, {
         0.0_c, 0.0_c,
         0.0_c, 1.0_c,
@@ -95,6 +99,22 @@ int main()
               << loss_tracker.getLossHistory().back()
               << '\n';
 
+    const auto& loss_history = loss_tracker.getLossHistory();
+    std::vector<double> epoch_range(loss_history.size());
+    std::iota(epoch_range.begin(), epoch_range.end(), 0.0);
+
+    auto figure = matplot::figure(true);
+    matplot::plot(epoch_range, loss_history);
+    matplot::title("XOR training loss");
+    matplot::xlabel("epoch");
+    matplot::ylabel("loss");
+    figure->size(1200, 800);
+    matplot::show();
+
+
+
+
+              
     cum::decum();
     return 0;
 }

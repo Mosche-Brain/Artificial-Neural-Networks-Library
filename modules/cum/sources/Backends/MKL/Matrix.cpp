@@ -186,52 +186,47 @@ namespace cum
         return temp;
     }
 
-	Matrix::operator Vector() const
-	{
-		if(rows_ == rows_ * cols_ || cols_ == rows_ * cols_)
-			std::invalid_argument("Invalid dimensions");
-		
-		Vector temp(rows_ * cols_);
-		memory::memcopy(temp.data(), this->data_, rows_ * cols_ * sizeof(cumeric_t));
-		
-		return temp;
-	}
-
-    void Matrix::fill(const cumeric_t value)
+    Matrix::operator Vector() const
     {
-        functions::various::fill(data_, value, rows_ * cols_);
+        if (rows_ != 1 && cols_ != 1)
+            throw std::invalid_argument("Matrix must be a vector");
+
+        Vector temp(rows_ * cols_);
+        memory::memcopy(temp.data(), data_, rows_ * cols_ * sizeof(cumeric_t));
+        return temp;
     }
 
-    /* ============================== Accessors ================================ */
+	void Matrix::fill(const cumeric_t value)
+	{
+		functions::various::fill(data_, value, rows_ * cols_);
+	}
 
     Matrix Matrix::row(size_t i) const
-    { 
+    {
+        if (i >= rows_)
+            throw std::out_of_range("Row index exceeds matrix dimensions");
+
         Matrix temp(1, cols_);
-		runtime::sync();
         internal::getQueue().memcpy(
             temp.data_,
             data_ + i * cols_,
-            cols_ * sizeof(cumeric_t)
-        ).wait();
+            cols_ * sizeof(cumeric_t)).wait();
         return temp;
     }
 
     Matrix Matrix::col(size_t i) const
     {
-        Matrix temp(rows_, 1);
-       
-		dim_t m = this->rows_;
-		dim_t n = this->cols_;
-		const cumeric_t* src = this->data_;
-		cumeric_t* dest = temp.data_;
-		
-        oneapi::mkl::blas::row_major::copy(internal::getQueue(), m, src, n, dest, 1).wait();
-        
-        // internal::getQueue().parallel_for(sycl::range<1>(m), [=](sycl::id<1> idx)
-		// {
-		// 	dest[idx] = src[idx * n + i];
-		// }).wait();
+        if (i >= cols_)
+            throw std::out_of_range("Column index exceeds matrix dimensions");
 
+        Matrix temp(rows_, 1);
+        oneapi::mkl::blas::row_major::copy(
+            internal::getQueue(),
+            rows_,
+            data_ + i,
+            cols_,
+            temp.data_,
+            1).wait();
         return temp;
     }
 
