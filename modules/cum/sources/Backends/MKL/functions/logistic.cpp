@@ -22,7 +22,7 @@ namespace cum::functions::logistic
 
     /* Parallel versions */
 
-    void sigmoid(cumeric_t* r, const cumeric_t* v, const std::size_t N)
+    __event__ sigmoid(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -30,7 +30,7 @@ namespace cum::functions::logistic
         });
     }
 
-    void sigmoid_in_place(cumeric_t* v, const std::size_t N)
+    __event__ sigmoid_in_place(cumeric_t* v, const std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -38,7 +38,7 @@ namespace cum::functions::logistic
         });
     }
 
-    void softmax(cumeric_t* r, const cumeric_t* v, const dim_t N)
+    __event__ softmax(cumeric_t* r, const cumeric_t* v, const dim_t N)
     {
         exponential::exp(r, v, N);
         
@@ -48,7 +48,7 @@ namespace cum::functions::logistic
         blas::scal(N, 1/sum_exp_v, r, 1);
     }
 
-    void softmax_in_place(cumeric_t* v, const dim_t N)
+    __event__ softmax_in_place(cumeric_t* v, const dim_t N)
     {
         exponential::exp_in_place(v, N);
 
@@ -70,7 +70,7 @@ namespace cum::functions::logistic
 
     /* Parallel versions */
 
-    void sigmoid_deriv(cumeric_t* r, const cumeric_t* v, const std::size_t N)
+    __event__ sigmoid_deriv(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -78,7 +78,7 @@ namespace cum::functions::logistic
         });
     }
 
-    void sigmoid_deriv_from_result(cumeric_t* r, const cumeric_t* v, const std::size_t N)
+    __event__ sigmoid_deriv_from_result(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -86,7 +86,7 @@ namespace cum::functions::logistic
         });
     }
 
-    void sigmoid_deriv_in_place(cumeric_t* v, const std::size_t N)
+    __event__ sigmoid_deriv_in_place(cumeric_t* v, const std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -94,7 +94,7 @@ namespace cum::functions::logistic
         });
     }
 
-    void sigmoid_deriv_from_result_in_place(cumeric_t* v, const std::size_t N)
+    __event__ sigmoid_deriv_from_result_in_place(cumeric_t* v, const std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -102,7 +102,7 @@ namespace cum::functions::logistic
         });
     }
 
-    void softmax_deriv(cumeric_t* r, const cumeric_t* v, const dim_t N)
+    __event__ softmax_deriv(cumeric_t* r, const cumeric_t* v, const dim_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -110,7 +110,7 @@ namespace cum::functions::logistic
         });
     }
 
-    void softmax_deriv_in_place(cumeric_t* v, const dim_t N)
+    __event__ softmax_deriv_in_place(cumeric_t* v, const dim_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -118,7 +118,7 @@ namespace cum::functions::logistic
         });
     }
     
-    void softmax_deriv_from_result(cumeric_t* r, const cumeric_t* v, const dim_t N)
+    __event__ softmax_deriv_from_result(cumeric_t* r, const cumeric_t* v, const dim_t N)
     {
 
     }

@@ -21,14 +21,14 @@ namespace cum::functions::hyperbolic
 
     /* Parallel versions */
 
-    void tanh(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void tanh_in_place(cumeric_t* v, std::size_t N);
+    __event__ tanh(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ tanh_in_place(cumeric_t* v, std::size_t N);
 
-    void sinh(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void sinh_in_place(cumeric_t* v, std::size_t N);
+    __event__ sinh(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ sinh_in_place(cumeric_t* v, std::size_t N);
 
-    void cosh(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void cosh_in_place(cumeric_t* v, std::size_t N);
+    __event__ cosh(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ cosh_in_place(cumeric_t* v, std::size_t N);
 
     /* ========================== Derivatives ========================== */
 
@@ -41,15 +41,15 @@ namespace cum::functions::hyperbolic
 
     /* Parallel versions */
 
-    void tanh_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void tanh_deriv_from_result(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void tanh_deriv_from_result_in_place(cumeric_t* v, std::size_t N);
+    __event__ tanh_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ tanh_deriv_from_result(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ tanh_deriv_from_result_in_place(cumeric_t* v, std::size_t N);
 
-    void sinh_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void sinh_deriv_in_place(cumeric_t* v, std::size_t N);
+    __event__ sinh_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ sinh_deriv_in_place(cumeric_t* v, std::size_t N);
 
-    void cosh_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void cosh_deriv_in_place(cumeric_t* v, std::size_t N);
+    __event__ cosh_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ cosh_deriv_in_place(cumeric_t* v, std::size_t N);
 
 } // namespace cum::functions::hyperbolic
 

@@ -17,14 +17,14 @@ namespace cum::functions::cyclometric
 
     /* Parallel versions */
 
-    void asin(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void asin_in_place(cumeric_t* v, std::size_t N);
+    __event__ asin(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ asin_in_place(cumeric_t* v, std::size_t N);
 
-    void acos(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void acos_in_place(cumeric_t* v, std::size_t N);
+    __event__ acos(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ acos_in_place(cumeric_t* v, std::size_t N);
 
-    void atan(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void atan_in_place(cumeric_t* v, std::size_t N);
+    __event__ atan(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ atan_in_place(cumeric_t* v, std::size_t N);
 
     /* ========================== Derivatives ========================== */
 
@@ -36,13 +36,13 @@ namespace cum::functions::cyclometric
 
     /* Parallel versions */
 
-    void asin_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void asin_deriv_in_place(cumeric_t* v, std::size_t N);
+    __event__ asin_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ asin_deriv_in_place(cumeric_t* v, std::size_t N);
 
-    void acos_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void acos_deriv_in_place(cumeric_t* v, std::size_t N);
+    __event__ acos_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ acos_deriv_in_place(cumeric_t* v, std::size_t N);
 
-    void atan_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void atan_deriv_in_place(cumeric_t* v, std::size_t N);
+    __event__ atan_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ atan_deriv_in_place(cumeric_t* v, std::size_t N);
 
 }

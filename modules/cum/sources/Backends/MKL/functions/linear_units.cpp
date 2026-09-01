@@ -45,7 +45,7 @@ namespace cum::functions::linear_units
 
     /* Parallel versions */
 
-    void identity(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ identity(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
         // memory::memcopy(r, v, N);
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
@@ -54,17 +54,17 @@ namespace cum::functions::linear_units
         });
     }
 
-    void relu(cumeric_t* r, const cumeric_t* v, const std::size_t N)
+    __event__ relu(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
         oneapi::mkl::vm::fmax(internal::getQueue(), N, v, internal::getZeros(), r, {});
     }
 
-    void relu_in_place(cumeric_t* v, std::size_t N)
+    __event__ relu_in_place(cumeric_t* v, std::size_t N)
     {
         oneapi::mkl::vm::fmax(internal::getQueue(), N, v, internal::getZeros(), v, {});
     }
 
-    void leaky_relu(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ leaky_relu(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -72,7 +72,7 @@ namespace cum::functions::linear_units
         });
     }
 
-    void leaky_relu_in_place(cumeric_t* v, std::size_t N)
+    __event__ leaky_relu_in_place(cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -80,14 +80,14 @@ namespace cum::functions::linear_units
         });
     }
 
-    void gelu(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ gelu(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = gelu(v[idx]);
         });
     }
-    void gelu_in_place(cumeric_t* v, std::size_t N)
+    __event__ gelu_in_place(cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -95,7 +95,7 @@ namespace cum::functions::linear_units
         });
     }
 
-    void elu(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ elu(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -103,7 +103,7 @@ namespace cum::functions::linear_units
         });
     }
 
-    void elu_in_place(cumeric_t* v, std::size_t N)
+    __event__ elu_in_place(cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -145,7 +145,7 @@ namespace cum::functions::linear_units
 
     /* Parallel versions */
 
-    void identity_deriv(cumeric_t* r, const cumeric_t* v, const std::size_t N)
+    __event__ identity_deriv(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
         // memory::memcopy(r, internal::getOnes(), N);
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
@@ -154,7 +154,7 @@ namespace cum::functions::linear_units
         });
     }
 
-    void identity_deriv_in_place(cumeric_t* v, std::size_t N)
+    __event__ identity_deriv_in_place(cumeric_t* v, std::size_t N)
     {
         // memory::memcopy(v, internal::getOnes(), N);
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
@@ -163,7 +163,7 @@ namespace cum::functions::linear_units
         });
     }
 
-    void relu_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ relu_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -171,7 +171,7 @@ namespace cum::functions::linear_units
         });
     }
 
-    void relu_deriv_in_place(cumeric_t* v, std::size_t N)
+    __event__ relu_deriv_in_place(cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -179,7 +179,7 @@ namespace cum::functions::linear_units
         });
     }
 
-    void leaky_relu_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ leaky_relu_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -187,7 +187,7 @@ namespace cum::functions::linear_units
         });
     }
 
-    void leaky_relu_deriv_in_place(cumeric_t* v, std::size_t N)
+    __event__ leaky_relu_deriv_in_place(cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -195,7 +195,7 @@ namespace cum::functions::linear_units
         });
     }
 
-    void gelu_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ gelu_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -203,7 +203,7 @@ namespace cum::functions::linear_units
         });
     }
 
-    void gelu_deriv_in_place(cumeric_t* v, std::size_t N)
+    __event__ gelu_deriv_in_place(cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -211,7 +211,7 @@ namespace cum::functions::linear_units
         });
     }
 
-    void elu_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ elu_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -219,7 +219,7 @@ namespace cum::functions::linear_units
         });
     }
 
-    void elu_deriv_in_place(cumeric_t* v, std::size_t N)
+    __event__ elu_deriv_in_place(cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {

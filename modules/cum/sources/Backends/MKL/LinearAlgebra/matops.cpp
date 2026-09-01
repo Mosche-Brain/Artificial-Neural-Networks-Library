@@ -10,7 +10,7 @@
 
 namespace cum::LinearAlgebra
 {
-	void mmul(cumeric_t* C, const cumeric_t* A, const cumeric_t* B, const dim_t m, const dim_t n, const dim_t k)
+	__event__ mmul(cumeric_t* C, const cumeric_t* A, const cumeric_t* B, const dim_t m, const dim_t n, const dim_t k)
 	{
 		blas::gemm(
 			static_cast<char>(blas::transpose::nontrans),
@@ -22,12 +22,12 @@ namespace cum::LinearAlgebra
 		);
 	}
 
-	void mmul(cumeric_t* A, const cumeric_t* B, const dim_t m, const dim_t n, const dim_t k)
+	__event__ mmul(cumeric_t* A, const cumeric_t* B, const dim_t m, const dim_t n, const dim_t k)
 	{
 		mmul(A, A, B, m, n, k);
 	}
 
-	void mtrans(cumeric_t *At, const cumeric_t *A, const dim_t m, const dim_t n)
+	__event__ mtrans(cumeric_t *At, const cumeric_t *A, const dim_t m, const dim_t n)
 	{
 		auto& q = internal::getQueue();
         #if defined(CUM_USE_F64) || defined(CUM_USE_F32)
@@ -45,7 +45,7 @@ namespace cum::LinearAlgebra
         #endif
 	}
 
-	void mtrans(cumeric_t* A, const dim_t m, const dim_t n)
+	__event__ mtrans(cumeric_t* A, const dim_t m, const dim_t n)
 	{
 		mtrans(A, A, m, n);
 	}

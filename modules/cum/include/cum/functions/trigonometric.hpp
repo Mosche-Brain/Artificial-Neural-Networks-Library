@@ -20,14 +20,14 @@ namespace cum::functions::trigonometric
 
     /* Parallel versions */
 
-    void sin(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void sin_in_place(cumeric_t* v, std::size_t N);
+    __event__ sin(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ sin_in_place(cumeric_t* v, std::size_t N);
 
-    void cos(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void cos_in_place(cumeric_t* v, const std::size_t N);
+    __event__ cos(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ cos_in_place(cumeric_t* v, const std::size_t N);
 
-    void tan(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void tan_in_place(cumeric_t* v, std::size_t N);
+    __event__ tan(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ tan_in_place(cumeric_t* v, std::size_t N);
 
     /* ========================== Derivatives ========================== */
 
@@ -40,16 +40,16 @@ namespace cum::functions::trigonometric
 
     /* Parallel versions */
 
-    void sin_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void sin_deriv_in_place(cumeric_t* v, std::size_t N);
+    __event__ sin_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ sin_deriv_in_place(cumeric_t* v, std::size_t N);
 
-    void cos_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void cos_deriv_in_place(cumeric_t* v, std::size_t N);
+    __event__ cos_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ cos_deriv_in_place(cumeric_t* v, std::size_t N);
 
-    void tan_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void tan_deriv_in_place(cumeric_t* v, std::size_t N);
+    __event__ tan_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ tan_deriv_in_place(cumeric_t* v, std::size_t N);
 
-    void tan_deriv_from_result(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void tan_deriv_in_place_from_result(cumeric_t* v, std::size_t N);
+    __event__ tan_deriv_from_result(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ tan_deriv_in_place_from_result(cumeric_t* v, std::size_t N);
 
 } // namespace cum::functions::trigonometric

@@ -16,11 +16,11 @@ namespace cum::functions::logistic
 
     /* Parallel versions */
 
-    void sigmoid(cumeric_t* r, const cumeric_t* v, const std::size_t N);
-    void sigmoid_in_place(cumeric_t* v, const std::size_t N);
+    __event__ sigmoid(cumeric_t* r, const cumeric_t* v, const std::size_t N);
+    __event__ sigmoid_in_place(cumeric_t* v, const std::size_t N);
 
-    void softmax(cumeric_t* r, const cumeric_t* v, const dim_t N);
-    void softmax_in_place(cumeric_t* v, const dim_t N);
+    __event__ softmax(cumeric_t* r, const cumeric_t* v, const dim_t N);
+    __event__ softmax_in_place(cumeric_t* v, const dim_t N);
 
     /* ========================== Derivatives ========================== */
 
@@ -31,13 +31,13 @@ namespace cum::functions::logistic
 
     /* Parallel versions */
 
-    void sigmoid_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
-    void sigmoid_deriv_from_result(cumeric_t* r, const cumeric_t* v, const std::size_t N);
-    void sigmoid_deriv_in_place(cumeric_t* v, const std::size_t N);
-    void sigmoid_deriv_from_result_in_place(cumeric_t* v, std::size_t N);
+    __event__ sigmoid_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N);
+    __event__ sigmoid_deriv_from_result(cumeric_t* r, const cumeric_t* v, const std::size_t N);
+    __event__ sigmoid_deriv_in_place(cumeric_t* v, const std::size_t N);
+    __event__ sigmoid_deriv_from_result_in_place(cumeric_t* v, std::size_t N);
 
-    void softmax_deriv(cumeric_t* r, const cumeric_t* v, dim_t N);
-    void softmax_deriv_in_place(cumeric_t* v, dim_t N);
-    void softmax_deriv_from_result(cumeric_t* r, const cumeric_t* v, const std::size_t N);
+    __event__ softmax_deriv(cumeric_t* r, const cumeric_t* v, dim_t N);
+    __event__ softmax_deriv_in_place(cumeric_t* v, dim_t N);
+    __event__ softmax_deriv_from_result(cumeric_t* r, const cumeric_t* v, const std::size_t N);
 
 }

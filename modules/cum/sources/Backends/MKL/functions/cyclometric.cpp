@@ -29,32 +29,32 @@ namespace cum::functions::cyclometric
 
     /* Parallel versions */
 
-    void asin(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ asin(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
         oneapi::mkl::vm::asin(internal::getQueue(), N, v, r, {});
     }
 
-    void asin_in_place(cumeric_t* v, std::size_t N)
+    __event__ asin_in_place(cumeric_t* v, std::size_t N)
     {
         oneapi::mkl::vm::asin(internal::getQueue(), N, v, v, {});
     }
 
-    void acos(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ acos(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
         oneapi::mkl::vm::acos(internal::getQueue(), N, v, r, {});
     }
 
-    void acos_in_place(cumeric_t* v, std::size_t N)
+    __event__ acos_in_place(cumeric_t* v, std::size_t N)
     {
         oneapi::mkl::vm::acos(internal::getQueue(), N, v, v, {});
     }
 
-    void atan(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ atan(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
         oneapi::mkl::vm::atan(internal::getQueue(), N, v, r, {});
     }
 
-    void atan_in_place(cumeric_t* v, std::size_t N)
+    __event__ atan_in_place(cumeric_t* v, std::size_t N)
     {
         oneapi::mkl::vm::atan(internal::getQueue(), N, v, v, {});
     }
@@ -79,7 +79,7 @@ namespace cum::functions::cyclometric
 
     /* Parallel versions */
 
-    void asin_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ asin_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -87,7 +87,7 @@ namespace cum::functions::cyclometric
         });
     }
 
-    void asin_deriv_in_place(cumeric_t* v, std::size_t N)
+    __event__ asin_deriv_in_place(cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -95,7 +95,7 @@ namespace cum::functions::cyclometric
         });
     }
 
-    void acos_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ acos_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -103,7 +103,7 @@ namespace cum::functions::cyclometric
         });
     }
 
-    void acos_deriv_in_place(cumeric_t* v, std::size_t N)
+    __event__ acos_deriv_in_place(cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -111,7 +111,7 @@ namespace cum::functions::cyclometric
         });
     }
 
-    void atan_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ atan_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -119,7 +119,7 @@ namespace cum::functions::cyclometric
         });
     }
 
-    void atan_deriv_in_place(cumeric_t* v, std::size_t N)
+    __event__ atan_deriv_in_place(cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {

@@ -3,31 +3,27 @@
 #include <cstdint>
 #include <stdfloat>
 
-// #define CUM_USE_F16
-#define BUILD_USE_MKL
 
 #if defined(BUILD_USE_MKL)
     #include <sycl/sycl.hpp>
 #endif
-
-// #ifndef CUM_USE_F64 && !defined(CUM_USE_F32) && !defined(CUM_USE_F16) && !defined(CUM_USE_BF16) && !defined(CUM_USE_INT8)
-    // #define CUM_USE_F16    
-// #error "Data type didn't specified. Define one of CUM_USE_F64, CUM_USE_F32, CUM_USE_F16, CUM_USE_BF16 or CUM_USE_INT8"
-// #endif
 
 #if !defined(CUM_USE_F64)  && \
     !defined(CUM_USE_F32)  && \
     !defined(CUM_USE_F16)  && \
     !defined(CUM_USE_BF16) && \
     !defined(CUM_USE_INT8)
-
-#define CUM_USE_F32
-
+    #define CUM_USE_F32
 #endif
+
+#include "cum/experimental/__event__.hpp"
 
 namespace cum
 {
     enum class CUM_DEVICE { AUTO, CPU, GPU };
+
+    using __event__ = experimental::__event__*;
+    // using __event__ = void;
 
     // give info ABOUT used precision in compile time for each precision
     #if defined(CUM_USE_F64)

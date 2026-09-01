@@ -1,5 +1,6 @@
 /* Created by jaro on 7/20/26. */
 #include <cstdint>
+#include <stdexcept>
 
 #include "cum/functions/linear_units.hpp"
 #include "cum/functions/trigonometric.hpp"
@@ -22,7 +23,6 @@ namespace cum::functions
         }
         else if (activation.function != nullptr)
         {
-            std::cout << "Using activation function with naive loop\n";
             #pragma omp parallel for
             for (std::size_t i = 0; i < N; ++i)
                 r[i] = activation.function(v[i]);

@@ -32,14 +32,14 @@ namespace cum::functions::trigonometric
 
     /* Parallelized versions */
 
-    void sin(cumeric_t* r, const cumeric_t* v, const std::size_t N)
+    __event__ sin(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
         auto& q = internal::getQueue();
         oneapi::mkl::vm::sin(q, N, v, r, {});
         // q.wait();
     }
 
-    void sin_in_place(cumeric_t* v, const std::size_t N)
+    __event__ sin_in_place(cumeric_t* v, const std::size_t N)
     {
         auto& q = internal::getQueue();
         oneapi::mkl::vm::sin(q, N, v, v, {});
@@ -51,26 +51,26 @@ namespace cum::functions::trigonometric
         // });
     }
 
-    void cos(cumeric_t* r, const cumeric_t* v, const std::size_t N)
+    __event__ cos(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
         auto& q = internal::getQueue();
         oneapi::mkl::vm::cos(q, N, v, r, {});
         // q.wait();
     }
 
-    void cos_in_place(cumeric_t* v, const std::size_t N)
+    __event__ cos_in_place(cumeric_t* v, const std::size_t N)
     {
         auto& q = internal::getQueue();
         oneapi::mkl::vm::cos(q, N, v, v, {});
         // q.wait();
     }
 
-    void tan(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ tan(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
         oneapi::mkl::vm::tan(cum::internal::getQueue(), N, v, r, {});
     }
 
-    void tan_in_place(cumeric_t* v, std::size_t N)
+    __event__ tan_in_place(cumeric_t* v, std::size_t N)
     {
         oneapi::mkl::vm::tan(cum::internal::getQueue(), N, v, v, {});
     }
@@ -102,17 +102,17 @@ namespace cum::functions::trigonometric
 
     /* Parallelized versions */
 
-    void sin_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ sin_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
         cos(r, v, N);
     }
 
-    void sin_deriv_in_place(cumeric_t* v, std::size_t N)
+    __event__ sin_deriv_in_place(cumeric_t* v, std::size_t N)
     {
         cos_in_place(v, N);
     }
 
-    void cos_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ cos_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -120,7 +120,7 @@ namespace cum::functions::trigonometric
         });
     }
 
-    void cos_deriv_in_place(cumeric_t* v, std::size_t N)
+    __event__ cos_deriv_in_place(cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -128,7 +128,7 @@ namespace cum::functions::trigonometric
         });
     }
 
-    void tan_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ tan_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -137,7 +137,7 @@ namespace cum::functions::trigonometric
         });
     }
 
-    void tan_deriv_in_place(cumeric_t* v, std::size_t N)
+    __event__ tan_deriv_in_place(cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -146,7 +146,7 @@ namespace cum::functions::trigonometric
         });
     }
 
-    void tan_deriv_from_result(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ tan_deriv_from_result(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
@@ -154,7 +154,7 @@ namespace cum::functions::trigonometric
         });
     }
 
-    void tan_deriv_in_place_from_result(cumeric_t* v, std::size_t N)
+    __event__ tan_deriv_in_place_from_result(cumeric_t* v, std::size_t N)
     {
         internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
