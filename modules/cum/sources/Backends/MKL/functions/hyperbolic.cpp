@@ -3,10 +3,12 @@
 //
 
 #include "cum/Core.hpp"
+#include "cum/detail/vendor/oneapi/make_event.hpp"
 #include "internal/cumMKL.hpp"
 
 #include <oneapi/mkl/vm.hpp>
 #include <sycl/sycl.hpp>
+#include <utility>
 
 namespace cum::functions::hyperbolic
 {
@@ -33,32 +35,39 @@ namespace cum::functions::hyperbolic
 
     __event__ tanh(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        oneapi::mkl::vm::tanh(internal::getQueue(), N, v, r);
+        sycl::event event = oneapi::mkl::vm::tanh(internal::getQueue(), N, v, r);
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ tanh_in_place(cumeric_t* v, const std::size_t N)
     {
-        oneapi::mkl::vm::tanh(internal::getQueue(), N, v, v);
+        sycl::event event = oneapi::mkl::vm::tanh(internal::getQueue(), N, v, v);
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ sinh(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        oneapi::mkl::vm::sinh(internal::getQueue(), N, v, r);
+        sycl::event event = oneapi::mkl::vm::sinh(internal::getQueue(), N, v, r);
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ sinh_in_place(cumeric_t* v, const std::size_t N)
     {
-        oneapi::mkl::vm::sinh(internal::getQueue(), N, v, v);
+        sycl::event event = oneapi::mkl::vm::sinh(internal::getQueue(), N, v, v);
+        return detail::make_event::create(std::move(event));
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ cosh(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        oneapi::mkl::vm::cosh(internal::getQueue(), N, v, r);
+        sycl::event event = oneapi::mkl::vm::cosh(internal::getQueue(), N, v, r);
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ cosh_in_place(cumeric_t* v, const std::size_t N)
     {
-        oneapi::mkl::vm::cosh(internal::getQueue(), N, v, v);
+        sycl::event event = oneapi::mkl::vm::cosh(internal::getQueue(), N, v, v);
+        return detail::make_event::create(std::move(event));
     }
 
     /* ========================== It's Derivatives ========================== */
@@ -90,7 +99,7 @@ namespace cum::functions::hyperbolic
     __event__ tanh_deriv(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
         auto queue = internal::getQueue();
-        auto e = oneapi::mkl::vm::tanh(queue, N, v, r);
+        sycl::event e = oneapi::mkl::vm::tanh(queue, N, v, r);
 
         // queue.parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         // {
@@ -98,16 +107,17 @@ namespace cum::functions::hyperbolic
         //     r[idx] = 1 - tanh_squared;
         //     // r[idx] = 1 - sycl::tanh(v[idx]) * sycl::tanh(v[idx]);
         // }).wait();
-        queue.parallel_for(sycl::range<1>(N), {e},
+        sycl::event event = queue.parallel_for(sycl::range<1>(N), {e},
         [=](sycl::id<1> idx)
         {
             r[idx] = 1 - r[idx] * r[idx];
         });
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ tanh_deriv_from_result(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = 1 - v[idx] * v[idx];
         });
@@ -115,30 +125,35 @@ namespace cum::functions::hyperbolic
 
     __event__ tanh_deriv_from_result_in_place(cumeric_t* v, const std::size_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             v[idx] = 1 - v[idx] * v[idx];
         });
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ sinh_deriv(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        oneapi::mkl::vm::cosh(internal::getQueue(), N, v, r);
+        sycl::event event = oneapi::mkl::vm::cosh(internal::getQueue(), N, v, r);
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ sinh_deriv_in_place(cumeric_t* v, const std::size_t N)
     {
-        oneapi::mkl::vm::cosh(internal::getQueue(), N, v, v);
+        sycl::event event = oneapi::mkl::vm::cosh(internal::getQueue(), N, v, v);
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ cosh_deriv(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        oneapi::mkl::vm::sinh(internal::getQueue(), N, v, r);
+        sycl::event event = oneapi::mkl::vm::sinh(internal::getQueue(), N, v, r);
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ cosh_deriv_in_place(cumeric_t* v, const std::size_t N)
     {
-        oneapi::mkl::vm::sinh(internal::getQueue(), N, v, v);
+        sycl::event event = oneapi::mkl::vm::sinh(internal::getQueue(), N, v, v);
+        return detail::make_event::create(std::move(event));
     }
 
 }

@@ -1,5 +1,5 @@
 #include "Sequential.hpp"
-#include "LayerType.hpp"
+#include "LayerType.hpp" 
 #include "cum/Matrix.hpp"
 #include <stdexcept>
 
@@ -23,7 +23,7 @@ namespace yann::models
 
     }
 
-    Sequential::Sequential(std::initializer_list<std::unique_ptr<layers::LayerBase>> newTopology, bool build)
+    Sequential::Sequential(std::initializer_list<std::unique_ptr<layers::LayerBase>> newTopology, bool build) // This constructor is awesome, I reject every other opinion
     {
         YANN_LOG(1, "Initializing Sequential model with {} layers...", newTopology.size());
 
@@ -96,7 +96,7 @@ namespace yann::models
      * Dodać przeładowanie pozwalające na przyjęcie zamiast X i Y zbioru batchy
      */
 
-    void Sequential::fit(const cum::Matrix& X, const cum::Matrix& Y, loss::LossBase& loss, optimizers::OptimizerBase& optimizer, size_t epochs, size_t batch_size, std::span<logging::ITrainingCallback*> callbacks)
+    void Sequential::fit(const cum::Matrix& X, const cum::Matrix& Y, loss::LossBase& loss, optimizers::OptimizerBase& optimizer, cum::dim_t epochs, cum::dim_t batch_size, std::span<logging::ITrainingCallback*> callbacks)
     {
         if (batch_size == 0)
             throw std::invalid_argument("batch_size must be greater than zero");
@@ -109,9 +109,9 @@ namespace yann::models
         std::vector<Batch> batches;
         if (batched)
         {
-            for (std::size_t begin = 0; begin < X.cols(); begin += batch_size) // przeniósł bym tą pętle do osobnej funkcji
+            for (cum::dim_t begin = 0; begin < X.cols(); begin += batch_size) // przeniósł bym tą pętle do osobnej funkcji
             {
-                const std::size_t samples = std::min(X.cols() - begin, batch_size);
+                const cum::dim_t samples = std::min(X.cols() - begin, batch_size);
                 batches.emplace_back(
                     X.slice(0, begin, X.rows(), samples),
                     Y.slice(0, begin, Y.rows(), samples),

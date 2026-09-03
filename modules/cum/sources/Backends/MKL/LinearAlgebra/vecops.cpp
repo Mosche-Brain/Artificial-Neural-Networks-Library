@@ -4,6 +4,8 @@
 
 #include <oneapi/mkl/blas.hpp>
 
+#include "cum/detail/vendor/oneapi/make_event.hpp"
+
 #include "internal/cumMKL.hpp"
 
 #include "cum/LinearAlgebra/vecops.hpp"
@@ -15,56 +17,65 @@ namespace cum::LinearAlgebra
 	{
 		// auto copy = q.copy(v, r, N);
 		// oneapi::mkl::blas::row_major::axpy(q, N, 1.0, u, 1, r, 1, {});
-		oneapi::mkl::vm::add(internal::getQueue(),
+		sycl::event event = oneapi::mkl::vm::add(internal::getQueue(),
 				n, v, u, r
-		).wait();
+		);
+		return detail::make_event::create(std::move(event));
 	}
 
 	__event__ vadd(cumeric_t* v, const cumeric_t* u, const dim_t n)
 	{
-		oneapi::mkl::vm::add(internal::getQueue(),
+		sycl::event event = oneapi::mkl::vm::add(internal::getQueue(),
 			n, v, u, v
-		).wait();
+		);
+		return detail::make_event::create(std::move(event));
 	}
 
 	__event__ vsub(cumeric_t* r, const cumeric_t* v, const cumeric_t* u, const dim_t n)
 	{
-		oneapi::mkl::vm::sub(internal::getQueue(),
+		sycl::event event = oneapi::mkl::vm::sub(internal::getQueue(),
 			n, v, u, r
-		).wait();
+		);
+		return detail::make_event::create(std::move(event));
 	}
 
 	__event__ vsub(cumeric_t* v, const cumeric_t* u, const dim_t n)
 	{
-		oneapi::mkl::vm::sub(internal::getQueue(),
+		sycl::event event = oneapi::mkl::vm::sub(internal::getQueue(),
 			n, v, u, v
-		).wait();
+		);
+		return detail::make_event::create(std::move(event));
 	}
 
 	__event__ vmul(cumeric_t* r, const cumeric_t* v, const cumeric_t* u, const dim_t n)
 	{
-		oneapi::mkl::vm::mul(internal::getQueue(),
+		sycl::event event = oneapi::mkl::vm::mul(internal::getQueue(),
 			n, v, u, r
-		).wait();
+		);
+		return detail::make_event::create(std::move(event));
 	}
 
 	__event__ vmul(cumeric_t* v, const cumeric_t* u, const dim_t n)
 	{
-		oneapi::mkl::vm::mul(internal::getQueue(),
+		sycl::event event = oneapi::mkl::vm::mul(internal::getQueue(),
 			n, v, u, v
-		).wait();
+		);
+		return detail::make_event::create(std::move(event));
 	}
 
 	__event__ vdiv(cumeric_t* r, const cumeric_t* v, const cumeric_t* u, const dim_t n)
 	{
-		oneapi::mkl::vm::div(internal::getQueue(),
+		sycl::event event = oneapi::mkl::vm::div(internal::getQueue(),
 			n, v, u, r
-		).wait();	}
+		);	
+		return detail::make_event::create(std::move(event));
+	}
 
 	__event__ vdiv(cumeric_t* v, const cumeric_t* u, const dim_t n)
 	{
-		oneapi::mkl::vm::div(internal::getQueue(),
+		sycl::event event = oneapi::mkl::vm::div(internal::getQueue(),
 			n, v, u, v
-		).wait();
+		);
+		return detail::make_event::create(std::move(event));
 	}
 }

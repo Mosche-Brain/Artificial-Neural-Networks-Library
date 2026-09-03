@@ -3,10 +3,16 @@
 //
 
 #include "cum/Core.hpp"
+
+
 #include "internal/cumMKL.hpp"
 
 #include <oneapi/mkl/vm.hpp>
 #include <sycl/sycl.hpp>
+
+#include "cum/detail/vendor/oneapi/make_event.hpp"
+
+#include "cum/functions/exponential.hpp"
 
 namespace cum::functions::exponential
 {
@@ -48,37 +54,44 @@ namespace cum::functions::exponential
 
     __event__ exp(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        oneapi::mkl::vm::exp(internal::getQueue(), N, v, r, {});
+        sycl::event event = oneapi::mkl::vm::exp(internal::getQueue(), N, v, r, {});
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ exp_in_place(cumeric_t* v, const std::size_t N)
     {
-        oneapi::mkl::vm::exp(internal::getQueue(), N, v, v, {});
+        sycl::event event = oneapi::mkl::vm::exp(internal::getQueue(), N, v, v, {});
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ exp2(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        oneapi::mkl::vm::exp2(internal::getQueue(), N, v, r, {});
+        sycl::event event = oneapi::mkl::vm::exp2(internal::getQueue(), N, v, r, {});
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ exp10(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        oneapi::mkl::vm::exp2(internal::getQueue(), N, v, r, {});
+        sycl::event event = oneapi::mkl::vm::exp2(internal::getQueue(), N, v, r, {});
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ log(cumeric_t* r, const cumeric_t* v, const std::size_t N) // base e
     {
-        oneapi::mkl::vm::ln(internal::getQueue(), N, v, r, {});
+        sycl::event event = oneapi::mkl::vm::ln(internal::getQueue(), N, v, r, {});
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ log2(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        oneapi::mkl::vm::log2(internal::getQueue(), N, v, r, {});
+        sycl::event event = oneapi::mkl::vm::log2(internal::getQueue(), N, v, r, {});
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ log10(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        oneapi::mkl::vm::log10(internal::getQueue(), N, v, r, {});
+        sycl::event event = oneapi::mkl::vm::log10(internal::getQueue(), N, v, r, {});
+        return detail::make_event::create(std::move(event));
     }
 
     /* ========================== Derivatives ========================== */
@@ -144,81 +157,91 @@ namespace cum::functions::exponential
 
     __event__ exp2_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = sycl::log(static_cast<cumeric_t>(2)) * exp2(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ exp2_deriv_in_place(cumeric_t* v, std::size_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             v[idx] = sycl::log(static_cast<cumeric_t>(2)) * exp2(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ exp10_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = sycl::log(static_cast<cumeric_t>(2)) * exp10(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ exp10_deriv_in_place(cumeric_t* v, std::size_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             v[idx] = sycl::log(static_cast<cumeric_t>(10)) * exp10(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ log_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = log_deriv(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ log_deriv_in_place(cumeric_t* v, std::size_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             v[idx] = log_deriv(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ log2_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = log2_deriv(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ log2_deriv_in_place(cumeric_t* v, std::size_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             v[idx] = log2_deriv(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ log10_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = log10_deriv(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ log10_deriv_in_place(cumeric_t* v, std::size_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             v[idx] = log10_deriv(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 }

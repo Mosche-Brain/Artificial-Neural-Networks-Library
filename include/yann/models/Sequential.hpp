@@ -89,7 +89,7 @@ namespace yann::models
         
         cum::Matrix forward(const cum::Matrix& input);
         
-        void fit(const cum::Matrix& X, const cum::Matrix& Y, loss::LossBase& loss, optimizers::OptimizerBase& optimizer, size_t epochs, size_t batch_size=1, std::span<logging::ITrainingCallback*> callbacks = {});
+        void fit(const cum::Matrix& X, const cum::Matrix& Y, loss::LossBase& loss, optimizers::OptimizerBase& optimizer, cum::dim_t epochs, cum::dim_t batch_size=1, std::span<logging::ITrainingCallback*> callbacks = {});
         void addLayer(LayerPtr layer);
         void clear();
 

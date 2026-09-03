@@ -21,10 +21,10 @@ namespace yann::logging
     {
         models::Sequential& model;
         cum::cumeric_t& loss;
-        size_t& epoch;
-        size_t& batch;
+        cum::dim_t& epoch;
+        cum::dim_t& batch;
 
-        TrainingContext(models::Sequential& model, cum::cumeric_t& loss, size_t& epoch, size_t& batch)
+        TrainingContext(models::Sequential& model, cum::cumeric_t& loss, cum::dim_t& epoch, cum::dim_t& batch)
             : model(model), loss(loss), epoch(epoch), batch(batch)
         {}
     };

@@ -11,6 +11,8 @@
 #include <memory>
 #include <sycl/event.hpp>
 
+#include "cum/detail/vendor/oneapi/make_event.hpp"
+
 #include "cum/experimental/__event__.hpp"
 
 namespace cum::experimental 
@@ -21,23 +23,28 @@ namespace cum::experimental
         explicit Impl(sycl::event&& e) : event(std::move(e)) {}
     };
 
-    // __event__::__event__(__event__&& other) noexcept : handle(other.handle)
-    // {
-    //     other.handle = nullptr;
-    // }
+    __event__::__event__() noexcept : handle(nullptr) {}
 
-    __event__::__event__(std::unique_ptr<Impl> handle) noexcept : __handle__(std::move(handle)) {}
+    __event__::__event__(std::unique_ptr<Impl> handle) noexcept : handle(std::move(handle)) {}
 
     __event__::__event__(__event__&&) noexcept = default;
     
     __event__& __event__::operator = (__event__&&) noexcept = default;
 
-    
+
     __event__::~__event__() = default;
 
     void __event__::wait()
     {
-        handle->event.wait();
+        if(handle != nullptr) handle->event.wait();
+    }
+}
+
+namespace cum::detail
+{
+    experimental::__event__ make_event::create(sycl::event&& event)
+    {
+        return experimental::__event__(std::make_unique<experimental::__event__::Impl>(std::move(event)));
     }
 }
 

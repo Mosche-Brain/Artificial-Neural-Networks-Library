@@ -9,12 +9,15 @@
 
 #pragma once
 
-#include "cum/Core.hpp"
 #include <memory>
+
+namespace cum::detail
+{
+    class make_event;
+}
 
 namespace cum::experimental 
 {
-    // struct __event__;
 
     class __event__
     {
@@ -22,6 +25,7 @@ namespace cum::experimental
         // __event__() = default;
         // __event__(__event__&& other) noexcept;
         // __event__& operator=(__event__&& other) noexcept;
+        __event__() noexcept;
         __event__(__event__&&) noexcept;
         __event__& operator=(__event__&&) noexcept;
 
@@ -31,13 +35,14 @@ namespace cum::experimental
         ~__event__();
 
         void wait();
-    // private:
-
+         
+    private:
         struct Impl;
         
-        explicit __event__(Impl* handle) noexcept;
-        
-        // Impl* handle = nullptr;
         std::unique_ptr<Impl> handle;
+
+        explicit __event__(std::unique_ptr<Impl> handle) noexcept;
+
+        friend class cum::detail::make_event;
     };
 }

@@ -70,6 +70,8 @@ int main()
     inputs.transposeInPlace();
     targets.transposeInPlace();
 
+
+    // return 0;
     // Same deterministic start as examples/xor_gradient_reference.py.
     set_values(model.getWeights(1), {
         -0.37002477_c, 0.99407870_c,

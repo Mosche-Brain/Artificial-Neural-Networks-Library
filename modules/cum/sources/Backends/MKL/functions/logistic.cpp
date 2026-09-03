@@ -7,6 +7,9 @@
 #include "cum/functions/exponential.hpp"
 
 #include "internal/cumMKL.hpp"
+#include "cum/detail/vendor/oneapi/make_event.hpp"
+
+
 #include "cum/functions/logistic.hpp"
 
 namespace cum::functions::logistic
@@ -24,18 +27,20 @@ namespace cum::functions::logistic
 
     __event__ sigmoid(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = sigmoid(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ sigmoid_in_place(cumeric_t* v, const std::size_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             v[idx] = sigmoid(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ softmax(cumeric_t* r, const cumeric_t* v, const dim_t N)
@@ -45,13 +50,17 @@ namespace cum::functions::logistic
         cumeric_t sum_exp_v = 0;
         LinearAlgebra::sum(&sum_exp_v, r, N);
 
-        blas::scal(N, 1/sum_exp_v, r, 1);
+        return blas::scal(N, 1/sum_exp_v, r, 1);
+        // sycl::event event = blas::scal(N, 1/sum_exp_v, r, 1);
+        // return detail::make_event::create(std::move(event));
     }
 
     __event__ softmax_in_place(cumeric_t* v, const dim_t N)
     {
-        exponential::exp_in_place(v, N);
+        // sycl::event event = exponential::exp_in_place(v, N);
+        return exponential::exp_in_place(v, N);
 
+        // return detail::make_event::create(std::move(event));
     }
 
     /* ========================== Derivatives ========================== */
@@ -72,50 +81,56 @@ namespace cum::functions::logistic
 
     __event__ sigmoid_deriv(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = sigmoid_deriv(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ sigmoid_deriv_from_result(cumeric_t* r, const cumeric_t* v, const std::size_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = sigmoid_deriv_from_result(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ sigmoid_deriv_in_place(cumeric_t* v, const std::size_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             v[idx] = sigmoid_deriv(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ sigmoid_deriv_from_result_in_place(cumeric_t* v, const std::size_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             v[idx] = sigmoid_deriv(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ softmax_deriv(cumeric_t* r, const cumeric_t* v, const dim_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = sigmoid_deriv(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
     __event__ softmax_deriv_in_place(cumeric_t* v, const dim_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             v[idx] = sigmoid_deriv(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
     
     __event__ softmax_deriv_from_result(cumeric_t* r, const cumeric_t* v, const dim_t N)

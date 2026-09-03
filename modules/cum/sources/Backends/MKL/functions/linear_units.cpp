@@ -1,7 +1,7 @@
 //
 // Created by jaro on 7/19/26.
 //
-
+#include "cum/detail/vendor/oneapi/make_event.hpp"
 #include "internal/cumMKL.hpp"
 #include "cum/memory.hpp"
 #include "cum/functions/hyperbolic.hpp"
@@ -45,70 +45,79 @@ namespace cum::functions::linear_units
 
     /* Parallel versions */
 
-    __event__ identity(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ identity(cumeric_t* r, const cumeric_t* v, dim_t N)
     {
         // memory::memcopy(r, v, N);
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = v[idx];
         });
+        return detail::make_event::create(std::move(event));
     }
 
-    __event__ relu(cumeric_t* r, const cumeric_t* v, const std::size_t N)
+    __event__ relu(cumeric_t* r, const cumeric_t* v, const dim_t N)
     {
-        oneapi::mkl::vm::fmax(internal::getQueue(), N, v, internal::getZeros(), r, {});
+        sycl::event event = oneapi::mkl::vm::fmax(internal::getQueue(), N, v, internal::getZeros(), r, {});
+        return detail::make_event::create(std::move(event));
     }
 
-    __event__ relu_in_place(cumeric_t* v, std::size_t N)
+    __event__ relu_in_place(cumeric_t* v, dim_t N)
     {
-        oneapi::mkl::vm::fmax(internal::getQueue(), N, v, internal::getZeros(), v, {});
+        sycl::event event = oneapi::mkl::vm::fmax(internal::getQueue(), N, v, internal::getZeros(), v, {});
+        return detail::make_event::create(std::move(event));
     }
 
-    __event__ leaky_relu(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ leaky_relu(cumeric_t* r, const cumeric_t* v, dim_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = leaky_relu(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
-    __event__ leaky_relu_in_place(cumeric_t* v, std::size_t N)
+    __event__ leaky_relu_in_place(cumeric_t* v, dim_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             v[idx] = leaky_relu(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
-    __event__ gelu(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ gelu(cumeric_t* r, const cumeric_t* v, dim_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = gelu(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
-    __event__ gelu_in_place(cumeric_t* v, std::size_t N)
+    __event__ gelu_in_place(cumeric_t* v, dim_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             v[idx] = gelu(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
-    __event__ elu(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ elu(cumeric_t* r, const cumeric_t* v, dim_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = elu(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
-    __event__ elu_in_place(cumeric_t* v, std::size_t N)
+    __event__ elu_in_place(cumeric_t* v, dim_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             v[idx] = elu(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
     /* ========================== Derivatives ========================== */
@@ -145,85 +154,95 @@ namespace cum::functions::linear_units
 
     /* Parallel versions */
 
-    __event__ identity_deriv(cumeric_t* r, const cumeric_t* v, const std::size_t N)
+    __event__ identity_deriv(cumeric_t* r, const cumeric_t* v, const dim_t N)
     {
         // memory::memcopy(r, internal::getOnes(), N);
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = static_cast<cumeric_t>(1);
         });
+        return detail::make_event::create(std::move(event));
     }
 
-    __event__ identity_deriv_in_place(cumeric_t* v, std::size_t N)
+    __event__ identity_deriv_in_place(cumeric_t* v, dim_t N)
     {
         // memory::memcopy(v, internal::getOnes(), N);
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             v[idx] = static_cast<cumeric_t>(1);
         });
+        return detail::make_event::create(std::move(event));
     }
 
-    __event__ relu_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ relu_deriv(cumeric_t* r, const cumeric_t* v, dim_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = relu_deriv(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
-    __event__ relu_deriv_in_place(cumeric_t* v, std::size_t N)
+    __event__ relu_deriv_in_place(cumeric_t* v, dim_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             v[idx] = relu_deriv(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
-    __event__ leaky_relu_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ leaky_relu_deriv(cumeric_t* r, const cumeric_t* v, dim_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = leaky_relu_deriv(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
-    __event__ leaky_relu_deriv_in_place(cumeric_t* v, std::size_t N)
+    __event__ leaky_relu_deriv_in_place(cumeric_t* v, dim_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             v[idx] = leaky_relu_deriv(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
-    __event__ gelu_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ gelu_deriv(cumeric_t* r, const cumeric_t* v, dim_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = gelu_deriv(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
-    __event__ gelu_deriv_in_place(cumeric_t* v, std::size_t N)
+    __event__ gelu_deriv_in_place(cumeric_t* v, dim_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             v[idx] = gelu_deriv(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
-    __event__ elu_deriv(cumeric_t* r, const cumeric_t* v, std::size_t N)
+    __event__ elu_deriv(cumeric_t* r, const cumeric_t* v, dim_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             r[idx] = gelu_deriv(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 
-    __event__ elu_deriv_in_place(cumeric_t* v, std::size_t N)
+    __event__ elu_deriv_in_place(cumeric_t* v, dim_t N)
     {
-        internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
+        sycl::event event = internal::getQueue().parallel_for(sycl::range<1>(N), [=](sycl::id<1> idx)
         {
             v[idx] = elu_deriv(v[idx]);
         });
+        return detail::make_event::create(std::move(event));
     }
 }

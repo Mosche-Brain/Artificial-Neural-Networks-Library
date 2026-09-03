@@ -14,21 +14,21 @@ namespace cum
     class Matrix
     {
     public:
-		Matrix(std::size_t rows, std::size_t cols);
-        Matrix(std::size_t rows, std::size_t cols, cumeric_t value);
-        Matrix(std::size_t rows, std::size_t cols, cumeric_t* source); // this constructor is used for copying data from source, not set source as a data handle
-        Matrix(std::size_t rows, std::size_t cols, const cumeric_t* source); // this constructor is used for copying data from source, not set source as a data handle
-        Matrix(std::size_t rows, std::size_t cols, std::initializer_list<cumeric_t> elements);
+		Matrix(dim_t rows, dim_t cols);
+        Matrix(dim_t rows, dim_t cols, cumeric_t value);
+        Matrix(dim_t rows, dim_t cols, cumeric_t* source); // this constructor is used for copying data from source, not set source as a data handle
+        Matrix(dim_t rows, dim_t cols, const cumeric_t* source); // this constructor is used for copying data from source, not set source as a data handle
+        Matrix(dim_t rows, dim_t cols, std::initializer_list<cumeric_t> elements);
         Matrix(const Matrix& other);
         Matrix(Matrix&& other) noexcept;
         Matrix() = default;
         ~Matrix();
 
         /* functions for advanced initialization */
-        static Matrix Random(std::size_t rows, std::size_t cols, cumeric_t min = -1_c, cumeric_t max = 1_c);
-        static Matrix Zeros(std::size_t rows, std::size_t cols);
-        static Matrix Ones(std::size_t rows, std::size_t cols);
-        static Matrix Linspace(cumeric_t start, cumeric_t end, std::size_t num); /* Row Vector */
+        static Matrix Random(dim_t rows, dim_t cols, cumeric_t min = -1_c, cumeric_t max = 1_c);
+        static Matrix Zeros(dim_t rows, dim_t cols);
+        static Matrix Ones(dim_t rows, dim_t cols);
+        static Matrix Linspace(cumeric_t start, cumeric_t end, dim_t num); /* Row Vector */
 
         static Matrix Copy(const Matrix& mat);
         static const Matrix View(const Matrix& mat);
@@ -40,23 +40,23 @@ namespace cum
 
         void fill(cumeric_t value);
 
-        std::size_t rows() const { return rows_; }
-        std::size_t cols() const { return cols_; }
+        dim_t rows() const { return rows_; }
+        dim_t cols() const { return cols_; }
         
-        Matrix row(const std::size_t i) const;
-        Matrix col(const std::size_t i) const;
+        Matrix row(const dim_t i) const;
+        Matrix col(const dim_t i) const;
         
-        std::size_t size() const { return rows_ * cols_; }
+        dim_t size() const { return rows_ * cols_; }
         
         /* Accesors */
         cumeric_t* data() { return data_; };
         const cumeric_t* data() const { return data_; };
 
-        cumeric_t& at(const std::size_t row, const std::size_t col) { return data_[get_idx(row, col)]; }
-        const cumeric_t& at(const std::size_t row, const std::size_t col) const { return data_[get_idx(row, col)]; }
+        cumeric_t& at(const dim_t row, const dim_t col) { return data_[get_idx(row, col)]; }
+        const cumeric_t& at(const dim_t row, const dim_t col) const { return data_[get_idx(row, col)]; }
 
-        cumeric_t& operator () (const std::size_t row, const std::size_t col) { return data_[get_idx(row, col)]; };
-        const cumeric_t& operator () (const std::size_t row, const std::size_t col) const { return data_[get_idx(row, col)]; };
+        cumeric_t& operator () (const dim_t row, const dim_t col) { return data_[get_idx(row, col)]; };
+        const cumeric_t& operator () (const dim_t row, const dim_t col) const { return data_[get_idx(row, col)]; };
 
 		Matrix slice(dim_t i, dim_t j, dim_t rows, dim_t cols) const;
 
@@ -95,7 +95,7 @@ namespace cum
         Matrix transpose() const;
         Matrix& transposeInPlace();
         Matrix flatten() const;
-        Matrix reshape(const std::size_t rows, const std::size_t cols) const;
+        Matrix reshape(const dim_t rows, const dim_t cols) const;
        	Matrix& reshapeInPlace(dim_t rows, dim_t cols);
 
         friend Matrix activation(const Matrix& mat, const char* name);
@@ -105,8 +105,8 @@ namespace cum
         Matrix& cwiseProductInPlace(const Matrix& other);
 
 		/* Elementwise functions */
-        Matrix transform(void (*func)(cumeric_t* data, const std::size_t size)) const;
-        Matrix& transformInPlace(void (*func)(cumeric_t* data, const std::size_t size));
+        Matrix transform(void (*func)(cumeric_t* data, const dim_t size)) const;
+        Matrix& transformInPlace(void (*func)(cumeric_t* data, const dim_t size));
 
         Matrix transform(cumeric_t (*func)(cumeric_t x)) const;
         Matrix& transformInPlace(cumeric_t (*func)(cumeric_t x));
@@ -146,8 +146,8 @@ namespace cum
 
 		/* idk how to name it */
 
-        Matrix& rowwiseOpInPlace(void (*op)(cumeric_t* row, const cumeric_t* v, const std::size_t cols), const cumeric_t* arr);
-        Matrix& colwiseOpInPlace(void (*op)(cumeric_t* col, const cumeric_t* v, const std::size_t rows), const cumeric_t* arr);
+        Matrix& rowwiseOpInPlace(void (*op)(cumeric_t* row, const cumeric_t* v, const dim_t cols), const cumeric_t* arr);
+        Matrix& colwiseOpInPlace(void (*op)(cumeric_t* col, const cumeric_t* v, const dim_t rows), const cumeric_t* arr);
 
         Matrix clip(const cumeric_t min, const cumeric_t max) const;
         Matrix& clipInPlace(const cumeric_t min, const cumeric_t max);
@@ -172,10 +172,10 @@ namespace cum
         Matrix& shuffleRowsInPlace();
 
     private:
-        std::size_t get_idx(const std::size_t row, const std::size_t col) const { return row * cols_ + col; }
+        dim_t get_idx(const dim_t row, const dim_t col) const { return row * cols_ + col; }
 
-        std::size_t rows_ = 0;
-        std::size_t cols_ = 0;
+        dim_t rows_ = 0;
+        dim_t cols_ = 0;
         cumeric_t* data_ = nullptr;
     };
 

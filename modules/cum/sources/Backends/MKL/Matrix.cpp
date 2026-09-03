@@ -36,42 +36,42 @@
 
 namespace cum
 {
-	Matrix::Matrix(size_t rows, size_t cols) : rows_(rows), cols_(cols)
+	Matrix::Matrix(dim_t rows, dim_t cols) : rows_(rows), cols_(cols)
 	{
 		data_ = memory::allocate(rows * cols);
 	}
 
-    Matrix::Matrix(size_t rows, size_t cols, cumeric_t value) : rows_(rows), cols_(cols)
+    Matrix::Matrix(dim_t rows, dim_t cols, cumeric_t value) : rows_(rows), cols_(cols)
     {
         data_ = memory::allocate(rows * cols);
-        // for(size_t i = 0 ; i < rows * cols ; i++)
+        // for(dim_t i = 0 ; i < rows * cols ; i++)
         //     data_[i] = value;
         cum::functions::various::fill(data_, value, rows * cols);
     }
 
-    Matrix::Matrix(std::size_t rows, std::size_t cols, cumeric_t* source) : rows_(rows), cols_(cols)
+    Matrix::Matrix(dim_t rows, dim_t cols, cumeric_t* source) : rows_(rows), cols_(cols)
     {
         // data_ = sycl::malloc_shared<cumeric_t>(rows * cols, internal::getQueue());
         data_ = memory::allocate(rows * cols);
 
 		memory::memcopy(data_, source, rows_ * cols_ * sizeof(cumeric_t));
         // sycl::memc
-        //for(size_t i = 0 ; i < rows * cols ; i++)
+        //for(dim_t i = 0 ; i < rows * cols ; i++)
         //    data_[i] = source[i];
     }    
 
-	Matrix::Matrix(std::size_t rows, std::size_t cols, const cumeric_t* source) : rows_(rows), cols_(cols)
+	Matrix::Matrix(dim_t rows, dim_t cols, const cumeric_t* source) : rows_(rows), cols_(cols)
     {
         // data_ = sycl::malloc_shared<cumeric_t>(rows * cols, internal::getQueue());
         data_ = memory::allocate(rows * cols);
 
         // sycl::memc
 		memory::memcopy(data_, source, rows_ * cols_ * sizeof(cumeric_t)); 
-		//for(size_t i = 0 ; i < rows * cols ; i++)
+		//for(dim_t i = 0 ; i < rows * cols ; i++)
         //    data_[i] = source[i];
     }
 
-    Matrix::Matrix(std::size_t rows, std::size_t cols, std::initializer_list<cumeric_t> elements) : rows_(rows), cols_(cols)
+    Matrix::Matrix(dim_t rows, dim_t cols, std::initializer_list<cumeric_t> elements) : rows_(rows), cols_(cols)
     {
         //data_ = sycl::malloc_shared<cumeric_t>(rows * cols, internal::getQueue()); 
         //internal::getQueue().copy(elements.begin(), data_, rows * cols).wait();
@@ -101,7 +101,7 @@ namespace cum
         memory::free(data_);
     }
 
-    Matrix Matrix::Random(std::size_t rows, std::size_t cols, cumeric_t min, cumeric_t max)
+    Matrix Matrix::Random(dim_t rows, dim_t cols, cumeric_t min, cumeric_t max)
     {
         Matrix temp;
 
@@ -114,7 +114,7 @@ namespace cum
         return temp;
     }
 
-    Matrix Matrix::Zeros(std::size_t rows, std::size_t cols)
+    Matrix Matrix::Zeros(dim_t rows, dim_t cols)
     {
         Matrix temp;
 
@@ -127,7 +127,7 @@ namespace cum
         return temp;
     }
 
-    Matrix Matrix::Ones(std::size_t rows, std::size_t cols)
+    Matrix Matrix::Ones(dim_t rows, dim_t cols)
     {
         Matrix temp;
 
@@ -140,12 +140,12 @@ namespace cum
 		return temp;
     }
 
-    Matrix Matrix::Linspace(cumeric_t start, cumeric_t end, std::size_t num)
+    Matrix Matrix::Linspace(cumeric_t start, cumeric_t end, dim_t num)
     {
         //cumeric_t* buff = memory::allocate(num);
         //internal::getQueue().parallel_for(sycl::range<1>(num), [=](sycl::id<1> idx)
         //{
-        //    const std::size_t i = idx[0];
+        //    const dim_t i = idx[0];
         //
         //    if (num == 1)
         //    {
@@ -201,7 +201,7 @@ namespace cum
 		functions::various::fill(data_, value, rows_ * cols_);
 	}
 
-    Matrix Matrix::row(size_t i) const
+    Matrix Matrix::row(dim_t i) const
     {
         if (i >= rows_)
             throw std::out_of_range("Row index exceeds matrix dimensions");
@@ -214,7 +214,7 @@ namespace cum
         return temp;
     }
 
-    Matrix Matrix::col(size_t i) const
+    Matrix Matrix::col(dim_t i) const
     {
         if (i >= cols_)
             throw std::out_of_range("Column index exceeds matrix dimensions");
@@ -456,12 +456,12 @@ namespace cum
         //LinearAlgebra::transposeInPlace(data_, rows_, cols_);
 		LinearAlgebra::mtrans(data_, rows_, cols_);
 		cum::runtime::sync();
-		std::swap<std::size_t>(cols_, rows_);
+		std::swap<dim_t>(cols_, rows_);
         return *this;
     }
 
 
-    // Matrix Matrix::transform(void (*func)(cumeric_t* data, const std::size_t size)) const
+    // Matrix Matrix::transform(void (*func)(cumeric_t* data, const dim_t size)) const
     // {
     //     Matrix temp(rows_, cols_);
     //     memcpy(temp.data_, data_, rows_ * cols_ * sizeof(cumeric_t));
@@ -470,7 +470,7 @@ namespace cum
     // }
 
 
-    // Matrix& Matrix::transformInPlace(void (*func)(cumeric_t* data, const std::size_t size))
+    // Matrix& Matrix::transformInPlace(void (*func)(cumeric_t* data, const dim_t size))
     // {
     //     func(data_, rows_ * cols_);
     //     return *this;
@@ -492,14 +492,14 @@ namespace cum
     //     return *this;
     // }
     
-    Matrix Matrix::transform(void (*func)(cumeric_t* data, const std::size_t size)) const
+    Matrix Matrix::transform(void (*func)(cumeric_t* data, const dim_t size)) const
     {
         Matrix temp(*this);
         temp.transformInPlace(func);
         return temp;
     }
 
-    Matrix& Matrix::transformInPlace(void (*func)(cumeric_t* data, const std::size_t size))
+    Matrix& Matrix::transformInPlace(void (*func)(cumeric_t* data, const dim_t size))
     {
         if (func == nullptr)
         {
@@ -525,7 +525,7 @@ namespace cum
             throw std::invalid_argument("Matrix transform requires a function");
         }
         internal::getQueue().wait();
-        for (std::size_t i = 0; i < size(); ++i)
+        for (dim_t i = 0; i < size(); ++i)
         {
             data_[i] = func(data_[i]);
         }
@@ -697,9 +697,9 @@ namespace cum
 		return *this;
     }
 
-    Matrix& Matrix::rowwiseOpInPlace(void (*op)(cumeric_t* row, const cumeric_t* v, const std::size_t cols), const cumeric_t* arr)
+    Matrix& Matrix::rowwiseOpInPlace(void (*op)(cumeric_t* row, const cumeric_t* v, const dim_t cols), const cumeric_t* arr)
     {
-        for(size_t i = 0 ; i < rows_ ; i++)
+        for(dim_t i = 0 ; i < rows_ ; i++)
         {
             // cumeric_t* row_begin = data_ + (i * cols_ * sizeof(cumeric_t));
             cumeric_t* row_begin = data_ + (i * cols_);
@@ -708,9 +708,9 @@ namespace cum
         return *this;
     }
 
-    Matrix& Matrix::colwiseOpInPlace(void (*op)(cumeric_t* col, const cumeric_t* v, const std::size_t rows), const cumeric_t* arr)
+    Matrix& Matrix::colwiseOpInPlace(void (*op)(cumeric_t* col, const cumeric_t* v, const dim_t rows), const cumeric_t* arr)
     {
-        // for(size_t i = 0 ; i < rows_ ; i+=cols_)
+        // for(dim_t i = 0 ; i < rows_ ; i+=cols_)
 
 
         return *this;
@@ -759,7 +759,7 @@ namespace cum
         return temp;
     }
 
-    Matrix Matrix::reshape(const std::size_t rows, const std::size_t cols) const
+    Matrix Matrix::reshape(const dim_t rows, const dim_t cols) const
     {
         return {rows, cols, data_};
     }
@@ -838,9 +838,9 @@ namespace cum
         if (rows_ <= 1 || cols_ == 0)
             return *this;
 
-        std::vector<std::size_t> indices(rows_);
+        std::vector<dim_t> indices(rows_);
 
-        for (std::size_t i = 0; i < rows_; ++i)
+        for (dim_t i = 0; i < rows_; ++i)
             indices[i] = i;
 
         std::random_device rd;
@@ -850,9 +850,9 @@ namespace cum
 
         Matrix temp(rows_, cols_);
 
-        for (std::size_t newRow = 0; newRow < rows_; ++newRow)
+        for (dim_t newRow = 0; newRow < rows_; ++newRow)
         {
-            std::size_t oldRow = indices[newRow];
+            dim_t oldRow = indices[newRow];
 
             std::memcpy(
                 temp.data_ + newRow * cols_,
