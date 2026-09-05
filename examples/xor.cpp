@@ -13,6 +13,7 @@
 #include <matplot/matplot.h>
 
 #include <numeric>
+#include <chrono>
 #include <vector>
 
 
@@ -89,8 +90,17 @@ int main()
     std::array<yann::logging::ITrainingCallback*, 1> callbacks = {&loss_tracker};
 
     constexpr std::size_t epochs = 100;
+    cum::runtime::sync();
+    const auto training_start = std::chrono::steady_clock::now();
     model.fit(inputs, targets, *loss, *optimizer, epochs, 1, callbacks);
     cum::runtime::sync();
+    const auto training_end = std::chrono::steady_clock::now();
+
+    const std::chrono::duration<double> training_time =
+        training_end - training_start;
+    std::cout << "training time: "
+              << training_time.count()
+              << " s\n";
 
     const cum::Matrix predictions_after = model.forward(inputs);
     print_predictions("after training:", inputs.transpose(), predictions_after);
