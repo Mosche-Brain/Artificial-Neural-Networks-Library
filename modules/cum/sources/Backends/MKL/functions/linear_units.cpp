@@ -1,7 +1,8 @@
 //
 // Created by jaro on 7/19/26.
 //
-#include "cum/detail/vendor/oneapi/make_event.hpp"
+#include "cum/Core.hpp"
+#include "cum/detail/vendor/oneapi/event_handler.hpp"
 #include "internal/cumMKL.hpp"
 #include "cum/memory.hpp"
 #include "cum/functions/hyperbolic.hpp"
@@ -52,19 +53,19 @@ namespace cum::functions::linear_units
         {
             r[idx] = v[idx];
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ relu(cumeric_t* r, const cumeric_t* v, const dim_t N)
     {
         sycl::event event = oneapi::mkl::vm::fmax(internal::getQueue(), N, v, internal::getZeros(), r, {});
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ relu_in_place(cumeric_t* v, dim_t N)
     {
         sycl::event event = oneapi::mkl::vm::fmax(internal::getQueue(), N, v, internal::getZeros(), v, {});
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ leaky_relu(cumeric_t* r, const cumeric_t* v, dim_t N)
@@ -73,7 +74,7 @@ namespace cum::functions::linear_units
         {
             r[idx] = leaky_relu(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ leaky_relu_in_place(cumeric_t* v, dim_t N)
@@ -82,7 +83,7 @@ namespace cum::functions::linear_units
         {
             v[idx] = leaky_relu(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ gelu(cumeric_t* r, const cumeric_t* v, dim_t N)
@@ -91,7 +92,7 @@ namespace cum::functions::linear_units
         {
             r[idx] = gelu(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
     __event__ gelu_in_place(cumeric_t* v, dim_t N)
     {
@@ -99,7 +100,7 @@ namespace cum::functions::linear_units
         {
             v[idx] = gelu(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ elu(cumeric_t* r, const cumeric_t* v, dim_t N)
@@ -108,7 +109,7 @@ namespace cum::functions::linear_units
         {
             r[idx] = elu(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ elu_in_place(cumeric_t* v, dim_t N)
@@ -117,7 +118,7 @@ namespace cum::functions::linear_units
         {
             v[idx] = elu(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     /* ========================== Derivatives ========================== */
@@ -161,7 +162,7 @@ namespace cum::functions::linear_units
         {
             r[idx] = static_cast<cumeric_t>(1);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ identity_deriv_in_place(cumeric_t* v, dim_t N)
@@ -171,7 +172,7 @@ namespace cum::functions::linear_units
         {
             v[idx] = static_cast<cumeric_t>(1);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ relu_deriv(cumeric_t* r, const cumeric_t* v, dim_t N)
@@ -180,7 +181,7 @@ namespace cum::functions::linear_units
         {
             r[idx] = relu_deriv(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ relu_deriv_in_place(cumeric_t* v, dim_t N)
@@ -189,7 +190,7 @@ namespace cum::functions::linear_units
         {
             v[idx] = relu_deriv(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ leaky_relu_deriv(cumeric_t* r, const cumeric_t* v, dim_t N)
@@ -198,7 +199,7 @@ namespace cum::functions::linear_units
         {
             r[idx] = leaky_relu_deriv(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ leaky_relu_deriv_in_place(cumeric_t* v, dim_t N)
@@ -207,7 +208,7 @@ namespace cum::functions::linear_units
         {
             v[idx] = leaky_relu_deriv(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ gelu_deriv(cumeric_t* r, const cumeric_t* v, dim_t N)
@@ -216,7 +217,7 @@ namespace cum::functions::linear_units
         {
             r[idx] = gelu_deriv(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ gelu_deriv_in_place(cumeric_t* v, dim_t N)
@@ -225,7 +226,7 @@ namespace cum::functions::linear_units
         {
             v[idx] = gelu_deriv(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ elu_deriv(cumeric_t* r, const cumeric_t* v, dim_t N)
@@ -234,7 +235,7 @@ namespace cum::functions::linear_units
         {
             r[idx] = gelu_deriv(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ elu_deriv_in_place(cumeric_t* v, dim_t N)
@@ -243,6 +244,6 @@ namespace cum::functions::linear_units
         {
             v[idx] = elu_deriv(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 }

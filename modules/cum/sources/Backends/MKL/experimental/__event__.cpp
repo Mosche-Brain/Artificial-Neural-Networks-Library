@@ -11,7 +11,7 @@
 #include <memory>
 #include <sycl/event.hpp>
 
-#include "cum/detail/vendor/oneapi/make_event.hpp"
+#include "cum/detail/vendor/oneapi/event_handler.hpp"
 
 #include "cum/experimental/__event__.hpp"
 
@@ -31,7 +31,6 @@ namespace cum::experimental
     
     __event__& __event__::operator = (__event__&&) noexcept = default;
 
-
     __event__::~__event__() = default;
 
     void __event__::wait()
@@ -42,9 +41,14 @@ namespace cum::experimental
 
 namespace cum::detail
 {
-    experimental::__event__ make_event::create(sycl::event&& event)
+    experimental::__event__ event_handler::create(sycl::event&& event)
     {
         return experimental::__event__(std::make_unique<experimental::__event__::Impl>(std::move(event)));
+    }
+
+    sycl::event& event_handler::handle(experimental::__event__& event)
+    {
+        return event.handle->event;
     }
 }
 

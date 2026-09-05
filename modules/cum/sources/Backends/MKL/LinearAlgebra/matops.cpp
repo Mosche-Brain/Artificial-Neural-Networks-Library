@@ -1,10 +1,11 @@
 
 #include <oneapi/mkl/blas.hpp>
+#include <vector>
 
 #include "cum/Core.hpp"
 #include "cum/runtime.hpp"
 
-#include "cum/detail/vendor/oneapi/make_event.hpp"
+#include "cum/detail/vendor/oneapi/event_handler.hpp"
 #include "internal/cumMKL.hpp"
 #include "cum/LinearAlgebra/BLAS/types.hpp"
 
@@ -12,14 +13,18 @@
 
 namespace cum::LinearAlgebra
 {
-	__event__ mmul(cumeric_t* C, const cumeric_t* A, const cumeric_t* B, const dim_t m, const dim_t n, const dim_t k)
+	__event__ mmul(cumeric_t* C, const cumeric_t* A, const cumeric_t* B, const dim_t m, const dim_t n, const dim_t k, __depencies__ depencies)
 	{
+		// std::vector<sycl::event> events;
+		// for(__event__& dependency : depencies)
+		// 	events.push_back(dependency.);
+
 		return blas::gemm
 		(
 			static_cast<char>(blas::transpose::nontrans),
 			static_cast<char>(blas::transpose::nontrans),
 			m, n, k,
-			1, A, k,
+			1, A, k, 
 			B, n, 0,
 			C, n
 		);
@@ -30,7 +35,7 @@ namespace cum::LinearAlgebra
 		return mmul(A, A, B, m, n, k);
 	}
 
-	__event__ mtrans(cumeric_t *At, const cumeric_t *A, const dim_t m, const dim_t n)
+	__event__ mtrans(cumeric_t *At, const cumeric_t *A, const dim_t m, const dim_t n, __depencies__ depencies)
 	{
 		auto& q = internal::getQueue();
         sycl::event event;
@@ -52,11 +57,11 @@ namespace cum::LinearAlgebra
             });
         }
         #endif
-		return detail::make_event::create(std::move(event));
+		return detail::event_handler::create(std::move(event));
 	}
 
-	__event__ mtrans(cumeric_t* A, const dim_t m, const dim_t n)
+	__event__ mtrans(cumeric_t* A, const dim_t m, const dim_t n, __depencies__ depencies)
 	{
-		return mtrans(A, A, m, n);
+		return mtrans(A, A, m, n, depencies);
 	}
 }

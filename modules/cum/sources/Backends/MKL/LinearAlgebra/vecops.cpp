@@ -4,7 +4,7 @@
 
 #include <oneapi/mkl/blas.hpp>
 
-#include "cum/detail/vendor/oneapi/make_event.hpp"
+#include "cum/detail/vendor/oneapi/event_handler.hpp"
 
 #include "internal/cumMKL.hpp"
 
@@ -20,7 +20,7 @@ namespace cum::LinearAlgebra
 		sycl::event event = oneapi::mkl::vm::add(internal::getQueue(),
 				n, v, u, r
 		);
-		return detail::make_event::create(std::move(event));
+		return detail::event_handler::create(std::move(event));
 	}
 
 	__event__ vadd(cumeric_t* v, const cumeric_t* u, const dim_t n)
@@ -28,7 +28,7 @@ namespace cum::LinearAlgebra
 		sycl::event event = oneapi::mkl::vm::add(internal::getQueue(),
 			n, v, u, v
 		);
-		return detail::make_event::create(std::move(event));
+		return detail::event_handler::create(std::move(event));
 	}
 
 	__event__ vsub(cumeric_t* r, const cumeric_t* v, const cumeric_t* u, const dim_t n)
@@ -36,7 +36,7 @@ namespace cum::LinearAlgebra
 		sycl::event event = oneapi::mkl::vm::sub(internal::getQueue(),
 			n, v, u, r
 		);
-		return detail::make_event::create(std::move(event));
+		return detail::event_handler::create(std::move(event));
 	}
 
 	__event__ vsub(cumeric_t* v, const cumeric_t* u, const dim_t n)
@@ -44,7 +44,7 @@ namespace cum::LinearAlgebra
 		sycl::event event = oneapi::mkl::vm::sub(internal::getQueue(),
 			n, v, u, v
 		);
-		return detail::make_event::create(std::move(event));
+		return detail::event_handler::create(std::move(event));
 	}
 
 	__event__ vmul(cumeric_t* r, const cumeric_t* v, const cumeric_t* u, const dim_t n)
@@ -52,7 +52,7 @@ namespace cum::LinearAlgebra
 		sycl::event event = oneapi::mkl::vm::mul(internal::getQueue(),
 			n, v, u, r
 		);
-		return detail::make_event::create(std::move(event));
+		return detail::event_handler::create(std::move(event));
 	}
 
 	__event__ vmul(cumeric_t* v, const cumeric_t* u, const dim_t n)
@@ -60,7 +60,7 @@ namespace cum::LinearAlgebra
 		sycl::event event = oneapi::mkl::vm::mul(internal::getQueue(),
 			n, v, u, v
 		);
-		return detail::make_event::create(std::move(event));
+		return detail::event_handler::create(std::move(event));
 	}
 
 	__event__ vdiv(cumeric_t* r, const cumeric_t* v, const cumeric_t* u, const dim_t n)
@@ -68,7 +68,7 @@ namespace cum::LinearAlgebra
 		sycl::event event = oneapi::mkl::vm::div(internal::getQueue(),
 			n, v, u, r
 		);	
-		return detail::make_event::create(std::move(event));
+		return detail::event_handler::create(std::move(event));
 	}
 
 	__event__ vdiv(cumeric_t* v, const cumeric_t* u, const dim_t n)
@@ -76,6 +76,6 @@ namespace cum::LinearAlgebra
 		sycl::event event = oneapi::mkl::vm::div(internal::getQueue(),
 			n, v, u, v
 		);
-		return detail::make_event::create(std::move(event));
+		return detail::event_handler::create(std::move(event));
 	}
 }

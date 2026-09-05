@@ -13,7 +13,7 @@
 
 namespace cum::detail
 {
-    class make_event;
+    class event_handler;
 }
 
 namespace cum::experimental 
@@ -35,7 +35,6 @@ namespace cum::experimental
         ~__event__();
 
         void wait();
-         
     private:
         struct Impl;
         
@@ -43,6 +42,6 @@ namespace cum::experimental
 
         explicit __event__(std::unique_ptr<Impl> handle) noexcept;
 
-        friend class cum::detail::make_event;
+        friend class cum::detail::event_handler;
     };
 }

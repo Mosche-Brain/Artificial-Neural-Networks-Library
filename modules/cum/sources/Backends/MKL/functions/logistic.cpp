@@ -7,7 +7,7 @@
 #include "cum/functions/exponential.hpp"
 
 #include "internal/cumMKL.hpp"
-#include "cum/detail/vendor/oneapi/make_event.hpp"
+#include "cum/detail/vendor/oneapi/event_handler.hpp"
 
 
 #include "cum/functions/logistic.hpp"
@@ -31,7 +31,7 @@ namespace cum::functions::logistic
         {
             r[idx] = sigmoid(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ sigmoid_in_place(cumeric_t* v, const std::size_t N)
@@ -40,7 +40,7 @@ namespace cum::functions::logistic
         {
             v[idx] = sigmoid(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ softmax(cumeric_t* r, const cumeric_t* v, const dim_t N)
@@ -52,7 +52,7 @@ namespace cum::functions::logistic
 
         return blas::scal(N, 1/sum_exp_v, r, 1);
         // sycl::event event = blas::scal(N, 1/sum_exp_v, r, 1);
-        // return detail::make_event::create(std::move(event));
+        // return detail::event_handler::create(std::move(event));
     }
 
     __event__ softmax_in_place(cumeric_t* v, const dim_t N)
@@ -60,7 +60,7 @@ namespace cum::functions::logistic
         // sycl::event event = exponential::exp_in_place(v, N);
         return exponential::exp_in_place(v, N);
 
-        // return detail::make_event::create(std::move(event));
+        // return detail::event_handler::create(std::move(event));
     }
 
     /* ========================== Derivatives ========================== */
@@ -85,7 +85,7 @@ namespace cum::functions::logistic
         {
             r[idx] = sigmoid_deriv(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ sigmoid_deriv_from_result(cumeric_t* r, const cumeric_t* v, const std::size_t N)
@@ -94,7 +94,7 @@ namespace cum::functions::logistic
         {
             r[idx] = sigmoid_deriv_from_result(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ sigmoid_deriv_in_place(cumeric_t* v, const std::size_t N)
@@ -103,7 +103,7 @@ namespace cum::functions::logistic
         {
             v[idx] = sigmoid_deriv(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ sigmoid_deriv_from_result_in_place(cumeric_t* v, const std::size_t N)
@@ -112,7 +112,7 @@ namespace cum::functions::logistic
         {
             v[idx] = sigmoid_deriv(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ softmax_deriv(cumeric_t* r, const cumeric_t* v, const dim_t N)
@@ -121,7 +121,7 @@ namespace cum::functions::logistic
         {
             r[idx] = sigmoid_deriv(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ softmax_deriv_in_place(cumeric_t* v, const dim_t N)
@@ -130,7 +130,7 @@ namespace cum::functions::logistic
         {
             v[idx] = sigmoid_deriv(v[idx]);
         });
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
     
     __event__ softmax_deriv_from_result(cumeric_t* r, const cumeric_t* v, const dim_t N)

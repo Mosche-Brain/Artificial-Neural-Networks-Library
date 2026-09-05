@@ -6,7 +6,7 @@
 // #include <oneapi/mkl/blas/usm_decls.hpp>
 
 
-#include "cum/detail/vendor/oneapi/make_event.hpp"
+#include "cum/detail/vendor/oneapi/event_handler.hpp"
 #include "internal/cumMKL.hpp"
 #include "cum/LinearAlgebra/BLAS/level3.hpp"
 
@@ -25,7 +25,7 @@ namespace cum::blas
             a, lda, b,
             ldb, beta, c, ldc, oneapi::mkl::blas::compute_mode::standard, {}
         );
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ symm(char horizontal, char vertical, dim_t m, dim_t n, dim_t k, cumeric_t alpha, const cumeric_t* a, dim_t lda, const cumeric_t* b, dim_t ldb, cumeric_t beta, cumeric_t* c, dim_t ldc)
@@ -38,7 +38,7 @@ namespace cum::blas
             beta, c, ldc, oneapi::mkl::blas::compute_mode::standard, {}
         );
     
-        return detail::make_event::create(std::move(event));
+        return detail::event_handler::create(std::move(event));
     }
 
     __event__ trmm(char horizontal, char vertical, char transpose_a, char diagonal, cumeric_t* c, dim_t m, dim_t n, cumeric_t alpha, const cumeric_t* a, dim_t lda, const cumeric_t* b, dim_t ldb)

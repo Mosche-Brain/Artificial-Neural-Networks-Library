@@ -5,8 +5,8 @@
 
 namespace cum::LinearAlgebra
 {
-	__event__ mmul(cumeric_t* C, const cumeric_t* A, const cumeric_t*, dim_t m, dim_t n, dim_t k);
+	__event__ mmul(cumeric_t* C, const cumeric_t* A, const cumeric_t*, dim_t m, dim_t n, dim_t k, __depencies__ depencies={});
 
-	__event__ mtrans(cumeric_t* At, const cumeric_t* A, dim_t m, dim_t n);
-	__event__ mtrans(cumeric_t* A, dim_t m, dim_t n);
+	__event__ mtrans(cumeric_t* At, const cumeric_t* A, dim_t m, dim_t n, __depencies__ depencies={});
+	__event__ mtrans(cumeric_t* A, dim_t m, dim_t n, __depencies__ depencies={});
 }

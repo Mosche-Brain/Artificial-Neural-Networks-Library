@@ -18,12 +18,10 @@
 
 namespace cum::detail
 {
-    class make_event
+    class event_handler
     {
     public:
         static experimental::__event__ create(sycl::event&& event);
-        // {
-        //     return experimental::__event__(std::make_unique<experimental::__event__::Impl>(event));
-        // }
+        static sycl::event& handle(experimental::__event__& event);
     };
 }
