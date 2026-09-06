@@ -86,7 +86,7 @@ int main()
     
     /* you can put there some strange code */
     
-    cum::decum()
+    cum::decum() // Putting this isn't necessary
 }
 ```
 
