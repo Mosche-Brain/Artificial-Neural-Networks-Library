@@ -5,9 +5,9 @@
 #ifndef YANN_ADAM_HPP
 #define YANN_ADAM_HPP
 
-#include "yann/optimizers/OptimizerBase.hpp"
+#include <unordered_map>
 
-#include <memory>
+#include "yann/optimizers/OptimizerBase.hpp"
 
 namespace yann::optimizers
 {
@@ -16,7 +16,7 @@ namespace yann::optimizers
     public:
         ADAM(cum::cumeric_t learning_rate, cum::cumeric_t b1=0.9, cum::cumeric_t b2=0.999);
 
-		void step(cum::Matrix& params, cum::Matrix& grad) override {}
+		void step(Parameter& param) override;
         void step(std::vector<Parameter*>& params) override;
 
 		static std::unique_ptr<ADAM> create(cum::cumeric_t learning_rate, cum::cumeric_t b1=0.9, cum::cumeric_t b2=0.999);
@@ -24,8 +24,10 @@ namespace yann::optimizers
 		std::size_t current_step;
         cum::cumeric_t b1;
         cum::cumeric_t b2;
-        std::vector<cum::Matrix> momentum;
-		std::vector<cum::Matrix> second_momentum;
+        // std::vector<cum::Matrix> momentum;
+		// std::vector<cum::Matrix> second_momentum;
+        std::unordered_map<Parameter*, cum::Matrix> momentum;
+		std::unordered_map<Parameter*, cum::Matrix> second_momentum;
     };
 } // yann
 

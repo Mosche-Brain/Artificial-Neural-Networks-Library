@@ -17,14 +17,18 @@ namespace yann::optimizers
     {
     }
 
+    void SGD::step(Parameter& param)
+    {
+        param.values -= param.gradient * learning_rate;
+        param.clear_gradient();
+    }
+
     void SGD::step(std::vector<Parameter*>& params)
     {
         for (Parameter* param : params)
         {
             param->values -= param->gradient * learning_rate;
-            cum::runtime::sync();
             param->clear_gradient();
-            cum::runtime::sync();
         }
     }
 

@@ -6,6 +6,7 @@
 #include <cmath>
 
 #include "yann/optimizers/ADAM.hpp"
+#include "Parameter.hpp"
 #include "cum/Core.hpp"
 #include "cum/runtime.hpp"
 #include "cum/cum.hpp"
@@ -17,35 +18,40 @@ namespace yann::optimizers
 
 	}
 
+	void ADAM::step(Parameter& param)
+	{
+		if(!momentum.contains(&param))
+			momentum.emplace(&param, cum::Matrix::Zeros(param.rows(), param.cols()));
+		if(!second_momentum.contains(&param))
+			second_momentum.emplace(&param, cum::Matrix::Zeros(param.rows(), param.cols()));
+	}
+
 	void ADAM::step(std::vector<Parameter*>& params)
 	{
-		if(momentum.size() == 0) // first step
-		{
+		if(momentum.empty()) // first step
 			for(auto* param : params)
 			{
-				momentum.push_back(cum::Matrix::Zeros(param->rows(), param->cols()));
-				second_momentum.push_back(cum::Matrix::Zeros(param->rows(), param->cols()));
+				if(!momentum.contains(param))
+					momentum.emplace(param, cum::Matrix::Zeros(param->rows(), param->cols()));
+				if(!second_momentum.contains(param))
+					second_momentum.emplace(param, cum::Matrix::Zeros(param->rows(), param->cols()));
 			}
-		}
 
 		current_step++;
 		for(auto [index, param] : params | std::views::enumerate)
 		{
-			cum::Matrix& m = momentum[index];
-			cum::Matrix& v = second_momentum[index];
+			cum::Matrix& m = momentum[param];
+			cum::Matrix& v = second_momentum[param];
 			cum::Matrix& g = param->gradient;
 
-			cum::runtime::sync();
 
 			m = b1 * m + (1 - b1) * g;
 			v = b2 * v + (1 - b2) * g.cwiseProduct(g);
 
-			cum::runtime::sync();
 
 			cum::Matrix mhat = m / (1 - std::pow(b1, current_step));
 			cum::Matrix vhat = v / (1 - std::pow(b2, current_step));
 
-			cum::runtime::sync();
 
 			param->values -= learning_rate * mhat / (vhat.sqrt() + cum::EPSILON);
 			param->clear_gradient();

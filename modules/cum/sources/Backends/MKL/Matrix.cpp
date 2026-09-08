@@ -423,7 +423,7 @@ namespace cum
         return mat; 
     }
 
-    Matrix operator / (const Matrix& mat, const cumeric_t& scalar)
+    Matrix operator / (const Matrix& mat, const cumeric_t scalar)
     {
         Matrix temp(mat.rows_, mat.cols_);
         //memcpy(temp.data_, mat.data_, mat.rows_ * mat.cols_ * sizeof(cumeric_t));
@@ -434,6 +434,15 @@ namespace cum
 		return temp;
     }
 
+	Matrix operator / (const cumeric_t scalar, const Matrix& mat)
+	{
+		Matrix temp(mat.rows_, mat.cols_, scalar);
+
+		LinearAlgebra::div(temp.data_, temp.data_, mat.data_, temp.size());
+
+		return temp;
+	}
+
     bool operator == (const Matrix& A, const Matrix& B)
     {
         // Yes, no runtime dimensions checks 💪
@@ -441,6 +450,11 @@ namespace cum
         auto policy = oneapi::dpl::execution::make_device_policy(internal::getQueue());
         return std::equal(policy, A.data(), A.data() + A.rows() * B.cols(), B.data());
     }
+
+	bool operator != (const Matrix& A, const Matrix& B)
+	{
+		return !(A == B);
+	}
 
     Matrix Matrix::transpose() const
     {

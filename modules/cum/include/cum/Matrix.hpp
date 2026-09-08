@@ -81,15 +81,17 @@ namespace cum
   
         /* Outplace arithmetic operator */
         friend Matrix operator + (const Matrix& A, const Matrix& B);
-		friend Matrix operator + (const Matrix& mat, const cumeric_t scalar);
+		friend Matrix operator + (const Matrix& mat, cumeric_t scalar);
 		friend Matrix operator + (const cumeric_t scalar, const Matrix& mat);
         friend Matrix operator - (const Matrix& A, const Matrix& B);
         friend Matrix operator * (const Matrix& A, const Matrix& B);
-        friend Matrix operator * (const Matrix& mat, const cumeric_t scalar);
+        friend Matrix operator * (const Matrix& mat, cumeric_t scalar);
         friend Matrix operator * (const cumeric_t scalar, const Matrix& mat);
         friend Matrix operator / (const Matrix& A, const Matrix& B);
-        friend Matrix operator / (const Matrix& mat, const cumeric_t& scalar);
-        friend bool operator == (const Matrix& A, const Matrix& B);
+        friend Matrix operator / (const Matrix& mat, cumeric_t scalar);
+        friend Matrix operator / (const cumeric_t scalar, const Matrix& mat);
+		friend bool operator == (const Matrix& A, const Matrix& B);
+		friend bool operator != (const Matrix& A, const Matrix& B);
         
         /* Transforming matrix dimensions */
         Matrix transpose() const;
