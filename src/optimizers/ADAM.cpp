@@ -24,6 +24,24 @@ namespace yann::optimizers
 			momentum.emplace(&param, cum::Matrix::Zeros(param.rows(), param.cols()));
 		if(!second_momentum.contains(&param))
 			second_momentum.emplace(&param, cum::Matrix::Zeros(param.rows(), param.cols()));
+
+		current_step++;
+
+		cum::Matrix& m = momentum[&param];
+		cum::Matrix& v = second_momentum[&param];
+		cum::Matrix& g = param.gradient;
+
+
+		m = b1 * m + (1 - b1) * g;
+		v = b2 * v + (1 - b2) * g.cwiseProduct(g);
+
+
+		cum::Matrix mhat = m / (1 - std::pow(b1, current_step));
+		cum::Matrix vhat = v / (1 - std::pow(b2, current_step));
+
+
+		param.values -= learning_rate * mhat / (vhat.sqrt() + cum::EPSILON);
+		param.clear_gradient();
 	}
 
 	void ADAM::step(std::vector<Parameter*>& params)

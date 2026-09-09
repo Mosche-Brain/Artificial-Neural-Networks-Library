@@ -1,8 +1,18 @@
-#include "yann/utils/filesystem.hpp"
+#include "Sequential.hpp"
+#include "cum/Core.hpp"
 
 #include <cstdint>
 #include <cstdio>
 #include <stdexcept>
+#include <format>
+#include <ranges>
+#include <filesystem>
+
+#include <nlohmann/json.hpp>
+
+#include "yann/utils/filesystem.hpp"
+
+using namespace nlohmann;
 
 namespace yann::utils::filesystem
 {
@@ -50,6 +60,45 @@ namespace yann::utils::filesystem
 
 	cum::Matrix read_matrix(const char* path)
 	{
+		MatrixHeader metadata;
+
+		FILE* fp = fopen(path, "rb");
+		if(fp == NULL)
+		{
+			std::runtime_error("Couldn't open file");
+			return cum::Matrix(0,0);
+		}
+
+		metadata.meta = (uint8_t)fgetc(fp);
+		metadata.type = (uint8_t)fgetc(fp);
+
+		fread(&metadata.rows, sizeof(uint64_t), 1, fp);
+		fread(&metadata.rows, sizeof(uint64_t), 1, fp);
+
+		cum::Matrix mat(metadata.rows, metadata.cols);
+		fread(mat.data(), sizeof(cum::cumeric_t), mat.size(), fp);
+
+		if(fclose(fp) != 0)
+			std::runtime_error("fclose");
+		
+		return mat;
+	}
+
+	void dump_model(const models::Sequential& model, const char* path)
+	{
+		std::filesystem::create_directories(path);
+		
+		json metadata = json::object();
+
+		for(auto [index, layer] : model.getTopology() | std::views::enumerate)
+		{
+			auto layer_label = std::format("layer_{}", index);
+			metadata[layer_label] = json::object();
+
+			metadata[layer_label]["input_features"] = layer->size();
+			metadata[layer_label]["output_features"] = layer->size();
+		}
+
 
 	}
 

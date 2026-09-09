@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Sequential.hpp"
 #include <cum/Matrix.hpp>
 #include <cum/Core.hpp>
 
@@ -44,4 +45,7 @@ namespace yann::utils::filesystem
 
 	void dump_buffer(const cum::cumeric_t* buffer, cum::dim_t size, const char* path);
 	void read_buffer(cum::cumeric_t* buffer, cum::dim_t size, const char* path);
+
+	void dump_model(models::Sequential& model, const char* path);
+	void load_model(models::Sequential& model, const char* path);
 }
