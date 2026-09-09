@@ -69,6 +69,9 @@ namespace cum
     #else
     using cummulative_t = double;
     #endif
+
+    using Shape = std::vector<cum::dim_t>;
+
 } // namespace cum
 
 

@@ -13,12 +13,11 @@ namespace cum::neural_primitives
     class tensor_descriptor
     {
     public:
-        using dimensions = std::vector<int64_t>;
 
-        enum class data_type { FP64, FP32, FP16, BF16, S8, U8 };
-        enum class layout { ANY, X, NC, OI, NCHW, NHWC, STRIDED };
+        enum class dtype { FP64, FP32, FP16, BF16, S8, U8 };
+        enum class layout { ANY, X, NC, OI, NCHW, NHWC, STRIDED }; // MCHW
 
-        tensor_descriptor(dimensions dims, data_type dtype, layout format=layout::ANY);
+        tensor_descriptor(Shape dims, dtype dtype, layout format=layout::ANY);
         ~tensor_descriptor();
     private:
         struct Impl;

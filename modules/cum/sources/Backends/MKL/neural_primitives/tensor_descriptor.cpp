@@ -40,7 +40,7 @@ namespace cum::neural_primitives
         }
     }
 
-    tensor_descriptor::tensor_descriptor(tensor_descriptor::dimensions dims, tensor_descriptor::data_type dtype, tensor_descriptor::layout format)
+    tensor_descriptor::tensor_descriptor(Shape dims, tensor_descriptor::dtype dtype, tensor_descriptor::layout format)
     {
         impl = new tensor_descriptor::Impl;
         impl->desc = dnnl::memory::desc(dims, dnnl_data_type(dtype), dnnl_format_tag(format));
