@@ -7,7 +7,7 @@
 int main()
 {
     Window::InitBackend();
-    cum::cum(cum::CUM_DEVICE::GPU);
+    cum::cum(cum::DEVICE::GPU);
 
     Application app;
     const int code = app.run();

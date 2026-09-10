@@ -6,7 +6,7 @@
 
 int main()
 {
-    cum::cum(cum::CUM_DEVICE::GPU);
+    cum::cum(cum::DEVICE::GPU);
 
     cum::Matrix mat(2, 2, {1, 2, 3, 4});
 

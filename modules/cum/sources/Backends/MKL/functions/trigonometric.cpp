@@ -7,7 +7,7 @@
 
 #include "cum/detail/vendor/oneapi/event_handler.hpp"
 
-#include "internal/cumMKL.hpp"
+#include "internal/context.hpp"
 #include "cum/functions/trigonometric.hpp"
 
 namespace cum::functions::trigonometric

@@ -1,6 +1,6 @@
 #include "cum/memory.hpp"
 
-#include "internal/cumMKL.hpp"
+#include "internal/context.hpp"
 #include <sycl/sycl.hpp>
 
 namespace cum::memory

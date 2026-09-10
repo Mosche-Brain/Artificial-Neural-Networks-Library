@@ -21,7 +21,7 @@
 
 namespace cum
 {
-    enum class CUM_DEVICE { AUTO, CPU, GPU };
+    enum class DEVICE { AUTO, CPU, GPU };
 
     using __event__ = experimental::__event__;
     using __depencies__ = std::vector<std::reference_wrapper<__event__>>;
@@ -71,6 +71,9 @@ namespace cum
     #endif
 
     using Shape = std::vector<cum::dim_t>;
+
+    enum class datatype { FP64, FP32, FP16, BF16, S8, U8 };
+    enum class layout { ANY, X, NC, OI, NCHW, NHWC, STRIDED }; // MCHW
 
 } // namespace cum
 

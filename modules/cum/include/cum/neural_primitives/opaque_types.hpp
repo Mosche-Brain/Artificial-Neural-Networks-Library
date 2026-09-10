@@ -4,11 +4,12 @@
 
 #pragma once
 
-namespace cum::neural_primitives
+namespace cum::neural_primitives::handles
 {
-    typedef struct Memory Memory;
-    typedef struct Engine Engine;
-    typedef struct Stream Stream;
+    typedef struct __memory__ __memory__;
+    typedef struct __engine__ __engine__;
+    typedef struct __stream__ __stream__;
+    typedef struct  __desc__   __desc__;
 }
 
 // #endif //YANN_OPAQUE_TYPES_HPP

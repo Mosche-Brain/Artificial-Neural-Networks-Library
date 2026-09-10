@@ -21,7 +21,7 @@ cumeric_t f(cumeric_t x, cumeric_t y)
 
 int main()
 {
-    cum::cum(          cum::CUM_DEVICE::CPU);
+    cum::cum(          cum::DEVICE::CPU);
     yann::models::Sequential model({
         yann::models::layers::Input::createUnique(2),
         // yann::models::layers::Dense::createUnique(256, "relu"),

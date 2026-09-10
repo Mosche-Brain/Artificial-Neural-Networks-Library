@@ -1,5 +1,5 @@
 #include "cum/random.hpp"
-#include "internal/cumMKL.hpp"
+#include "internal/context.hpp"
 
 #include <oneapi/mkl/rng.hpp>
 #include <oneapi/mkl/rng/device.hpp>

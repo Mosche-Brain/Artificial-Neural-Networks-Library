@@ -171,7 +171,7 @@ private:
 
 int main(int argc, char** argv)
 {
-    cum::cum(cum::CUM_DEVICE::GPU);
+    cum::cum(cum::DEVICE::GPU);
 
     const std::string mnist_directory = argc > 1 ? argv[1] : "/home/jaro/Development/Yann/Assets/mnist";
     try

@@ -27,7 +27,7 @@ cum::cumeric_t diff(cum::cumeric_t* dY, const cum::cumeric_t* X, std::function<c
 
 TEST_CASE("tanh'")
 {
-    cum::cum(cum::CUM_DEVICE::CPU);
+    cum::cum(cum::DEVICE::CPU);
 
     TEST_DATA data;
     setup_data(data);

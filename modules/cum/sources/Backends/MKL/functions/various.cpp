@@ -4,7 +4,7 @@
 
 #include <sycl/sycl.hpp>
 
-#include "internal/cumMKL.hpp"
+#include "internal/context.hpp"
 #include "cum/functions/various.hpp"
 
 #include <oneapi/dpl/algorithm>

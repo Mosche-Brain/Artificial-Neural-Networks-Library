@@ -6,7 +6,7 @@
 
 #include <sycl/sycl.hpp>
 
-#include "internal/cumMKL.hpp"
+#include "internal/context.hpp"
 
 namespace cum::runtime
 {

@@ -21,7 +21,7 @@ namespace plt = matplot;
 
 int main()
 {
-    cum::cum(cum::CUM_DEVICE::CPU);
+    cum::cum(cum::DEVICE::CPU);
 
     yann::runtime_config::set_verbosity(0);
 

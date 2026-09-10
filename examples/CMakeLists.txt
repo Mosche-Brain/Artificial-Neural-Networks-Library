@@ -17,8 +17,8 @@ foreach(EXAMPLE_SOURCE ${EXAMPLE_SOURCES})
         ${CMAKE_SOURCE_DIR}/include
     )
 
-    target_link_libraries(${EXAMPLE_NAME} PRIVATE ${PROJECT_NAME} OpenMP::OpenMP_CXX cum::Core cum::MKL matplot easy3d::viewer)
-
+    target_link_libraries(${EXAMPLE_NAME} PRIVATE ${PROJECT_NAME} OpenMP::OpenMP_CXX cum::Core cum::MKL matplot)
+    #easy3d::viewer
     if(EXAMPLE_NAME STREQUAL "mnist")
         find_package(ZLIB REQUIRED)
         target_link_libraries(${EXAMPLE_NAME} PRIVATE ZLIB::ZLIB)

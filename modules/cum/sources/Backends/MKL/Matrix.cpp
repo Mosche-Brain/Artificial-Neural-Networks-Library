@@ -9,7 +9,7 @@
 #include "cum/Vector.hpp"
 #include "cum/random.hpp"
 
-#include "internal/cumMKL.hpp"
+#include "internal/context.hpp"
 
 #include <oneapi/mkl/blas/usm.hpp>
 #include <stdexcept>

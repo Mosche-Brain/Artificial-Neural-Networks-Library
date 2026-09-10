@@ -15,7 +15,7 @@ namespace plt = matplot;
 
 int main()
 {
-    cum::cum(cum::CUM_DEVICE::GPU);
+    cum::cum(cum::DEVICE::GPU);
 
 
     yann::models::Sequential sequential({

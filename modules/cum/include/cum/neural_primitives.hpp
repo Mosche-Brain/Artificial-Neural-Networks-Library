@@ -9,7 +9,7 @@
 #include <vector>
 #include <memory>
 
-#include "neural_primitives/tensor_descriptor.hpp"
+#include "neural_primitives/Descriptor.hpp"
 
 namespace cum::neural_primitives
 {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <oneapi/dnnl/dnnl_common.hpp>
 #include <oneapi/mkl.hpp>
 #include <oneapi/dnnl/dnnl.hpp>
 #include <oneapi/dnnl/dnnl_sycl.hpp>
@@ -14,12 +15,9 @@ namespace cum::internal
 {
     struct Context
     {
-        sycl::queue queue;
-        sycl::context context;
-        sycl::device device;
-        dnnl::engine engine;
-        dnnl::stream stream;
-        oneapi::mkl::rng::device::philox4x32x10<1> rng;
+    	explicit Context(DEVICE device=DEVICE::AUTO);
+    	~Context();
+
 
         std::once_flag initialized;
 
@@ -27,13 +25,17 @@ namespace cum::internal
         cumeric_t* ones;
         cumeric_t* cache;
 
-        void setDevice(CUM_DEVICE device);
+        void setDevice(DEVICE device);
 
-        ~Context();
-        Context();
+    	sycl::queue queue;
+    	sycl::context context;
+    	sycl::device device;
+    	dnnl::engine engine;
+    	dnnl::stream stream;
+    	oneapi::mkl::rng::device::philox4x32x10<1> rng;
     };
 
-    Context& getContext();
+    Context& context(DEVICE device=DEVICE::AUTO);
 
     sycl::context& getSyclContext();
     sycl::device& device();
@@ -45,4 +47,12 @@ namespace cum::internal
 
     cumeric_t* getZeros();
     cumeric_t* getOnes();
+
+    const cumeric_t* zeros();
+    const cumeric_t* ones();
+	cumeric_t* cache();
+
+	sycl::queue& queue();
+	dnnl::engine& engine();
+	dnnl::stream& stream();
 }

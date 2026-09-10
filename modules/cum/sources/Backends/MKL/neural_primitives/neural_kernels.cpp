@@ -5,7 +5,7 @@
 
 #include "cum/functions/transform.hpp"
 
-#include "internal/cumMKL.hpp"
+#include "internal/context.hpp"
 #include "cum/neural_primitives/neural_kernels.hpp"
 
 #include "cum/runtime.hpp"

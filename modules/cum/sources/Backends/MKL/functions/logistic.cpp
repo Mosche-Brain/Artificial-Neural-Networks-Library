@@ -6,7 +6,7 @@
 #include "cum/LinearAlgebra/reductions.hpp"
 #include "cum/functions/exponential.hpp"
 
-#include "internal/cumMKL.hpp"
+#include "internal/context.hpp"
 #include "cum/detail/vendor/oneapi/event_handler.hpp"
 
 

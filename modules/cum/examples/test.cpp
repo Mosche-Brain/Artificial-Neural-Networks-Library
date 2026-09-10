@@ -47,7 +47,7 @@ double benchmark()
 
 int main()
 {
-    cum::cum(cum::CUM_DEVICE::GPU);
+    cum::cum(cum::DEVICE::GPU);
 
 
     std::cout << "Testing addition correctness... ";
@@ -61,7 +61,7 @@ int main()
     double gpu_time = benchmark();
     std::cout << gpu_time << " seconds" << std::endl;
 
-    cum::recum(cum::CUM_DEVICE::CPU);
+    cum::recum(cum::DEVICE::CPU);
     sleep(5);
 
     std::cout << "Time taken on CPU: ";

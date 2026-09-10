@@ -6,7 +6,8 @@
 #include <memory>
 
 #include "cum/Core.hpp"
-#include "cum/neural_primitives/tensor_descriptor.hpp"
+#include "cum/neural_primitives/Descriptor.hpp"
+#include "cum/neural_primitives/Memory.hpp"
 #include "cum/neural_primitives/opaque_types.hpp"
 
 namespace cum
@@ -15,7 +16,7 @@ namespace cum
     class Tensor
     {
     public:
-        Tensor(Shape shape, neural_primitives::tensor_descriptor::dtype dtype=1, neural_primitives::tensor_descriptor::layout=0); // FP32, ANY
+        Tensor(Shape shape, datatype dtype = datatype::FP32, layout layout = layout::ANY); // FP32, ANY
 		~Tensor();
 
 		 
@@ -23,6 +24,8 @@ namespace cum
         
         const cumeric_t* data() const;
         cumeric_t* data();
+
+        cumeric_t sum();
 
         Tensor friend operator + (const Tensor& A, const Tensor& B);
         Tensor friend operator - (const Tensor& A, const Tensor& B);
@@ -40,10 +43,8 @@ namespace cum
 
         bool friend operator == (Tensor& A, Tensor& B);
         bool friend operator != (Tensor& A, Tensor& B);
-
-
     private:
-        std::unique_ptr<neural_primitives::tensor_descriptor> __desc___;
+        std::unique_ptr<neural_primitives::Descriptor> __desc__;
         std::unique_ptr<neural_primitives::Memory> __data__;
     };
 } // cum

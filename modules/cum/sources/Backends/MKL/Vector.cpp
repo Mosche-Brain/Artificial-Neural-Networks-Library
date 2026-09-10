@@ -4,7 +4,7 @@
 #include "cum/LinearAlgebra.hpp"
 #include "cum/functions/various.hpp"
 #include "cum/memory.hpp"
-#include "internal/cumMKL.hpp"
+#include "internal/context.hpp"
 
 namespace cum
 {

@@ -20,7 +20,7 @@ int main()
 {
     using namespace matplot;
 
-    cum::cum(cum::CUM_DEVICE::CPU);
+    cum::cum(cum::DEVICE::CPU);
     // fplot([](double x){
         // return (double)cum::functions::tanh_derivative((cum::cumeric_t)x);
     // }, std::array<double, 2>{-10, 10}, "b");

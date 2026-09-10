@@ -11,3 +11,4 @@ thirdparty/imgui
 thirdparty/matplotplusplus
 thirdparty/rapidcsv
 thirdparty/Catch2
+*.ipynb

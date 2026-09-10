@@ -7,10 +7,8 @@
 
 
 #include "cum/detail/vendor/oneapi/event_handler.hpp"
-#include "internal/cumMKL.hpp"
+#include "internal/context.hpp"
 #include "cum/LinearAlgebra/BLAS/level3.hpp"
-
-#include "../../internal/cumMKL.hpp"
 
 namespace cum::blas
 {

@@ -4,7 +4,7 @@
 
 #include <oneapi/mkl/blas.hpp>
 
-#include "internal/cumMKL.hpp"
+#include "internal/context.hpp"
 
 #include "cum/LinearAlgebra/BLAS/level2.hpp"
 

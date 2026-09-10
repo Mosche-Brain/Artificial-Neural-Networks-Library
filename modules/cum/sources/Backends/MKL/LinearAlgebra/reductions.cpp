@@ -2,7 +2,7 @@
 // Created by jaro on 8/2/26.
 //
 
-#include "internal/cumMKL.hpp"
+#include "internal/context.hpp"
 #include "cum/LinearAlgebra/BLAS/level1.hpp"
 #include "cum/LinearAlgebra/BLAS/level2.hpp"
 #include "cum/LinearAlgebra/BLAS/types.hpp"

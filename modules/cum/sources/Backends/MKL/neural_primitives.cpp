@@ -11,7 +11,7 @@ namespace cum::neural_primitives
     /* Non public conversion helper */
 
 
-    /* Internal tensor_descriptor implementation  */
+    /* Internal Descriptor implementation  */
 
 
 

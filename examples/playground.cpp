@@ -23,7 +23,7 @@ namespace plt = matplot;
 int main()
 {
 
-    cum::cum(cum::CUM_DEVICE::CPU);
+    cum::cum(cum::DEVICE::CPU);
 
 
 	cum::Matrix mat = cum::Matrix::Ones(6, 9);

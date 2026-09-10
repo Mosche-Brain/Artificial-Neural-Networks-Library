@@ -33,7 +33,7 @@ static void print_matrix_data(const std::string& name, cum::Matrix& m)
 
 int main()
 {
-    cum::cum(cum::CUM_DEVICE::GPU);
+    cum::cum(cum::DEVICE::GPU);
 
     std::cout << "=== MATRIX BEHAVIOUR ANALYSIS (CUM_USE_F16 + row_major MKL) ===\n";
     std::cout << "sizeof(cumeric_t) = " << sizeof(cum::cumeric_t) << " bytes\n\n";

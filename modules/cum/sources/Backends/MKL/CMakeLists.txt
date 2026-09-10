@@ -8,9 +8,11 @@ set(CMAKE_CXX_STANDARD 23)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+set(dnnl_DIR "/home/jaro/Development/Yann/thirdparty/oneDNN/install/lib/cmake/dnnl/" CACHE PATH "" FORCE)
+
 find_package(TBB CONFIG REQUIRED PATHS $ENV{TBBROOT} /opt/intel/oneapi/tbb/latest/lib/cmake/tbb/)
 find_package(MKL CONFIG REQUIRED PATHS $ENV{MKLROOT} /opt/intel/oneapi/mkl/latest/lib/cmake/mkl/)
-find_package(dnnl CONFIG REQUIRED)
+find_package(dnnl CONFIG REQUIRED NO_DEFAULT_PATH)
 find_package(oneDPL CONFIG REQUIRED)
 
 add_library(${PROJECT_NAME}_MKL STATIC
@@ -24,11 +26,10 @@ target_include_directories(${PROJECT_NAME}_MKL PRIVATE
 target_link_libraries(${PROJECT_NAME}_MKL 
     PRIVATE ${PROJECT_NAME}::Core 
     TBB::tbb
-    # TBB::TBB_DPCPP
     MKL::MKL
     MKL::MKL_DPCPP
     oneDPL
-    dnnl
+    DNNL::dnnl
 )
 
 target_compile_definitions(${PROJECT_NAME}_MKL 

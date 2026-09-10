@@ -7,7 +7,7 @@
 
 TEST_CASE("CPU mmul")
 {
-    cum::cum(cum::CUM_DEVICE::CPU);
+    cum::cum(cum::DEVICE::CPU);
 
     cum::Matrix A(2, 2,
         {1, 2,
@@ -30,7 +30,7 @@ TEST_CASE("CPU mmul")
 
 TEST_CASE("GPU mmul")
 {
-    cum::cum(cum::CUM_DEVICE::GPU);
+    cum::cum(cum::DEVICE::GPU);
 
     cum::Matrix A(2, 2,
         {1, 2,

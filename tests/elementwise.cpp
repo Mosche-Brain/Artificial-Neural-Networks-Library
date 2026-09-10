@@ -15,14 +15,14 @@
 
 struct ELEMENTWISE_TEST_CASE
 {
-    cum::CUM_DEVICE device;
+    cum::DEVICE device;
     cum::functions::function_id function_id;
 };
 
 
 TEST_CASE("tanh")
 {
-    cum::cum(cum::CUM_DEVICE::CPU);
+    cum::cum(cum::DEVICE::CPU);
 
     TEST_DATA data;
     setup_data(data);
@@ -42,7 +42,7 @@ TEST_CASE("tanh")
 
 TEST_CASE("sin")
 {
-    cum::cum(cum::CUM_DEVICE::CPU);
+    cum::cum(cum::DEVICE::CPU);
 
     TEST_DATA data;
     setup_data(data);
@@ -62,7 +62,7 @@ TEST_CASE("sin")
 
 TEST_CASE("log")
 {
-    cum::cum(cum::CUM_DEVICE::CPU);
+    cum::cum(cum::DEVICE::CPU);
 
     TEST_DATA data;
     setup_data(data, 0.01_c, 20._c);
