@@ -15,17 +15,17 @@ A lightweight, modular minimalistic and easy to use C++ library for machine lear
 
 ## ❗ Disclaimers
 * I used very poor english due to sleep quality.
+* Library is currently under active development, there is no production ready realase (first is planned for 7 oct 2026)
 
 ## ⬇️ Installaction and building process
 
 #### Requirements
 
 * CMake
-* OpenMP
-* eigen3 or oneAPI or openBLAS
-* G++ compiler or clang++
+* oneAPI/OpenMP/~~cuda~~/~~ROCm~~/~~openBLAS~~
+* G++, clang++ or Intel DPC++ compiler for oneAPI backend
 * CPU with at least one core
-* At least one sexual crime in lifetime
+* ~~At least one sexual crime in lifetime~~
 
 #### Notes
 * Supported numeric types
@@ -34,7 +34,6 @@ A lightweight, modular minimalistic and easy to use C++ library for machine lear
 * BF16 and Q8 may not compile properly
 
 ### 🐧 Linux and GNU/Linux
-
 ```bash
 git clone https://github.com/Czuowuek-SOS/Artificial-Neural-Networks-Library
 mv Artificial-Neural-Networks-Library Yet-Another-Artificial-Neural-Networks-Library
@@ -54,6 +53,8 @@ cmake -B build -DCUM_USE_MKL=ON -DCUM_USE_F16
 Probably almost, just like in linux and GNU/Linux (I guess).
 
 ## 💡 Getting started
+
+* ⚠️ Some examples may not be accurate due to recent changes
 
 ### Building project
 ```cmake 
@@ -108,7 +109,7 @@ int main()
     Sequential model({
         layers::Input::createUnique(input_layer_size),
         layers::Dense::createUnique(hidden_layer_size, "relu"),
-        layers::Dense::createUnique(outut_layer_size, "sigmoid")
+        layers::Dense::createUnique(outut_layer_size, "atan")
     }); 
 
     int number_of_samples = 4;
@@ -118,7 +119,7 @@ int main()
     /* Fill training data here */
 
     cum::cumeric_t learning_rate = 0.1_c;
-    int epochs = 200;
+    cum::dim_t epochs = 200;
 
     yann::loss::Loss loss = yann::loss::MeanSquaredError::create();
     yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(learning_rate);
@@ -139,7 +140,7 @@ using namespace yann::models;
 int main()
 {
     int perceptron_input_size = 2;
-    Perceptron model(perceptron_input_size, "relu");
+    Perceptron model(perceptron_input_size, "gelu");
 
     int number_of_samples = 2137;
     cum::Matrix x_train(number_of_samples, perceptron_input_size);
@@ -155,7 +156,9 @@ int main()
 }
 ```
 
-You can find full API documentation [there (currently not avaible)](www.amogus.org)
+~~You can find full API documentation [there (currently not avaible)](www.amogus.org)~~
+
+Full documentation will be avaible [here](brain.mosche.dev/docs)
 
 ## 🔨 Features
 
@@ -170,13 +173,16 @@ You can find full API documentation [there (currently not avaible)](www.amogus.o
 * ✅ GPU acceleration
 * ✅ Templates-free math framework
 * ✅ OneAPI support
-* ⚠️ [Dedicated graphical envionment](https://github.com/Czuowuek-SOS/MLStudio) (work in progress)
+* ⚠️ N-dimensional Tensors
+* ⚠️ Fused kernels for neural networks
+* ⚠️ Fused kernels for neural networks
+* ⚠️ Dynamic computational graphs
+* ⚠️ Convolutional layers
+* ⚠️ [Dedicated graphical envionment](https://github.com/Mosche-Brain/MLStudio) (work in progress)
 * ❌ CUDA support
 * ❌ ROCm support
 * ❌ BF16, Q8 support
-* ❌ Dynamic computational graphs
 * ❌ Fully working Python binding
-* ❌ Convolutional layers
 * ❌ Recurrent Neural Networks
 * ❌ Transformers
 * ❌ Built in telemetry
@@ -192,7 +198,7 @@ You can find full API documentation [there (currently not avaible)](www.amogus.o
 
 ## 🥱 Other useless informations
 
-### 💻 Hardware used during development
+### 💻 Hardware used during development (this may not work on anything else)
 
 * Intel Core Ultra 5 250k plus
 * Intel Arc B580

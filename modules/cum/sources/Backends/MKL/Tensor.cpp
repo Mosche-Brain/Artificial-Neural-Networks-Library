@@ -17,6 +17,8 @@
 
 #include "cum/functions.hpp"
 
+/* This implementation have a lot of redundant code */
+
 namespace cum
 {
     Tensor::Tensor(Shape shape, datatype dtype, layout layout)
