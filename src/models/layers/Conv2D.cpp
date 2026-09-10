@@ -23,6 +23,16 @@ namespace yann::models::layers
 
     }
 
+    cum::Tensor Conv2D::forward(const cum::Tensor& input)
+    {
+
+    }
+
+    cum::Tensor Conv2D::backward(const cum::Tensor& input)
+    {
+
+    }
+
     std::unique_ptr<LayerBase> Conv2D::createUnique(const cum::Shape input_shape, const cum::dim_t kernels_n, const cum::Shape kernel_size, const char* activation, const cum::dim_t stride, const cum::dim_t padding, const cum::dim_t dilatation)
     {
         return std::make_unique<Conv2D>(input_shape, kernels_n, kernel_size, activation, stride, padding, dilatation);

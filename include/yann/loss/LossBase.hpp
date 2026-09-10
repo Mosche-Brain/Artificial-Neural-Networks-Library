@@ -12,7 +12,7 @@ namespace yann::loss
 {
     typedef struct
     {
-        cum::cummulative_t value;
+        cum::cumeric_t value;
         cum::Matrix gradient;
     } loss_t;
 
@@ -25,7 +25,7 @@ namespace yann::loss
 
 
         const loss_t& result() const { return loss; }
-        cum::cummulative_t getLoss() const { return loss.value; }
+        cum::cumeric_t getLoss() const { return loss.value; }
         cum::Matrix getGradient() const { return loss.gradient; }
     protected:
         loss_t loss;

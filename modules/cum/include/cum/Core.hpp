@@ -25,56 +25,93 @@ namespace cum
 
     using __event__ = experimental::__event__;
     using __depencies__ = std::vector<std::reference_wrapper<__event__>>;
-    // using 
-    // using __event__ = void;
+
+    using dim_t = std::int64_t;
+    using Shape = std::vector<cum::dim_t>;
+    using Dims = std::vector<cum::dim_t>;
+
+    enum class datatype : uint8_t { FP64, FP32, FP16, BF16, FP8, S64, S32, S16, S8, U64, U32, U16, U8, UNDEF };
+    enum class layout : std::uint8_t {
+        ANY,
+        X,
+        NC,
+        OI,
+        IO,
+        NCHW,
+        NHWC,
+        OIHW,
+        HWIO,
+        NCDHW,
+        NDHWC,
+        TNC,
+        NTC,
+        STRIDED,
+        UNDEF
+    };
 
     // give info ABOUT used precision in compile time for each precision
     #if defined(CUM_USE_F64)
         using cumeric_t = double;        
-        // #warning "F64"
+        using cummulative_t = double;
+        constexpr datatype default_type = datatype::FP64;
     #elif defined(CUM_USE_F32)
         using cumeric_t = float;
         constexpr cumeric_t EPSILON = 1e-9f;
-        // #warning "F32"
+        using cummulative_t = double;
+        constexpr datatype default_type = datatype::FP32;
     #elif defined(CUM_USE_F16)
         #if defined(BUILD_USE_MKL)
         using cumeric_t = sycl::half;
-        // #warning "F16 sycl format"
         #else
         using cumeric_t = _Float16;
         #endif
         constexpr cumeric_t EPSILON = 1e-4f16;
+        using cummulative_t = float;
+        constexpr datatype default_type = datatype::FP16;
     #elif defined(CUM_USE_BF16)
         #if defined(BUILD_USE_MKL)
         using cumeric_t = sycl::bfloat16;
-        // #warning "BF16 sycl format"
         #else
         using cumeric_t = std::bfloat16;
         constexpr cumeric_t EPSILON = 1e-3bf16;
-        #warning "BF16"
         #endif
+        using cummulative_t = float;
+        constexpr datatype default_type = datatype::BF16;
     #elif defined(CUM_USE_INT8)
         using cumeric_t = int8_t;
         constexpr cumeric_t EPSILON = 1e1;
-        // #warning "INT8"
+        using cummulative_t = float;
+        constexpr datatype default_type = datatype::S8;
     #else
         #warning "Type was not defined"
     // #error "Data type didn't specified"
     #endif
 
-    using dim_t = std::int64_t;
+    constexpr std::size_t datatype_size(datatype type)
+    {
+        switch (type)
+        {
+        case datatype::FP64: return 8;
+        case datatype::FP32: return 4;
+        case datatype::FP16: return 2;
+        case datatype::BF16: return 2;
+        case datatype::FP8:  return 1;
 
-    #if defined(CUM_USE_F32)
-    using cummulative_t = float;
-    #else
-    using cummulative_t = double;
-    #endif
+        case datatype::S64:  return 8;
+        case datatype::S32:  return 4;
+        case datatype::S16:  return 2;
+        case datatype::S8:   return 1;
 
-    using Shape = std::vector<cum::dim_t>;
+        case datatype::U64:  return 8;
+        case datatype::U32:  return 4;
+        case datatype::U16:  return 2;
+        case datatype::U8:   return 1;
 
-    enum class datatype { FP64, FP32, FP16, BF16, S8, U8 };
-    enum class layout { ANY, X, NC, OI, NCHW, NHWC, STRIDED }; // MCHW
-
+        case datatype::UNDEF:
+        default:
+            return 1;
+        }
+    }
 } // namespace cum
 
 

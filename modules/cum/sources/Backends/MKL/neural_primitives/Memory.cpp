@@ -12,22 +12,22 @@ namespace cum::neural_primitives
 {
     Memory::Memory(const Descriptor& desc)
     {
-        handle = std::make_unique<handles::__memory__>(
-            dnnl::memory{desc.handle->desc, internal::engine()}
+        handle_ = std::make_unique<handles::__memory__>(
+            dnnl::memory{desc.handle_->desc, internal::engine()}
         );
     }
 
     Memory::Memory(const Descriptor& desc, void* data)
     {
-        handle = std::make_unique<handles::__memory__>(
-            dnnl::sycl_interop::make_memory(desc.handle->desc, internal::engine(), dnnl::sycl_interop::memory_kind::usm, data)
+        handle_ = std::make_unique<handles::__memory__>(
+            dnnl::sycl_interop::make_memory(desc.handle_->desc, internal::engine(), dnnl::sycl_interop::memory_kind::usm, data)
         );
     }
 
     Memory::Memory(const Descriptor& desc, Engine& engine)
     {
-        handle = std::make_unique<handles::__memory__>(
-            dnnl::memory{desc.handle->desc, engine.handle->engine}
+        handle_ = std::make_unique<handles::__memory__>(
+            dnnl::memory{desc.handle_->desc, engine.handle->engine}
         );
     }
 
@@ -38,12 +38,22 @@ namespace cum::neural_primitives
 
     void* Memory::data()
     {
-        return handle->memory.get_data_handle();
+        return handle_->memory.get_data_handle();
     }
 
     void Memory::set_data(void* data)
     {
-        handle->memory.set_data_handle(data);
+        handle_->memory.set_data_handle(data);
     }
+
+    const handles::__memory__& Memory::handle() const
+    {
+        return *handle_;
+    }
+
+    // const Descriptor& Memory::descriptor() const
+    // {
+    //     return D(handle_->memory.get_desc());
+    // }
 
 }

@@ -16,8 +16,8 @@ namespace cum
     public:
 		Matrix(dim_t rows, dim_t cols);
         Matrix(dim_t rows, dim_t cols, cumeric_t value);
-        Matrix(dim_t rows, dim_t cols, cumeric_t* source); // this constructor is used for copying data from source, not set source as a data handle
-        Matrix(dim_t rows, dim_t cols, const cumeric_t* source); // this constructor is used for copying data from source, not set source as a data handle
+        Matrix(dim_t rows, dim_t cols, cumeric_t* source); // this constructor is used for copying data from source, not set source as a data handle_
+        Matrix(dim_t rows, dim_t cols, const cumeric_t* source); // this constructor is used for copying data from source, not set source as a data handle_
         Matrix(dim_t rows, dim_t cols, std::initializer_list<cumeric_t> elements);
         Matrix(const Matrix& other);
         Matrix(Matrix&& other) noexcept;

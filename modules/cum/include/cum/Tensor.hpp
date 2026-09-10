@@ -12,13 +12,21 @@
 
 namespace cum
 {
-
     class Tensor
     {
     public:
         Tensor(Shape shape, datatype dtype = datatype::FP32, layout layout = layout::ANY); // FP32, ANY
 		~Tensor();
 
+        Tensor(const Tensor& tensor);
+        Tensor(Tensor&& tensor) noexcept;
+
+        dim_t size() const;
+        dim_t dims() const;
+        dim_t lenght() const;
+        Shape shape() const;
+        layout format() const;
+        datatype type() const;
 		 
         cumeric_t& at(const Shape indices);
         
@@ -26,6 +34,10 @@ namespace cum
         cumeric_t* data();
 
         cumeric_t sum();
+
+        Tensor& fill(cumeric_t scalar);
+
+        Tensor multiply(const Tensor& tensor);
 
         Tensor friend operator + (const Tensor& A, const Tensor& B);
         Tensor friend operator - (const Tensor& A, const Tensor& B);

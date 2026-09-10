@@ -8,16 +8,6 @@ namespace cum
 {
     internal::Context::Context(DEVICE device) // : queue(sycl::default_selector{})
     {
-        // this->setDevice(DEVICE::AUTO);
-        // zeros = sycl::malloc_shared<cumeric_t>(2048*2048, queue);
-        // ones = sycl::malloc_shared<cumeric_t>(2048*2048, queue);
-
-        // std::call_once(this->initialized, [](){
-        //     auto device = context().queue.get_device();
-        //     std::cout << "cum initialized, used device: " << device.get_info<sycl::info::device::name>() << '\n';
-        // });
-
-
         switch (device)
         {
             case DEVICE::AUTO:
@@ -41,8 +31,8 @@ namespace cum
             }
         }
 
-        constexpr std::size_t buffer_size = 2048 * 2048;
-        constexpr std::size_t chunk_size = 65536;
+        constexpr dim_t buffer_size = 2048 * 2048;
+        constexpr dim_t chunk_size = 65536;
 
         zeros = sycl::malloc_shared<cumeric_t>(buffer_size, queue);
         ones  = sycl::malloc_shared<cumeric_t>(buffer_size, queue);
@@ -50,8 +40,9 @@ namespace cum
 
         queue.wait();
 
-        functions::various::fill(zeros, buffer_size, 0);
-        functions::various::fill(ones, buffer_size, 1);
+
+        sycl::ext::oneapi::experimental::fill(queue, zeros, static_cast<cumeric_t>(0), buffer_size);
+        sycl::ext::oneapi::experimental::fill(queue, ones, static_cast<cumeric_t>(0), buffer_size);
 
         this->engine = dnnl::sycl_interop::make_engine(queue.get_device(), queue.get_context());
         this->stream = dnnl::sycl_interop::make_stream(engine, queue);
@@ -91,7 +82,6 @@ namespace cum
         cache = sycl::malloc_shared<cumeric_t>(buffer_size, queue);
 
         queue.wait();
-
 
         auto& q = queue;
         const auto initialize = [&q, buffer_size, chunk_size](cumeric_t* buffer, cumeric_t value)

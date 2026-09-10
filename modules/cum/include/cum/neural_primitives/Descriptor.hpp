@@ -18,12 +18,23 @@ namespace cum::neural_primitives
     class Descriptor
     {
     public:
-        Descriptor(Shape dims, datatype dtype, layout format=layout::ANY);
+        Descriptor(Shape dims, datatype dtype, layout format);
+
+        dim_t size() const;
+        dim_t ndims() const;
+        Shape shape() const;
+        datatype type() const;
+        layout format() const;
+
+        const handles::__desc__& handle() const;
+
         ~Descriptor();
     private:
         friend class Memory;
+        friend class Tensor;
 
-        std::unique_ptr<handles::__desc__> handle;
+        layout fmt;
+        std::unique_ptr<handles::__desc__> handle_;
     };
 } // cum
 

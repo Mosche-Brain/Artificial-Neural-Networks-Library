@@ -84,6 +84,7 @@ int main()
     const cum::Matrix predictions_before = model.forward(inputs);
     print_predictions("before training:", inputs.transpose(), predictions_before);
 
+
     yann::loss::Loss loss = yann::loss::BinaryCrossEntropy::create();
     yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.1_c);
     yann::logging::LossTracker loss_tracker;

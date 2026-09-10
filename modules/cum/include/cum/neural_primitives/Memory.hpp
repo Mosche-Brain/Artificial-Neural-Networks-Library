@@ -24,10 +24,12 @@ namespace cum::neural_primitives
         void* data();
         void  set_data(void* data);
 
-        const Descriptor& descriptor() const;
+        const handles::__memory__& handle() const;
+        // const Descriptor& descriptor() const;
     private:
+        friend class Tensor;
 
-        std::unique_ptr<handles::__memory__> handle;
+        std::unique_ptr<handles::__memory__> handle_;
     };
 
 } // cum

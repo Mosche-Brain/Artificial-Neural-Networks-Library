@@ -4,6 +4,10 @@
 #include <cum/neural_primitives.hpp>
 #include <cum/Tensor.hpp>
 #include <cum/cum.hpp>
+#include <cum/runtime.hpp>
+
+#include <print>
+
 
 using namespace cum;
 
@@ -13,9 +17,12 @@ int main()
 
     // cum::neural_primitives::Descriptor desc({3, 3, 3}, cum::neural_primitives::Descriptor::data_type::FP16);
 
-    Tensor tensor({3, 3, 3}, datatype::FP16);
+    std::println("ko");
 
+    runtime::sync();
+    Tensor tensor({1, 3, 3, 3}, datatype::FP16, layout::NCHW);
 
+    std::println("ok");
 
     return 0;
 }
