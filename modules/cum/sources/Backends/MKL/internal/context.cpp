@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <iostream>
 #include <print>
+#include <sycl/context.hpp>
+#include <sycl/device.hpp>
 
 namespace cum
 {
@@ -34,6 +36,7 @@ namespace cum
         constexpr dim_t buffer_size = 2048 * 2048;
         constexpr dim_t chunk_size = 65536;
 
+        cache_size = buffer_size;
         zeros = sycl::malloc_shared<cumeric_t>(buffer_size, queue);
         ones  = sycl::malloc_shared<cumeric_t>(buffer_size, queue);
         cache = sycl::malloc_shared<cumeric_t>(buffer_size, queue);
@@ -41,8 +44,14 @@ namespace cum
         queue.wait();
 
 
-        sycl::ext::oneapi::experimental::fill(queue, zeros, static_cast<cumeric_t>(0), buffer_size);
-        sycl::ext::oneapi::experimental::fill(queue, ones, static_cast<cumeric_t>(0), buffer_size);
+        queue.fill(zeros, static_cast<cumeric_t>(0), buffer_size);
+        queue.fill(ones, static_cast<cumeric_t>(1), buffer_size);
+
+        // sycl::ext::oneapi::experimental::fill(queue, zeros, static_cast<cumeric_t>(0), buffer_size);
+        // sycl::ext::oneapi::experimental::fill(queue, ones, static_cast<cumeric_t>(1), buffer_size);
+
+        this->device = queue.get_device();
+        this->context = queue.get_context();
 
         this->engine = dnnl::sycl_interop::make_engine(queue.get_device(), queue.get_context());
         this->stream = dnnl::sycl_interop::make_stream(engine, queue);
@@ -124,9 +133,19 @@ namespace cum
     cumeric_t* internal::getZeros() { return context().zeros; }
     cumeric_t* internal::getOnes() { return context().ones; }
 
+    sycl::context& internal::sycl_context()
+    {
+        return context().context;
+    }
+
 	sycl::queue& internal::queue()
 	{
 		return context().queue;
+	}
+
+	sycl::device& internal::device()
+	{
+		return context().device;
 	}
 
     dnnl::engine& internal::engine()
@@ -151,6 +170,6 @@ namespace cum
 
     cumeric_t* internal::cache()
     {
-
+        return context().cache;
     }
 }

@@ -20,7 +20,17 @@ int main()
     std::println("ko");
 
     runtime::sync();
-    Tensor tensor({1, 3, 3, 3}, datatype::FP16, layout::NCHW);
+    Tensor A({1, 3, 3, 3}, datatype::FP16, layout::NCHW);
+
+    Tensor B({1, 3, 3, 3}, datatype::FP16, layout::NCHW);
+
+    Tensor C = A + B;
+
+    std::println("płint");
+
+    std::println("A.sum() = {}", A.sum());
+    std::println("B.sum() = {}", B.sum());
+    std::println("C.sum() = {}", C.sum());
 
     std::println("ok");
 

@@ -21,6 +21,7 @@ namespace cum::internal
 
         std::once_flag initialized;
 
+        dim_t cache_size;
         cumeric_t* zeros;
         cumeric_t* ones;
         cumeric_t* cache;
@@ -52,6 +53,7 @@ namespace cum::internal
     const cumeric_t* ones();
 	cumeric_t* cache();
 
+    sycl::context& sycl_context();
 	sycl::queue& queue();
 	dnnl::engine& engine();
 	dnnl::stream& stream();

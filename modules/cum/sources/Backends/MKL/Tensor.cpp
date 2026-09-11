@@ -2,9 +2,11 @@
 // Created by jaro on 6/28/26.
 //
 
+#include <cstdint>
 #include <oneapi/dnnl/dnnl.hpp>
 
 
+#include "cum/Core.hpp"
 #include "cum/runtime.hpp"
 #include "cum/memory.hpp"
 #include "cum/neural_primitives/Descriptor.hpp"
@@ -16,6 +18,8 @@
 #include "cum/Tensor.hpp"
 
 #include "cum/functions.hpp"
+
+#include <print>
 
 /* This implementation have a lot of redundant code */
 
@@ -75,11 +79,13 @@ namespace cum
 
 	cumeric_t Tensor::sum()
     {
-    	cumeric_t* sum_buff = memory::allocate(1);
+    	// cumeric_t* sum_buff = memory::allocate(1);
+		cumeric_t* sum_buff = sycl::malloc_shared<cumeric_t>(1, internal::device(), internal::sycl_context());
     	sum_buff[0] = 0;
 
     	dnnl::memory::desc sum_desc {
-    		Shape(this->dims(), 1), dnnl_data_type(default_type), dnnl::memory::format_tag::any
+    		// shp, dnnl_data_type(default_type), dnnl::memory::format_tag::any
+    		Shape(this->dims(), 1), dnnl_data_type(default_type), dnnl_format_tag(format())
     	};
 
     	dnnl::memory sum_memory = dnnl::sycl_interop::make_memory(
@@ -92,7 +98,7 @@ namespace cum
 			__desc__->handle().desc,
 			sum_desc,
 			0.0f,   // p
-			0.0f    // eps
+			0.0f  // eps
 		);
 
     	dnnl::reduction(pd).execute(
