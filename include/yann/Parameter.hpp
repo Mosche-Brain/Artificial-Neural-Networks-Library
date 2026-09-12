@@ -15,8 +15,8 @@ namespace yann
         cum::Matrix values;
         cum::Matrix gradient;
 
-        std::size_t cols() const { return values.cols(); }
-        std::size_t rows() const { return values.rows(); }
+        cum::dim_t cols() const { return values.cols(); }
+        cum::dim_t rows() const { return values.rows(); }
 
         void clear_gradient();
         void scale_gradient(cum::cumeric_t scalar);

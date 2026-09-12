@@ -57,23 +57,23 @@ namespace yann::models::layers
             }
             else
             {
-                std::runtime_error("YANN_DENSE_FORWARD_FUSED_PATH weren't compiled")
+                std::runtime_error("YANN_DENSE_FORWARD_FUSED_PATH weren't compiled");
             }
         }
         else
         {
-            if constexpr(YANN_DENSE_FORWARD_REFEREMCE_PATH)
+            if constexpr(YANN_DENSE_FORWARD_REFERENCE_PATH)
             {
                 cum::Tensor weigths_tensor = cum::Tensor::take_memory({weights_.rows(), weights_.cols()}, weights_.values.data(), cum::default_type, cum::layout::IO);
                 cum::Tensor biases_tensor  = cum::Tensor::take_memory({biases_.rows(), biases_.cols()}, weights_.values.data(), cum::default_type, cum::layout::IO);
 
-                cum::Tensor Z = weights_tensor * input + biases_tensor;
+                cum::Tensor Z = weigths_tensor * input + biases_tensor;
 
-                cum::Tensor Y =
+                // cum::Tensor Y =
             }
             else
             {
-                std::runtime_error("YANN_DENSE_FORWARD_REFERENCE_PATH weren't compiled")
+                std::runtime_error("YANN_DENSE_FORWARD_REFERENCE_PATH weren't compiled");
             }
         }
     }

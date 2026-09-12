@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "cum/Core.hpp"
 #include "cum/config.hpp"
 
 #include <stdfloat>
@@ -43,6 +44,10 @@ namespace cum
     typedef struct fp8_e4_3m_impl
     {
         unsigned char data;
+        operator float() 
+        { 
+            return 69;
+        }
     } fp8_e4_3m_impl;
     using float8 = fp8_e4_3m_impl;
 

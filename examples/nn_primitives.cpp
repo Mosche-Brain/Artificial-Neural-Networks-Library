@@ -27,7 +27,7 @@ int main()
     A.fill(6);
     B.fill(9);
 
-    Tensor C = A + B;
+    Tensor C = A * B;
 
     std::println("płint");
 

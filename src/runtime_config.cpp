@@ -7,6 +7,11 @@ namespace yann::runtime_config
         return logging::Logger::getInstance().getDebugVerbosity();
     }
 
+    bool fused_kernels()
+    {
+        return RuntimeConfig::getInstance().getFusedKernels();
+    }
+
     void set_verbosity(unsigned char level)
     {
         logging::Logger::getInstance().setDebugVerbosity(level);
