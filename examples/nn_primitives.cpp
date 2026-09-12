@@ -24,6 +24,9 @@ int main()
 
     Tensor B({1, 3, 3, 3}, datatype::FP16, layout::NCHW);
 
+    A.fill(6);
+    B.fill(9);
+
     Tensor C = A + B;
 
     std::println("płint");

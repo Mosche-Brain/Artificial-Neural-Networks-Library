@@ -18,6 +18,8 @@
     #define CUM_USE_F32
 #endif
 
+#include "cum/datatypes.hpp"
+
 #include "cum/experimental/__event__.hpp"
 
 namespace cum
@@ -71,7 +73,7 @@ namespace cum
         constexpr datatype default_type = datatype::FP16;
     #elif defined(CUM_USE_BF16)
         #if defined(BUILD_USE_MKL)
-        using cumeric_t = sycl::bfloat16;
+        using cumeric_t = sycl::ext::oneapi::bfloat16;
         #else
         using cumeric_t = std::bfloat16;
         constexpr cumeric_t EPSILON = 1e-3bf16;
@@ -141,7 +143,7 @@ namespace cum
             case datatype::U16:  return f.template operator()<uint16_t>();
             case datatype::U8:   return f.template operator()<uint8_t>();
             default:
-                throw std::runtime_error("Unsupported datatype");
+                throw std::runtime_error("Unsupported datatype in dispatch_datatype");
         }
     }
 } // namespace cum
