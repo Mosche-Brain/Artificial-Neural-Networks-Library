@@ -25,6 +25,7 @@ namespace cum::neural_primitives
         void  set_data(void* data);
 
         const handles::__memory__& handle() const;
+        handles::__memory__& handle();
         // const Descriptor& descriptor() const;
     private:
         friend class Tensor;

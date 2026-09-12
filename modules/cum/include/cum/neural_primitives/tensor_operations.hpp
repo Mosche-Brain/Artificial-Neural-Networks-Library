@@ -21,7 +21,7 @@ namespace cum::neural_primitives
 {
     /* Raw handles overloads */
     __event__ add(handles::__memory__ C, handles::__memory__ A, handles::__memory__ B, handles::__desc__ c_desc, handles::__desc__ a_desc, handles::__desc__ b_desc);
-    __event__ sum(handles::__memory__ C, handles::__memory__ A, handles::__memory__ B, handles::__desc__ c_desc, handles::__desc__ a_desc, handles::__desc__ b_desc);
+    __event__ sub(handles::__memory__ C, handles::__memory__ A, handles::__memory__ B, handles::__desc__ c_desc, handles::__desc__ a_desc, handles::__desc__ b_desc);
     __event__ mul(handles::__memory__ C, handles::__memory__ A, handles::__memory__ B, handles::__desc__ c_desc, handles::__desc__ a_desc, handles::__desc__ b_desc);
     __event__ div(handles::__memory__ C, handles::__memory__ A, handles::__memory__ B, handles::__desc__ c_desc, handles::__desc__ a_desc, handles::__desc__ b_desc);
     
@@ -30,7 +30,7 @@ namespace cum::neural_primitives
     /* RAII handles overloads */
 
     __event__ add(Memory& C, const Memory& A, const Memory& B, const Descriptor& c_desc, const Descriptor& a_desc, const Descriptor& b_desc);
-    __event__ sum(Memory& C, const Memory& A, const Memory& B, const Descriptor& c_desc, const Descriptor& a_desc, const Descriptor& b_desc);
+    __event__ sub(Memory& C, const Memory& A, const Memory& B, const Descriptor& c_desc, const Descriptor& a_desc, const Descriptor& b_desc);
     __event__ mul(Memory& C, const Memory& A, const Memory& B, const Descriptor& c_desc, const Descriptor& a_desc, const Descriptor& b_desc);
     __event__ div(Memory& C, const Memory& A, const Memory& B, const Descriptor& c_desc, const Descriptor& a_desc, const Descriptor& b_desc);
     

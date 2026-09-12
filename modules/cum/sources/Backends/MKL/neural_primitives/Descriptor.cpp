@@ -51,6 +51,11 @@ namespace cum::neural_primitives
         return *handle_;
     }
 
+    handles::__desc__& Descriptor::handle()
+    {
+        return *handle_;
+    }
+
     layout Descriptor::format() const
     {
         return fmt;

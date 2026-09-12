@@ -51,6 +51,11 @@ namespace cum::neural_primitives
         return *handle_;
     }
 
+    handles::__memory__& Memory::handle()
+    {
+        return *handle_;
+    }
+
     // const Descriptor& Memory::descriptor() const
     // {
     //     return D(handle_->memory.get_desc());

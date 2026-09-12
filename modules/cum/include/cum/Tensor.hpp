@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <initializer_list>
 #include <memory>
 
 #include "cum/Core.hpp"
@@ -21,12 +22,24 @@ namespace cum
         Tensor(const Tensor& tensor);
         Tensor(Tensor&& tensor) noexcept;
 
+        template<datatype T, layout layout>
+        static Tensor create_tensor(Shape shape)
+        {
+            return Tensor(shape, T, layout);
+        }
+
         dim_t size() const;
         dim_t dims() const;
         dim_t lenght() const;
         Shape shape() const;
         layout format() const;
         datatype type() const;
+
+        std::unique_ptr<neural_primitives::Descriptor>& descriptor();
+        std::unique_ptr<neural_primitives::Memory>& memory();
+
+        const std::unique_ptr<neural_primitives::Descriptor>& descriptor() const;
+        const std::unique_ptr<neural_primitives::Memory>& memory() const;
 		 
         cumeric_t& at(const Shape indices);
         

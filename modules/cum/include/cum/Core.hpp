@@ -18,6 +18,8 @@
     #define CUM_USE_F32
 #endif
 
+#define defined_definition
+
 #include "cum/datatypes.hpp"
 
 #include "cum/experimental/__event__.hpp"
@@ -123,7 +125,8 @@ namespace cum
         {
             case datatype::FP64: return f.template operator()<double>();
             case datatype::FP32: return f.template operator()<float>();
-            #if defined(BUILD_USE_MKL)  
+            // #if defined(BUILD_USE_MKL)  
+            #if defined(defined_definition)  
             case datatype::FP16: return f.template operator()<sycl::half>();
             case datatype::BF16: return f.template operator()<sycl::ext::oneapi::bfloat16>();
             #else

@@ -27,6 +27,7 @@ namespace cum::neural_primitives
         layout format() const;
 
         const handles::__desc__& handle() const;
+        handles::__desc__& handle();
 
         ~Descriptor();
     private:

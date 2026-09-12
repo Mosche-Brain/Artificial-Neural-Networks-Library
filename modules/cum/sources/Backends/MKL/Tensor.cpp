@@ -47,6 +47,28 @@ namespace cum
 
 	}
 
+
+	std::unique_ptr<neural_primitives::Descriptor>& Tensor::descriptor()
+	{
+		return __desc__;
+	}
+
+	std::unique_ptr<neural_primitives::Memory>& Tensor::memory()
+	{
+		return __data__;
+	}
+
+
+	const std::unique_ptr<neural_primitives::Descriptor>& Tensor::descriptor() const
+	{
+		return __desc__;
+	}
+
+	const std::unique_ptr<neural_primitives::Memory>& Tensor::memory() const
+	{
+		return __data__;
+	}
+
 	dim_t Tensor::size() const
     {
 		return __desc__->size();
