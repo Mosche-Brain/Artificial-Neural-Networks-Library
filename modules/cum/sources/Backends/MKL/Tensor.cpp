@@ -40,7 +40,13 @@ namespace cum
 
     Tensor::Tensor(const Tensor& tensor)
     {
+		__desc__ = std::make_unique<neural_primitives::Descriptor>(tensor.shape(), tensor.type(), tensor.format());
 
+    	dispatch_datatype(this->type(), [&]<typename T>(){
+    		__data__ = sycl::malloc_shared<T>(tensor.lenght(), internal::device(), internal::sycl_context());
+    	});
+
+    	__memr__ = std::make_unique<neural_primitives::Memory>(*__desc__, __data__);
     }
 
     Tensor::Tensor(Tensor&& tensor) noexcept : __desc__(std::move(tensor.__desc__)), __memr__(std::move(tensor.__memr__))

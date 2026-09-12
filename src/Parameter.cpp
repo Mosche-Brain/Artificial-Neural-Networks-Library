@@ -20,8 +20,10 @@ namespace yann
 {
     Parameter::Parameter(std::size_t cols, std::size_t rows) /* init with zeros by default */
     {
-        values   = cum::Matrix(rows, cols);
-        gradient = cum::Matrix(rows, cols);
+        // values   = cum::Tensor({rows, cols});
+        // gradient = cum::Tensor({rows, cols});
+        values   = cum::Tensor({rows, cols}, cum::default_type, cum::layout::IO);
+        gradient = cum::Tensor({rows, cols});
     }
 
     Parameter Parameter::Uniform(std::size_t rows, std::size_t cols)
@@ -29,8 +31,8 @@ namespace yann
         constexpr cum::cumeric_t ampl = 0.1;
 
         Parameter param;
-        param.values = cum::Matrix::Random(rows, cols, -ampl, ampl);
-        param.gradient = cum::Matrix::Zeros(rows, cols);
+        param.values = cum::Tensor::Random({rows, cols}, -ampl, ampl, cum::default_type, cum::layout::IO);
+        param.gradient = cum::Tensor::Zeros({rows, cols});
         return param;
     }
 
@@ -39,9 +41,9 @@ namespace yann
         cum::cumeric_t sigma = std::sqrt(2.f / (float)cols);
 
         Parameter param;
-        param.values = cum::Matrix(rows, cols);
+        param.values = cum::Tensor({rows, cols}, cum::default_type, cum::layout::IO);
         cum::random::normal(param.values.data(), rows * cols, sigma);
-        param.gradient = cum::Matrix(rows, cols);
+        param.gradient = cum::Tensor({rows, cols}, cum::default_type, cum::layout::IO);
 
         return param;
     }
@@ -49,16 +51,16 @@ namespace yann
     Parameter Parameter::Zeros(std::size_t rows, std::size_t cols)
     {
         Parameter param;
-        param.values = cum::Matrix::Zeros(rows, cols);
-        param.gradient = cum::Matrix::Zeros(rows, cols);
+        param.values = cum::Tensor::Zeros({rows, cols}, cum::default_type, cum::layout::IO);
+        param.gradient = cum::Tensor::Zeros({rows, cols}, cum::default_type, cum::layout::IO);
         return param;
     }
 
     Parameter Parameter::Ones(std::size_t rows, std::size_t cols)
     {
         Parameter param;
-        param.values = cum::Matrix::Ones(rows, cols);
-        param.gradient = cum::Matrix(rows, cols);
+        param.values = cum::Tensor::Ones({rows, cols}, cum::default_type, cum::layout::IO);
+        param.gradient = cum::Tensor::Zeros({rows, cols}, cum::default_type, cum::layout::IO);
         return param;
     }
 
@@ -75,6 +77,6 @@ namespace yann
 
     void Parameter::scale_gradient(cum::cumeric_t scalar)
     {
-        gradient *= scalar;
+        gradient = gradient * scalar;
     }
 } // yann

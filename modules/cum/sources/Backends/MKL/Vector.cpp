@@ -19,7 +19,7 @@ namespace cum
     	functions::various::fill(data_, value, lenght);
 	}
 
-    Vector::operator Matrix() const
+    Vector::operator Matrix () const
     {
         //Matrix temp(lenght_, 1);
         //for(size_t i = 0 ; i < lenght_ ; i++)
