@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iostream>
 #include <print>
+#include <sycl/aliases.hpp>
 #include <sycl/context.hpp>
 #include <sycl/device.hpp>
 
@@ -43,7 +44,7 @@ namespace cum
 
         queue.wait();
 
-
+        // sycl::half
         queue.fill(zeros, static_cast<cumeric_t>(0), buffer_size);
         queue.fill(ones, static_cast<cumeric_t>(1), buffer_size);
 

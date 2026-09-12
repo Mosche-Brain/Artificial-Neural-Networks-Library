@@ -119,13 +119,23 @@ namespace cum
 
 	Tensor& Tensor::fill(cumeric_t scalar)
 	{
-    	cumeric_t* ptr = static_cast<cumeric_t*>(
+    	void* ptr = static_cast<cumeric_t*>(
 			__data__->handle().memory.get_data_handle()
 		);
 
     	const dim_t count = __desc__->handle().desc.get_size() / sizeof(cumeric_t);
 
-		functions::various::fill(ptr, scalar, count);
+		// functions::various::fill(ptr, scalar, count);
+
+		dispatch_datatype(type(), [&]<typename T>()
+		{
+			internal::queue().fill(
+				static_cast<T*>(ptr),
+				static_cast<T>(scalar),
+				lenght()
+			).wait();
+		});
+
     	runtime::sync();
 
     	return *this;

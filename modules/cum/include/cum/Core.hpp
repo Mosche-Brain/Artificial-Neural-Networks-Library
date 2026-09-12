@@ -7,6 +7,7 @@
 
 #if defined(BUILD_USE_MKL)
     #include <sycl/sycl.hpp>
+    #include <sycl/ext/oneapi/bfloat16.hpp>
 #endif
 
 #if !defined(CUM_USE_F64)  && \
@@ -110,6 +111,37 @@ namespace cum
         case datatype::UNDEF:
         default:
             return 1;
+        }
+    }
+
+    template <typename F>
+    decltype(auto) dispatch_datatype(datatype dt, F&& f) // I must get better undestenting of these sematnics, this is realy strange
+    {
+        switch (dt)
+        {
+            case datatype::FP64: return f.template operator()<double>();
+            case datatype::FP32: return f.template operator()<float>();
+            #if defined(BUILD_USE_MKL)  
+            case datatype::FP16: return f.template operator()<sycl::half>();
+            case datatype::BF16: return f.template operator()<sycl::ext::oneapi::bfloat16>();
+            #else
+            #ifdef __STDCPP_FLOAT16_T__
+            case datatype::FP16: return f.template operator()<std::float16_t>();
+            #endif
+            #ifdef __STDCPP_BFLOAT16_T__        
+            case datatype::BF16: return f.template operator()<std::bfloat16_t>();
+            #endif
+            #endif
+            case datatype::S64:  return f.template operator()<int64_t>();
+            case datatype::S32:  return f.template operator()<int32_t>();
+            case datatype::S16:  return f.template operator()<int16_t>();
+            case datatype::S8:   return f.template operator()<int8_t>();
+            case datatype::U64:  return f.template operator()<uint64_t>();
+            case datatype::U32:  return f.template operator()<uint32_t>();
+            case datatype::U16:  return f.template operator()<uint16_t>();
+            case datatype::U8:   return f.template operator()<uint8_t>();
+            default:
+                throw std::runtime_error("Unsupported datatype");
         }
     }
 } // namespace cum
