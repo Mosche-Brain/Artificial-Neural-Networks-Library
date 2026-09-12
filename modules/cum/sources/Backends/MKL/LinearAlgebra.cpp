@@ -141,7 +141,7 @@ namespace cum::LinearAlgebra
     {
         auto& q = internal::getQueue();
         int64_t i;
-        #if defined(CUM_USE_F64) || defined(CUM_USE_F32)
+        #if CUM_USE_FP64 || CUM_USE_FP32
         {
             oneapi::mkl::blas::row_major::iamax(q, N, v, 1, &i);
         }
@@ -167,7 +167,7 @@ namespace cum::LinearAlgebra
         auto& q = internal::getQueue();
         // oneapi::mkl::blas::row_major::iamin(q, N, v, 1, r, {});
         int64_t i;
-        #if defined(CUM_USE_F64) || defined(CUM_USE_F32)
+        #if CUM_USE_FP64 || CUM_USE_FP32
         {
             oneapi::mkl::blas::row_major::iamin(q, N, v, 1, &i);
         }
@@ -287,7 +287,7 @@ namespace cum::LinearAlgebra
     void transpose(cumeric_t* A, const cumeric_t* B, std::size_t rows, std::size_t cols)
     {
         auto& q = internal::getQueue();
-        #if defined(CUM_USE_F64) || defined(CUM_USE_F32)
+        #if CUM_USE_FP64 || CUM_USE_FP32
         {
             oneapi::mkl::blas::row_major::omatcopy(q, oneapi::mkl::transpose::trans, rows, cols, 1.0, B, cols, A, rows);
         }
@@ -306,7 +306,7 @@ namespace cum::LinearAlgebra
     void transposeInPlace(cumeric_t* mat, std::size_t rows, std::size_t cols)
     {
         auto& q = internal::getQueue();
-        #if defined(CUM_USE_F64) || defined(CUM_USE_F32)
+        #if CUM_USE_FP64 || CUM_USE_FP32
         {
             oneapi::mkl::blas::row_major::imatcopy(q, oneapi::mkl::transpose::trans, rows, cols, 1.0, mat, cols, rows);
         }
@@ -339,7 +339,7 @@ namespace cum::LinearAlgebra
     void rowwiseSum(cumeric_t* r, const cumeric_t* mat, std::size_t rows, std::size_t cols)
     {
         auto& q = internal::getQueue();
-        #if defined(CUM_USE_F64) || defined(CUM_USE_F32)
+        #if CUM_USE_FP64 || CUM_USE_FP32
         {
             oneapi::mkl::blas::row_major::gemv(q, oneapi::mkl::transpose::nontrans, rows, cols, 1.0, mat, cols, internal::getOnes(), 1, 0.0, r, 1);
         }
@@ -354,7 +354,7 @@ namespace cum::LinearAlgebra
     void colwiseSum(cumeric_t* r, const cumeric_t* mat, std::size_t rows, std::size_t cols)
     {
         auto& q = internal::getQueue();
-        #if defined(CUM_USE_F64) || defined(CUM_USE_F32)
+        #if CUM_USE_FP64 || CUM_USE_FP32
         {
             oneapi::mkl::blas::row_major::gemv(q, oneapi::mkl::transpose::trans, rows, cols, 1.0, mat, cols, internal::getOnes(), 1, 0.0, r, 1);
         }

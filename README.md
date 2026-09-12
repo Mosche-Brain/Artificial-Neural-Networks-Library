@@ -29,8 +29,8 @@ A lightweight, modular minimalistic and easy to use C++ library for machine lear
 
 #### Notes
 * Supported numeric types
-  `CUM_USE_F64` `CUM_USE_F32` `CUM_USE_F16` ~~`CUM_USE_BF16`~~ ~~`CUM_USE_Q8`~~
-* Currently supported backends `BUILD_USE_MKL`
+  `CUM_USE_FP64` `CUM_USE_FP32` `CUM_USE_FP16` ~~`CUM_USE_BF16`~~ ~~`CUM_USE_INT8`~~
+* Currently supported backends `CUM_USE_MKL`
 * BF16 and Q8 may not compile properly
 
 ### 🐧 Linux and GNU/Linux
@@ -45,7 +45,7 @@ cmake --build build
 
 FP16 and oneAPI backend
 ```bash
-cmake -B build -DCUM_USE_MKL=ON -DCUM_USE_F16
+cmake -B build -DCUM_USE_MKL=ON -DCUM_USE_FP16
 ```
 
 ### 🪟 Windows and MacOS
@@ -174,7 +174,6 @@ Full documentation will be avaible [here](brain.mosche.dev/docs)
 * ✅ Templates-free math framework
 * ✅ OneAPI support
 * ⚠️ N-dimensional Tensors
-* ⚠️ Fused kernels for neural networks
 * ⚠️ Fused kernels for neural networks
 * ⚠️ Dynamic computational graphs
 * ⚠️ Convolutional layers

@@ -1,26 +1,23 @@
 #pragma once
 
+#include "cum/config.hpp"
+#include "cum/datatypes.hpp"
 #include <cstdint>
 #include <stdfloat>
 #include <vector>
 
-
-#if defined(BUILD_USE_MKL)
+#if CUM_USE_MKL
     #include <sycl/sycl.hpp>
     #include <sycl/ext/oneapi/bfloat16.hpp>
 #endif
 
-#if !defined(CUM_USE_F64)  && \
-    !defined(CUM_USE_F32)  && \
-    !defined(CUM_USE_F16)  && \
-    !defined(CUM_USE_BF16) && \
-    !defined(CUM_USE_INT8)
-    #define CUM_USE_F32
+#if !CUM_USE_FP64 && \
+    !CUM_USE_FP32 && \
+    !CUM_USE_FP16 && \
+    !CUM_USE_BF16 && \
+    !CUM_USE_INT8
+    #error "No CUM numeric type was configured"
 #endif
-
-#define defined_definition
-
-#include "cum/datatypes.hpp"
 
 #include "cum/experimental/__event__.hpp"
 
@@ -55,41 +52,30 @@ namespace cum
     };
 
     // give info ABOUT used precision in compile time for each precision
-    #if defined(CUM_USE_F64)
-        using cumeric_t = double;        
+    #if CUM_USE_FP64
+        using cumeric_t = double;
         using cummulative_t = double;
         constexpr datatype default_type = datatype::FP64;
-    #elif defined(CUM_USE_F32)
+    #elif CUM_USE_FP32
         using cumeric_t = float;
         constexpr cumeric_t EPSILON = 1e-9f;
         using cummulative_t = double;
         constexpr datatype default_type = datatype::FP32;
-    #elif defined(CUM_USE_F16)
-        #if defined(BUILD_USE_MKL)
-        using cumeric_t = sycl::half;
-        #else
-        using cumeric_t = _Float16;
-        #endif
+    #elif CUM_USE_FP16
+        using cumeric_t = cum::float16;
         constexpr cumeric_t EPSILON = 1e-4f16;
         using cummulative_t = float;
         constexpr datatype default_type = datatype::FP16;
-    #elif defined(CUM_USE_BF16)
-        #if defined(BUILD_USE_MKL)
-        using cumeric_t = sycl::ext::oneapi::bfloat16;
-        #else
-        using cumeric_t = std::bfloat16;
+    #elif CUM_USE_BF16
+        using cumeric_t = cum::bfloat16;
         constexpr cumeric_t EPSILON = 1e-3bf16;
-        #endif
         using cummulative_t = float;
         constexpr datatype default_type = datatype::BF16;
-    #elif defined(CUM_USE_INT8)
+    #elif CUM_USE_INT8
         using cumeric_t = int8_t;
         constexpr cumeric_t EPSILON = 1e1;
         using cummulative_t = float;
         constexpr datatype default_type = datatype::S8;
-    #else
-        #warning "Type was not defined"
-    // #error "Data type didn't specified"
     #endif
 
     constexpr std::size_t datatype_size(datatype type)
@@ -119,38 +105,27 @@ namespace cum
     }
 
     template <typename F>
-    decltype(auto) dispatch_datatype(datatype dt, F&& f) // I must get better undestenting of these sematnics, this is realy strange
+    decltype(auto) dispatch_datatype(datatype dt, F&& f)
     {
         switch (dt)
         {
             case datatype::FP64: return f.template operator()<double>();
             case datatype::FP32: return f.template operator()<float>();
-            // #if defined(BUILD_USE_MKL)  
-            #if defined(defined_definition)  
-            case datatype::FP16: return f.template operator()<sycl::half>();
-            case datatype::BF16: return f.template operator()<sycl::ext::oneapi::bfloat16>();
-            #else
-            #ifdef __STDCPP_FLOAT16_T__
-            case datatype::FP16: return f.template operator()<std::float16_t>();
-            #endif
-            #ifdef __STDCPP_BFLOAT16_T__        
-            case datatype::BF16: return f.template operator()<std::bfloat16_t>();
-            #endif
-            #endif
-            case datatype::S64:  return f.template operator()<int64_t>();
-            case datatype::S32:  return f.template operator()<int32_t>();
-            case datatype::S16:  return f.template operator()<int16_t>();
-            case datatype::S8:   return f.template operator()<int8_t>();
-            case datatype::U64:  return f.template operator()<uint64_t>();
-            case datatype::U32:  return f.template operator()<uint32_t>();
-            case datatype::U16:  return f.template operator()<uint16_t>();
-            case datatype::U8:   return f.template operator()<uint8_t>();
-            default:
-                throw std::runtime_error("Unsupported datatype in dispatch_datatype");
+            case datatype::FP16: return f.template operator()<cum::float16>();
+            case datatype::BF16: return f.template operator()<cum::bfloat16>();
+            case datatype::FP8:  return f.template operator()<cum::float8>();
+            case datatype::S64:  return f.template operator()<std::int64_t>();
+            case datatype::S32:  return f.template operator()<std::int32_t>();
+            case datatype::S16:  return f.template operator()<std::int16_t>();
+            case datatype::S8:   return f.template operator()<std::int8_t>();
+            case datatype::U64:  return f.template operator()<std::uint64_t>();
+            case datatype::U32:  return f.template operator()<std::uint32_t>();
+            case datatype::U16:  return f.template operator()<std::uint16_t>();
+            case datatype::U8:   return f.template operator()<std::uint8_t>();
+            default:             return f.template operator()<cum::cumeric_t>();
         }
     }
 } // namespace cum
-
 
 inline cum::cumeric_t operator"" _c(long double val) 
 {

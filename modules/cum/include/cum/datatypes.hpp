@@ -9,30 +9,37 @@
 
 #pragma once
 
+#include "cum/config.hpp"
+
 #include <stdfloat>
 #include <cstdint>
+
+#if CUM_USE_MKL
+#include <sycl/sycl.hpp>
+#include <sycl/ext/oneapi/bfloat16.hpp>
+#endif
 
 namespace cum
 {
     using float64 = double;
     using float32 = float;
-    #if defined (BUILD_USE_MKL)
+#if CUM_USE_MKL
     using float16 = sycl::half;
     using bfloat16 = sycl::ext::oneapi::bfloat16;
-    #else 
-    #ifdef __STDCPP_FLOAT16_T__
+#else
+#ifdef __STDCPP_FLOAT16_T__
     using float16 = std::float16;
-    #else
+#else
     using float16 = float;
-    #warning float16 not supported by compiler, fallback to float32
-    #endif // __STDCPP_FLOAT16_T__
-    #ifdef __STDCPP_BFLOAT16_T__
+#warning float16 not supported by compiler, fallback to float32
+#endif
+#ifdef __STDCPP_BFLOAT16_T__
     using bfloat16 = std::bfloat16;
-    #else
+#else
     using bfloat16 = float;
-    #warning bfloat16 not supported by compiler, fallback to float32
-    #endif // __STDCPP_BFLOAT16_T__
-    #endif // defined (BUILD_USE_MKL)
+#warning bfloat16 not supported by compiler, fallback to float32
+#endif
+#endif
     typedef struct fp8_e4_3m_impl
     {
         unsigned char data;

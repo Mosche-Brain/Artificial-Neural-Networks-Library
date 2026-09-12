@@ -2,10 +2,13 @@
 // Created by jaro on 9/10/26.
 //
 
+#include <oneapi/dnnl/dnnl.hpp>
+
 #include "cum/detail/vendor/oneapi/conversion_helpers.hpp"
 
 namespace cum
 {
+    
     dnnl::memory::data_type dnnl_data_type(datatype dtype)
     {
         switch(dtype)
@@ -15,6 +18,7 @@ namespace cum
             case datatype::FP16: return dnnl::memory::data_type::f16;
             case datatype::BF16: return dnnl::memory::data_type::bf16;
             case datatype::FP8:  return dnnl::memory::data_type::f8_e4m3;
+            // case datatype::S64:   return dnnl_s64;
             case datatype::S64:   return dnnl::memory::data_type::s64;
             case datatype::S32:   return dnnl::memory::data_type::s32;
             case datatype::S16:   return dnnl::memory::data_type::undef;

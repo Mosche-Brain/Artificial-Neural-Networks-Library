@@ -15,7 +15,7 @@ namespace cum::LinearAlgebra
 
     __event__ rwise_sum(cumeric_t* r, cumeric_t* mat, dim_t m, dim_t n)
     {
-        #if defined(CUM_USE_F64) || defined(CUM_USE_F32)
+        #if CUM_USE_FP64 || CUM_USE_FP32
         {
             blas::gemv(
                 static_cast<char>(blas::transpose::nontrans),

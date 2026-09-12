@@ -39,7 +39,7 @@ namespace cum::LinearAlgebra
 	{
 		auto& q = internal::getQueue();
         sycl::event event;
-		#if defined(CUM_USE_F64) || defined(CUM_USE_F32)
+		#if CUM_USE_FP64 || CUM_USE_FP32
         {
             event = oneapi::mkl::blas::row_major::omatcopy(q, oneapi::mkl::transpose::trans, m, n, 1.0, A, n, At, m);
         }

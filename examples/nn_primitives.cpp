@@ -20,9 +20,9 @@ int main()
     std::println("ko");
 
     runtime::sync();
-    Tensor A({1, 3, 3, 3}, datatype::FP16, layout::NCHW);
+    Tensor A({1, 3, 3, 3}, datatype::FP8, layout::NCHW);
 
-    Tensor B({1, 3, 3, 3}, datatype::FP16, layout::NCHW);
+    Tensor B({1, 3, 3, 3}, datatype::FP8, layout::NCHW);
 
     A.fill(6);
     B.fill(9);
