@@ -32,21 +32,41 @@ namespace cum
     using Shape = std::vector<cum::dim_t>;
     using Dims = std::vector<cum::dim_t>;
 
-    enum class datatype : uint8_t { FP64, FP32, FP16, BF16, FP8, S64, S32, S16, S8, U64, U32, U16, U8, UNDEF };
     enum class layout : std::uint8_t {
         ANY,
+
         X,
+
         NC,
+        BC = NC,       // Batch, Channels / Features
+
         OI,
         IO,
+
         NCHW,
+        BCHW = NCHW,   // Batch, Channels, Height, Width
+
         NHWC,
+        BHWC = NHWC,   // Batch, Height, Width, Channels
+
         OIHW,
+
         HWIO,
+
         NCDHW,
+        BCDHW = NCDHW, // Batch, Channels, Depth, Height, Width
+
         NDHWC,
+        BDHWC = NDHWC, // Batch, Depth, Height, Width, Channels
+
         TNC,
+        SBC = TNC,     // Sequence, Batch, Channels
+        SBE = TNC,     // Sequence, Batch, Embedding
+
         NTC,
+        BSC = NTC,     // Batch, Sequence, Channels
+        BSE = NTC,     // Batch, Sequence, Embedding
+
         STRIDED,
         UNDEF
     };

@@ -7,9 +7,9 @@
 #include <cum/Vector.hpp>
 #include <cum/LinearAlgebra.hpp>
 #include <cum/functions.hpp>
+#include <cum/Tensor.hpp>
 
-#include "LayerType.hpp"
-#include "cum/Tensor.hpp"
+#include "yann/models/layers/LayerType.hpp"
 #include "yann/Parameter.hpp"
 
 namespace yann::models::layers

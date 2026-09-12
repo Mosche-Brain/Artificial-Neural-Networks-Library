@@ -11,6 +11,9 @@ namespace yann::models::layers
 
         void initParameters(int output_features, int input_features) override;
 
+        cum::Tensor forward(const cum::Tensor& input) override;
+        cum::Tensor backward(const cum::Tensor& deltaOutput) override;
+
         cum::Matrix forward(const cum::Matrix& input) override;
         cum::Matrix backward(const cum::Matrix& deltaOutput) override;
 

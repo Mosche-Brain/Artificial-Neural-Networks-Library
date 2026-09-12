@@ -28,6 +28,13 @@ namespace cum
             return Tensor(shape, T, layout);
         }
 
+        static Tensor take_memory(Shape shape, void* data, datatype dtype = datatype::FP32, layout layout = layout::ANY);
+
+        static Tensor make_cube(dim_t width, dim_t height, dim_t deepth, datatype dtype = default_type, layout layout = layout::OI);
+        static Tensor make_matrix(dim_t rows, dim_t cols, datatype dtype = default_type, layout layout = layout::OI);
+        static Tensor make_vector(dim_t lenght, datatype dtype = default_type, layout layout = layout::x);
+        static Tensor make_scalar(datatype dtype = default_type, layout layout = layout::x);
+
         dim_t size() const;
         dim_t dims() const;
         dim_t lenght() const;

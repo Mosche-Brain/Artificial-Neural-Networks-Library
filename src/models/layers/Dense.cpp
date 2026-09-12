@@ -3,6 +3,7 @@
 #include <cum/LinearAlgebra.hpp>
 #include <cum/memory.hpp>
 #include <cum/neural_primitives/neural_kernels.hpp>
+#include <stdexcept>
 
 #include "cum/runtime.hpp"
 #include "cum/functions/transform.hpp"
@@ -40,6 +41,48 @@ namespace yann::models::layers
         this->cache.x       = cum::Matrix::Zeros(input_features, 1);                  /* Column-Vector */
         this->_initialized_ = true;
     }
+
+    
+    cum::Tensor Dense::forward(const cum::Tensor& input) // temporary implementation for compatibility
+    {
+        // those const expresions will be moved to build config
+        constexpr bool YANN_DENSE_FORWARD_FUSED_PATH = true;
+        constexpr bool YANN_DENSE_FORWARD_REFERENCE_PATH = true;
+
+        if(runtime_config::fused_kernels())
+        {
+            if constexpr(YANN_DENSE_FORWARD_FUSED_PATH)
+            {
+                // todo: implement this
+            }
+            else
+            {
+                std::runtime_error("YANN_DENSE_FORWARD_FUSED_PATH weren't compiled")
+            }
+        }
+        else
+        {
+            if constexpr(YANN_DENSE_FORWARD_REFEREMCE_PATH)
+            {
+                cum::Tensor weigths_tensor = cum::Tensor::take_memory({weights_.rows(), weights_.cols()}, weights_.values.data(), cum::default_type, cum::layout::IO);
+                cum::Tensor biases_tensor  = cum::Tensor::take_memory({biases_.rows(), biases_.cols()}, weights_.values.data(), cum::default_type, cum::layout::IO);
+
+                cum::Tensor Z = weights_tensor * input + biases_tensor;
+
+                cum::Tensor Y =
+            }
+            else
+            {
+                std::runtime_error("YANN_DENSE_FORWARD_REFERENCE_PATH weren't compiled")
+            }
+        }
+    }
+
+    cum::Tensor Dense::backward(const cum::Tensor& deltaOutput)
+    {
+
+    }
+
 
     cum::Matrix Dense::forward(const cum::Matrix& input)
     {
@@ -105,18 +148,18 @@ namespace yann::models::layers
         cum::runtime::sync();
 
         YANN_LOG(4, "applying chain rule\n", "");
-        cum::Matrix cached_somewhat = cache.dz.cwiseProduct(deltaOutput);
+        cum::Matrix ΔZ = cache.dz.cwiseProduct(deltaOutput);
         cum::runtime::sync();
 
         YANN_LOG(4, "computing weights grad\n", "");
-        weights_.gradient += cached_somewhat * cache.x.transpose();
+        weights_.gradient += ΔZ * cache.x.transpose();
         cum::runtime::sync();
 
         YANN_LOG(4, "computing biases grad\n", "");
-        biases_.gradient += cached_somewhat.rowwiseSum();
+        biases_.gradient += ΔZ.rowwiseSum();
         cum::runtime::sync();
 
-        return weights_().transpose() * cached_somewhat;
+        return weights_().transpose() * ΔZ;
 
     }
 

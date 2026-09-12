@@ -73,4 +73,29 @@ namespace cum
     using u8    = uint8;
 
     using byte = uint8;
+
+    enum class datatype : uint8_t 
+    {
+        /* Floating point*/ 
+        FP64, 
+        FP32,
+        FP16, 
+        BF16, 
+        FP8, // joke
+        
+        /* Signed integers*/
+        S64, 
+        S32, 
+        S16, 
+        S8, 
+        
+        /* Unsigned integers */
+        U64, 
+        U32, 
+        U16, 
+        U8, 
+        
+        UNDEF 
+    };
+
 }

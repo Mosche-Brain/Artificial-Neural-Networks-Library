@@ -47,6 +47,17 @@ namespace cum
 
 	}
 
+	Tensor Tensor::take_memory(Shape shape, void* data, datatype dtype, layout layout)
+	{
+		Tensor tensor;
+
+		tensor.__desc__ = std::make_unique<neural_primitives::Descriptor>(shape, dtype, layout);
+		tensor.__data__ = std::make_unique<neural_primitives::Memory>(*__desc__, data);
+
+		return tensor;
+	}
+
+
 
 	std::unique_ptr<neural_primitives::Descriptor>& Tensor::descriptor()
 	{
