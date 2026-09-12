@@ -20,7 +20,7 @@ namespace yann::optimizers
 	void Momentum::step(Parameter& param)
 	{
 		if(!momentum.contains(&param))
-			momentum.emplace(&param, cum::Matrix::Zeros(param.rows(), param.cols()));
+			momentum.emplace(&param, cum::Tensor::Zeros(param.shape(), param.type(), param.format()));
 	}
 
 	void Momentum::step(std::vector<Parameter*>& params)
@@ -28,13 +28,13 @@ namespace yann::optimizers
 		if(momentum.empty())
 			for(Parameter* param : params)
 				if(!momentum.contains(param))
-					momentum.emplace(param, cum::Matrix::Zeros(param->rows(), param->cols()));
+					momentum.emplace(param, cum::Tensor::Zeros(param->shape(), param->type(), param->format()));
 
 		for(Parameter* param : params)
 		{
-			cum::Matrix& w = param->values;
-			cum::Matrix& g = param->gradient;
-			cum::Matrix& v = momentum[param];
+			cum::Tensor& w = param->values;
+			cum::Tensor& g = param->gradient;
+			cum::Tensor& v = momentum.at(param);
 
 			v = b * v + (1 - b) * g;
 

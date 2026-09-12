@@ -16,11 +16,11 @@ namespace yann::models::layers
 {
     struct ForwardCache
     {
-        cum::Matrix x;
-        cum::Matrix z;
-        cum::Matrix a;
-        cum::Matrix dz;
-        cum::Matrix da;
+        cum::Tensor x;
+        cum::Tensor z;
+        cum::Tensor a;
+        cum::Tensor dz;
+        cum::Tensor da;
 
         void clear()
         {
@@ -32,10 +32,15 @@ namespace yann::models::layers
 
         void resize(cum::dim_t in_features, cum::dim_t out_features, cum::dim_t batch_size)
         {
-            x = cum::Matrix(in_features, batch_size);
-            z = cum::Matrix(out_features, batch_size);
-            a = cum::Matrix(out_features, batch_size);
-            dz= cum::Matrix(out_features, batch_size);
+            x   = cum::Tensor::make_matrix(in_features, batch_size);
+            z   = cum::Tensor::make_matrix(out_features, batch_size);
+            a   = cum::Tensor::make_matrix(out_features, batch_size);
+            dz  = cum::Tensor::make_matrix(out_features, batch_size);
+        }
+
+        void resise(const cum::Shape& in_shape, const cum::Shape& out_shape, cum::dim_t batch_size)
+        {
+
         }
     };
 
@@ -59,12 +64,19 @@ namespace yann::models::layers
         
         bool initialized();
         virtual int size();
-        virtual cum::Matrix& Outputs();
-        virtual cum::Matrix& Inputs();
-        virtual cum::Matrix& weights_grad();
-        virtual cum::Matrix& weights();
-        virtual cum::Matrix& biases();
-        virtual cum::Matrix& biases_grad();
+        // virtual cum::Matrix& Outputs();
+        // virtual cum::Matrix& Inputs();
+        // virtual cum::Matrix& weights_grad();
+        // virtual cum::Matrix& weights();
+        // virtual cum::Matrix& biases();
+        // virtual cum::Matrix& biases_grad();
+        //
+        virtual cum::Tensor& Outputs();
+        virtual cum::Tensor& Inputs();
+        virtual cum::Tensor& weights_grad();
+        virtual cum::Tensor& weights();
+        virtual cum::Tensor& biases();
+        virtual cum::Tensor& biases_grad();
         // utils::Activation activation;
         cum::functions::activation_t activation;
         

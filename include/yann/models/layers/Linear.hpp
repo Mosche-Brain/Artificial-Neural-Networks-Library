@@ -16,16 +16,16 @@ namespace yann::models::layers
 
         void initParameters(int output_features, int input_features) override;
 
-        cum::Matrix forward(const cum::Matrix& input) override;
-        cum::Matrix backward(const cum::Matrix& deltaOutput) override;
+        cum::Tensor forward(const cum::Tensor& input) override;
+        cum::Tensor backward(const cum::Tensor& deltaOutput) override;
 
         void collect_parameters(std::vector<Parameter*>& params) override;
 
-        cum::Matrix& weights() override { return weights_.values; }
-        cum::Matrix& weights_grad() override { return weights_.gradient; }
+        cum::Tensor& weights() override { return weights_.values; }
+        cum::Tensor& weights_grad() override { return weights_.gradient; }
 
-        cum::Matrix& biases() override { return biases_.values; }
-        cum::Matrix& biases_grad() override { return biases_.gradient; };
+        cum::Tensor& biases() override { return biases_.values; }
+        cum::Tensor& biases_grad() override { return biases_.gradient; };
 
         static std::unique_ptr<LayerBase> createUnique(int layerSize);
 

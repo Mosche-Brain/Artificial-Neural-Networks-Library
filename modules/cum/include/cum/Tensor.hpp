@@ -7,6 +7,7 @@
 #include <memory>
 #include <stdexcept>
 
+#include "Matrix.hpp"
 #include "cum/Core.hpp"
 #include "cum/neural_primitives/Descriptor.hpp"
 #include "cum/neural_primitives/Memory.hpp"
@@ -78,15 +79,25 @@ namespace cum
 
         Tensor slice(const Shape& indices);
 
+        Tensor& transpose();
+
         /* reductions */
 
         cumeric_t sum();
+
+        Tensor colwise_sum();
+        Tensor rowwise_sum();
+        Tensor channelwise_sum();
 
         /* elementwise */
 
         Tensor& fill(cumeric_t scalar);
 
         Tensor multiply(const Tensor& tensor);
+        Tensor cwiseProduct(const Tensor& tensor);
+
+        Tensor sqrt();
+
         Tensor& scale(cumeric_t scalar);
 
         /* operator overloads */
@@ -112,6 +123,9 @@ namespace cum
 
         bool friend operator == (Tensor& A, Tensor& B);
         bool friend operator != (Tensor& A, Tensor& B);
+
+        Tensor& operator = (const Tensor& other);
+        Tensor& operator = (Tensor&& other) noexcept;
     private:
         dim_t compute_index(const Shape& indices) const;
         void* compute_address(const Shape& indices);

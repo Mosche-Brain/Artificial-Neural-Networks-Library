@@ -20,12 +20,18 @@ namespace cum { class Tensor; }
 namespace cum::neural_primitives
 {
     /* Raw handles overloads */
-    __event__ add(handles::__memory__ C, handles::__memory__ A, handles::__memory__ B, handles::__desc__ c_desc, handles::__desc__ a_desc, handles::__desc__ b_desc);
-    __event__ sub(handles::__memory__ C, handles::__memory__ A, handles::__memory__ B, handles::__desc__ c_desc, handles::__desc__ a_desc, handles::__desc__ b_desc);
-    __event__ mul(handles::__memory__ C, handles::__memory__ A, handles::__memory__ B, handles::__desc__ c_desc, handles::__desc__ a_desc, handles::__desc__ b_desc);
-    __event__ div(handles::__memory__ C, handles::__memory__ A, handles::__memory__ B, handles::__desc__ c_desc, handles::__desc__ a_desc, handles::__desc__ b_desc);
-    
-    __event__ matmul(handles::__memory__ C, handles::__memory__ A, handles::__memory__ B, handles::__desc__ c_desc, handles::__desc__ a_desc, handles::__desc__ b_desc);
+    __event__ add(handles::__memory__& C, const handles::__memory__& A, const handles::__memory__& B, const handles::__desc__& c_desc, const handles::__desc__& a_desc, const handles::__desc__& b_desc);
+    __event__ sub(handles::__memory__& C, const handles::__memory__& A, const handles::__memory__& B, const handles::__desc__& c_desc, const handles::__desc__& a_desc, const handles::__desc__& b_desc);
+    __event__ mul(handles::__memory__& C, const handles::__memory__& A, const handles::__memory__& B, const handles::__desc__& c_desc, const handles::__desc__& a_desc, const handles::__desc__& b_desc);
+    __event__ div(handles::__memory__& C, const handles::__memory__& A, const handles::__memory__& B, const handles::__desc__& c_desc, const handles::__desc__& a_desc, const handles::__desc__& b_desc);
+    __event__ matmul(handles::__memory__& C, const handles::__memory__& A, const handles::__memory__& B, const handles::__desc__& c_desc, const handles::__desc__& a_desc, const handles::__desc__& b_desc);
+
+    __event__ add(handles::__memory__& A, const handles::__memory__& B, const handles::__desc__& a_desc, const handles::__desc__& b_desc);
+    __event__ sub(handles::__memory__& A, const handles::__memory__& B, const handles::__desc__& a_desc, const handles::__desc__& b_desc);
+    __event__ mul(handles::__memory__& A, const handles::__memory__& B, const handles::__desc__& a_desc, const handles::__desc__& b_desc);
+    __event__ div(handles::__memory__& A, const handles::__memory__& B, const handles::__desc__& a_desc, const handles::__desc__& b_desc);
+    __event__ matmul(handles::__memory__& A, const handles::__memory__& B, const handles::__desc__& a_desc, const handles::__desc__& b_desc); //! dimensions of multiplied matrices may differ
+
 
     /* RAII handles overloads */
 
@@ -33,8 +39,13 @@ namespace cum::neural_primitives
     __event__ sub(Memory& C, const Memory& A, const Memory& B, const Descriptor& c_desc, const Descriptor& a_desc, const Descriptor& b_desc);
     __event__ mul(Memory& C, const Memory& A, const Memory& B, const Descriptor& c_desc, const Descriptor& a_desc, const Descriptor& b_desc);
     __event__ div(Memory& C, const Memory& A, const Memory& B, const Descriptor& c_desc, const Descriptor& a_desc, const Descriptor& b_desc);
-    
     __event__ matmul(Memory& C, const Memory& A, const Memory& B, const Descriptor& c_desc, const Descriptor& a_desc, const Descriptor& b_desc);
+
+    __event__ add(Memory& A, const Memory& B, const Descriptor& a_desc, const Descriptor& b_desc);
+    __event__ sub(Memory& A, const Memory& B, const Descriptor& a_desc, const Descriptor& b_desc);
+    __event__ mul(Memory& A, const Memory& B, const Descriptor& a_desc, const Descriptor& b_desc);
+    __event__ div(Memory& A, const Memory& B, const Descriptor& a_desc, const Descriptor& b_desc);
+    __event__ matmul(Memory& A, const Memory& B, const Descriptor& a_desc, const Descriptor& b_desc);
 
     /* Objective tensors overloads */
 
@@ -42,6 +53,12 @@ namespace cum::neural_primitives
     __event__ sub(Tensor& C, const Tensor& A, const Tensor& B);
     __event__ mul(Tensor& C, const Tensor& A, const Tensor& B);
     __event__ div(Tensor& C, const Tensor& A, const Tensor& B);
-    
     __event__ matmul(Tensor& C, const Tensor& A, const Tensor& B);
+
+    __event__ add(Tensor& A, const Tensor& B);
+    __event__ sub(Tensor& A, const Tensor& B);
+    __event__ mul(Tensor& A, const Tensor& B);
+    __event__ div(Tensor& A, const Tensor& B);
+    __event__ matmul(Tensor& A, const Tensor& B);
+
 }

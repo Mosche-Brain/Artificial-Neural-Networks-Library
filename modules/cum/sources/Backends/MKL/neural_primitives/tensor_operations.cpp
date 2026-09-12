@@ -21,7 +21,7 @@
 namespace cum::neural_primitives
 {
     /* Raw handles overloads */
-    __event__ add(handles::__memory__ C, handles::__memory__ A, handles::__memory__ B, handles::__desc__ c_desc, handles::__desc__ a_desc, handles::__desc__ b_desc)
+    __event__ add(handles::__memory__& C, const handles::__memory__& A, const handles::__memory__& B, const handles::__desc__& c_desc, const handles::__desc__& a_desc, const handles::__desc__& b_desc)
     {
 	    dnnl::binary::primitive_desc primitive_desc {
 			internal::engine(),
@@ -48,7 +48,7 @@ namespace cum::neural_primitives
         return detail::event_handler::create(std::move(event));
     }
 
-    __event__ sub(handles::__memory__ C, handles::__memory__ A, handles::__memory__ B, handles::__desc__ c_desc, handles::__desc__ a_desc, handles::__desc__ b_desc)
+    __event__ sub(handles::__memory__& C, const handles::__memory__& A, const handles::__memory__& B, const handles::__desc__& c_desc, const handles::__desc__& a_desc, const handles::__desc__& b_desc)
     {
 	    dnnl::binary::primitive_desc primitive_desc {
 			internal::engine(),
@@ -75,7 +75,7 @@ namespace cum::neural_primitives
         return detail::event_handler::create(std::move(event));
     }
 
-    __event__ mul(handles::__memory__ C, handles::__memory__ A, handles::__memory__ B, handles::__desc__ c_desc, handles::__desc__ a_desc, handles::__desc__ b_desc)
+    __event__ mul(handles::__memory__& C, const handles::__memory__& A, const handles::__memory__& B, const handles::__desc__& c_desc, const handles::__desc__& a_desc, const handles::__desc__& b_desc)
     {
 	    dnnl::binary::primitive_desc primitive_desc {
 			internal::engine(),
@@ -102,7 +102,7 @@ namespace cum::neural_primitives
         return detail::event_handler::create(std::move(event));
     }
 
-    __event__ div(handles::__memory__ C, handles::__memory__ A, handles::__memory__ B, handles::__desc__ c_desc, handles::__desc__ a_desc, handles::__desc__ b_desc)
+    __event__ div(handles::__memory__& C, const handles::__memory__& A, const handles::__memory__& B, const handles::__desc__& c_desc, const handles::__desc__& a_desc, const handles::__desc__& b_desc)
     {
 	    dnnl::binary::primitive_desc primitive_desc {
 			internal::engine(),
@@ -130,7 +130,7 @@ namespace cum::neural_primitives
     }
 
     
-    __event__ matmul(handles::__memory__ C, handles::__memory__ A, handles::__memory__ B, handles::__desc__ c_desc, handles::__desc__ a_desc, handles::__desc__ b_desc)
+    __event__ matmul(handles::__memory__& C, const handles::__memory__& A, const handles::__memory__& B, const handles::__desc__& c_desc, const handles::__desc__& a_desc, const handles::__desc__& b_desc)
     {
 	    dnnl::matmul::primitive_desc primitive_desc {
 			internal::engine(),
@@ -154,6 +154,31 @@ namespace cum::neural_primitives
 
     	internal::stream().wait();
         return detail::event_handler::create(std::move(event));
+    }
+
+    __event__ add(handles::__memory__& A, const handles::__memory__& B, const handles::__desc__& a_desc, const handles::__desc__& b_desc)
+    {
+	    return add(A, A, B, a_desc, a_desc, b_desc);
+    }
+
+    __event__ sub(handles::__memory__& A, const handles::__memory__& B, const handles::__desc__& a_desc, const handles::__desc__& b_desc)
+    {
+	    return sub(A, A, B, a_desc, a_desc, b_desc);
+    }
+
+    __event__ mul(handles::__memory__& A, const handles::__memory__& B, const handles::__desc__& a_desc, const handles::__desc__& b_desc)
+    {
+	    return mul(A, A, B, a_desc, a_desc, b_desc);
+    }
+
+    __event__ div(handles::__memory__& A, const handles::__memory__& B, const handles::__desc__& a_desc, const handles::__desc__& b_desc)
+    {
+	    return div(A, A, B, a_desc, a_desc, b_desc);
+    }
+
+    __event__ matmul(handles::__memory__& A, const handles::__memory__& B, const handles::__desc__& a_desc, const handles::__desc__& b_desc)
+    {
+	    return matmul(A, A, B, a_desc, a_desc, b_desc);
     }
 
 

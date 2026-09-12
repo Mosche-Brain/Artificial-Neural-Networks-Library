@@ -34,7 +34,7 @@ namespace cum::neural_primitives
     /* Raw handles overloads */
 
 
-    __event__ eltwise(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc, dnnl::algorithm algorithm, dnnl::prop_kind prop_kind) // does
+    __event__ dnnl_eltwise(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc, dnnl::algorithm algorithm, dnnl::prop_kind prop_kind) // does
     {
         dnnl::eltwise_forward::primitive_desc primitive_desc {
             internal::engine(),
@@ -45,7 +45,6 @@ namespace cum::neural_primitives
         };
 
         dnnl::primitive primitive = dnnl::eltwise_forward(primitive_desc);
-
         sycl::event event = dnnl::sycl_interop::execute(
             primitive,
             internal::stream(),
@@ -61,7 +60,7 @@ namespace cum::neural_primitives
 
     __event__ eltwise(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc,  functions::function_id algorithm, prop_kind prop_kind)
     {
-        return eltwise(dst, src, dst_desc, src_desc, dnnl_algorithm(algorithm), prop_kind);
+        return dnnl_eltwise(dst, src, dst_desc, src_desc, dnnl_algorithm(algorithm), static_cast<dnnl::prop_kind>(prop_kind));
     }
 
     __event__ relu(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc)
@@ -90,7 +89,7 @@ namespace cum::neural_primitives
     }
     __event__ relu(handles::__memory__& src, const handles::__desc__& desc)
     {
-
+        return relu(src, src, desc, desc);
     }
 
     __event__ sigmoid(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc)
@@ -269,6 +268,31 @@ namespace cum::neural_primitives
 
     }
 
+    __event__ sqrt(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc)
+    {
+        dnnl::eltwise_forward::primitive_desc primitive_desc {
+            internal::engine(),
+            dnnl::prop_kind::forward_inference,
+            dnnl::algorithm::eltwise_sqrt,
+            src_desc.desc,
+            dst_desc.desc
+        };
+
+        dnnl::primitive primitive = dnnl::eltwise_forward(primitive_desc);
+
+        sycl::event event = dnnl::sycl_interop::execute(
+            primitive,
+            internal::stream(),
+            {
+                { DNNL_ARG_SRC, src.memory },
+                { DNNL_ARG_DST, dst.memory }
+            }
+        );
+
+        internal::stream().wait();
+        return detail::event_handler::create(std::move(event));
+    }
+
     /* RAII wrappers overloads */
 
     __event__ relu(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc)
@@ -371,9 +395,21 @@ namespace cum::neural_primitives
 
         return leaky_relu(dst_memory, src_memory, dst_descriptor, src_descriptor, alpha);
     }
+
     __event__ leaky_relu(Memory& src, const Descriptor& desc, const cumeric_t alpha)
     {
 
+    }
+
+    __event__ sqrt(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc)
+    {
+        handles::__memory__& dst_memory = dst.handle();
+        const handles::__memory__& src_memory = src.handle();
+
+        const handles::__desc__& dst_descriptor = dst_desc.handle();
+        const handles::__desc__& src_descriptor = src_desc.handle();
+
+        return sqrt(dst_memory, src_memory, dst_descriptor, src_descriptor);
     }
 
     /* Objective tensors overloads */
@@ -388,6 +424,7 @@ namespace cum::neural_primitives
 
         return relu(dst_memory, src_memory, dst_descriptor, a_descriptor);
     }
+
     __event__ sigmoid(Tensor& dst, const Tensor& src)
     {
 

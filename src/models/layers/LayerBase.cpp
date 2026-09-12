@@ -24,34 +24,34 @@ namespace yann::models::layers
         return this->_layerSize_;
     }
 
-    cum::Matrix& LayerBase::Outputs()
+    cum::Tensor& LayerBase::Outputs()
     {
         // return this->outputs;
         return this->cache.a;
     }
 
-    cum::Matrix& LayerBase::Inputs()
+    cum::Tensor& LayerBase::Inputs()
     {
         // return this->inputs;
         return this->cache.x;
     }
     
-    cum::Matrix& LayerBase::weights()
+    cum::Tensor& LayerBase::weights()
     {
         // return this->weights();
     }
 
-    cum::Matrix& LayerBase::weights_grad()
+    cum::Tensor& LayerBase::weights_grad()
     {
         // return this->weights.gradient;
     }
 
-    cum::Matrix& LayerBase::biases()
+    cum::Tensor& LayerBase::biases()
     {
         // return this->biases();
     }
 
-    cum::Matrix& LayerBase::biases_grad()
+    cum::Tensor& LayerBase::biases_grad()
     {
         // return this->biases.gradient;
     }

@@ -11,6 +11,7 @@
 #include "cum/runtime.hpp"
 #include "cum/memory.hpp"
 #include "cum/neural_primitives/Descriptor.hpp"
+#include "cum/neural_primitives/tensor_operations.hpp"
 #include "cum/detail/vendor/oneapi/opaque_types.hpp"
 #include "cum/detail/vendor/oneapi/conversion_helpers.hpp"
 
@@ -21,6 +22,8 @@
 #include "cum/functions.hpp"
 
 #include <print>
+
+#include "cum/neural_primitives/elementwise.hpp"
 
 /* This implementation have a lot of redundant code */
 
@@ -46,10 +49,12 @@ namespace cum
     		__data__ = sycl::malloc_shared<T>(tensor.lenght(), internal::device(), internal::sycl_context());
     	});
 
+		internal::queue().memcpy(__data__, tensor.__data__, tensor.lenght() * datatype_size(this->type()));
+
     	__memr__ = std::make_unique<neural_primitives::Memory>(*__desc__, __data__);
     }
 
-    Tensor::Tensor(Tensor&& tensor) noexcept : __desc__(std::move(tensor.__desc__)), __memr__(std::move(tensor.__memr__))
+    Tensor::Tensor(Tensor&& tensor) noexcept : __desc__(std::move(tensor.__desc__)), __memr__(std::move(tensor.__memr__)), __data__(tensor.__data__)
     {
 
     }
@@ -67,8 +72,9 @@ namespace cum
 	{
 		Tensor tensor;
 
+    	tensor.__data__ = data;
 		tensor.__desc__ = std::make_unique<neural_primitives::Descriptor>(shape, dtype, layout);
-		tensor.__memr__ = std::make_unique<neural_primitives::Memory>(*tensor.__desc__, data);
+		tensor.__memr__ = std::make_unique<neural_primitives::Memory>(*tensor.__desc__, tensor.__data__);
 
 		return tensor;
 	}
@@ -80,12 +86,18 @@ namespace cum
 
 	Tensor Tensor::Zeros(Shape shape, datatype dtype, layout layout)
 	{
+		Tensor tensor(shape, dtype, layout);
+    	tensor.fill(0);
 
+    	return tensor;
 	}
 
 	Tensor Tensor::Ones(Shape shape, datatype dtype, layout layout)
 	{
+		Tensor tensor(shape, dtype, layout);
+    	tensor.fill(1);
 
+    	return tensor;
 	}
 
 	Tensor Tensor::Linspace(cumeric_t start, cumeric_t end, dim_t num) // vector
@@ -164,6 +176,8 @@ namespace cum
 		{
 			offset += indices[_] * strides[_];
 		}
+
+    	return offset;
 	}
 
 	void* Tensor::compute_address(const Shape& indices)
@@ -179,7 +193,7 @@ namespace cum
 
 		cumeric_t result;
 		dispatch_datatype(this->type(), [&]<typename T>(){
-			T value = static_cast<T*>(__data__)[idx * datatype_size(this->type())];
+			T value = static_cast<T*>(__data__)[idx];
 			result = static_cast<cumeric_t>(value);
 		});
 
@@ -282,6 +296,20 @@ namespace cum
     	internal::stream().wait();
     	return C;
     }
+
+	Tensor Tensor::cwiseProduct(const Tensor& tensor)
+	{
+		return this->multiply(tensor);
+	}
+
+	Tensor Tensor::sqrt()
+	{
+		Tensor result = *this;
+
+    	neural_primitives::sqrt(result.__memr__->handle(), __memr__->handle(), result.__desc__->handle(), __desc__->handle());
+
+    	return result;
+	}
 
 	/**------------------------------------------------------------------------------------------------
 	 *                                         Operator overloads
@@ -469,7 +497,11 @@ namespace cum
 
 	Tensor operator - (const cumeric_t scalar, const Tensor& tensor)
     {
-    	return tensor - scalar;
+    	Tensor sex(tensor.shape(), tensor.type(), tensor.format());
+
+    	sex.fill(scalar);
+
+    	return sex - tensor;
     }
 
 
@@ -556,8 +588,58 @@ namespace cum
 
 	Tensor operator / (const cumeric_t scalar, const Tensor& tensor)
     {
-    	return tensor / scalar;
+    	Tensor sex(tensor.shape(), tensor.type(), tensor.format());
+
+    	sex.fill(scalar);
+
+    	return sex / tensor;
     }
+
+	Tensor& Tensor::operator += (const Tensor& other)
+    {
+	    neural_primitives::add(*__memr__, *other.__memr__, *__desc__, *other.__desc__);
+        return *this;
+    }
+
+	Tensor& Tensor::operator -= (const Tensor& other)
+    {
+	    neural_primitives::sub(*__memr__, *other.__memr__, *__desc__, *other.__desc__);
+        return *this;
+    }
+
+	Tensor& Tensor::operator *= (const Tensor& other)
+    {
+	    neural_primitives::mul(*__memr__, *other.__memr__, *__desc__, *other.__desc__);
+        return *this;
+    }
+
+	Tensor& Tensor::operator /= (const Tensor& other)
+    {
+	    neural_primitives::div(*__memr__, *other.__memr__, *__desc__, *other.__desc__);
+        return *this;
+    }
+
+	Tensor& Tensor::operator = (const Tensor& other)
+    {
+    	if (this == &other)
+    		return *this;
+
+    	__desc__ = std::make_unique<neural_primitives::Descriptor>(other.shape(), other.type(), other.format());
+
+    	dispatch_datatype(this->type(), [&]<typename T>(){
+			__data__ = sycl::malloc_shared<T>(other.lenght(), internal::device(), internal::sycl_context());
+		});
+
+    	internal::queue().memcpy(__data__, other.__data__, other.lenght() * datatype_size(this->type()));
+
+    	__memr__ = std::make_unique<neural_primitives::Memory>(*__desc__, __data__);
+    	return *this;
+    }
+
+	Tensor& Tensor::operator = (Tensor&&) noexcept = default;
+  //   {
+		// __desc__ = std::move
+  //   }
 
 
 } // cum

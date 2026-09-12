@@ -27,7 +27,7 @@ namespace yann::optimizers
                                                                                                    
     private:                                                                                       
         cum::cumeric_t b;                                                                          
-        std::unordered_map<Parameter*, cum::Matrix> momentum;                                      
+        std::unordered_map<Parameter*, cum::Tensor> momentum;
     };                                                                                                                                                    
 }                                                                                                                                                         
                                                                                                                                                                

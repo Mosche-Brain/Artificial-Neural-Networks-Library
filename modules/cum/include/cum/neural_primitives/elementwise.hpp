@@ -66,6 +66,9 @@ namespace cum::neural_primitives
     __event__ leaky_relu(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& r_desc, const handles::__desc__& a_desc, cumeric_t alpha);
     __event__ leaky_relu(handles::__memory__& src, const handles::__desc__& desc, cumeric_t alpha);
 
+    __event__ sqrt(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc);
+    __event__ sqrt(handles::__memory__& src, const handles::__desc__& desc);
+
     /* RsrcII wrappers overloads */
     __event__ eltwise(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc, functions::function_id algorithm, prop_kind prop_kind);
 
@@ -90,6 +93,9 @@ namespace cum::neural_primitives
     __event__ leaky_relu(Memory& dst, const Memory& src, const Descriptor& r_desc, const Descriptor& a_desc, cumeric_t alpha);
     __event__ leaky_relu(Memory& src, const Descriptor& desc, cumeric_t alpha);
 
+    __event__ sqrt(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc);
+    __event__ sqrt(Memory& src, const Descriptor& desc);
+
     /* Objective tensors overloads */
     __event__ eltwise(Tensor& dst, const Tensor& src, functions::function_id algorithm, prop_kind prop_kind);
 
@@ -111,4 +117,6 @@ namespace cum::neural_primitives
     __event__ leaky_relu(Tensor& dst, const Tensor& src, cumeric_t alpha);
     __event__ leaky_relu(Tensor& src, cumeric_t alpha);
 
+    __event__ sqrt(Tensor& dst, const Tensor& src);
+    __event__ sqrt(Tensor& src);
 }

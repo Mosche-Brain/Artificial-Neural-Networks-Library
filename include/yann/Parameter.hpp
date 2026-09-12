@@ -21,26 +21,32 @@ namespace yann
         // cum::dim_t rows() const { return values.rows(); }
 
         [[nodiscard]]
-        cum::dim_t cols() const { return values.shape()[0]; }
+        cum::dim_t rows() const { return values.shape()[0]; }
 
         [[nodiscard]]
-        cum::dim_t rows() const { return values.shape()[1]; }
+        cum::dim_t cols() const { return values.shape()[1]; }
 
         [[nodiscard]]
         cum::Shape shape() const { return values.shape(); }
+
+        [[nodiscard]]
+        cum::datatype type() const { return values.type(); }
+
+        [[nodiscard]]
+        cum::layout format() const { return values.format(); }
 
         void clear_gradient();
         void scale_gradient(cum::cumeric_t scalar);
 
         Parameter() = default;
-        Parameter(std::size_t cols, std::size_t rows);
+        Parameter(cum::dim_t cols, cum::dim_t rows);
         Parameter(const cum::Shape& shape);
 
-        static Parameter Uniform(std::size_t rows, std::size_t cols); // +-0.1
-        static Parameter He(std::size_t rows, std::size_t cols);
-        static Parameter Zeros(std::size_t rows, std::size_t cols);
-        static Parameter Ones(std::size_t rows, std::size_t cols);
-        static Parameter Xavier(std::size_t rows, std::size_t cols);
+        static Parameter Uniform(cum::dim_t rows, cum::dim_t cols); // +-0.1
+        static Parameter He(cum::dim_t rows, cum::dim_t cols);
+        static Parameter Zeros(cum::dim_t rows, cum::dim_t cols);
+        static Parameter Ones(cum::dim_t rows, cum::dim_t cols);
+        static Parameter Xavier(cum::dim_t rows, cum::dim_t cols);
 
         static Parameter Uniform(const cum::Shape& shape); // +-0.1
         static Parameter He(const cum::Shape& shape);

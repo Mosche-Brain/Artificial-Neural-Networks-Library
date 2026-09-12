@@ -18,7 +18,7 @@
 
 namespace yann
 {
-    Parameter::Parameter(std::size_t cols, std::size_t rows) /* init with zeros by default */
+    Parameter::Parameter(const cum::dim_t cols, const cum::dim_t rows) /* init with zeros by default */
     {
         // values   = cum::Tensor({rows, cols});
         // gradient = cum::Tensor({rows, cols});
@@ -26,7 +26,14 @@ namespace yann
         gradient = cum::Tensor({rows, cols});
     }
 
-    Parameter Parameter::Uniform(std::size_t rows, std::size_t cols)
+    Parameter::Parameter(const cum::Shape& shape)
+    {
+        values = cum::Tensor(shape, cum::default_type, cum::layout::IO);
+        gradient = cum::Tensor(shape, cum::default_type, cum::layout::IO);
+    }
+
+
+    Parameter Parameter::Uniform(const cum::dim_t rows, const cum::dim_t cols)
     {
         constexpr cum::cumeric_t ampl = 0.1;
 
@@ -36,7 +43,7 @@ namespace yann
         return param;
     }
 
-    Parameter Parameter::He(std::size_t rows, std::size_t cols)
+    Parameter Parameter::He(const cum::dim_t rows, const cum::dim_t cols)
     {
         cum::cumeric_t sigma = std::sqrt(2.f / (float)cols);
 
@@ -48,7 +55,7 @@ namespace yann
         return param;
     }
 
-    Parameter Parameter::Zeros(std::size_t rows, std::size_t cols)
+    Parameter Parameter::Zeros(const cum::dim_t rows, const cum::dim_t cols)
     {
         Parameter param;
         param.values = cum::Tensor::Zeros({rows, cols}, cum::default_type, cum::layout::IO);
@@ -56,7 +63,7 @@ namespace yann
         return param;
     }
 
-    Parameter Parameter::Ones(std::size_t rows, std::size_t cols)
+    Parameter Parameter::Ones(const cum::dim_t rows, const cum::dim_t cols)
     {
         Parameter param;
         param.values = cum::Tensor::Ones({rows, cols}, cum::default_type, cum::layout::IO);
@@ -64,7 +71,7 @@ namespace yann
         return param;
     }
 
-    Parameter Parameter::Xavier(std::size_t rows, std::size_t cols)
+    Parameter Parameter::Xavier(const cum::dim_t rows, const cum::dim_t cols)
     {
 
     }

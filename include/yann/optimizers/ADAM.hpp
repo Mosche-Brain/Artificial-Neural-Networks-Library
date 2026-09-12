@@ -26,8 +26,8 @@ namespace yann::optimizers
         cum::cumeric_t b2;
         // std::vector<cum::Matrix> momentum;
 		// std::vector<cum::Matrix> second_momentum;
-        std::unordered_map<Parameter*, cum::Matrix> momentum;
-		std::unordered_map<Parameter*, cum::Matrix> second_momentum;
+        std::unordered_map<Parameter*, cum::Tensor> momentum;
+		std::unordered_map<Parameter*, cum::Tensor> second_momentum;
     };
 } // yann
 

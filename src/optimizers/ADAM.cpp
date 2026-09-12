@@ -27,17 +27,17 @@ namespace yann::optimizers
 
 		current_step++;
 
-		cum::Matrix& m = momentum[&param];
-		cum::Matrix& v = second_momentum[&param];
-		cum::Matrix& g = param.gradient;
+		cum::Tensor& m = momentum.at(&param);
+		cum::Tensor& v = second_momentum.at(&param);
+		cum::Tensor& g = param.gradient;
 
 
 		m = b1 * m + (1 - b1) * g;
 		v = b2 * v + (1 - b2) * g.cwiseProduct(g);
 
 
-		cum::Matrix mhat = m / (1 - std::pow(b1, current_step));
-		cum::Matrix vhat = v / (1 - std::pow(b2, current_step));
+		cum::Tensor mhat = m / (1 - std::pow(b1, current_step));
+		cum::Tensor vhat = v / (1 - std::pow(b2, current_step));
 
 
 		param.values -= learning_rate * mhat / (vhat.sqrt() + cum::EPSILON);
@@ -50,25 +50,25 @@ namespace yann::optimizers
 			for(auto* param : params)
 			{
 				if(!momentum.contains(param))
-					momentum.emplace(param, cum::Matrix::Zeros(param->rows(), param->cols()));
+					momentum.emplace(param, cum::Tensor::Zeros(param->shape(), param->type(), param->format()));
 				if(!second_momentum.contains(param))
-					second_momentum.emplace(param, cum::Matrix::Zeros(param->rows(), param->cols()));
+					second_momentum.emplace(param, cum::Tensor::Zeros(param->shape(), param->type(), param->format()));
 			}
 
 		current_step++;
 		for(auto [index, param] : params | std::views::enumerate)
 		{
-			cum::Matrix& m = momentum[param];
-			cum::Matrix& v = second_momentum[param];
-			cum::Matrix& g = param->gradient;
+			cum::Tensor& m = momentum.at(param);
+			cum::Tensor& v = second_momentum.at(param);
+			cum::Tensor& g = param->gradient;
 
 
 			m = b1 * m + (1 - b1) * g;
 			v = b2 * v + (1 - b2) * g.cwiseProduct(g);
 
 
-			cum::Matrix mhat = m / (1 - std::pow(b1, current_step));
-			cum::Matrix vhat = v / (1 - std::pow(b2, current_step));
+			cum::Tensor mhat = m / (1 - std::pow(b1, current_step));
+			cum::Tensor vhat = v / (1 - std::pow(b2, current_step));
 
 
 			param->values -= learning_rate * mhat / (vhat.sqrt() + cum::EPSILON);
