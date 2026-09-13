@@ -3,6 +3,7 @@
 #include "yann.h"
 
 #include "cum/Matrix.hpp"
+#include "cum/Tensor.hpp"
 #include "yann/models/Sequential.hpp"
 
 #include <memory>
@@ -16,6 +17,11 @@ struct yann_context_s {
 struct yann_matrix_s
 {
     cum::Matrix matrix;
+};
+
+struct yann_tensor_s
+{
+    cum::Tensor tensor;
 };
 
 struct yann_model_s

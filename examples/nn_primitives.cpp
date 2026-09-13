@@ -2,6 +2,7 @@
 // Created by jaro on 7/2/26.
 //
 #include <cum/neural_primitives.hpp>
+#include <cum/neural_primitives/elementwise.hpp>
 #include <cum/Tensor.hpp>
 #include <cum/cum.hpp>
 #include <cum/runtime.hpp>
@@ -17,23 +18,25 @@ int main()
 
     // cum::neural_primitives::Descriptor desc({3, 3, 3}, cum::neural_primitives::Descriptor::data_type::FP16);
 
-    std::println("ko");
-
     runtime::sync();
-    Tensor A({1, 3, 3, 3}, datatype::BF16, layout::NCHW);
+    Tensor W({1, 3, 3, 3}, datatype::BF16, layout::NCHW);
 
-    Tensor B({1, 3, 3, 3}, datatype::BF16, layout::NCHW);
+    Tensor X({1, 3, 3, 3}, datatype::BF16, layout::NCHW);
 
-    A.fill(6);
-    B.fill(9);
+    W.fill(6);
+    X.fill(9);
 
-    Tensor C = A * B;
+    Tensor Z = W * X;
 
-    std::println("płint");
+    Tensor Y = Z;
 
-    std::println("A.sum() = {}", A.sum());
-    std::println("B.sum() = {}", B.sum());
-    std::println("C.sum() = {}", C.sum());
+    neural_primitives::tanh(Y);
+
+
+    std::println("W.sum() = {}", W.sum());
+    std::println("X.sum() = {}", X.sum());
+    std::println("Z.sum() = {}", Z.sum());
+    std::println("Y.sum() = {}", Y.sum());
 
     std::println("ok");
 

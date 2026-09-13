@@ -453,6 +453,17 @@ namespace cum::neural_primitives
 
     /* Objective tensors overloads */
 
+    __event__ eltwise(Tensor& dst, const Tensor& src, functions::function_id algorithm, prop_kind prop_kind)
+    {
+        handles::__memory__& dst_memory = dst.memory()->handle();
+        const handles::__memory__& src_memory = src.memory()->handle();
+
+        const handles::__desc__& dst_descriptor = dst.descriptor()->handle();
+        const handles::__desc__& a_descriptor = src.descriptor()->handle();
+
+        return eltwise(dst_memory, src_memory, dst_descriptor, a_descriptor, algorithm, prop_kind);
+    }
+
     __event__ relu(Tensor& dst, const Tensor& src)
     {
         handles::__memory__& dst_memory = dst.memory()->handle();

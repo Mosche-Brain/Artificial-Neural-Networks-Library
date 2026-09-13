@@ -1,13 +1,16 @@
-#include "Dense.hpp"
-#include <cum/functions.hpp>
-#include <cum/LinearAlgebra.hpp>
-#include <cum/memory.hpp>
-#include <cum/neural_primitives/neural_kernels.hpp>
 #include <stdexcept>
 
-#include "cum/runtime.hpp"
-#include "cum/functions/transform.hpp"
-#include "runtime_config.hpp"
+#include <cum/memory.hpp>
+#include <cum/runtime.hpp>
+#include <cum/LinearAlgebra.hpp>
+#include <cum/functions.hpp>
+#include <cum/functions/transform.hpp>
+#include <cum/neural_primitives/neural_kernels.hpp>
+#include <cum/neural_primitives/elementwise.hpp>
+
+#include "yann/runtime_config.hpp"
+
+#include "Dense.hpp"
 
 #define ENABLE_RUNTIME_CHECKS true
 #define USE_FUSED_KERNELS false
@@ -49,11 +52,14 @@ namespace yann::models::layers
         constexpr bool YANN_DENSE_FORWARD_FUSED_PATH = true;
         constexpr bool YANN_DENSE_FORWARD_REFERENCE_PATH = true;
 
+        this->cache.x = input;
+
         if(runtime_config::fused_kernels())
         {
             if constexpr(YANN_DENSE_FORWARD_FUSED_PATH)
             {
                 // todo: implement this
+                return cache.a;
             }
             else
             {
@@ -67,9 +73,12 @@ namespace yann::models::layers
                 // cum::Tensor weigths_tensor = cum::Tensor::take_memory({weights_.rows(), weights_.cols()}, weights_.values.data(), cum::default_type, cum::layout::IO);
                 // cum::Tensor biases_tensor  = cum::Tensor::take_memory({biases_.rows(), biases_.cols()}, weights_.values.data(), cum::default_type, cum::layout::IO);
 
-                // cum::Tensor Z = weigths_tensor * input + biases_tensor;
+                cache.z = weights_.values * input;
+                cache.z += biases_.values; // with broadcast
 
-                // cum::Tensor Y =
+                cum::neural_primitives::eltwise(cache.a, cache.z, activation.name, cum::neural_primitives::prop_kind::forward_inference);
+
+                return cache.a;
             }
             else
             {
