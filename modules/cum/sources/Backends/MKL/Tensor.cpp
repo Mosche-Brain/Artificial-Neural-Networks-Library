@@ -27,6 +27,110 @@
 #include "cum/neural_primitives/elementwise.hpp"
 
 /* This implementation have a lot of redundant code */
+
+namespace cum
+{
+	int axis_position(layout format, Axis axis)
+	{
+		switch(format)
+		{
+			case layout::X:
+				if(axis == Axis::Channels || axis == Axis::Width)
+					return 0;
+				break;
+			case layout::NC:
+				if(axis == Axis::Batches)
+					return 0;
+				if(axis == Axis::Channels)
+					return 1;
+				break;
+			case layout::OI:
+			case layout::IO:
+				if(axis == Axis::Rows)
+					return 0;
+				if(axis == Axis::Cols)
+					return 1;
+				break;
+			case layout::NCHW:
+				if(axis == Axis::Batches)
+					return 0;
+				if(axis == Axis::Channels)
+					return 1;
+				if(axis == Axis::Height)
+					return 2;
+				if(axis == Axis::Width)
+					return 3;
+				break;
+			case layout::NHWC:
+				if(axis == Axis::Batches)
+					return 0;
+				if(axis == Axis::Height)
+					return 1;
+				if(axis == Axis::Width)
+					return 2;
+				if(axis == Axis::Channels)
+					return 3;
+				break;
+			case layout::OIHW:
+				if(axis == Axis::Channels)
+					return 0;
+				if(axis == Axis::Height)
+					return 2;
+				if(axis == Axis::Width)
+					return 3;
+				break;
+			case layout::HWIO:
+				if(axis == Axis::Height)
+					return 0;
+				if(axis == Axis::Width)
+					return 1;
+				if(axis == Axis::Channels)
+					return 3;
+				break;
+			case layout::NCDHW:
+				if(axis == Axis::Batches)
+					return 0;
+				if(axis == Axis::Channels)
+					return 1;
+				if(axis == Axis::Depth)
+					return 2;
+				if(axis == Axis::Height)
+					return 3;
+				if(axis == Axis::Width)
+					return 4;
+				break;
+			case layout::NDHWC:
+				if(axis == Axis::Batches)
+					return 0;
+				if(axis == Axis::Depth)
+					return 1;
+				if(axis == Axis::Height)
+					return 2;
+				if(axis == Axis::Width)
+					return 3;
+				if(axis == Axis::Channels)
+					return 4;
+				break;
+			case layout::TNC:
+				if(axis == Axis::Batches)
+					return 1;
+				if(axis == Axis::Channels)
+					return 2;
+				break;
+			case layout::NTC:
+				if(axis == Axis::Batches)
+					return 0;
+				if(axis == Axis::Channels)
+					return 2;
+				break;
+			default:
+				break;
+		}
+
+		return -1;
+	}
+
+}
 #include <print>
 namespace cum
 {
@@ -118,54 +222,53 @@ namespace cum
     	return tensor;
 	}
 
+	Tensor Tensor::Linspace(cumeric_t start, cumeric_t end, dim_t num)
+	{
+		if(num <= 0)
+			throw std::invalid_argument("Linspace requires a positive number of elements");
+
+		Tensor tensor({num}, default_type, layout::X);
+		auto* values = tensor.data();
+		const cumeric_t step = num == 1 ? cumeric_t(0) :
+			(end - start) / static_cast<cumeric_t>(num - 1);
+		for(dim_t i = 0; i < num; ++i)
+			values[i] = start + static_cast<cumeric_t>(i) * step;
+		return tensor;
+	}
+
 	Tensor Tensor::Zeros(const Shape& shape, datatype dtype, layout layout)
 	{
-		// Tensor tensor(shape, dtype, layout);
-    	std::println("Tensor::Zeros fabrique called");
-		Tensor tensor;
-    	tensor.__desc__ = std::make_unique<neural_primitives::Descriptor>(shape, dtype, layout);
-    	tensor.__memr__ = std::make_unique<neural_primitives::Memory>(*tensor.__desc__);
-    	tensor.__data__ = tensor.__memr__->handle().memory.get_data_handle();
-
-    	runtime::sync();
-
-    	tensor.fill(0);
-
-    	return tensor;
+		Tensor tensor(shape, dtype, layout);
+		tensor.fill(0);
+		return tensor;
 	}
 
 	Tensor Tensor::Ones(const Shape& shape, datatype dtype, layout layout)
 	{
 		Tensor tensor(shape, dtype, layout);
     	tensor.fill(1);
-
-    	return tensor;
+		return tensor;
 	}
-
-	Tensor Tensor::Linspace(cumeric_t start, cumeric_t end, dim_t num) // vector
-	{
-
-	}
-
 
 	Tensor Tensor::make_cube(dim_t width, dim_t height, dim_t deepth, datatype dtype, layout layout)
     {
-
+		const auto cube_layout = layout == cum::layout::OI ? cum::layout::ANY : layout;
+		return Tensor({deepth, height, width}, dtype, cube_layout);
     }
 
 	Tensor Tensor::make_matrix(dim_t rows, dim_t cols, datatype dtype, layout layout)
     {
-
+		return Tensor({rows, cols}, dtype, layout);
     }
 
 	Tensor Tensor::make_vector(dim_t lenght, datatype dtype, layout layout)
     {
-
+		return Tensor({lenght}, dtype, layout);
     }
 
 	Tensor Tensor::make_scalar(datatype dtype, layout layout)
     {
-
+		return Tensor({1}, dtype, layout);
     }
 
 
@@ -215,37 +318,48 @@ namespace cum
 
 	bool Tensor::has(Axis axis) const
 	{
+		const Shape tensor_shape = __desc__->shape();
+		const int position = axis_position(__desc__->format(), axis);
 
+		return position >= 0 &&
+			static_cast<std::size_t>(position) < tensor_shape.size();
 	}
 
 	dim_t Tensor::extent(Axis axis) const
 	{
-		
+		const Shape tensor_shape = __desc__->shape();
+		const int position = axis_position(__desc__->format(), axis);
+
+		if(position < 0 ||
+			static_cast<std::size_t>(position) >= tensor_shape.size())
+			return 0;
+
+		return tensor_shape[position];
 	}
 
 	dim_t Tensor::batches() const
 	{
-
+		return extent(Axis::Batches);
     }
 
 	dim_t Tensor::channels() const
     {
-
+		return extent(Axis::Channels);
     }
 
 	dim_t Tensor::depth() const
     {
-
+		return extent(Axis::Depth);
     }
 
 	dim_t Tensor::height() const
     {
-
+		return extent(Axis::Height);
     }
 
 	dim_t Tensor::width() const
     {
-
+		return extent(Axis::Width);
     }
 
 	dim_t Tensor::rows() const
@@ -604,7 +718,8 @@ namespace cum
     	scalar_buff[0] = scalar;
 
     	dnnl::memory::desc scalar_desc {
-    		Shape(tensor.dims(), 1), dnnl_data_type(default_type), dnnl::memory::format_tag::any
+    		Shape(tensor.dims(), 1), dnnl_data_type(default_type),
+			tensor.dims() == 1 ? dnnl::memory::format_tag::x : dnnl::memory::format_tag::any
     	};
 
     	dnnl::memory scalar_memory = dnnl::sycl_interop::make_memory(
@@ -647,7 +762,8 @@ namespace cum
     	scalar_buff[0] = scalar;
 
     	dnnl::memory::desc scalar_desc {
-    		Shape(tensor.dims(), 1), dnnl_data_type(default_type), dnnl::memory::format_tag::any
+    		Shape(tensor.dims(), 1), dnnl_data_type(default_type),
+			tensor.dims() == 1 ? dnnl::memory::format_tag::x : dnnl::memory::format_tag::any
     	};
 
     	dnnl::memory scalar_memory = dnnl::sycl_interop::make_memory(
@@ -695,7 +811,8 @@ namespace cum
     	scalar_buff[0] = scalar;
 
     	dnnl::memory::desc scalar_desc {
-    		Shape(tensor.dims(), 1), dnnl_data_type(default_type), dnnl::memory::format_tag::any
+    		Shape(tensor.dims(), 1), dnnl_data_type(default_type),
+			tensor.dims() == 1 ? dnnl::memory::format_tag::x : dnnl::memory::format_tag::any
     	};
 
     	dnnl::memory scalar_memory = dnnl::sycl_interop::make_memory(
@@ -738,7 +855,8 @@ namespace cum
     	scalar_buff[0] = scalar;
 
     	dnnl::memory::desc scalar_desc {
-    		Shape(tensor.dims(), 1), dnnl_data_type(default_type), dnnl::memory::format_tag::any
+    		Shape(tensor.dims(), 1), dnnl_data_type(default_type),
+			tensor.dims() == 1 ? dnnl::memory::format_tag::x : dnnl::memory::format_tag::any
     	};
 
     	dnnl::memory scalar_memory = dnnl::sycl_interop::make_memory(
@@ -812,7 +930,7 @@ namespace cum
 			__data__ = sycl::malloc_shared<T>(other.lenght(), internal::device(), internal::sycl_context());
 		});
 
-    	internal::queue().memcpy(__data__, other.__data__, other.lenght() * datatype_size(this->type()));
+    	internal::queue().memcpy(__data__, other.__data__, other.lenght() * datatype_size(this->type())).wait();
 
     	__memr__ = std::make_unique<neural_primitives::Memory>(*__desc__, __data__);
     	return *this;
