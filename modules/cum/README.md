@@ -1,4 +1,4 @@
-# CUM - **C**++ N**u**meri**c** Library
+# CUM - **C**++ N**um**eric Library
 Vendor agnostic C++ library providing linear algebra, eltwise operations, convenient datastructures and deep learning primitives without template hell (we moved the problems from the compile time to the runtime)
 
 ### CUM modules
@@ -14,3 +14,16 @@ Vendor agnostic C++ library providing linear algebra, eltwise operations, conven
 ### Known issues
 * FP8 and lower floating point precision tensors didn't work and wouldn't for some time.
 * Tensor class operator overloads and member functions aren't yet finished.
+
+### Related projects ( most are not even existing )
+* cumDNN *(also known as yann)*
+* cumBLAS
+* ~~cumLAPACK~~
+* ~~cumFFT~~
+* ~~cumGRAD~~
+* ~~cumPy~~
+* ~~cumGL~~
+* ~~cumGPT~~
+* ~~cumAGI~~
+* ~~cumMileniumRun~~
+* Cumming Simulator 2023

@@ -84,84 +84,84 @@ namespace yann::models::layers
     }
 
 
-    cum::Matrix Dense::forward(const cum::Matrix& input)
-    {
-        if constexpr(ENABLE_RUNTIME_CHECKS)
-        {
-            if(input.rows() != weights_.cols())
-            {
-                throw std::runtime_error("Input dimension mismatch: " + std::to_string(input.rows()) + " != " + std::to_string(weights_.cols()));
-            }
-        }
+    // cum::Matrix Dense::forward(const cum::Matrix& input)
+    // {
+    //     if constexpr(ENABLE_RUNTIME_CHECKS)
+    //     {
+    //         if(input.rows() != weights_.cols())
+    //         {
+    //             throw std::runtime_error("Input dimension mismatch: " + std::to_string(input.rows()) + " != " + std::to_string(weights_.cols()));
+    //         }
+    //     }
+    //
+    //     if (input.cols() != cache.x.cols())
+    //     {
+    //         cache.resize(cache.x.rows(), cache.z.rows(), input.cols());
+    //     }
+    //
+    //     YANN_LOG(4, "caching inputs", "");
+    //     cache.x = input;
+    //
+    //     cum::runtime::sync();
+    //
+    //     if constexpr (USE_FUSED_KERNELS)
+    //     {
+    //         if constexpr (ENABLE_CACHED_PREACTIVATION) // must be enabled for proper training in most of cases
+    //         {
+    //             YANN_LOG(4, "Running feed forward kernel (cached raw)", "");
+    //             cum::neural_primitives::neural_kernels::feed_forward_cached_raw(cache.a.data(), cache.z.data(), weights_.values.data(), input.data(), biases_.values.data(), weights_.values.cols(), weights_.values.rows(), input.cols(), activation.name);
+    //         }
+    //         else
+    //         {
+    //             YANN_LOG(4, "Running feed forward kernel", "");
+    //             cum::neural_primitives::neural_kernels::feed_forward(cache.a.data(), weights_().data(), input.data(), biases_().data(), weights_().cols(), weights_().rows(), input.cols(), activation.name);
+    //         }
+    //     }
+    //     else
+    //     {
+    //         YANN_LOG(4, "Performing (weights_ * input) + biases_", "");
+    //         cache.z = weights_() * cache.x;
+    //         cum::runtime::sync();
+    //         cum::LinearAlgebra::addRowVectorInPlace(
+    //             cache.z.data(),
+    //             biases_().data(),
+    //             cache.z.rows(),
+    //             cache.z.cols()); // broadcast biasu
+    //
+    //         cum::runtime::sync();
+    //
+    //         YANN_LOG(4, "Performing activation", "");
+    //         cum::functions::transform(cache.a.data(), cache.z.data(), cache.z.size(), activation.name);
+    //     }
+    //
+    //     YANN_LOG(4, "forward pass succeed", "");
+    //     cum::runtime::sync();
+    //     return cache.a;
+    // }
 
-        if (input.cols() != cache.x.cols())
-        {
-            cache.resize(cache.x.rows(), cache.z.rows(), input.cols());
-        }
-
-        YANN_LOG(4, "caching inputs", "");
-        cache.x = input;
-
-        cum::runtime::sync();
-
-        if constexpr (USE_FUSED_KERNELS)
-        {
-            if constexpr (ENABLE_CACHED_PREACTIVATION) // must be enabled for proper training in most of cases
-            {
-                YANN_LOG(4, "Running feed forward kernel (cached raw)", "");
-                cum::neural_primitives::neural_kernels::feed_forward_cached_raw(cache.a.data(), cache.z.data(), weights_.values.data(), input.data(), biases_.values.data(), weights_.values.cols(), weights_.values.rows(), input.cols(), activation.name);
-            }
-            else
-            {
-                YANN_LOG(4, "Running feed forward kernel", "");
-                cum::neural_primitives::neural_kernels::feed_forward(cache.a.data(), weights_().data(), input.data(), biases_().data(), weights_().cols(), weights_().rows(), input.cols(), activation.name);
-            }
-        }
-        else
-        {
-            YANN_LOG(4, "Performing (weights_ * input) + biases_", "");
-            cache.z = weights_() * cache.x;
-            cum::runtime::sync();
-            cum::LinearAlgebra::addRowVectorInPlace(
-                cache.z.data(),
-                biases_().data(),
-                cache.z.rows(),
-                cache.z.cols()); // broadcast biasu
-
-            cum::runtime::sync();
-
-            YANN_LOG(4, "Performing activation", "");
-            cum::functions::transform(cache.a.data(), cache.z.data(), cache.z.size(), activation.name);
-        }
-
-        YANN_LOG(4, "forward pass succeed", "");
-        cum::runtime::sync();
-        return cache.a;
-    }
-
-    cum::Matrix Dense::backward(const cum::Matrix& deltaOutput)
-    {
-        cum::runtime::sync();
-        YANN_LOG(4, "computing activation derivative", "");
-        cum::functions::transform_deriv(
-            cache.dz.data(), cache.z.data(), cache.z.size(), activation.name);
-        cum::runtime::sync();
-
-        YANN_LOG(4, "applying chain rule\n", "");
-        cum::Matrix ΔZ = cache.dz.cwiseProduct(deltaOutput);
-        cum::runtime::sync();
-
-        YANN_LOG(4, "computing weights grad\n", "");
-        weights_.gradient += ΔZ * cache.x.transpose();
-        cum::runtime::sync();
-
-        YANN_LOG(4, "computing biases grad\n", "");
-        biases_.gradient += ΔZ.rowwiseSum();
-        cum::runtime::sync();
-
-        return weights_().transpose() * ΔZ;
-
-    }
+    // cum::Matrix Dense::backward(const cum::Matrix& deltaOutput)
+    // {
+    //     cum::runtime::sync();
+    //     YANN_LOG(4, "computing activation derivative", "");
+    //     cum::functions::transform_deriv(
+    //         cache.dz.data(), cache.z.data(), cache.z.size(), activation.name);
+    //     cum::runtime::sync();
+    //
+    //     YANN_LOG(4, "applying chain rule\n", "");
+    //     cum::Matrix ΔZ = cache.dz.cwiseProduct(deltaOutput);
+    //     cum::runtime::sync();
+    //
+    //     YANN_LOG(4, "computing weights grad\n", "");
+    //     weights_.gradient += ΔZ * cache.x.transpose();
+    //     cum::runtime::sync();
+    //
+    //     YANN_LOG(4, "computing biases grad\n", "");
+    //     biases_.gradient += ΔZ.rowwiseSum();
+    //     cum::runtime::sync();
+    //
+    //     return weights_().transpose() * ΔZ;
+    //
+    // }
 
     void Dense::collect_parameters(std::vector<Parameter*>& params)
     {

@@ -12,15 +12,17 @@ namespace yann::models::layers
     class Flatten : public LayerBase
     {
     public:
-        Flatten(int rows, int cols);
+        // Flatten(int rows, int cols);
+        Flatten(const cum::Shape& shape);
 
-        cum::Matrix forward(const cum::Matrix& input) override;
-        cum::Matrix backward(const cum::Matrix& deltaOutput) override;
+        cum::Tensor forward(const cum::Tensor& input) override;
+        cum::Tensor backward(const cum::Tensor& deltaOutput) override;
 
-    public:
-        int input_rows;
-        int input_cols;
-        bool to_column_vector; // true by default
+    private:
+        cum::Shape shape_;
+        // int input_ros;
+        // int input_cols;
+        // bool to_column_vector; // true by default
     };
 
 } // yann::models::layers

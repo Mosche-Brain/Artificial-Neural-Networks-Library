@@ -54,7 +54,7 @@ namespace yann
         static Parameter Ones(const cum::Shape& shape);
         static Parameter Xavier(const cum::Shape& shape);
 
-        // cum::Matrix& operator()() { return values; }
+        // cum::Matrix& operator()() { return values; } 
         cum::Tensor& operator()() { return values; }
     };
 } // yann

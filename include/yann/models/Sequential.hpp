@@ -87,17 +87,18 @@ namespace yann::models
 
         /* Methods */
         
-        cum::Matrix forward(const cum::Matrix& input);
+        cum::Tensor forward(const cum::Tensor& input);
         
-        void fit(const cum::Matrix& X, const cum::Matrix& Y, loss::LossBase& loss, optimizers::OptimizerBase& optimizer, cum::dim_t epochs, cum::dim_t batch_size=1, std::span<logging::ITrainingCallback*> callbacks = {});
+        // void fit(const cum::Matrix& X, const cum::Matrix& Y, loss::LossBase& loss, optimizers::OptimizerBase& optimizer, cum::dim_t epochs, cum::dim_t batch_size=1, std::span<logging::ITrainingCallback*> callbacks = {});
+        void fit(const cum::Tensor& X, const cum::Tensor& Y, loss::LossBase& loss, optimizers::OptimizerBase& optimizer, cum::dim_t epochs, cum::dim_t batch_size=1, std::span<logging::ITrainingCallback*> callbacks = {});
         void addLayer(LayerPtr layer);
         void clear();
 
         void build();
         /* Getters */
-        cum::Matrix& getWeights(size_t layer) const;
-        cum::Matrix& getBiases(size_t layer) const;
-        cum::Matrix& getOutputs(size_t layer) const;
+        cum::Tensor& getWeights(size_t layer) const;
+        cum::Tensor& getBiases(size_t layer) const;
+        cum::Tensor& getOutputs(size_t layer) const;
         cum::functions::activation_t getActivation(size_t layer) const;
         auto getTopology() const -> const Topology&;
         auto getLayer(size_t layer) const -> LayerPtr;
@@ -106,7 +107,7 @@ namespace yann::models
 
         std::vector<Parameter*> parameters();
     protected:
-        void backward(const cum::Matrix& d_output);
+        void backward(const cum::Tensor& d_output);
 
         Topology topology;
     };

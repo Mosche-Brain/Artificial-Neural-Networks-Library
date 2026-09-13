@@ -7,13 +7,14 @@
 
 #include "cum/Core.hpp"
 #include "cum/Matrix.hpp"
+#include "cum/Tensor.hpp"
 
 namespace yann::loss
 {
     typedef struct
     {
         cum::cumeric_t value;
-        cum::Matrix gradient;
+        cum::Tensor gradient;
     } loss_t;
 
 
@@ -21,12 +22,13 @@ namespace yann::loss
     {
     public:
         virtual ~LossBase() = default;
-        virtual void compute(const cum::Matrix& predicted, const cum::Matrix& target) = 0;
+        virtual void compute(const cum::Tensor& predicted, const cum::Matrix& Tensor) = 0;
+        // virtual void compute(const cum::Matrix& predicted, const cum::Matrix& target) = 0;
 
 
         const loss_t& result() const { return loss; }
         cum::cumeric_t getLoss() const { return loss.value; }
-        cum::Matrix getGradient() const { return loss.gradient; }
+        cum::Tensor getGradient() const { return loss.gradient; }
     protected:
         loss_t loss;
     };

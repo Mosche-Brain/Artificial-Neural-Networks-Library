@@ -9,26 +9,29 @@
 namespace yann::models::layers
 {
 
-    Flatten::Flatten(int rows, int cols)
+    Flatten::Flatten(const cum::Shape shape)
     {
         #if defined(ENABLE_DEBUG_OUTPUT)
         // yann::logger().log(1, "Initializing flatten layer with {} x  input shape", rows);
         YANN_LOG(1, "Initializing flatten layer with {} x {} input shape", rows, cols);
         #endif
-        input_rows = rows;
-        input_cols = cols;
-        to_column_vector = true;
+
+        shape_ = shape;
+
+        // input_rows = rows;
+        // input_cols = cols;
+        // to_column_vector = true;
 
         this->_layerType_ = LAYER_TYPE::FLATTEN;
     }
 
-    cum::Matrix Flatten::forward(const cum::Matrix& input)
+    cum::Tensor Flatten::forward(const cum::Tensor& input)
     {
-        return input.reshape(input_rows * input_cols, 1);
+        // return input.reshape(input_rows * input_cols, 1);
     }
 
-    cum::Matrix Flatten::backward(const cum::Matrix& deltaOutput)
+    cum::Tensor Flatten::backward(const cum::Tensor& deltaOutput)
     {
-        return deltaOutput.reshape(input_rows, input_cols);
+        // return deltaOutput.reshape(input_rows, input_cols);
     }
 } // yann::models::layers

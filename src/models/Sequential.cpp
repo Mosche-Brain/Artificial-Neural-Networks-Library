@@ -60,9 +60,9 @@ namespace yann::models
         topology.clear();
     }
 
-    cum::Matrix Sequential::forward(const cum::Matrix& input)
+    cum::Tensor Sequential::forward(const cum::Tensor& input)
     {
-        cum::Matrix result = topology[0]->forward(input);
+        cum::Tensor result = topology[0]->forward(input);
 
         for (size_t i = 1; i < topology.size(); ++i)
         {
@@ -96,28 +96,29 @@ namespace yann::models
      * Dodać przeładowanie pozwalające na przyjęcie zamiast X i Y zbioru batchy
      */
 
-    void Sequential::fit(const cum::Matrix& X, const cum::Matrix& Y, loss::LossBase& loss, optimizers::OptimizerBase& optimizer, cum::dim_t epochs, cum::dim_t batch_size, std::span<logging::ITrainingCallback*> callbacks)
+    void Sequential::fit(const cum::Tensor& X, const cum::Tensor& Y, loss::LossBase& loss, optimizers::OptimizerBase& optimizer, cum::dim_t epochs, cum::dim_t batch_size, std::span<logging::ITrainingCallback*> callbacks)
     {
         if (batch_size == 0)
             throw std::invalid_argument("batch_size must be greater than zero");
-        if (X.cols() != Y.cols())
+        // if (X.cols() != Y.cols())
+        if (X.shape()[1] != Y.shape()[1])
             throw std::invalid_argument("X and Y must contain the same number of samples");
 
         std::vector<Parameter*> params = this->parameters();
         const bool batched = batch_size > 1;
 
-        std::vector<Batch> batches;
-        if (batched)
-        {
-            for (cum::dim_t begin = 0; begin < X.cols(); begin += batch_size) // przeniósł bym tą pętle do osobnej funkcji
-            {
-                const cum::dim_t samples = std::min(X.cols() - begin, batch_size);
-                batches.emplace_back(
-                    X.slice(0, begin, X.rows(), samples),
-                    Y.slice(0, begin, Y.rows(), samples),
-                    Batch::ORIENTATION::COLUMN_SAMPLE);
-            }
-        }
+        // std::vector<Batch> batches;
+        // if (batched)
+        // {
+        //     for (cum::dim_t begin = 0; begin < X.cols(); begin += batch_size) // przeniósł bym tą pętle do osobnej funkcji
+        //     {
+        //         const cum::dim_t samples = std::min(X.cols() - begin, batch_size);
+        //         batches.emplace_back(
+        //             X.slice(0, begin, X.rows(), samples),
+        //             Y.slice(0, begin, Y.rows(), samples),
+        //             Batch::ORIENTATION::COLUMN_SAMPLE);
+        //     }
+        // }
 
         YANN_LOG(1, "Started training for {} epochs...", epochs);
 
@@ -146,8 +147,8 @@ namespace yann::models
 
                 if (batched)
                 {
-                    x = batches[batch].inputs();
-                    y = batches[batch].targets();
+                    // x = batches[batch].inputs();
+                    // y = batches[batch].targets();
                 }
                 else
                 {

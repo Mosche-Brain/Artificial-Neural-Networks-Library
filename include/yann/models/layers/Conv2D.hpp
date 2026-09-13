@@ -33,7 +33,8 @@ namespace yann::models::layers
         struct Config { cum::dim_t kernels_n; cum::Shape kernel_size; cum::dim_t stride; cum::dim_t padding; cum::dim_t dilatation; }
         config;
 
-        std::vector<Parameter> kernels;
+        Parameter kernels;
+        // std::vector<Parameter> kernels;
     };
 } // yann
 
