@@ -187,12 +187,12 @@ namespace cum
 
 	dim_t Tensor::rows() const
     {
-	    // alias height()
+	    return height();
     }
 
-	dim_t cols() const
+	dim_t Tensor::cols() const
     {
-	    // alias width()
+	    return width();
     }
 
 	std::unique_ptr<neural_primitives::Descriptor>& Tensor::descriptor()
@@ -288,6 +288,16 @@ namespace cum
 
     	return result;
     }
+
+	cumeric_t Tensor::mean()
+	{
+
+	}
+
+	cumeric_t Tensor::amean()
+	{
+
+	}
 
 	/**------------------------------------------------------------------------------------------------
 	 *                                         Elementwise

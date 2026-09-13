@@ -33,7 +33,6 @@ namespace cum::neural_primitives
 
     /* Raw handles overloads */
 
-
     __event__ dnnl_eltwise(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc, dnnl::algorithm algorithm, dnnl::prop_kind prop_kind) // does
     {
         dnnl::eltwise_forward::primitive_desc primitive_desc {
@@ -118,7 +117,7 @@ namespace cum::neural_primitives
     }
     __event__ sigmoid(handles::__memory__& src, const handles::__desc__& desc)
     {
-
+        return sigmoid(src, src, desc, desc);
     }
 
     __event__ tanh(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc)
@@ -147,7 +146,7 @@ namespace cum::neural_primitives
     }
     __event__ tanh(handles::__memory__& src, const handles::__desc__& desc)
     {
-
+        return tanh(src, src, desc, desc);
     }
 
     __event__ softmax(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc)
@@ -177,7 +176,7 @@ namespace cum::neural_primitives
     }
     __event__ softmax(handles::__memory__& src, const handles::__desc__& desc)
     {
-
+        return softmax(src, src, desc, desc);
     }
 
     __event__ gelu(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc)
@@ -206,7 +205,7 @@ namespace cum::neural_primitives
     }
     __event__ gelu(handles::__memory__& src, const handles::__desc__& desc)
     {
-
+        return gelu(src, src, desc, desc);
     }
 
     __event__ elu(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc)
@@ -235,7 +234,7 @@ namespace cum::neural_primitives
     }
     __event__ elu(handles::__memory__& src, const handles::__desc__& desc)
     {
-
+        return elu(src, src, desc, desc);
     }
 
     __event__ leaky_relu(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc, const cumeric_t alpha)
@@ -263,9 +262,9 @@ namespace cum::neural_primitives
         internal::stream().wait();
         return detail::event_handler::create(std::move(event));
     }
-    __event__ leaky_relu(handles::__memory__& src, const handles::__desc__& desc)
+    __event__ leaky_relu(handles::__memory__& src, const handles::__desc__& desc, const cumeric_t alpha)
     {
-
+        return leaky_relu(src, src, desc, desc, alpha);
     }
 
     __event__ sqrt(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc)
@@ -307,7 +306,7 @@ namespace cum::neural_primitives
     }
     __event__ relu(Memory& src, const Descriptor& desc)
     {
-
+        return relu(src, src, desc, desc);
     }
 
     __event__ sigmoid(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc)
@@ -322,7 +321,7 @@ namespace cum::neural_primitives
     }
     __event__ sigmoid(Memory& src, const Descriptor& desc)
     {
-
+        return sigmoid(src, src, desc, desc);
     }
 
     __event__ tanh(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc)
@@ -335,9 +334,10 @@ namespace cum::neural_primitives
 
         return tanh(dst_memory, src_memory, dst_descriptor, src_descriptor);
     }
+
     __event__ tanh(Memory& src, const Descriptor& desc)
     {
-
+        return tanh(src, src, desc, desc);
     }
 
     __event__ softmax(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc)
@@ -352,7 +352,7 @@ namespace cum::neural_primitives
     }
     __event__ softmax(Memory& src, const Descriptor& desc)
     {
-
+        return softmax(src, src, desc, desc);
     }
 
     __event__ gelu(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc)
@@ -367,7 +367,7 @@ namespace cum::neural_primitives
     }
     __event__ gelu(Memory& src, const Descriptor& desc)
     {
-
+        return gelu(src, src, desc, desc);
     }
 
     __event__ elu(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc)
@@ -380,9 +380,10 @@ namespace cum::neural_primitives
 
         return elu(dst_memory, src_memory, dst_descriptor, src_descriptor);
     }
+
     __event__ elu(Memory& src, const Descriptor& desc)
     {
-
+        return elu(src, src, desc, desc);
     }
 
     __event__ leaky_relu(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc, const cumeric_t alpha)
@@ -398,7 +399,7 @@ namespace cum::neural_primitives
 
     __event__ leaky_relu(Memory& src, const Descriptor& desc, const cumeric_t alpha)
     {
-
+        return leaky_relu(src, src, desc, desc, alpha);
     }
 
     __event__ sqrt(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc)
@@ -427,31 +428,64 @@ namespace cum::neural_primitives
 
     __event__ sigmoid(Tensor& dst, const Tensor& src)
     {
+        handles::__memory__& dst_memory = dst.memory()->handle();
+        const handles::__memory__& src_memory = src.memory()->handle();
 
+        const handles::__desc__& dst_descriptor = dst.descriptor()->handle();
+        const handles::__desc__& a_descriptor = src.descriptor()->handle();
+
+        return sigmoid(dst_memory, src_memory, dst_descriptor, a_descriptor);
     }
 
     __event__ tanh(Tensor& dst, const Tensor& src)
     {
+        handles::__memory__& dst_memory = dst.memory()->handle();
+        const handles::__memory__& src_memory = src.memory()->handle();
 
+        const handles::__desc__& dst_descriptor = dst.descriptor()->handle();
+        const handles::__desc__& a_descriptor = src.descriptor()->handle();
+
+        return tanh(dst_memory, src_memory, dst_descriptor, a_descriptor);
     }
+
     __event__ tanh(Tensor& src)
     {
+        handles::__memory__& memory = src.memory()->handle();
+        const handles::__desc__& descriptor = src.descriptor()->handle();
 
+        return tanh(memory, memory, descriptor, descriptor);
     }
 
     __event__ softmax(Tensor& dst, const Tensor& src)
     {
+        handles::__memory__& dst_memory = dst.memory()->handle();
+        const handles::__memory__& src_memory = src.memory()->handle();
 
+        const handles::__desc__& dst_descriptor = dst.descriptor()->handle();
+        const handles::__desc__& a_descriptor = src.descriptor()->handle();
+
+        return softmax(dst_memory, src_memory, dst_descriptor, a_descriptor);
     }
+
     __event__ softmax(Tensor& src)
     {
+        handles::__memory__& memory = src.memory()->handle();
+        const handles::__desc__& descriptor = src.descriptor()->handle();
 
+        return softmax(memory, memory, descriptor, descriptor);
     }
 
     __event__ gelu(Tensor& dst, const Tensor& src)
     {
+        handles::__memory__& dst_memory = dst.memory()->handle();
+        const handles::__memory__& src_memory = src.memory()->handle();
 
+        const handles::__desc__& dst_descriptor = dst.descriptor()->handle();
+        const handles::__desc__& a_descriptor = src.descriptor()->handle();
+
+        return gelu(dst_memory, src_memory, dst_descriptor, a_descriptor);
     }
+
     __event__ gelu(Tensor& src)
     {
 
@@ -459,8 +493,15 @@ namespace cum::neural_primitives
 
     __event__ elu(Tensor& dst, const Tensor& src)
     {
+        handles::__memory__& dst_memory = dst.memory()->handle();
+        const handles::__memory__& src_memory = src.memory()->handle();
 
+        const handles::__desc__& dst_descriptor = dst.descriptor()->handle();
+        const handles::__desc__& a_descriptor = src.descriptor()->handle();
+
+        return elu(dst_memory, src_memory, dst_descriptor, a_descriptor);
     }
+
     __event__ elu(Tensor& src)
     {
 
@@ -468,8 +509,15 @@ namespace cum::neural_primitives
 
     __event__ leaky_relu(Tensor& dst, const Tensor& src, const cumeric_t alpha)
     {
+        handles::__memory__& dst_memory = dst.memory()->handle();
+        const handles::__memory__& src_memory = src.memory()->handle();
 
+        const handles::__desc__& dst_descriptor = dst.descriptor()->handle();
+        const handles::__desc__& a_descriptor = src.descriptor()->handle();
+
+        return leaky_relu(dst_memory, src_memory, dst_descriptor, a_descriptor, alpha);
     }
+
     __event__ leaky_relu(Tensor& src, const cumeric_t alpha)
     {
 

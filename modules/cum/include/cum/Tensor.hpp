@@ -106,6 +106,8 @@ namespace cum
         /* reductions */
 
         cumeric_t sum();
+        cumeric_t mean();
+        cumeric_t amean();
 
         Tensor colwise_sum();
         Tensor rowwise_sum();

@@ -9,11 +9,11 @@
 namespace yann::models::layers
 {
 
-    Flatten::Flatten(const cum::Shape shape)
+    Flatten::Flatten(const cum::Shape& shape)
     {
         #if defined(ENABLE_DEBUG_OUTPUT)
         // yann::logger().log(1, "Initializing flatten layer with {} x  input shape", rows);
-        YANN_LOG(1, "Initializing flatten layer with {} x {} input shape", rows, cols);
+        // YANN_LOG(1, "Initializing flatten layer with {} x {} input shape", rows, cols);
         #endif
 
         shape_ = shape;

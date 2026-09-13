@@ -17,7 +17,7 @@ namespace yann::loss
         constexpr bool fused_kernels = true;
 
         loss.value = 0;
-        loss.gradient = cum::Matrix::Zeros(predicted.shape(), predicted.type(), predicted.format());
+        loss.gradient = cum::Tensor::Zeros(predicted.shape(), predicted.type(), predicted.format());
 
         if constexpr (fused_kernels)
         {
@@ -51,18 +51,15 @@ namespace yann::loss
                 }
                 indices[axis] = 0;
             }
-
             // const std::size_t rows = predicted.rows();
             // const std::size_t cols = predicted.cols();
             // const std::size_t size = predicted.size();
-
         //     for (std::size_t i = 0; i < rows; ++i)  // iterowanie osobno po kolumnach i wierszach jest właściwie nie potrzebne, ale jeszcze nie chciiało mi się tego zmieniać
         //     {
         //         for (std::size_t j = 0; j < cols; ++j)
         //         {
         //             const cum::cumeric_t y = target(i, j);
         //             const cum::cumeric_t p = cum::functions::various::clamp(predicted(i, j), eps, 1 - eps);
-        //
         //             loss.value += -(y * cum::functions::exponential::log(p) + (1 - y) * cum::functions::exponential::log(1 - p));
         //             loss.gradient(i, j) = ((1 - y) / (1 - p) - y / p);
         //         }
