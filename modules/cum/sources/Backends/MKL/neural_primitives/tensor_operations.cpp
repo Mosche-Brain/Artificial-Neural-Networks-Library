@@ -235,7 +235,6 @@ namespace cum::neural_primitives
 
         return div(c_memory, a_memory, b_memory, c_descriptor, a_descriptor, b_descriptor);
     }
-
     
     __event__ matmul(Memory& C, const Memory& A, const Memory& B, const Descriptor& c_desc, const Descriptor& a_desc, const Descriptor& b_desc)
     {
@@ -250,8 +249,32 @@ namespace cum::neural_primitives
         return matmul(c_memory, a_memory, b_memory, c_descriptor, a_descriptor, b_descriptor);
     }
 
+	__event__ add(Memory& A, const Memory& B, const Descriptor& a_desc, const Descriptor& b_desc)
+    {
+    	return add(A, A, B, a_desc, a_desc, b_desc);
+    }
 
-    /* Objective tensors overloads */
+	__event__ sub(Memory& A, const Memory& B, const Descriptor& a_desc, const Descriptor& b_desc)
+	{
+    	return sub(A, A, B, a_desc, a_desc, b_desc);
+	}
+
+	__event__ mul(Memory& A, const Memory& B, const Descriptor& a_desc, const Descriptor& b_desc)
+	{
+    	return mul(A, A, B, a_desc, a_desc, b_desc);
+	}
+
+	__event__ div(Memory& A, const Memory& B, const Descriptor& a_desc, const Descriptor& b_desc)
+	{
+    	return div(A, A, B, a_desc, a_desc, b_desc);
+	}
+
+	__event__ matmul(Memory& A, const Memory& B, const Descriptor& a_desc, const Descriptor& b_desc)
+	{
+    	return matmul(A, A, B, a_desc, a_desc, b_desc);
+	}
+
+	/* Objective tensors overloads */
 
     __event__ add(Tensor& C, const Tensor& A, const Tensor& B)
     {

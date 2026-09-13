@@ -194,13 +194,13 @@ Full documentation will be avaible [here](brain.mosche.dev/docs)
 * ✅ GPU acceleration
 * ✅ Templates-free math framework
 * ✅ OneAPI support
+* ✅ Compiling code (finally)
 * ✅ N-dimensional Tensors *(almost)*
 * ⚠️ BF16 support
 * ⚠️ Fused kernels for neural networks
 * ⚠️ Dynamic computational graphs
 * ⚠️ Convolutional layers
 * ⚠️ Compile time code traces pruning
-* ⚠️ Compiling code (work in progress)
 * ⚠️ [Dedicated graphical envionment](https://github.com/Mosche-Brain/MLStudio) (work in progress)
 * ❌ CUDA support
 * ❌ ROCm support

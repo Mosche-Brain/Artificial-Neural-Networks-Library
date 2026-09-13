@@ -107,6 +107,27 @@ namespace cum
 	}
 
 
+	Tensor Tensor::make_cube(dim_t width, dim_t height, dim_t deepth, datatype dtype, layout layout)
+    {
+
+    }
+
+	Tensor Tensor::make_matrix(dim_t rows, dim_t cols, datatype dtype, layout layout)
+    {
+
+    }
+
+	Tensor Tensor::make_vector(dim_t lenght, datatype dtype, layout layout)
+    {
+
+    }
+
+	Tensor Tensor::make_scalar(datatype dtype, layout layout)
+    {
+
+    }
+
+
 	/**------------------------------------------------------------------------------------------------
 	 *                                         Getters
 	 *------------------------------------------------------------------------------------------------**/
@@ -259,6 +280,36 @@ namespace cum
 		return result;
 	}
 
+
+	const cumeric_t* Tensor::data() const
+    {
+	    return static_cast<const cumeric_t*>(__data__);
+    }
+
+	cumeric_t* Tensor::data()
+    {
+    	return static_cast<cumeric_t*>(__data__);
+    }
+
+	/**------------------------------------------------------------------------------------------------
+	*                                         Reshaping
+	*------------------------------------------------------------------------------------------------**/
+
+	Tensor Tensor::slice(const Shape& indices)
+    {
+
+    }
+
+	Tensor Tensor::transpose()
+	{
+		// return ;
+    }
+
+	Tensor& Tensor::transpose_in_place()
+    {
+
+    }
+
 	/**------------------------------------------------------------------------------------------------
 	 *                                         Reductions
 	 *------------------------------------------------------------------------------------------------**/
@@ -380,21 +431,24 @@ namespace cum
     	return result;
 	}
 
+	Tensor& Tensor::sqrt_in_place()
+	{
+    	neural_primitives::sqrt(__memr__->handle(), __desc__->handle());
+    	return *this;
+	}
+
 	Tensor Tensor::square()
 	{
 		Tensor result = *this;
 
-    	neural_primitives::sqrt(result.__memr__->handle(), __memr__->handle(), result.__desc__->handle(), __desc__->handle());
+    	neural_primitives::square(result.__memr__->handle(), __memr__->handle(), result.__desc__->handle(), __desc__->handle());
 
     	return result;
 	}
 
 	Tensor& Tensor::square_in_place()
 	{
-		Tensor result = *this;
-
-    	neural_primitives::sqrt(result.__memr__->handle(), __memr__->handle(), result.__desc__->handle(), __desc__->handle());
-
+    	neural_primitives::square(__memr__->handle(), __desc__->handle());
     	return *this;
 	}
 

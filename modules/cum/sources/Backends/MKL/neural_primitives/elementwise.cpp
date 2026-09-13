@@ -292,6 +292,44 @@ namespace cum::neural_primitives
         return detail::event_handler::create(std::move(event));
     }
 
+    __event__ sqrt(handles::__memory__& src, const handles::__desc__& desc)
+    {
+        return sqrt(src, src, desc, desc);
+    }
+
+
+    __event__ square(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc)
+    {
+        dnnl::eltwise_forward::primitive_desc primitive_desc {
+            internal::engine(),
+            dnnl::prop_kind::forward_inference,
+            dnnl::algorithm::eltwise_square,
+            src_desc.desc,
+            dst_desc.desc
+        };
+
+        dnnl::primitive primitive = dnnl::eltwise_forward(primitive_desc);
+
+        sycl::event event = dnnl::sycl_interop::execute(
+            primitive,
+            internal::stream(),
+            {
+                { DNNL_ARG_SRC, src.memory },
+                { DNNL_ARG_DST, dst.memory }
+            }
+        );
+
+        internal::stream().wait();
+        return detail::event_handler::create(std::move(event));
+    }
+
+    __event__ square(handles::__memory__& src, const handles::__desc__& desc)
+    {
+        return square(src, src, desc, desc);
+    }
+
+
+
     /* RAII wrappers overloads */
 
     __event__ relu(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc)

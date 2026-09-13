@@ -69,6 +69,9 @@ namespace cum::neural_primitives
     __event__ sqrt(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc);
     __event__ sqrt(handles::__memory__& src, const handles::__desc__& desc);
 
+    __event__ square(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc);
+    __event__ square(handles::__memory__& src, const handles::__desc__& desc);
+
     /* RsrcII wrappers overloads */
     __event__ eltwise(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc, functions::function_id algorithm, prop_kind prop_kind);
 

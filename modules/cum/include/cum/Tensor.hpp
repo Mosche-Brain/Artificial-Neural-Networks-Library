@@ -97,12 +97,15 @@ namespace cum
         cumeric_t at(const Shape& indices);
         cumeric_t at(const Shape& indices) const;
 
-        const cumeric_t* data() const;
+        const cumeric_t* data() const; // I should add templated data getter
         cumeric_t* data();
 
+
+        /* Reshaping */
         Tensor slice(const Shape& indices);
 
-        Tensor& transpose();
+        Tensor transpose();
+        Tensor& transpose_in_place();
 
         /* reductions */
 
@@ -125,6 +128,8 @@ namespace cum
         Tensor cwiseProduct(const Tensor& tensor);
 
         Tensor sqrt();
+        Tensor& sqrt_in_place();
+
         Tensor square();
         Tensor& square_in_place();
 

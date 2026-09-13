@@ -30,7 +30,7 @@ namespace yann::models::layers
         this->_initialized_ = true;
     }
 
-    cum::Matrix Linear::forward(const cum::Tensor& input)
+    cum::Tensor Linear::forward(const cum::Tensor& input)
     {
         if constexpr(ENABLE_RUNTIME_CHECKS)
         {
@@ -43,7 +43,7 @@ namespace yann::models::layers
         if (input.cols() != cache.x.cols())
         {
             cache.resize(cache.x.rows(), cache.z.rows(), input.cols());
-            cache.dz = cum::Tensor::Zeros(cache.z.rows(), input.cols());
+            cache.dz = cum::Tensor::Zeros({cache.z.rows(), input.cols()}, cum::default_type, cum::layout::NC);
         }
 
         YANN_LOG(4, "caching inputs", "");
