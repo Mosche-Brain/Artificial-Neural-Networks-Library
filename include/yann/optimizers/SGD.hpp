@@ -19,7 +19,8 @@ namespace yann::optimizers
         SGD(cum::cumeric_t learning_rate);
 
         // void step() override;
-        void step(cum::Matrix& params, cum::Matrix& grad) override;
+        // void step(cum::Matrix& params, cum::Matrix& grad) override;
+        void step(cum::Tensor& params, cum::Tensor& grad) override;
         void step(Parameter& param) override;
         void step(std::vector<Parameter*>& params) override;
 

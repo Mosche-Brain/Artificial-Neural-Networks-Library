@@ -73,15 +73,15 @@ namespace yann::models
         return result;
     }
 
-    void Sequential::backward(const cum::Matrix& d_output)
+    void Sequential::backward(const cum::Tensor& d_output)
     {
         if (topology.size() <= 1)
             return;
 
-        cum::Matrix curr_gradient = topology.back()->backward(d_output);
+        cum::Tensor curr_gradient = topology.back()->backward(d_output);
         for (size_t i = topology.size() - 1; i > 1; --i)
         {
-            cum::Matrix next_gradient = topology[i-1]->backward(curr_gradient);
+            cum::Tensor next_gradient = topology.at(i-1)->backward(curr_gradient);
 
             cum::runtime::sync();
 
@@ -138,12 +138,12 @@ namespace yann::models
             cum::Matrix x;
             cum::Matrix y;
 
-            cum::dim_t n = batched ? batches.size() : X.cols();
-
+            // cum::dim_t n = batched ? batches.size() : X.cols();
+            cum::dim_t n = X.shape()[1];
             for (batch = 0; batch < n; batch++)
             {
-                cum::dim_t current_batch_size = batched ? batches[batch].size : 1;
-                YANN_LOG(2, "{} batch, {} samples", batch, current_batch_size);
+                // cum::dim_t current_batch_size = batched ? batches[batch].size : 1;
+                // YANN_LOG(2, "{} batch, {} samples", batch, current_batch_size);
 
                 if (batched)
                 {
@@ -152,27 +152,27 @@ namespace yann::models
                 }
                 else
                 {
-                    x = X.col(batch);
-                    y = Y.col(batch);
+                    // x = X.col(batch);
+                    // y = Y.col(batch);
                 }
 
-                cum::Matrix results = this->forward(x);
+                // cum::Matrix results = this->forward(x);
 
-                loss.compute(results, y);
+                // loss.compute(results, y);
 
-                loss::loss_t error = loss.result();
+                // loss::loss_t error = loss.result();
 
-                this->backward(error.gradient);
+                // this->backward(error.gradient);
 
                 for (logging::ITrainingCallback*&  callback : callbacks)
                     callback->afterBackprop(ctx);
 
-                optimizer.scale_grads(params, 1 / static_cast<cum::cumeric_t>(current_batch_size));
+                // optimizer.scale_grads(params, 1 / static_cast<cum::cumeric_t>(current_batch_size));
                 optimizer.step(params); // zerowanie gradientów jest dokonywanie niejawnie w kroku optymalizatora
-                total_loss += error.value;
+                // total_loss += error.value;
             }
 
-            mean_loss = total_loss / static_cast<cum::cumeric_t>(batched ? batches.size() : X.cols());
+            // mean_loss = total_loss / static_cast<cum::cumeric_t>(batched ? batches.size() : X.cols());
 
             YANN_LOG(2, "Average epoch loss: ", static_cast<float>(mean_loss));
             YANN_LOG(2, "Total epoch loss: ", static_cast<float>(total_loss));
@@ -184,17 +184,17 @@ namespace yann::models
     }
 
 
-    cum::Matrix& Sequential::getWeights(size_t layer) const
+    cum::Tensor& Sequential::getWeights(size_t layer) const
     {
         return topology[layer]->weights();
     }
 
-    cum::Matrix& Sequential::getBiases(size_t layer) const
+    cum::Tensor& Sequential::getBiases(size_t layer) const
     {
         return topology[layer]->biases();
     }
 
-    cum::Matrix& Sequential::getOutputs(size_t layer) const
+    cum::Tensor& Sequential::getOutputs(size_t layer) const
     {
         return topology[layer]->Outputs();
     }

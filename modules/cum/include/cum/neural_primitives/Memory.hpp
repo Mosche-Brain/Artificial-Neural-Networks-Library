@@ -21,6 +21,8 @@ namespace cum::neural_primitives
         Memory(const Descriptor& desc, Engine& engine);
         Memory(const Descriptor& desc, Engine& engine, void* data);
 
+        ~Memory();
+
         void* data();
         void  set_data(void* data);
 

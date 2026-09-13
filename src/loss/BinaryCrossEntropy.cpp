@@ -42,12 +42,12 @@ namespace yann::loss
             {
                 for (cum::dim_t n = shape[axis] ; indices[axis] < n; indices[axis]++)
                 {
-                    const cum::cumeric_t y = target.at(indices);
-                    const cum::cumeric_t p = cum::functions::various::clamp(predicted.at(indices), eps, 1 - eps);
-
-
-                    loss.value += -(y * cum::functions::exponential::log(p) + (1 - y) * cum::functions::exponential::log(1 - p));
-                    loss.gradient.at(indices) = ((1 - y) / (1 - p) - y / p);
+                    // const cum::cumeric_t y = target.at(indices);
+                    // const cum::cumeric_t p = cum::functions::various::clamp(predicted.at(indices), eps, 1 - eps);
+                    //
+                    //
+                    // loss.value += -(y * cum::functions::exponential::log(p) + (1 - y) * cum::functions::exponential::log(1 - p));
+                    // loss.gradient.at(indices) = ((1 - y) / (1 - p) - y / p);
                 }
                 indices[axis] = 0;
             }
@@ -64,7 +64,7 @@ namespace yann::loss
         //             loss.gradient(i, j) = ((1 - y) / (1 - p) - y / p);
         //         }
         //     }
-        // }
+        }
         // loss.value /= predicted.cols();
     }
 

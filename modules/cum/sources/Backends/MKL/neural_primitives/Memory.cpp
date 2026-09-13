@@ -36,6 +36,8 @@ namespace cum::neural_primitives
 
     }
 
+    Memory::~Memory() = default;
+
     void* Memory::data()
     {
         return handle_->memory.get_data_handle();

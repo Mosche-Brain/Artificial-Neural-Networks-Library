@@ -24,13 +24,13 @@ namespace yann::models::layers
     {
         this->weights_      = Parameter::Uniform(output_features, input_features);   /* neurons * input_length */
         this->biases_       = Parameter::Zeros(output_features, 1);               /* Column-Vector */
-        this->cache.x       = cum::Matrix::Zeros(input_features, 1);   /* Column-Vector */
-        this->cache.z   	= cum::Matrix::Zeros(output_features, 1);             /* Column-Vector */
-        this->cache.dz      = cum::Matrix::Ones(output_features, 1);
+        this->cache.x       = cum::Tensor::Zeros({input_features, 1});   /* Column-Vector */
+        this->cache.z   	= cum::Tensor::Zeros({output_features, 1});             /* Column-Vector */
+        this->cache.dz      = cum::Tensor::Ones({output_features, 1});
         this->_initialized_ = true;
     }
 
-    cum::Matrix Linear::forward(const cum::Matrix& input)
+    cum::Matrix Linear::forward(const cum::Tensor& input)
     {
         if constexpr(ENABLE_RUNTIME_CHECKS)
         {
@@ -43,7 +43,7 @@ namespace yann::models::layers
         if (input.cols() != cache.x.cols())
         {
             cache.resize(cache.x.rows(), cache.z.rows(), input.cols());
-            cache.dz = cum::Matrix::Zeros(cache.z.rows(), input.cols());
+            cache.dz = cum::Tensor::Zeros(cache.z.rows(), input.cols());
         }
 
         YANN_LOG(4, "caching inputs", "");
@@ -87,24 +87,24 @@ namespace yann::models::layers
         return cache.z;
     }
 
-    cum::Matrix Linear::backward(const cum::Matrix& deltaOutput)
+    cum::Tensor Linear::backward(const cum::Tensor& deltaOutput)
     {
         cum::runtime::sync();
         cum::functions::transform_deriv(
             cache.dz.data(), cache.z.data(), cache.z.size(), cum::functions::function_id::linear);
         cum::runtime::sync();
 
-        cum::Matrix cached_somewhat = cache.dz.cwiseProduct(deltaOutput);
-        cum::runtime::sync();
-
-        weights_.gradient += cached_somewhat * cache.x.transpose();
-        cum::runtime::sync();
-
-        biases_.gradient += cached_somewhat.rowwiseSum();
-        cum::runtime::sync();
-
-
-        return weights_().transpose() * cached_somewhat;
+        // cum::Matrix cached_somewhat = cache.dz.cwiseProduct(deltaOutput);
+        // cum::runtime::sync();
+        //
+        // weights_.gradient += cached_somewhat * cache.x.transpose();
+        // cum::runtime::sync();
+        //
+        // biases_.gradient += cached_somewhat.rowwiseSum();
+        // cum::runtime::sync();
+        //
+        //
+        // return weights_().transpose() * cached_somewhat;
     }
 
     void Linear::collect_parameters(std::vector<Parameter*>& params)

@@ -21,9 +21,9 @@ namespace yann::optimizers
 	void ADAM::step(Parameter& param)
 	{
 		if(!momentum.contains(&param))
-			momentum.emplace(&param, cum::Matrix::Zeros(param.rows(), param.cols()));
+			momentum.emplace(&param, cum::Tensor::Zeros({param.rows(), param.cols()}));
 		if(!second_momentum.contains(&param))
-			second_momentum.emplace(&param, cum::Matrix::Zeros(param.rows(), param.cols()));
+			second_momentum.emplace(&param, cum::Tensor::Zeros({param.rows(), param.cols()}));
 
 		current_step++;
 
@@ -36,8 +36,8 @@ namespace yann::optimizers
 		v = b2 * v + (1 - b2) * g.cwiseProduct(g);
 
 
-		cum::Tensor mhat = m / (1 - std::pow(b1, current_step));
-		cum::Tensor vhat = v / (1 - std::pow(b2, current_step));
+		cum::Tensor mhat = m / static_cast<cum::cumeric_t>(1 - std::pow(b1, current_step));
+		cum::Tensor vhat = v / static_cast<cum::cumeric_t>(1 - std::pow(b2, current_step));
 
 
 		param.values -= learning_rate * mhat / (vhat.sqrt() + cum::EPSILON);
@@ -67,8 +67,8 @@ namespace yann::optimizers
 			v = b2 * v + (1 - b2) * g.cwiseProduct(g);
 
 
-			cum::Tensor mhat = m / (1 - std::pow(b1, current_step));
-			cum::Tensor vhat = v / (1 - std::pow(b2, current_step));
+			cum::Tensor mhat = m / static_cast<cum::cumeric_t>(1 - std::pow(b1, current_step));
+			cum::Tensor vhat = v / static_cast<cum::cumeric_t>(1 - std::pow(b2, current_step));
 
 
 			param->values -= learning_rate * mhat / (vhat.sqrt() + cum::EPSILON);

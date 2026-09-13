@@ -13,7 +13,7 @@ namespace yann::optimizers
     {
     }
 
-    void SGD::step(cum::Matrix& params, cum::Matrix& grad)
+    void SGD::step(cum::Tensor& params, cum::Tensor& grad)
     {
     }
 

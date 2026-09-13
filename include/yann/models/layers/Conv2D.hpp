@@ -23,8 +23,8 @@ namespace yann::models::layers
         cum::Tensor forward(const cum::Tensor& input) override;
         cum::Tensor backward(const cum::Tensor& input) override;
 
-        cum::Matrix forward(const cum::Matrix& input) override {}
-        cum::Matrix backward(const cum::Matrix& input) override {}
+        // cum::Matrix forward(const cum::Matrix& input) override {}
+        // cum::Matrix backward(const cum::Matrix& input) override {}
 
         void collect_parameters(std::vector<Parameter*>& params) override {};
 

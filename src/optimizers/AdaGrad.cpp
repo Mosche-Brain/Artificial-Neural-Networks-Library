@@ -28,13 +28,13 @@ namespace yann::optimizers
 		if(sum_sq_g.empty())
 			for(Parameter* param : params)
 				if(!sum_sq_g.contains(param))
-					sum_sq_g.emplace(param, cum::Matrix(param->rows(), param->cols(), eps));
+					sum_sq_g.emplace(param, cum::Tensor({param->rows(), param->cols()}, param->type(), param->format()).fill(eps));
 		
 		for(Parameter* param : params)
 		{
-			cum::Matrix& w = param->values;
-			cum::Matrix& g = param->gradient;
-			cum::Matrix& v = sum_sq_g[param];
+			cum::Tensor& w = param->values;
+			cum::Tensor& g = param->gradient;
+			cum::Tensor& v = sum_sq_g[param];
 
 			v += g.square();
 

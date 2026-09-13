@@ -11,6 +11,7 @@
 #include "cum/runtime.hpp"
 #include "cum/memory.hpp"
 #include "cum/neural_primitives/Descriptor.hpp"
+#include "cum/neural_primitives/Memory.hpp"
 #include "cum/neural_primitives/tensor_operations.hpp"
 #include "cum/detail/vendor/oneapi/opaque_types.hpp"
 #include "cum/detail/vendor/oneapi/conversion_helpers.hpp"
@@ -245,6 +246,19 @@ namespace cum
 		return result;
 	}
 
+	cumeric_t Tensor::at(const Shape& indices) const
+	{
+		dim_t idx = compute_index(indices);
+
+		cumeric_t result;
+		dispatch_datatype(this->type(), [&]<typename T>(){
+			T value = static_cast<T*>(__data__)[idx];
+			result = static_cast<cumeric_t>(value);
+		});
+
+		return result;
+	}
+
 	/**------------------------------------------------------------------------------------------------
 	 *                                         Reductions
 	 *------------------------------------------------------------------------------------------------**/
@@ -364,6 +378,24 @@ namespace cum
     	neural_primitives::sqrt(result.__memr__->handle(), __memr__->handle(), result.__desc__->handle(), __desc__->handle());
 
     	return result;
+	}
+
+	Tensor Tensor::square()
+	{
+		Tensor result = *this;
+
+    	neural_primitives::sqrt(result.__memr__->handle(), __memr__->handle(), result.__desc__->handle(), __desc__->handle());
+
+    	return result;
+	}
+
+	Tensor& Tensor::square_in_place()
+	{
+		Tensor result = *this;
+
+    	neural_primitives::sqrt(result.__memr__->handle(), __memr__->handle(), result.__desc__->handle(), __desc__->handle());
+
+    	return *this;
 	}
 
 	/**------------------------------------------------------------------------------------------------

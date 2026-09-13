@@ -18,6 +18,6 @@ namespace yann::optimizers
 		std::unique_ptr<AdaGrad> create(cum::cumeric_t rate, cum::cumeric_t eps=1e-8);
 	private:
 		cum::cumeric_t eps;
-		std::unordered_map<Parameter*, cum::Matrix> sum_sq_g;
+		std::unordered_map<Parameter*, cum::Tensor> sum_sq_g;
 	};
 }

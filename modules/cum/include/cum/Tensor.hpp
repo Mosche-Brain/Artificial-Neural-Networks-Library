@@ -95,7 +95,8 @@ namespace cum
         }
 
         cumeric_t at(const Shape& indices);
-        
+        cumeric_t at(const Shape& indices) const;
+
         const cumeric_t* data() const;
         cumeric_t* data();
 
@@ -109,6 +110,9 @@ namespace cum
         cumeric_t mean();
         cumeric_t amean();
 
+        cumeric_t squaredNorm() {}
+        cumeric_t squared_norm() {}
+
         Tensor colwise_sum();
         Tensor rowwise_sum();
         Tensor channelwise_sum();
@@ -121,6 +125,8 @@ namespace cum
         Tensor cwiseProduct(const Tensor& tensor);
 
         Tensor sqrt();
+        Tensor square();
+        Tensor& square_in_place();
 
         Tensor& scale(cumeric_t scalar);
 

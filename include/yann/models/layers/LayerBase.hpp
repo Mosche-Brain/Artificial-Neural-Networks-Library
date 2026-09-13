@@ -56,8 +56,8 @@ namespace yann::models::layers
         virtual cum::Tensor forward(const cum::Tensor& input) {};
         virtual cum::Tensor backward(const cum::Tensor& input) {};
 
-        virtual cum::Matrix forward(const cum::Matrix& input) = 0;
-        virtual cum::Matrix backward(const cum::Matrix& deltaOutput) = 0;
+        virtual cum::Matrix forward(const cum::Matrix& input) {};
+        virtual cum::Matrix backward(const cum::Matrix& deltaOutput) {};
 
         virtual void collect_parameters(std::vector<Parameter*>& params) = 0;
         // virtual std::unique_ptr<LayerBase> getUnique() = 0;

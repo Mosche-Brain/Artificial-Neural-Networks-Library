@@ -18,6 +18,7 @@ namespace yann::optimizers
         virtual ~OptimizerBase() = default;
         // virtual void step(cum::Matrix& params, cum::Matrix& grad) {};
         virtual void step(cum::Matrix& params, cum::Matrix& grad) {};
+        virtual void step(cum::Tensor& params, cum::Tensor& grad) {};
         virtual void step(Parameter& param) {};
         virtual void step(std::vector<Parameter*>& params) = 0;
 

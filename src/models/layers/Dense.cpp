@@ -36,9 +36,9 @@ namespace yann::models::layers
     {
         this->weights_       = Parameter::Uniform(output_features, input_features);   /* neurons * input_length */
         this->biases_        = Parameter::Zeros(output_features, 1);                  /* Column-Vector */
-        this->cache.a       = cum::Matrix::Zeros(output_features, 1);                 /* Column-Vector */
-        this->cache.z   	= cum::Matrix::Zeros(output_features, 1);                 /* Column-Vector */
-        this->cache.x       = cum::Matrix::Zeros(input_features, 1);                  /* Column-Vector */
+        this->cache.a       = cum::Tensor::Zeros({output_features, 1});                 /* Column-Vector */
+        this->cache.z   	= cum::Tensor::Zeros({output_features, 1});                 /* Column-Vector */
+        this->cache.x       = cum::Tensor::Zeros({input_features, 1});                  /* Column-Vector */
         this->_initialized_ = true;
     }
 
@@ -64,10 +64,10 @@ namespace yann::models::layers
         {
             if constexpr(YANN_DENSE_FORWARD_REFERENCE_PATH)
             {
-                cum::Tensor weigths_tensor = cum::Tensor::take_memory({weights_.rows(), weights_.cols()}, weights_.values.data(), cum::default_type, cum::layout::IO);
-                cum::Tensor biases_tensor  = cum::Tensor::take_memory({biases_.rows(), biases_.cols()}, weights_.values.data(), cum::default_type, cum::layout::IO);
+                // cum::Tensor weigths_tensor = cum::Tensor::take_memory({weights_.rows(), weights_.cols()}, weights_.values.data(), cum::default_type, cum::layout::IO);
+                // cum::Tensor biases_tensor  = cum::Tensor::take_memory({biases_.rows(), biases_.cols()}, weights_.values.data(), cum::default_type, cum::layout::IO);
 
-                cum::Tensor Z = weigths_tensor * input + biases_tensor;
+                // cum::Tensor Z = weigths_tensor * input + biases_tensor;
 
                 // cum::Tensor Y =
             }
@@ -80,7 +80,8 @@ namespace yann::models::layers
 
     cum::Tensor Dense::backward(const cum::Tensor& deltaOutput)
     {
-
+        constexpr bool YANN_DENSE_BACKWARD_FUSED_PATH = true;
+        constexpr bool YANN_DENSE_BACKWARD_REFERENCE_PATH = true;
     }
 
 
