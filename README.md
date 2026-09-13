@@ -35,7 +35,7 @@ A lightweight, modular minimalistic and easy to use C++ library for machine lear
 
 ### 🐧 Linux and GNU/Linux
 ```bash
-git clone https://github.com/Czuowuek-SOS/Artificial-Neural-Networks-Library
+git clone https://github.com/Mosche-Brain/Artificial-Neural-Networks-Library
 mv Artificial-Neural-Networks-Library Yet-Another-Artificial-Neural-Networks-Library
 cd Yet-Another-Artificial-Neural-Networks-Library
 mkdir build
@@ -62,15 +62,15 @@ Probably almost, just like in linux and GNU/Linux (I guess).
 cmake_minimum_required(VERSION 3.10)
 project(gpt69)
 
-add_executable(${project_name} main.cpp)
-target_link_libraries(${project_name} PRIVATE YANN OpenMP::OpenMP_CXX cum::Core)
+add_executable(${PROJECT_NAME} main.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE YANN cum)
 
 if(BUILD_USE_MKL)
-    target_link_libraries(${project_name} PRIVATE cum::MKL cumL)
-    target_compile_definitions(${project_name} PRIVATE fsycl fPIC)
-    target_compile_options(${project_name} PRIVATE -fsycl -qopenmp)
+    target_link_libraries(${PROJECT_NAME} PRIVATE cum::MKL)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE fsycl fPIC)
+    target_compile_options(${PROJECT_NAME} PRIVATE -fsycl -qopenmp)
 else()
-    target_compile_options(${project_name} PRIVATE -fopenmp)
+    target_compile_options(${PROJECT_NAME} PRIVATE -fopenmp)
 endif()
 ```
 
@@ -89,10 +89,31 @@ int main()
     
     /* you can put there some strange code */
     
-    cum::decum() // Putting this isn't necessary
+    cum::decum(); // Putting this isn't necessary
 }
 ```
 
+### Manipulating tensors
+
+```cpp
+#include <cum/Tensor.hpp>
+#include <cum/cum.hpp>
+
+int main()
+{
+    cum::Tensor A({6, 9, 7} cum::datatype::BF16, cum::layout::BSC);
+    cum::Tensor B({6, 9, 7} cum::datatype::BF16, cum::layout::BSC);
+
+    A.fill(67._c);
+    B.fill(0.2137_c);
+    
+    cum::Tensor C = A * B;
+    
+    // You can try to print the result somehow
+
+    return 67;
+}
+```
 
 ### Creating and fitting sequential model
 * In constructor of `yann::models::Sequential` class your can put initializer list filled with fabric methods of various layers types.
@@ -173,17 +194,23 @@ Full documentation will be avaible [here](brain.mosche.dev/docs)
 * ✅ GPU acceleration
 * ✅ Templates-free math framework
 * ✅ OneAPI support
-* ⚠️ N-dimensional Tensors
+* ✅ N-dimensional Tensors *(almost)*
+* ⚠️ BF16 support
 * ⚠️ Fused kernels for neural networks
 * ⚠️ Dynamic computational graphs
 * ⚠️ Convolutional layers
+* ⚠️ Compile time code traces pruning
+* ⚠️ Compiling code (work in progress)
 * ⚠️ [Dedicated graphical envionment](https://github.com/Mosche-Brain/MLStudio) (work in progress)
 * ❌ CUDA support
 * ❌ ROCm support
 * ❌ BF16, Q8 support
-* ❌ Fully working Python binding
+* ❌ Python binding
+* ❌ C binding
+* ❌ Reasonable unit tests
 * ❌ Recurrent Neural Networks
 * ❌ Transformers
+* ❌ Wielogłowicowa uwaga
 * ❌ Built in telemetry
 
 ## 🧷 Credits and used technologies
@@ -201,6 +228,7 @@ Full documentation will be avaible [here](brain.mosche.dev/docs)
 
 * Intel Core Ultra 5 250k plus
 * Intel Arc B580
+* GX-420GI Radeon R7E
 
 ### 🧼 Generative AI assistance in this project
 

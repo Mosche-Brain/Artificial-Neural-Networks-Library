@@ -15,6 +15,17 @@
 
 namespace cum
 {
+    enum class Axis
+    {
+        Batches,
+        Channels,
+        Depth,
+        Height,
+        Width,
+        Rows = Height,
+        Cols = Width,
+    };
+
     class Tensor
     {
     public:
@@ -54,6 +65,17 @@ namespace cum
         Shape shape() const;
         layout format() const;
         datatype type() const;
+
+        bool has(Axis axis) const;
+        dim_t extent(Axis axis) const;
+
+        dim_t batches() const;
+        dim_t channels() const;
+        dim_t depth() const;
+        dim_t height() const;
+        dim_t width() const;
+        dim_t rows() const;    // alias height()
+        dim_t cols() const;    // alias width()
 
         std::unique_ptr<neural_primitives::Descriptor>& descriptor();
         std::unique_ptr<neural_primitives::Memory>& memory();

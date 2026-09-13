@@ -22,7 +22,7 @@ namespace yann::loss
     {
     public:
         virtual ~LossBase() = default;
-        virtual void compute(const cum::Tensor& predicted, const cum::Matrix& Tensor) = 0;
+        virtual void compute(const cum::Tensor& predicted, const cum::Tensor& target) = 0;
         // virtual void compute(const cum::Matrix& predicted, const cum::Matrix& target) = 0;
 
 

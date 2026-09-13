@@ -150,6 +150,51 @@ namespace cum
 	    return __desc__->type();
     }
 
+	bool Tensor::has(Axis axis) const
+	{
+
+	}
+
+	dim_t Tensor::extent(Axis axis) const
+	{
+		
+	}
+
+	dim_t Tensor::batches() const
+	{
+
+    }
+
+	dim_t Tensor::channels() const
+    {
+
+    }
+
+	dim_t Tensor::depth() const
+    {
+
+    }
+
+	dim_t Tensor::height() const
+    {
+
+    }
+
+	dim_t Tensor::width() const
+    {
+
+    }
+
+	dim_t Tensor::rows() const
+    {
+	    // alias height()
+    }
+
+	dim_t cols() const
+    {
+	    // alias width()
+    }
+
 	std::unique_ptr<neural_primitives::Descriptor>& Tensor::descriptor()
 	{
 		return __desc__;
