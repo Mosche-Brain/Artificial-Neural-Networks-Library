@@ -5,8 +5,8 @@
  * @date:   13 September 2026 22:34:31
  */
 
-#ifndef YANN_TENSOR_H
-#define YANN_TENSOR_H
+#ifndef CUM_TENSOR_H
+#define CUM_TENSOR_H
 
 #include "cum/core.h"
 
@@ -19,8 +19,11 @@ typedef struct cum_shape_t cum_shape_t;
 typedef struct cum_layout_t cum_layout_t;
 
 __event__ cum_create_tensor(cum_shape_t* shape);
+__event__ cum_destroy_tensor(cum_tensor_t* shape);
 
-void __
+__event__ cum_copy_tensor(cum_tensor_t* dst, cum_tensor_t* src);
+
+__event__ cum_tensor_shape(cum_shape_t* shape, cum_tensor_t* tensor);
 
 __event__ cum_tensor_mul(cum_tensor_t* C, cum_tensor_t* A, cum_tensor_t* B);
 __event__ cum_tensor_add(cum_tensor_t* C, cum_tensor_t* A, cum_tensor_t* B);
@@ -31,4 +34,4 @@ __event__ cum_tensor_mmul(cum_tensor_t* C, cum_tensor_t* A, cum_tensor_t* B);
 __event__ cum_tensor_scale(cum_tensor_t* dst, cum_tensor_t* src, cumeric_t scal);
 __event__ cum_tensor_trans(cum_tensor_t* dst, cum_tensor_t* src);
 
-#endif //YANN_TENSOR_H
+#endif //CUM_TENSOR_H

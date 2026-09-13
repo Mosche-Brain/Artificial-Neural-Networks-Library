@@ -53,8 +53,8 @@ namespace cum
         static Tensor make_scalar(datatype dtype = default_type, layout layout = layout::X);
 
         static Tensor Random(Shape shape, cumeric_t min = -1_c, cumeric_t max = 1_c, datatype dtype = datatype::FP32, layout layout = layout::ANY);
-        static Tensor Zeros(Shape shape, datatype dtype = datatype::FP32, layout layout = layout::ANY);
-        static Tensor Ones(Shape shape, datatype dtype = datatype::FP32, layout layout = layout::ANY);
+        static Tensor Zeros(const Shape& shape, datatype dtype = datatype::FP32, layout layout = layout::ANY);
+        static Tensor Ones(const Shape& shape, datatype dtype = datatype::FP32, layout layout = layout::ANY);
         static Tensor Linspace(cumeric_t start, cumeric_t end, dim_t num); // vector
 
         /* getters */

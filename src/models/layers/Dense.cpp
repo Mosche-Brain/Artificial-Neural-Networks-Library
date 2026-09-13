@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include <print>
 
 #include <cum/memory.hpp>
 #include <cum/runtime.hpp>
@@ -37,11 +38,19 @@ namespace yann::models::layers
 
     void Dense::initParameters(int output_features, int input_features)
     {
+        std::println("Initializing Params");
+        cum::runtime::sync();
         this->weights_       = Parameter::Uniform(output_features, input_features);   /* neurons * input_length */
+        cum::runtime::sync();
+        std::println("initialized weights");
         this->biases_        = Parameter::Zeros(output_features, 1);                  /* Column-Vector */
-        this->cache.a       = cum::Tensor::Zeros({output_features, 1});                 /* Column-Vector */
-        this->cache.z   	= cum::Tensor::Zeros({output_features, 1});                 /* Column-Vector */
-        this->cache.x       = cum::Tensor::Zeros({input_features, 1});                  /* Column-Vector */
+        std::println("initialized biases");
+        cum::runtime::sync();
+        this->cache.a       = cum::Tensor({output_features, 1}, cum::default_type, cum::layout::IO);                 /* Column-Vector */
+        this->cache.z   	= cum::Tensor({output_features, 1}, cum::default_type, cum::layout::IO);                 /* Column-Vector */
+        this->cache.x       = cum::Tensor({input_features, 1}, cum::default_type, cum::layout::IO);                  /* Column-Vector */
+        std::println("initialized cache");
+        cum::runtime::sync();
         this->_initialized_ = true;
     }
 
@@ -72,6 +81,8 @@ namespace yann::models::layers
             {
                 // cum::Tensor weigths_tensor = cum::Tensor::take_memory({weights_.rows(), weights_.cols()}, weights_.values.data(), cum::default_type, cum::layout::IO);
                 // cum::Tensor biases_tensor  = cum::Tensor::take_memory({biases_.rows(), biases_.cols()}, weights_.values.data(), cum::default_type, cum::layout::IO);
+                std::println("weigths {}x{}", weights_.rows(), weights_.cols());
+                std::println("input {}x{}", input.rows(), input.cols());
 
                 cache.z = weights_.values * input;
                 cache.z += biases_.values; // with broadcast

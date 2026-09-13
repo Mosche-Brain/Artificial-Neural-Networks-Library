@@ -27,7 +27,7 @@
 #include "cum/neural_primitives/elementwise.hpp"
 
 /* This implementation have a lot of redundant code */
-
+#include <print>
 namespace cum
 {
 	/**------------------------------------------------------------------------------------------------
@@ -82,18 +82,59 @@ namespace cum
 
 	Tensor Tensor::Random(Shape shape, cumeric_t min, cumeric_t max, datatype dtype, layout layout)
 	{
+    	Tensor tensor;
+    	tensor.__desc__ = std::make_unique<neural_primitives::Descriptor>(shape, dtype, layout);
+    	dim_t count = tensor.lenght();
 
+    	float* temp = sycl::malloc_shared<float>(count, internal::device(), internal::sycl_context());
+
+    	float f_min = static_cast<float>(min);
+    	float f_max = static_cast<float>(max);
+
+    	oneapi::mkl::rng::philox4x32x10 engine(internal::queue(), 2137);
+    	oneapi::mkl::rng::uniform<float> dist(f_min, f_max);
+    	sycl::event rng_event = oneapi::mkl::rng::generate(dist, engine, count, temp);
+
+    	sycl::event kernel_event;
+
+    	tensor.__memr__ = std::make_unique<neural_primitives::Memory>(*tensor.__desc__);
+    	tensor.__data__ = tensor.__memr__->handle().memory.get_data_handle();
+
+    	void* data = tensor.__data__;
+
+    	dispatch_datatype(tensor.type(), [&]<typename T>(){
+			kernel_event = internal::queue().submit([&](sycl::handler& cgh) {
+				cgh.depends_on(rng_event);
+				cgh.parallel_for(sycl::range<1>(count), [=](sycl::id<1> idx) {
+					static_cast<T*>(data)[idx] = static_cast<T>(temp[idx]);
+				});
+			});
+		});
+
+    	kernel_event.wait();
+
+		sycl::free(temp, internal::sycl_context());
+
+    	return tensor;
 	}
 
-	Tensor Tensor::Zeros(Shape shape, datatype dtype, layout layout)
+	Tensor Tensor::Zeros(const Shape& shape, datatype dtype, layout layout)
 	{
-		Tensor tensor(shape, dtype, layout);
+		// Tensor tensor(shape, dtype, layout);
+    	std::println("Tensor::Zeros fabrique called");
+		Tensor tensor;
+    	tensor.__desc__ = std::make_unique<neural_primitives::Descriptor>(shape, dtype, layout);
+    	tensor.__memr__ = std::make_unique<neural_primitives::Memory>(*tensor.__desc__);
+    	tensor.__data__ = tensor.__memr__->handle().memory.get_data_handle();
+
+    	runtime::sync();
+
     	tensor.fill(0);
 
     	return tensor;
 	}
 
-	Tensor Tensor::Ones(Shape shape, datatype dtype, layout layout)
+	Tensor Tensor::Ones(const Shape& shape, datatype dtype, layout layout)
 	{
 		Tensor tensor(shape, dtype, layout);
     	tensor.fill(1);
