@@ -19,6 +19,7 @@ TEST_CASE("Tensor constructor exposes shape, type and layout")
 {
     cum::cum(cum::DEVICE::CPU);
     cum::Tensor tensor({2, 3}, cum::default_type, cum::layout::IO);
+    tensor.fill(7);
 
     REQUIRE(tensor.shape() == (cum::Shape{2, 3}));
     REQUIRE(tensor.dims() == 2);
@@ -31,6 +32,9 @@ TEST_CASE("Tensor constructor exposes shape, type and layout")
     REQUIRE(tensor.has(cum::Axis::Rows));
     REQUIRE(tensor.extent(cum::Axis::Rows) == 2);
     REQUIRE(tensor.extent(cum::Axis::Cols) == 3);
+    REQUIRE(tensor.at({1, 2}) == 7);
+    const cum::Tensor& const_tensor = tensor;
+    REQUIRE(const_tensor.at({1, 2}) == 7);
     cum::decum();
 }
 

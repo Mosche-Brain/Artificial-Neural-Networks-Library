@@ -138,7 +138,7 @@ namespace cum
 	 *                                         Constructors
 	 *------------------------------------------------------------------------------------------------**/
 
-    Tensor::Tensor(const Shape& shape, datatype dtype, layout layout)
+	Tensor::Tensor(const Shape& shape, datatype dtype, layout layout)
 		: __desc__(std::make_unique<neural_primitives::Descriptor>(shape, dtype, layout)),
 		  __memr__(std::make_unique<neural_primitives::Memory>(*__desc__)),
 		  __data__(__memr__->handle().memory.get_data_handle())
@@ -146,20 +146,48 @@ namespace cum
 
 	}
 
-    Tensor::Tensor(const Tensor& tensor)
-    {
+	Tensor::Tensor(const Tensor& tensor)
+	{
 		__desc__ = std::make_unique<neural_primitives::Descriptor>(tensor.shape(), tensor.type(), tensor.format());
 
-    	dispatch_datatype(this->type(), [&]<typename T>(){
-    		__data__ = sycl::malloc_shared<T>(tensor.lenght(), internal::device(), internal::sycl_context());
-    	});
+		dispatch_datatype(this->type(), [&]<typename T>(){
+			__data__ = sycl::malloc_shared<T>(tensor.lenght(), internal::device(), internal::sycl_context());
+		});
 
 		internal::queue().memcpy(__data__, tensor.__data__, tensor.lenght() * datatype_size(this->type()));
 
-    	__memr__ = std::make_unique<neural_primitives::Memory>(*__desc__, __data__);
-    }
+		__memr__ = std::make_unique<neural_primitives::Memory>(*__desc__, __data__);
+	}
 
-    Tensor::Tensor(Tensor&& tensor) noexcept : __desc__(std::move(tensor.__desc__)), __memr__(std::move(tensor.__memr__)), __data__(tensor.__data__)
+	Tensor::Tensor(Tensor&& tensor) noexcept : __desc__(std::move(tensor.__desc__)), __memr__(std::move(tensor.__memr__)), __data__(tensor.__data__)
+	{
+
+	}
+
+
+	Tensor::Tensor(datatype dtype, layout layout)
+	{
+
+	}
+
+	Tensor::Tensor(dim_t lenght, datatype dtype, layout layout) : Tensor(Shape{lenght}, dtype, layout)
+	{
+	}
+
+	Tensor::Tensor(dim_t rows, dim_t cols, datatype dtype , layout layout) : Tensor(Shape{rows, cols}, dtype, layout)
+	{
+	}
+
+	Tensor::Tensor(dim_t axis0, dim_t axis1, dim_t axis2, datatype dtype, layout layout) : Tensor(Shape{axis0, axis1, axis2}, dtype, layout)
+	{
+	}
+
+	Tensor::Tensor(dim_t axis0, dim_t axis1, dim_t axis2, dim_t axis3, datatype dtype, layout layout) : Tensor(Shape{axis0, axis1, axis2, axis3}, dtype, layout)
+	{
+
+	}
+
+	Tensor::Tensor(dim_t axis0, dim_t axis1, dim_t axis2, dim_t axis3, dim_t axis4, datatype dtype, layout layout) : Tensor(Shape{axis0, axis1, axis2, axis3, axis4}, dtype, layout)
     {
 
     }
@@ -263,14 +291,35 @@ namespace cum
 
 	Tensor Tensor::make_vector(dim_t lenght, datatype dtype, layout layout)
     {
-		return Tensor({lenght}, dtype, layout);
+		return Tensor(Shape{lenght}, dtype, layout);
     }
 
 	Tensor Tensor::make_scalar(datatype dtype, layout layout)
     {
-		return Tensor({1}, dtype, layout);
+		return Tensor(Shape{1}, dtype, layout);
     }
 
+
+	/**------------------------------------------------------------------------------------------------
+	 *                                         Memory
+	 *------------------------------------------------------------------------------------------------**/
+
+	Tensor& Tensor::prefetch()
+	{
+		memory::prefetch(__data__, this->size());
+		return *this;
+	}
+
+	Tensor& Tensor::to_host()
+	{
+
+	}
+
+	Tensor& Tensor::to_device()
+	{
+		memory::prefetch(__data__, this->size());
+		return *this;
+	}
 
 	/**------------------------------------------------------------------------------------------------
 	 *                                         Getters
@@ -571,6 +620,13 @@ namespace cum
     	internal::stream().wait();
     	return C;
     }
+
+	Tensor& Tensor::scale(cumeric_t scalar)
+	{
+		*this *= scalar;
+
+		return *this;
+	}
 
 	Tensor Tensor::cwiseProduct(const Tensor& tensor)
 	{

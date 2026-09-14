@@ -30,12 +30,19 @@ namespace cum
     {
     public:
         /* Constructors */
-        Tensor(const Shape& shape, datatype dtype = datatype::FP32, layout layout = layout::ANY); // FP32, ANY
-		~Tensor();
+        Tensor(const Shape& shape, datatype dtype = default_type, layout layout = layout::ANY); // FP32, ANY
+
+        Tensor(datatype dtype = default_type, layout layout = layout::ANY); // scalar constructor
+        Tensor(dim_t lenght, datatype dtype = default_type, layout layout = layout::X); // vector constructor
+        Tensor(dim_t rows, dim_t cols, datatype dtype = default_type, layout layout = layout::NC); // Matrix Constructor
+        Tensor(dim_t axis0, dim_t axis1, dim_t axis2, datatype dtype = default_type, layout layout = layout::NCHW); // 3-rd rank tensor constructor
+        Tensor(dim_t axis0, dim_t axis1, dim_t axis2, dim_t axis3, datatype dtype = default_type, layout layout = layout::NCHW); // 4-th rank tensor constructor
+        Tensor(dim_t axis0, dim_t axis1, dim_t axis2, dim_t axis3, dim_t axis4, datatype dtype = default_type, layout layout = layout::NCDHW); // 5-th rank tensor constructor
 
         Tensor() = default;
         Tensor(const Tensor& tensor);
         Tensor(Tensor&& tensor) noexcept;
+		~Tensor();
 
         /* fabriques */
 
@@ -56,6 +63,14 @@ namespace cum
         static Tensor Zeros(const Shape& shape, datatype dtype = datatype::FP32, layout layout = layout::ANY);
         static Tensor Ones(const Shape& shape, datatype dtype = datatype::FP32, layout layout = layout::ANY);
         static Tensor Linspace(cumeric_t start, cumeric_t end, dim_t num); // vector
+
+        /* Memory */
+
+        Tensor& prefetch();
+
+        Tensor& to_host();
+
+        Tensor& to_device();
 
         /* getters */
 
