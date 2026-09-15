@@ -7,7 +7,10 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 find_package(TBB CONFIG REQUIRED)
 find_package(MKL CONFIG REQUIRED)
-find_package(dnnl CONFIG REQUIRED)
+find_package(dnnl CONFIG REQUIRED
+    PATHS "${CUM_ONEDNN_INSTALL_DIR}/lib/cmake/dnnl"
+    NO_DEFAULT_PATH
+)
 find_package(oneDPL CONFIG REQUIRED)
 
 add_library(${CUM_PROJECT_NAME}_MKL STATIC

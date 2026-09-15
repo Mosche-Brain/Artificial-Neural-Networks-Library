@@ -69,6 +69,19 @@ set(CUM_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 set(CUM_GENERATED_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 set(CUM_PROJECT_NAME cum)
 
+set(CUM_THIRDPARTY_DIR
+    "${CMAKE_CURRENT_LIST_DIR}/../../thirdparty"
+    CACHE PATH "CUM third-party dependency root"
+)
+set(CUM_ONEDNN_ROOT
+    "${CUM_THIRDPARTY_DIR}/oneDNN"
+    CACHE PATH "oneDNN source and install root"
+)
+set(CUM_ONEDNN_INSTALL_DIR
+    "${CUM_ONEDNN_ROOT}/install"
+    CACHE PATH "oneDNN installation prefix"
+)
+
 
 configure_file(
     "${CUM_SOURCE_DIR}/config.hpp.in"
@@ -76,6 +89,11 @@ configure_file(
 )
 
 add_subdirectory(sources)
+
+option(BUILD_C_BINDING "Build the C language binding" ON)
+if(BUILD_C_BINDING)
+    add_subdirectory(bindings/C)
+endif()
 
 if(BUILD_USE_MKL)
     add_executable(example examples/test.cpp)
