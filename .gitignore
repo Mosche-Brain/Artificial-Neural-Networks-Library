@@ -4,6 +4,8 @@
 /.datasets/
 /.external/
 /modules/cum/build/
+/modules/cum/bindings/python/dist
+/modules/cum/bindings/python/src/cumpy.egg-info
 /build/
 thirdparty/*
 thirdparty/Easy3D

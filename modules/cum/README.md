@@ -27,3 +27,4 @@ Vendor agnostic C++ library providing linear algebra, eltwise operations, conven
 * ~~cumAGI~~
 * ~~cumMileniumRun~~
 * Cumming Simulator 2023
+* Cumming Simulator 2026

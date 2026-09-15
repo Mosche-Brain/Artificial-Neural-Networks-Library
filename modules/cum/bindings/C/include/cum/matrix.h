@@ -5,7 +5,9 @@
  * @date:   13 September 2026 22:33:57
  */
 
-#ifndef YANN_MATRIX_H
-#define YANN_MATRIX_H
+#ifndef CUM_MATRIX_H
+#define CUM_MATRIX_H
+
+typedef struct cum_matrix_t cum_matrix_t;
 
 #endif //YANN_MATRIX_H

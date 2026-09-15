@@ -5,8 +5,8 @@
  * @date:   13 September 2026 22:28:16
  */
 
-#ifndef YANN_CORE_H
-#define YANN_CORE_H
+#ifndef CUM_CORE_H
+#define CUM_CORE_H
 
 typedef float cumeric_t;
 

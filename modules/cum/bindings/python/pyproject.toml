@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cumpy"
+version = "0.1.0"
+description = "CumPy numerical library for python"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "Apache-2.0"
+authors = [
+    {name = "Świadomy Mężczyzna"}
+]
+dependencies = [
+]
+
+[project.urls]
+Homepage = "https://brain.mosche.dev"

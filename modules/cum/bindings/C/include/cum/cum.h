@@ -5,7 +5,7 @@
  * @date:   13 September 2026 22:25:47
  */
 
-#ifndef YANN_CUM_H
-#define YANN_CUM_H
+#ifndef CUM_CUM_H
+#define CUM_CUM_H
 
 #endif //YANN_CUM_H
