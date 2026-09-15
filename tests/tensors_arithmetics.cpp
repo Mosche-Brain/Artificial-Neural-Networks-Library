@@ -18,7 +18,7 @@ namespace
         REQUIRE(tensor.lenght() == static_cast<cum::dim_t>(expected.size()));
         std::size_t index = 0;
         for(const auto value : expected)
-            REQUIRE_THAT(tensor.data()[index++], Catch::Matchers::WithinRel(value, static_cast<cum::cumeric_t>(1e-5)));
+            REQUIRE_THAT(tensor.data<cum::cumeric_t>()[index++], Catch::Matchers::WithinRel(value, static_cast<cum::cumeric_t>(1e-5)));
     }
 }
 
@@ -28,10 +28,10 @@ TEST_CASE("Tensor binary operators perform arithmetic")
     cum::Tensor a({2, 2}, cum::default_type, cum::layout::IO);
     cum::Tensor b({2, 2}, cum::default_type, cum::layout::IO);
     cum::Tensor identity({2, 2}, cum::default_type, cum::layout::IO);
-    a.data()[0] = 1; a.data()[1] = 2; a.data()[2] = 3; a.data()[3] = 4;
+    a.data<cum::cumeric_t>()[0] = 1; a.data<cum::cumeric_t>()[1] = 2; a.data<cum::cumeric_t>()[2] = 3; a.data<cum::cumeric_t>()[3] = 4;
     b.fill(2);
-    identity.data()[0] = 1; identity.data()[1] = 0;
-    identity.data()[2] = 0; identity.data()[3] = 1;
+    identity.data<cum::cumeric_t>()[0] = 1; identity.data<cum::cumeric_t>()[1] = 0;
+    identity.data<cum::cumeric_t>()[2] = 0; identity.data<cum::cumeric_t>()[3] = 1;
 
     require_values(a + b, {3, 4, 5, 6});
     require_values(a - b, {-1, 0, 1, 2});
@@ -43,9 +43,9 @@ TEST_CASE("Tensor binary operators perform arithmetic")
 TEST_CASE("Tensor scalar operators work in both operand orders")
 {
     cum::cum(cum::DEVICE::CPU);
-    cum::Tensor tensor({2}, cum::default_type, cum::layout::X);
-    tensor.data()[0] = 2;
-    tensor.data()[1] = 4;
+    cum::Tensor tensor(cum::Shape{2}, cum::default_type, cum::layout::X);
+    tensor.data<cum::cumeric_t>()[0] = 2;
+    tensor.data<cum::cumeric_t>()[1] = 4;
 
     require_values(tensor + 1, {3, 5});
     require_values(1 + tensor, {3, 5});
@@ -61,8 +61,8 @@ TEST_CASE("Tensor scalar operators work in both operand orders")
 TEST_CASE("Tensor compound operators mutate the left operand")
 {
     cum::cum(cum::DEVICE::CPU);
-    cum::Tensor tensor({2}, cum::default_type, cum::layout::X);
-    cum::Tensor other({2}, cum::default_type, cum::layout::X);
+    cum::Tensor tensor(cum::Shape{2}, cum::default_type, cum::layout::X);
+    cum::Tensor other(cum::Shape{2}, cum::default_type, cum::layout::X);
     tensor.fill(4);
     other.fill(2);
 

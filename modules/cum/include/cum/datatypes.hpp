@@ -15,6 +15,9 @@
 #include <stdfloat>
 #include <cstdint>
 
+#include "Core.hpp"
+#include "Core.hpp"
+
 #if CUM_USE_MKL
 #include <sycl/sycl.hpp>
 #include <sycl/ext/oneapi/bfloat16.hpp>
@@ -44,6 +47,9 @@ namespace cum
     typedef struct fp8_e4_3m_impl
     {
         unsigned char data;
+
+        fp8_e4_3m_impl(float val) : data( (unsigned char) (val * 255)) {}
+
         operator float() 
         { 
             return 69;

@@ -12,6 +12,7 @@
 #include "cum/neural_primitives/Descriptor.hpp"
 #include "cum/neural_primitives/Memory.hpp"
 #include "cum/neural_primitives/opaque_types.hpp"
+#include "functions/function_id.hpp"
 
 namespace cum
 {
@@ -32,7 +33,7 @@ namespace cum
         /* Constructors */
         Tensor(const Shape& shape, datatype dtype = default_type, layout layout = layout::ANY); // FP32, ANY
 
-        Tensor(datatype dtype = default_type, layout layout = layout::ANY); // scalar constructor
+        Tensor(cumeric_t value, datatype dtype = default_type, layout layout = layout::X); // scalar constructor
         Tensor(dim_t lenght, datatype dtype = default_type, layout layout = layout::X); // vector constructor
         Tensor(dim_t rows, dim_t cols, datatype dtype = default_type, layout layout = layout::NC); // Matrix Constructor
         Tensor(dim_t axis0, dim_t axis1, dim_t axis2, datatype dtype = default_type, layout layout = layout::NCHW); // 3-rd rank tensor constructor
@@ -109,12 +110,30 @@ namespace cum
             return static_cast<const T*>(__data__)[idx];
         }
 
+
+
+        const void* data() const; // I should add templated data getter
+        void* data();
+
+
+
+        template<typename T>
+        T* data() { return static_cast<T*>(__data__); }
+
+        template<typename T>
+        const T* data() const { return static_cast<const T*>(__data__); }
+
         cumeric_t at(const Shape& indices);
         cumeric_t at(const Shape& indices) const;
 
-        const cumeric_t* data() const; // I should add templated data getter
-        cumeric_t* data();
 
+        cumeric_t& operator () (const Shape& indices);
+        const cumeric_t& operator () (const Shape& indices) const;
+        
+        cumeric_t operator ()(dim_t row, dim_t col) const;
+        cumeric_t operator ()(dim_t idx0, dim_t idx1, dim_t idx2) const;
+        cumeric_t operator ()(dim_t idx0, dim_t idx1, dim_t idx2, dim_t idx3) const;
+        cumeric_t operator ()(dim_t idx0, dim_t idx1, dim_t idx2, dim_t idx3, dim_t idx4) const;
 
         /* Reshaping */
         Tensor slice(const Shape& indices);
@@ -136,6 +155,9 @@ namespace cum
         Tensor channelwise_sum();
 
         /* elementwise */
+
+        Tensor elementwise(functions::function_id function) const;
+        Tensor& elementwise_in_place(functions::function_id function);
 
         Tensor& fill(cumeric_t scalar);
 

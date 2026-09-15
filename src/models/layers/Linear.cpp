@@ -6,7 +6,7 @@
 
 #include "cum/runtime.hpp"
 #include "cum/functions/transform.hpp"
-#include "logging/Logger.hpp"
+#include "yann/logging/Logger.hpp"
 
 #define ENABLE_RUNTIME_CHECKS true
 
@@ -32,22 +32,22 @@ namespace yann::models::layers
 
     cum::Tensor Linear::forward(const cum::Tensor& input)
     {
-        if constexpr(ENABLE_RUNTIME_CHECKS)
-        {
-            if(input.rows() != weights_.cols())
-            {
-                throw std::runtime_error("Input dimension mismatch: " + std::to_string(input.rows()) + " != " + std::to_string(weights_.cols()));
-            }
-        }
-
-        if (input.cols() != cache.x.cols())
-        {
-            cache.resize(cache.x.rows(), cache.z.rows(), input.cols());
-            cache.dz = cum::Tensor::Zeros({cache.z.rows(), input.cols()}, cum::default_type, cum::layout::NC);
-        }
-
-        YANN_LOG(4, "caching inputs", "");
-        cache.x = input;
+        // if constexpr(ENABLE_RUNTIME_CHECKS)
+        // {
+        //     if(input.rows() != weights_.cols())
+        //     {
+        //         throw std::runtime_error("Input dimension mismatch: " + std::to_string(input.rows()) + " != " + std::to_string(weights_.cols()));
+        //     }
+        // }
+        //
+        // if (input.cols() != cache.x.cols())
+        // {
+        //     cache.resize(cache.x.rows(), cache.z.rows(), input.cols());
+        //     cache.dz = cum::Tensor::Zeros({cache.z.rows(), input.cols()}, cum::default_type, cum::layout::NC);
+        // }
+        //
+        // YANN_LOG(4, "caching inputs", "");
+        // cache.x = input;
 
         cum::runtime::sync();
         //
@@ -68,31 +68,31 @@ namespace yann::models::layers
         // }
         // else
         // {
-            YANN_LOG(4, "Performing (weights_ * input) + biases_", "");
-            // cache.z = (weights_() * input) += biases_();;
-            cache.z = weights_() * cache.x;
-            cum::runtime::sync();
-            cum::LinearAlgebra::addRowVectorInPlace(
-                cache.z.data(),
-                biases_().data(),
-                cache.z.rows(),
-                cache.z.cols());
-
-            cum::runtime::sync();
-
-        // }
-
-        YANN_LOG(4, "forward pass succeed", "");
-        cum::runtime::sync();
-        return cache.z;
+        //     YANN_LOG(4, "Performing (weights_ * input) + biases_", "");
+        //     // cache.z = (weights_() * input) += biases_();;
+        //     cache.z = weights_() * cache.x;
+        //     cum::runtime::sync();
+        //     cum::LinearAlgebra::addRowVectorInPlace(
+        //         cache.z.data<cum::cumeric_t>(),
+        //         biases_().data<cum::cumeric_t>(),
+        //         cache.z.rows(),
+        //         cache.z.cols());
+        //
+        //     cum::runtime::sync();
+        //
+        // // }
+        //
+        // YANN_LOG(4, "forward pass succeed", "");
+        // cum::runtime::sync();
+        // return cache.z;
     }
 
     cum::Tensor Linear::backward(const cum::Tensor& deltaOutput)
     {
-        cum::runtime::sync();
-        cum::functions::transform_deriv(
-            cache.dz.data(), cache.z.data(), cache.z.size(), cum::functions::function_id::linear);
-        cum::runtime::sync();
+        // cum::runtime::sync();
+        // cum::functions::transform_deriv(
+        //     cache.dz.data(), cache.z.data(), cache.z.size(), cum::functions::function_id::linear);
+        // cum::runtime::sync();
 
         // cum::Matrix cached_somewhat = cache.dz.cwiseProduct(deltaOutput);
         // cum::runtime::sync();

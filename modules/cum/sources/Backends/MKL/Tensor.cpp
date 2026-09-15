@@ -165,9 +165,9 @@ namespace cum
 	}
 
 
-	Tensor::Tensor(datatype dtype, layout layout)
+	Tensor::Tensor(const cumeric_t value, datatype dtype, layout layout) : Tensor(Shape{1}, dtype, layout)
 	{
-
+		fill(value);
 	}
 
 	Tensor::Tensor(dim_t lenght, datatype dtype, layout layout) : Tensor(Shape{lenght}, dtype, layout)
@@ -250,17 +250,28 @@ namespace cum
     	return tensor;
 	}
 
-	Tensor Tensor::Linspace(cumeric_t start, cumeric_t end, dim_t num)
+	Tensor Tensor::Linspace(cumeric_t start, const cumeric_t end, dim_t num)
 	{
 		if(num <= 0)
 			throw std::invalid_argument("Linspace requires a positive number of elements");
 
-		Tensor tensor({num}, default_type, layout::X);
-		auto* values = tensor.data();
-		const cumeric_t step = num == 1 ? cumeric_t(0) :
-			(end - start) / static_cast<cumeric_t>(num - 1);
-		for(dim_t i = 0; i < num; ++i)
-			values[i] = start + static_cast<cumeric_t>(i) * step;
+		Tensor tensor(cum::Shape{num}, default_type, layout::X);
+		void* values = tensor.data();
+		const cumeric_t step = num == 1 ? cumeric_t(0) : (end - start) / static_cast<cumeric_t>(num - 1);
+		// for(dim_t i = 0; i < num; ++i)
+			// static_cast<cu>(values)[i] = start + static_cast<cumeric_t>(i) * step;
+
+		dispatch_datatype(tensor.type(), [&]<typename T>() -> void
+		{
+			internal::queue().submit([&](sycl::handler& cgh) -> void
+			{
+				cgh.parallel_for(sycl::range<1>(num), [=](sycl::id<1> idx) -> void {
+					static_cast<T*>(values)[idx] = static_cast<T>(start) + static_cast<cumeric_t>(idx) * step;
+				});
+			});
+			// static_cast<T*>(values)[0] = static_cast<T>(start) + ;
+		});
+
 		return tensor;
 	}
 
@@ -485,15 +496,37 @@ namespace cum
 	}
 
 
-	const cumeric_t* Tensor::data() const
+	const void* Tensor::data() const
     {
-	    return static_cast<const cumeric_t*>(__data__);
+	    return __data__;
+	    // return static_cast<const cumeric_t*>(__data__);
     }
 
-	cumeric_t* Tensor::data()
+	void* Tensor::data()
     {
-    	return static_cast<cumeric_t*>(__data__);
+    	// return static_cast<cumeric_t*>(__data__);
+    	return __data__;
     }
+
+	cumeric_t Tensor::operator ()(const dim_t row, const dim_t col) const
+	{
+		return this->at(Shape{row, col});
+	}
+
+	cumeric_t Tensor::operator ()(const dim_t idx0, const dim_t idx1, const dim_t idx2) const
+	{
+		return this->at(Shape{idx0, idx1, idx2});
+	}
+
+	cumeric_t Tensor::operator ()(const dim_t idx0, const dim_t idx1, const dim_t idx2, const dim_t idx3) const
+	{
+		return this->at(Shape{idx0, idx1, idx2, idx3});
+	}
+
+	cumeric_t Tensor::operator ()(const dim_t idx0, const dim_t idx1, const dim_t idx2, const dim_t idx3, const dim_t idx4) const
+	{
+		return this->at(Shape{idx0, idx1, idx2, idx3, idx4});
+	}
 
 	/**------------------------------------------------------------------------------------------------
 	*                                         Reshaping
@@ -571,6 +604,20 @@ namespace cum
 	/**------------------------------------------------------------------------------------------------
 	 *                                         Elementwise
 	 *------------------------------------------------------------------------------------------------**/
+
+	Tensor Tensor::elementwise(functions::function_id function) const
+	{
+		Tensor result = *this;
+		neural_primitives::eltwise(result.__memr__->handle(), result.__desc__->handle(), function, neural_primitives::prop_kind::forward);
+		return result;
+	}
+
+	Tensor& Tensor::elementwise_in_place(functions::function_id function)
+	{
+		Tensor& tensor = *this;
+		neural_primitives::eltwise(__memr__->handle(), __desc__->handle(), function, neural_primitives::prop_kind::forward);
+		return *this;
+	}
 
 	Tensor& Tensor::fill(cumeric_t scalar)
 	{

@@ -44,6 +44,7 @@ namespace cum::neural_primitives
 
     /* Raw handles overloads */
     __event__ eltwise(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc,  functions::function_id algorithm, prop_kind prop_kind);
+    __event__ eltwise(handles::__memory__& memory, const handles::__desc__& desc,  functions::function_id algorithm, prop_kind prop_kind);
 
     __event__ relu(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& r_desc, const handles::__desc__& a_desc);
     __event__ relu(handles::__memory__& src, const handles::__desc__& desc);
@@ -101,6 +102,7 @@ namespace cum::neural_primitives
 
     /* Objective tensors overloads */
     __event__ eltwise(Tensor& dst, const Tensor& src, functions::function_id algorithm, prop_kind prop_kind);
+    __event__ eltwise(Tensor& tensor, functions::function_id algorithm, prop_kind prop_kind);
 
     __event__ relu(Tensor& dst, const Tensor& src);
     __event__ sigmoid(Tensor& dst, const Tensor& src);
