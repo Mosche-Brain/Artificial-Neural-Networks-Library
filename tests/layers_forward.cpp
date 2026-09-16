@@ -20,9 +20,8 @@ TEST_CASE("Dense forward")
 {
     cum::cum(cum::DEVICE::GPU);
 
-    cum::runtime::sync();
 
-    cum::Tensor X( { 4, 8 }, cum::default_type, cum::layout::IO);
+    cum::Tensor X( { 8, 8 }, cum::default_type, cum::layout::IO);
     std::println("Created X tensor");
 
     X.fill(1);
@@ -31,7 +30,7 @@ TEST_CASE("Dense forward")
     auto layer = yann::models::layers::Dense::createUnique(8, "relu");
     std::println("Created Dense layer");
 
-    layer->initParameters(8, 8);
+    layer->initParameters(4, 8);
     std::println("Initialized Dense layer parameters");
 
     cum::Tensor Y = layer->forward(X);
@@ -41,4 +40,9 @@ TEST_CASE("Dense forward")
     REQUIRE(true);
 
     cum::decum();
+}
+
+TEST_CASE("Sequential forward")
+{
+
 }
