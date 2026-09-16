@@ -14,6 +14,7 @@ namespace cum::functions
         leaky_relu,
         gelu,
         elu,
+        sqrt,
         exp, // base e
         exp2,
         exp10,

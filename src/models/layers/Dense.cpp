@@ -8,6 +8,7 @@
 #include <cum/functions/transform.hpp>
 #include <cum/neural_primitives/neural_kernels.hpp>
 #include <cum/neural_primitives/elementwise.hpp>
+#include <cum/neural_primitives/elementwise_diffs.hpp>
 
 #include "yann/runtime_config.hpp"
 
@@ -90,6 +91,41 @@ namespace yann::models::layers
     {
         constexpr bool YANN_DENSE_BACKWARD_FUSED_PATH = true;
         constexpr bool YANN_DENSE_BACKWARD_REFERENCE_PATH = true;
+
+        if(runtime_config::fused_kernels())
+        {
+            if constexpr(YANN_DENSE_BACKWARD_FUSED_PATH)
+            {
+                // todo: implement this
+            }
+            else
+            {
+                std::runtime_error("YANN_DENSE_BACKWARD_FUSED_PATH weren't compiled");
+            }
+        }
+        else
+        {
+            if constexpr(YANN_DENSE_BACKWARD_REFERENCE_PATH)
+            {
+                YANN_LOG(4, "dA/dZ = cache.z.elementwise_diff(activation.name)", "");
+                cache.da = cache.z.elementwise_diff(activation.name);
+
+                YANN_LOG(4, "dL/dZ = deltaOutput * cache.da", "");
+                cache.dz = cache.da.cwiseProduct(deltaOutput);
+
+                YANN_LOG(4, "dL/B = cache.dz * cache.x.transpose()", "");
+                biases_.gradient += cache.dz.rowwise_sum();
+
+                YANN_LOG(4, "dL/dW = cache.dz * cache.x.transpose()", "");
+                weights_.gradient += cache.dz * cache.x.transpose();
+
+                return weights_.values.transpose() * cache.dz;
+            }
+            else
+            {
+                std::runtime_error("YANN_DENSE_FORWARD_REFERENCE_PATH weren't compiled");
+            }
+        }
     }
 
 

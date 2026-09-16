@@ -3,28 +3,27 @@
 //
 
 #include <cstdint>
+#include <print>
+
 #include <oneapi/dnnl/dnnl.hpp>
 
-
 #include "cum/Core.hpp"
-#include "cum/datatypes.hpp"
-#include "cum/runtime.hpp"
 #include "cum/memory.hpp"
-#include "cum/neural_primitives/Descriptor.hpp"
+#include "cum/runtime.hpp"
+#include "cum/datatypes.hpp"
+#include "cum/functions.hpp"
 #include "cum/neural_primitives/Memory.hpp"
-#include "cum/neural_primitives/tensor_operations.hpp"
+#include "cum/neural_primitives/Descriptor.hpp"
+#include "cum/neural_primitives/elementwise.hpp"
 #include "cum/detail/vendor/oneapi/opaque_types.hpp"
+#include "cum/neural_primitives/elementwise_diffs.hpp"
+#include "cum/neural_primitives/tensor_operations.hpp"
 #include "cum/detail/vendor/oneapi/conversion_helpers.hpp"
 
 #include "internal/context.hpp"
 
+
 #include "cum/Tensor.hpp"
-
-#include "cum/functions.hpp"
-
-#include <print>
-
-#include "cum/neural_primitives/elementwise.hpp"
 
 /* This implementation have a lot of redundant code */
 
@@ -601,21 +600,72 @@ namespace cum
 
 	}
 
+
+	Tensor Tensor::colwise_sum()
+	{
+
+	}
+
+	Tensor Tensor::rowwise_sum()
+	{
+		if(dims() != 2)
+			throw std::invalid_argument("rowwise_sum requires a two-dimensional tensor");
+
+		const Shape source_shape = shape();
+		Tensor result({source_shape[0], 1}, type(), layout::IO);
+		dnnl::reduction::primitive_desc primitive_desc(
+			internal::engine(),
+			dnnl::algorithm::reduction_sum,
+			__desc__->handle().desc,
+			result.__desc__->handle().desc,
+			0.0f,
+			0.0f
+		);
+
+		dnnl::reduction(primitive_desc).execute(
+			internal::stream(),
+			{
+				{DNNL_ARG_SRC, __memr__->handle().memory},
+				{DNNL_ARG_DST, result.__memr__->handle().memory}
+			}
+		);
+		internal::stream().wait();
+		return result;
+	}
+
+	Tensor Tensor::channelwise_sum()
+	{
+
+	}
+
 	/**------------------------------------------------------------------------------------------------
 	 *                                         Elementwise
 	 *------------------------------------------------------------------------------------------------**/
 
 	Tensor Tensor::elementwise(functions::function_id function) const
 	{
-		Tensor result = *this;
+		Tensor result = Tensor(shape(), type(), format());
 		neural_primitives::eltwise(result.__memr__->handle(), result.__desc__->handle(), function, neural_primitives::prop_kind::forward);
 		return result;
 	}
 
+
 	Tensor& Tensor::elementwise_in_place(functions::function_id function)
 	{
-		Tensor& tensor = *this;
 		neural_primitives::eltwise(__memr__->handle(), __desc__->handle(), function, neural_primitives::prop_kind::forward);
+		return *this;
+	}
+
+	Tensor Tensor::elementwise_diff(functions::function_id function) const
+	{
+		Tensor result = Tensor(shape(), type(), format());
+		neural_primitives::eltwise_diff(result.__memr__->handle(), result.__desc__->handle(), function, neural_primitives::prop_kind::forward);
+		return result;
+	}
+
+	Tensor& Tensor::elementwise_diff_in_place(functions::function_id function)
+	{
+		neural_primitives::eltwise_diff(__memr__->handle(), __desc__->handle(), function, neural_primitives::prop_kind::forward);
 		return *this;
 	}
 
@@ -680,7 +730,7 @@ namespace cum
 		return this->multiply(tensor);
 	}
 
-	Tensor Tensor::sqrt()
+	Tensor Tensor::sqrt() const
 	{
 		Tensor result = *this;
 

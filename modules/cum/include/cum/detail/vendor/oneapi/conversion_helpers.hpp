@@ -8,9 +8,12 @@
 #include <oneapi/dnnl/dnnl.hpp>
 
 #include "cum/Core.hpp"
+#include "cum/functions/function_id.hpp"
 
 namespace cum
 {
+    dnnl::algorithm dnnl_algorithm(functions::function_id id);
+
     dnnl::memory::data_type dnnl_data_type(datatype dtype);
 
     datatype cum_data_type(dnnl::memory::data_type dtype);

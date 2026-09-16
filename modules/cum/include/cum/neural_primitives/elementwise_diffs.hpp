@@ -17,87 +17,87 @@
 
 #include "cum/Core.hpp"
 
-namespace cum::neural_primitives::diff
+namespace cum::neural_primitives
 {
-    __event__ eltwise(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc,  functions::function_id algorithm, prop_kind prop_kind);
-    __event__ eltwise(handles::__memory__& memory, const handles::__desc__& desc,  functions::function_id algorithm, prop_kind prop_kind);
+    __event__ eltwise_diff(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc,  functions::function_id algorithm, prop_kind prop_kind);
+    __event__ eltwise_diff(handles::__memory__& memory, const handles::__desc__& desc,  functions::function_id algorithm, prop_kind prop_kind);
 
-    __event__ relu(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& r_desc, const handles::__desc__& a_desc);
-    __event__ relu(handles::__memory__& src, const handles::__desc__& desc);
+    __event__ relu_diff(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& r_desc, const handles::__desc__& a_desc);
+    __event__ relu_diff(handles::__memory__& src, const handles::__desc__& desc);
 
-    __event__ sigmoid(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& r_desc, const handles::__desc__& a_desc);
-    __event__ sigmoid(handles::__memory__& src, const handles::__desc__& desc);
+    __event__ sigmoid_diff(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& r_desc, const handles::__desc__& a_desc);
+    __event__ sigmoid_diff(handles::__memory__& src, const handles::__desc__& desc);
 
-    __event__ tanh(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& r_desc, const handles::__desc__& a_desc);
-    __event__ tanh(handles::__memory__& src, const handles::__desc__& desc);
+    __event__ tanh_diff(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& r_desc, const handles::__desc__& a_desc);
+    __event__ tanh_diff(handles::__memory__& src, const handles::__desc__& desc);
 
-    __event__ softmax(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& r_desc, const handles::__desc__& a_desc);
-    __event__ softmax(handles::__memory__& src, const handles::__desc__& desc);
+    __event__ softmax_diff(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& r_desc, const handles::__desc__& a_desc);
+    __event__ softmax_diff(handles::__memory__& src, const handles::__desc__& desc);
 
-    __event__ gelu(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& r_desc, const handles::__desc__& a_desc);
-    __event__ gelu(handles::__memory__& src, const handles::__desc__& desc);
+    __event__ gelu_diff(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& r_desc, const handles::__desc__& a_desc);
+    __event__ gelu_diff(handles::__memory__& src, const handles::__desc__& desc);
 
-    __event__ elu(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& r_desc, const handles::__desc__& a_desc);
-    __event__ elu(handles::__memory__& src, const handles::__desc__& desc);
+    __event__ elu_diff(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& r_desc, const handles::__desc__& a_desc);
+    __event__ elu_diff(handles::__memory__& src, const handles::__desc__& desc);
 
-    __event__ leaky_relu(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& r_desc, const handles::__desc__& a_desc, cumeric_t alpha);
-    __event__ leaky_relu(handles::__memory__& src, const handles::__desc__& desc, cumeric_t alpha);
+    __event__ leaky_relu_diff(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& r_desc, const handles::__desc__& a_desc, cumeric_t alpha);
+    __event__ leaky_relu_diff(handles::__memory__& src, const handles::__desc__& desc, cumeric_t alpha);
 
-    __event__ sqrt(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc);
-    __event__ sqrt(handles::__memory__& src, const handles::__desc__& desc);
+    __event__ sqrt_diff(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc);
+    __event__ sqrt_diff(handles::__memory__& src, const handles::__desc__& desc);
 
-    __event__ square(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc);
-    __event__ square(handles::__memory__& src, const handles::__desc__& desc);
+    __event__ square_diff(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc);
+    __event__ square_diff(handles::__memory__& src, const handles::__desc__& desc);
 
     /* RsrcII wrappers overloads */
-    __event__ eltwise(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc, functions::function_id algorithm, prop_kind prop_kind);
+    __event__ eltwise_diff(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc, functions::function_id algorithm, prop_kind prop_kind);
 
-    __event__ relu(Memory& dst, const Memory& src, const Descriptor& r_desc, const Descriptor& a_desc);
-    __event__ relu(Memory& src, const Descriptor& desc);
+    __event__ relu_diff(Memory& dst, const Memory& src, const Descriptor& r_desc, const Descriptor& a_desc);
+    __event__ relu_diff(Memory& src, const Descriptor& desc);
 
-    __event__ sigmoid(Memory& dst, const Memory& src, const Descriptor& r_desc, const Descriptor& a_desc);
-    __event__ sigmoid(Memory& src, const Descriptor& desc);
+    __event__ sigmoid_diff(Memory& dst, const Memory& src, const Descriptor& r_desc, const Descriptor& a_desc);
+    __event__ sigmoid_diff(Memory& src, const Descriptor& desc);
 
-    __event__ tanh(Memory& dst, const Memory& src, const Descriptor& r_desc, const Descriptor& a_desc);
-    __event__ tanh(Memory& src, const Descriptor& desc);
+    __event__ tanh_diff(Memory& dst, const Memory& src, const Descriptor& r_desc, const Descriptor& a_desc);
+    __event__ tanh_diff(Memory& src, const Descriptor& desc);
 
-    __event__ softmax(Memory& dst, const Memory& src, const Descriptor& r_desc, const Descriptor& a_desc);
-    __event__ softmax(Memory& src, const Descriptor& desc);
+    __event__ softmax_diff(Memory& dst, const Memory& src, const Descriptor& r_desc, const Descriptor& a_desc);
+    __event__ softmax_diff(Memory& src, const Descriptor& desc);
 
-    __event__ gelu(Memory& dst, const Memory& src, const Descriptor& r_desc, const Descriptor& a_desc);
-    __event__ gelu(Memory& src, const Descriptor& desc);
+    __event__ gelu_diff(Memory& dst, const Memory& src, const Descriptor& r_desc, const Descriptor& a_desc);
+    __event__ gelu_diff(Memory& src, const Descriptor& desc);
 
-    __event__ elu(Memory& dst, const Memory& src, const Descriptor& r_desc, const Descriptor& a_desc);
-    __event__ elu(Memory& src, const Descriptor& desc);
+    __event__ elu_diff(Memory& dst, const Memory& src, const Descriptor& r_desc, const Descriptor& a_desc);
+    __event__ elu_diff(Memory& src, const Descriptor& desc);
 
-    __event__ leaky_relu(Memory& dst, const Memory& src, const Descriptor& r_desc, const Descriptor& a_desc, cumeric_t alpha);
-    __event__ leaky_relu(Memory& src, const Descriptor& desc, cumeric_t alpha);
+    __event__ leaky_relu_diff(Memory& dst, const Memory& src, const Descriptor& r_desc, const Descriptor& a_desc, cumeric_t alpha);
+    __event__ leaky_relu_diff(Memory& src, const Descriptor& desc, cumeric_t alpha);
 
-    __event__ sqrt(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc);
-    __event__ sqrt(Memory& src, const Descriptor& desc);
+    __event__ sqrt_diff(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc);
+    __event__ sqrt_diff(Memory& src, const Descriptor& desc);
 
     /* Objective tensors overloads */
-    __event__ eltwise(Tensor& dst, const Tensor& src, functions::function_id algorithm, prop_kind prop_kind);
-    __event__ eltwise(Tensor& tensor, functions::function_id algorithm, prop_kind prop_kind);
+    __event__ eltwise_diff(Tensor& dst, const Tensor& src, functions::function_id algorithm, prop_kind prop_kind);
+    __event__ eltwise_diff(Tensor& tensor, functions::function_id algorithm, prop_kind prop_kind);
 
-    __event__ relu(Tensor& dst, const Tensor& src);
-    __event__ sigmoid(Tensor& dst, const Tensor& src);
+    __event__ relu_diff(Tensor& dst, const Tensor& src);
+    __event__ sigmoid_diff(Tensor& dst, const Tensor& src);
 
-    __event__ tanh(Tensor& dst, const Tensor& src);
-    __event__ tanh(Tensor& src);
+    __event__ tanh_diff(Tensor& dst, const Tensor& src);
+    __event__ tanh_diff(Tensor& src);
 
-    __event__ softmax(Tensor& dst, const Tensor& src);
-    __event__ softmax(Tensor& src);
+    __event__ softmax_diff(Tensor& dst, const Tensor& src);
+    __event__ softmax_diff(Tensor& src);
 
-    __event__ gelu(Tensor& dst, const Tensor& src);
-    __event__ gelu(Tensor& src);
+    __event__ gelu_diff(Tensor& dst, const Tensor& src);
+    __event__ gelu_diff(Tensor& src);
 
-    __event__ elu(Tensor& dst, const Tensor& src);
-    __event__ elu(Tensor& src);
+    __event__ elu_diff(Tensor& dst, const Tensor& src);
+    __event__ elu_diff(Tensor& src);
 
-    __event__ leaky_relu(Tensor& dst, const Tensor& src, cumeric_t alpha);
-    __event__ leaky_relu(Tensor& src, cumeric_t alpha);
+    __event__ leaky_relu_diff(Tensor& dst, const Tensor& src, cumeric_t alpha);
+    __event__ leaky_relu_diff(Tensor& src, cumeric_t alpha);
 
-    __event__ sqrt(Tensor& dst, const Tensor& src);
-    __event__ sqrt(Tensor& src);
+    __event__ sqrt_diff(Tensor& dst, const Tensor& src);
+    __event__ sqrt_diff(Tensor& src);
 }

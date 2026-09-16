@@ -8,6 +8,22 @@
 
 namespace cum
 {
+    dnnl::algorithm dnnl_algorithm(functions::function_id id)
+    {
+        switch (id)
+        {
+            case functions::function_id::relu: return dnnl::algorithm::eltwise_relu;
+            case functions::function_id::sigmoid: return dnnl::algorithm::eltwise_logistic;
+            case functions::function_id::tanh: return dnnl::algorithm::eltwise_tanh;
+            case functions::function_id::elu: return dnnl::algorithm::eltwise_elu;
+            case functions::function_id::leaky_relu: return dnnl::algorithm::eltwise_relu;
+            case functions::function_id::sqrt: return dnnl::algorithm::eltwise_sqrt;
+                // case functions::function_id::softmax: return dnnl::algorithm::softmax_accurate;
+            case functions::function_id::gelu: return dnnl::algorithm::eltwise_gelu_tanh;
+            default: return dnnl::algorithm::undef;
+        }
+    }
+
     
     dnnl::memory::data_type dnnl_data_type(datatype dtype)
     {

@@ -40,6 +40,21 @@ TEST_CASE("Tensor binary operators perform arithmetic")
     cum::decum();
 }
 
+TEST_CASE("Tensor rowwise_sum reduces each matrix row")
+{
+    cum::cum(cum::DEVICE::CPU);
+    cum::Tensor tensor(cum::Shape{2, 3}, cum::default_type, cum::layout::IO);
+    auto* values = tensor.data<cum::cumeric_t>();
+    values[0] = 1; values[1] = 2; values[2] = 3;
+    values[3] = 4; values[4] = 5; values[5] = 6;
+
+    const auto result = tensor.rowwise_sum();
+    REQUIRE(result.shape() == (cum::Shape{2, 1}));
+    REQUIRE(result.at({0, 0}) == 6);
+    REQUIRE(result.at({1, 0}) == 15);
+    cum::decum();
+}
+
 TEST_CASE("Tensor scalar operators work in both operand orders")
 {
     cum::cum(cum::DEVICE::CPU);

@@ -159,12 +159,15 @@ namespace cum
         Tensor elementwise(functions::function_id function) const;
         Tensor& elementwise_in_place(functions::function_id function);
 
+        Tensor elementwise_diff(functions::function_id function) const;
+        Tensor& elementwise_diff_in_place(functions::function_id function);
+
         Tensor& fill(cumeric_t scalar);
 
         Tensor multiply(const Tensor& tensor);
         Tensor cwiseProduct(const Tensor& tensor);
 
-        Tensor sqrt();
+        Tensor sqrt() const;
         Tensor& sqrt_in_place();
 
         Tensor square();

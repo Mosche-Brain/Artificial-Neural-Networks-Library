@@ -8,6 +8,7 @@
 #include "internal/context.hpp"
 #include "cum/detail/vendor/oneapi/opaque_types.hpp"
 #include "cum/detail/vendor/oneapi/event_handler.hpp"
+#include "cum/detail/vendor/oneapi/conversion_helpers.hpp"
 
 #include "cum/Tensor.hpp"
 
@@ -15,22 +16,6 @@
 
 namespace cum::neural_primitives
 {
-    // conversion helper function_id -> dnnl::algortithm
-    dnnl::algorithm dnnl_algorithm(functions::function_id id)
-    {
-        switch (id)
-        {
-            case functions::function_id::relu: return dnnl::algorithm::eltwise_relu;
-            case functions::function_id::sigmoid: return dnnl::algorithm::eltwise_logistic;
-            case functions::function_id::tanh: return dnnl::algorithm::eltwise_tanh;
-            case functions::function_id::elu: return dnnl::algorithm::eltwise_elu;
-            case functions::function_id::leaky_relu: return dnnl::algorithm::eltwise_relu;
-            // case functions::function_id::softmax: return dnnl::algorithm::softmax_accurate;
-            case functions::function_id::gelu: return dnnl::algorithm::eltwise_gelu_tanh;
-            default: return dnnl::algorithm::undef;
-        }
-    }
-
     /* Raw handles overloads */
 
     __event__ dnnl_eltwise(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc, dnnl::algorithm algorithm, dnnl::prop_kind prop_kind) // does
