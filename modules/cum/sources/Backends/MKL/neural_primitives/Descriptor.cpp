@@ -22,6 +22,12 @@ namespace cum::neural_primitives
         );
     }
 
+    Descriptor::Descriptor(Descriptor& other) : fmt(other.fmt)
+    {
+        handle_ = std::make_unique<handles::__desc__>(other.handle_->desc);
+    }
+
+
     Descriptor::~Descriptor()
     {
     }
@@ -62,5 +68,14 @@ namespace cum::neural_primitives
         // return cum_format_tag(handle_->desc.get_format_kind());
     }
 
+    Descriptor& Descriptor::operator = (Descriptor& other)
+    {
+        if (this == &other) return *this;
+
+        this->fmt = other.fmt;
+        this->handle_ = std::make_unique<handles::__desc__>(other.handle_->desc);
+
+        return *this;
+    }
 
 } // cum

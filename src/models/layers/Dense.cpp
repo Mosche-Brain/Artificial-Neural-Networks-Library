@@ -24,6 +24,7 @@
  * Ścieżka z fused kernel dla backward
  * ~~Usunięcie `cum::runtime::sync() pozostałych po debugowaniu~~ (done?)
  * Zwracanie referencji lub widoku do cache przez `forward` i `backward` zamiast kopii
+ * Brak niejawnej alokacji cache potrzebnego tylko do treningu
  */
 
 namespace yann::models::layers
@@ -39,11 +40,12 @@ namespace yann::models::layers
 
     void Dense::init_parameters(int output_features, int input_features)
     {
-        this->weights_       = Parameter::Uniform(output_features, input_features);   /* neurons * input_length */
-        this->biases_        = Parameter::Zeros(output_features, 1);                  /* Column-Vector */
+        this->weights_      = Parameter::Uniform(output_features, input_features);   /* neurons * input_length */
+        this->biases_       = Parameter::Zeros(output_features, 1);                  /* Column-Vector */
         this->cache.a       = cum::Tensor({output_features, 1}, cum::default_type, cum::layout::IO);                 /* Column-Vector */
         this->cache.z   	= cum::Tensor({output_features, 1}, cum::default_type, cum::layout::IO);                 /* Column-Vector */
         this->cache.x       = cum::Tensor({input_features, 1}, cum::default_type, cum::layout::IO);                  /* Column-Vector */
+        this->cache.da      = cum::Tensor({output_features, 1}, cum::default_type, cum::layout::IO);                 /* Column-Vector */
         this->_initialized_ = true;
     }
 
@@ -118,20 +120,31 @@ namespace yann::models::layers
         }
         else
         {
-            if constexpr(YANN_DENSE_BACKWARD_REFERENCE_PATH)
+            if constexpr(YANN_DENSE_BACKWARD_REFERENCE_PATH) // We may move transpositions to compute kernel, but for now it's fine
             {
-                YANN_LOG(4, "dA/dZ = cache.z.elementwise_diff(activation.name)", "");
+                YANN_LOG(3, "dA/dZ = cache.z.elementwise_diff(activation.name)", "");
                 cache.da = cache.z.elementwise_diff(activation.name);
 
-                YANN_LOG(4, "dL/dZ = deltaOutput * cache.da", "");
+                YANN_LOG(3, "dL/dZ = deltaOutput * cache.da", "");
                 cache.dz = cache.da.cwiseProduct(deltaOutput);
 
-                YANN_LOG(4, "dL/B = cache.dz * cache.x.transpose()", "");
-                biases_.gradient += cache.dz.rowwise_sum();
+                YANN_LOG(3, "dL/dB = rowwise sum of cache.dz", "");
+                if (cache.dz.cols() == 1)
+                    biases_.gradient += cache.dz;
+                else
+                    biases_.gradient += cache.dz.rowwise_sum();
 
-                YANN_LOG(4, "dL/dW = cache.dz * cache.x.transpose()", "");
+                YANN_LOG(3, "dL/dW = cache.dz * cache.x.transpose()", "");
+                YANN_LOG(4, "dZ: {}x{} | X: {}x{}", cache.dz.rows(), cache.dz.cols(), cache.x.rows(), cache.x.cols());
+
                 weights_.gradient += cache.dz * cache.x.transpose();
 
+                YANN_LOG(3, "dL/dX = weights.transpose() * cahce.dz", "");
+                YANN_LOG(4, "W: {}x{}, | dZ: {}x{}", weights_.values.rows(), weights_.values.cols(), cache.dz.rows(), cache.dz.cols());
+                // cum::Tensor transposed_weights = weights_.values.transpose();
+                // YANN_LOG(4, "W: {}x{}", transposed_weights.rows(), transposed_weights.cols());
+
+                // return transposed_weights * cache.dz;
                 return weights_.values.transpose() * cache.dz;
             }
             else
@@ -140,86 +153,6 @@ namespace yann::models::layers
             }
         }
     }
-
-
-    // cum::Matrix Dense::forward(const cum::Matrix& input)
-    // {
-    //     if constexpr(ENABLE_RUNTIME_CHECKS)
-    //     {
-    //         if(input.rows() != weights_.cols())
-    //         {
-    //             throw std::runtime_error("Input dimension mismatch: " + std::to_string(input.rows()) + " != " + std::to_string(weights_.cols()));
-    //         }
-    //     }
-    //
-    //     if (input.cols() != cache.x.cols())
-    //     {
-    //         cache.resize(cache.x.rows(), cache.z.rows(), input.cols());
-    //     }
-    //
-    //     YANN_LOG(4, "caching inputs", "");
-    //     cache.x = input;
-    //
-    //     cum::runtime::sync();
-    //
-    //     if constexpr (USE_FUSED_KERNELS)
-    //     {
-    //         if constexpr (ENABLE_CACHED_PREACTIVATION) // must be enabled for proper training in most of cases
-    //         {
-    //             YANN_LOG(4, "Running feed forward kernel (cached raw)", "");
-    //             cum::neural_primitives::neural_kernels::feed_forward_cached_raw(cache.a.data(), cache.z.data(), weights_.values.data(), input.data(), biases_.values.data(), weights_.values.cols(), weights_.values.rows(), input.cols(), activation.name);
-    //         }
-    //         else
-    //         {
-    //             YANN_LOG(4, "Running feed forward kernel", "");
-    //             cum::neural_primitives::neural_kernels::feed_forward(cache.a.data(), weights_().data(), input.data(), biases_().data(), weights_().cols(), weights_().rows(), input.cols(), activation.name);
-    //         }
-    //     }
-    //     else
-    //     {
-    //         YANN_LOG(4, "Performing (weights_ * input) + biases_", "");
-    //         cache.z = weights_() * cache.x;
-    //         cum::runtime::sync();
-    //         cum::LinearAlgebra::addRowVectorInPlace(
-    //             cache.z.data(),
-    //             biases_().data(),
-    //             cache.z.rows(),
-    //             cache.z.cols()); // broadcast biasu
-    //
-    //         cum::runtime::sync();
-    //
-    //         YANN_LOG(4, "Performing activation", "");
-    //         cum::functions::transform(cache.a.data(), cache.z.data(), cache.z.size(), activation.name);
-    //     }
-    //
-    //     YANN_LOG(4, "forward pass succeed", "");
-    //     cum::runtime::sync();
-    //     return cache.a;
-    // }
-
-    // cum::Matrix Dense::backward(const cum::Matrix& deltaOutput)
-    // {
-    //     cum::runtime::sync();
-    //     YANN_LOG(4, "computing activation derivative", "");
-    //     cum::functions::transform_deriv(
-    //         cache.dz.data(), cache.z.data(), cache.z.size(), activation.name);
-    //     cum::runtime::sync();
-    //
-    //     YANN_LOG(4, "applying chain rule\n", "");
-    //     cum::Matrix ΔZ = cache.dz.cwiseProduct(deltaOutput);
-    //     cum::runtime::sync();
-    //
-    //     YANN_LOG(4, "computing weights grad\n", "");
-    //     weights_.gradient += ΔZ * cache.x.transpose();
-    //     cum::runtime::sync();
-    //
-    //     YANN_LOG(4, "computing biases grad\n", "");
-    //     biases_.gradient += ΔZ.rowwiseSum();
-    //     cum::runtime::sync();
-    //
-    //     return weights_().transpose() * ΔZ;
-    //
-    // }
 
     void Dense::collect_parameters(std::vector<Parameter*>& params)
     {

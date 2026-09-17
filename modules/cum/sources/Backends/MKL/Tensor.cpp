@@ -535,6 +535,16 @@ namespace cum
 	*                                         Reshaping
 	*------------------------------------------------------------------------------------------------**/
 
+	Tensor Tensor::reshape(const Shape& shape) const
+	{
+
+	}
+
+	Tensor& Tensor::reshape_in_place(const Shape& shape)
+	{
+		return *this;
+	}
+
 	Tensor Tensor::slice(const Shape& indices)
     {
 
@@ -542,12 +552,49 @@ namespace cum
 
 	Tensor Tensor::transpose()
 	{
-		// return ;
+		Tensor result = *this;
+
+		result.transpose_in_place();
+		return result;
     }
 
 	Tensor& Tensor::transpose_in_place()
     {
+		if(dims() != 2)
+			throw std::invalid_argument("transpose requires a two-dimensional tensor");
 
+		layout format = this->format() == layout::IO ? layout::OI : layout::IO;
+
+
+		neural_primitives::Descriptor desc(this->shape(), this->type(), format);
+		// neural_primitives::Memory mem(desc);
+		dnnl::reorder::primitive_desc primitive_desc(
+			internal::engine(),
+			__desc__->handle().desc,
+			internal::engine(),
+			desc.handle().desc
+		);
+
+		dnnl::reorder(primitive_desc).execute(
+			internal::stream(),
+			{
+				{DNNL_ARG_SRC, __memr__->handle().memory},
+				{DNNL_ARG_DST, __memr__->handle().memory}
+			}
+		);
+
+		internal::stream().wait();
+
+
+		// __desc__ = std::make_unique<neural_primitives::Descriptor>(desc);
+
+		Shape new_shape = __desc__->shape();
+		std::swap(new_shape[0], new_shape[1]);
+
+		// __desc__->handle() = std::make_unique<neural_primitives::handles::__desc__>(__desc__->handle().desc.reshape(new_shape));
+		__desc__->handle().desc = __desc__->handle().desc.reshape(new_shape); // Is it safe? probably not
+		// std::swap(__desc__, std::make_unique<neural_primitives::Descriptor>(desc));
+		return *this;
     }
 
 	/**------------------------------------------------------------------------------------------------
@@ -767,7 +814,7 @@ namespace cum
 	Tensor Tensor::elementwise_diff(functions::function_id function) const
 	{
 		Tensor result = Tensor(shape(), type(), format());
-		neural_primitives::eltwise_diff(result.__memr__->handle(), result.__desc__->handle(), function, neural_primitives::prop_kind::forward);
+		neural_primitives::eltwise_diff(result.__memr__->handle(), result.__desc__->handle(), function, neural_primitives::prop_kind::backward);
 		return result;
 	}
 
@@ -925,22 +972,21 @@ namespace cum
 	Tensor operator * (const Tensor& A, const Tensor& B)
     {
 		Shape result_shape = {};
-		// Temporary implementation using switch statement
-		switch (A.format())
+		switch (A.format()) // Temporary implementation using switch statement
 		{
 			case layout::IO:
+			case layout::OI:
 			{
 				result_shape = {A.rows(), B.cols()};
 				break;
 			}
 			default:
 			{
-				throw std::invalid_argument("Unsupported format for tensor multiplication");
+				throw std::invalid_argument("Unsupported format for tensor matmul");
 			}
 		}
 
 		Tensor C(result_shape, A.type(), A.format());
-
 	    dnnl::matmul::primitive_desc primitive_desc {
 			internal::engine(),
 	    	A.__desc__->handle().desc,

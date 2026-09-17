@@ -19,6 +19,7 @@ namespace cum::neural_primitives
     {
     public:
         Descriptor(Shape dims, datatype dtype, layout format);
+        Descriptor(Descriptor& other);
 
         dim_t size() const;
         dim_t ndims() const;
@@ -29,6 +30,7 @@ namespace cum::neural_primitives
         const handles::__desc__& handle() const;
         handles::__desc__& handle();
 
+        Descriptor& operator = (Descriptor& other);
         ~Descriptor();
     private:
         friend class Memory;

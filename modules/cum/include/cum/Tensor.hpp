@@ -144,6 +144,9 @@ namespace cum
         /* Reshaping */
         Tensor slice(const Shape& indices);
 
+        Tensor reshape(const Shape& shape) const;
+        Tensor& reshape_in_place(const Shape& shape);
+
         Tensor transpose();
         Tensor& transpose_in_place();
 

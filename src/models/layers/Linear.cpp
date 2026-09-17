@@ -27,9 +27,9 @@ namespace yann::models::layers
     {
         this->weights_      = Parameter::Uniform(output_features, input_features);   /* neurons * input_length */
         this->biases_       = Parameter::Zeros(output_features, 1);               /* Column-Vector */
-        this->cache.x       = cum::Tensor::Zeros({input_features, 1});   /* Column-Vector */
-        this->cache.z   	= cum::Tensor::Zeros({output_features, 1});             /* Column-Vector */
-        this->cache.dz      = cum::Tensor::Ones({output_features, 1});
+        this->cache.x       = cum::Tensor({input_features, 1}, cum::default_type, cum::layout::IO);   /* Column-Vector */
+        this->cache.a       = cum::Tensor({output_features, 1}, cum::default_type, cum::layout::IO);
+        this->cache.dz      = cum::Tensor::Ones({output_features, 1}, cum::default_type, cum::layout::IO);
         this->_initialized_ = true;
     }
 
@@ -56,8 +56,14 @@ namespace yann::models::layers
         {
             if constexpr(YANN_LINEAR_FORWARD_REFERENCE_PATH)
             {
+
+                YANN_LOG(3, "cache.a = weights_.values * input", "");
+                YANN_LOG(4, "X: {}x{}, | W: {}x{}", input.rows(), input.cols(), weights_.values.rows(), weights_.values.cols());
                 cache.a = weights_.values * input;
 
+
+                YANN_LOG(3, "cache.a = cache.z + biases_.values", "");
+                YANN_LOG(4, "A: {}x{} | B: {}x{}", cache.a.rows(), cache.a.cols(), biases_.values.rows(), biases_.values.cols());
                 cache.a = cache.a + biases_.values; // with broadcast
 
                 return cache.a;

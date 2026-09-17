@@ -2,9 +2,13 @@
 // Created by jaro on 7/24/26.
 //
 
-#include "../../../include/yann/models/layers/Flatten.hpp"
+#include "yann/models/layers/Flatten.hpp"
 
-#include "runtime_config.hpp"
+#include "yann/runtime_config.hpp"
+
+/*
+ * Trzeba rozwiązać zachowanie wymiaru batcha przy spłaszczaniu próbek
+ */
 
 namespace yann::models::layers
 {
@@ -12,26 +16,21 @@ namespace yann::models::layers
     Flatten::Flatten(const cum::Shape& shape)
     {
         #if defined(ENABLE_DEBUG_OUTPUT)
-        // yann::logger().log(1, "Initializing flatten layer with {} x  input shape", rows);
-        // YANN_LOG(1, "Initializing flatten layer with {} x {} input shape", rows, cols);
+        YANN_LOG(1, "Initializing flatten layer with some input shape", "");
         #endif
 
         shape_ = shape;
-
-        // input_rows = rows;
-        // input_cols = cols;
-        // to_column_vector = true;
 
         this->_layerType_ = LayerType::Flatten;
     }
 
     cum::Tensor Flatten::forward(const cum::Tensor& input)
     {
-        // return input.reshape(input_rows * input_cols, 1);
+        return input.reshape(__output_shape__);
     }
 
     cum::Tensor Flatten::backward(const cum::Tensor& deltaOutput)
     {
-        // return deltaOutput.reshape(input_rows, input_cols);
+        return deltaOutput.reshape(__input_shape__);
     }
 } // yann::models::layers
