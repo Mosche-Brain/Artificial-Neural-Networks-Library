@@ -22,7 +22,7 @@
  * Ograniczenie kopiowania, cache.x może przechywać referencje lub view na cache.a z poprzedniej warstwy
  * Wprowadzenie forward trace selection do runtime config oraz pozostawienie branchy w `if constexpr` by za pomocą konfiguracji cmake można było wyłączyć ich kompilacje
  * Ścieżka z fused kernel dla backward
- * Usunięcie `cum::runtime::sync() pozostałych po debugowaniu
+ * ~~Usunięcie `cum::runtime::sync() pozostałych po debugowaniu~~ (done?)
  * Zwracanie referencji lub widoku do cache przez `forward` i `backward` zamiast kopii
  */
 
@@ -34,7 +34,7 @@ namespace yann::models::layers
         cum::functions::get_function_by_name(&activation, func);
         _layerSize_ = layerSize;
 
-        this->_layerType_ = LAYER_TYPE::DENSE;
+        this->_layerType_ = LayerType::Dense;
     }
 
     void Dense::init_parameters(int output_features, int input_features)
@@ -65,7 +65,7 @@ namespace yann::models::layers
             }
             else
             {
-                std::runtime_error("YANN_DENSE_FORWARD_FUSED_PATH weren't compiled");
+                throw std::runtime_error("YANN_DENSE_FORWARD_FUSED_PATH weren't compiled");
             }
         }
         else
@@ -82,7 +82,7 @@ namespace yann::models::layers
             }
             else
             {
-                std::runtime_error("YANN_DENSE_FORWARD_REFERENCE_PATH weren't compiled");
+                throw std::runtime_error("YANN_DENSE_FORWARD_REFERENCE_PATH weren't compiled");
             }
         }
     }
@@ -100,7 +100,7 @@ namespace yann::models::layers
             }
             else
             {
-                std::runtime_error("YANN_DENSE_BACKWARD_FUSED_PATH weren't compiled");
+                throw std::runtime_error("YANN_DENSE_BACKWARD_FUSED_PATH weren't compiled");
             }
         }
         else
@@ -123,7 +123,7 @@ namespace yann::models::layers
             }
             else
             {
-                std::runtime_error("YANN_DENSE_FORWARD_REFERENCE_PATH weren't compiled");
+                throw std::runtime_error("YANN_DENSE_FORWARD_REFERENCE_PATH weren't compiled");
             }
         }
     }

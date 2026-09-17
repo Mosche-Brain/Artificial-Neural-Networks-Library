@@ -1,20 +1,19 @@
-#include "Sequential.hpp"
-#include "LayerType.hpp" 
-#include "cum/Matrix.hpp"
+#include "LayerType.hpp"
+#include <cum/Matrix.hpp>
 #include <stdexcept>
+#include <ranges>
+
+#include <cum/runtime.hpp>
 
 #if defined(ENABLE_DEBUG_OUTPUT)
 #include <iostream>
 #include "utils/formating.hpp"
 #endif
 
-#include "runtime_config.hpp"
-#include "cum/runtime.hpp"
-#include "loss/LossBase.hpp"
-// #include "utils/Logger.hpp"
+#include "yann/loss/LossBase.hpp"
+#include "yann/runtime_config.hpp"
 
-
-
+#include "yann/models/Sequential.hpp"
 
 namespace yann::models
 {
@@ -41,12 +40,12 @@ namespace yann::models
     void Sequential::build()
     {
         topology[0]->init_parameters(topology[0]->size(), 1);
-        for(size_t i = 1 ; i < topology.size() ; i++)
+        // for(size_t i = 1 ; i < topology.size() ; i++)
+        for(auto [index, layer] : topology | std::views::enumerate)
         {
-            int previous_layer_size = topology[i - 1]->size();
-            int current_layer_size  = topology[  i  ]->size();
+            int previous_layer_size = topology[index - 1]->size();
 
-            topology[i]->init_parameters(current_layer_size, previous_layer_size);
+            layer->init_parameters(layer->size(), previous_layer_size);
         }
     }
 
@@ -63,11 +62,9 @@ namespace yann::models
     cum::Tensor Sequential::forward(const cum::Tensor& input)
     {
         cum::Tensor result = topology[0]->forward(input);
-
-        for (size_t i = 1; i < topology.size(); ++i)
+        for (auto& layer : topology)
         {
-            result = topology[i]->forward(result);
-            cum::runtime::sync();
+            result = layer->forward(result);
         }
 
         return result;
@@ -75,23 +72,24 @@ namespace yann::models
 
     void Sequential::backward(const cum::Tensor& d_output)
     {
-        if (topology.size() <= 1)
-            return;
+        if (topology.empty()) return;
 
         cum::Tensor curr_gradient = topology.back()->backward(d_output);
-        for (size_t i = topology.size() - 1; i > 1; --i)
+        // for (size_t i = topology.size() - 1; i > 0; --i)
+        for (auto [index, layer] : topology | std::views::enumerate | std::views::reverse)
         {
-            cum::Tensor next_gradient = topology.at(i-1)->backward(curr_gradient);
+            if (layer->layerType() == layers::LayerType::Input)
+                break;
 
-            cum::runtime::sync();
+            cum::Tensor next_gradient = layer->backward(curr_gradient);
+
 
             curr_gradient = std::move(next_gradient);
 
-            cum::runtime::sync();
         }
     }
 
-    /* TODO:
+    /* TODO: (obsolete)
      * Przenieść budowaniu batcht do wyspecjalizowanej funkcji/klasy
      * Dodać przeładowanie pozwalające na przyjęcie zamiast X i Y zbioru batchy
      */

@@ -26,7 +26,7 @@ namespace yann::models::layers
         // this->biases  = Parameter::Zeros(layerSize, 1);
 
         this->_layerSize_   = layerSize;
-        this->_layerType_   = LAYER_TYPE::INPUT;
+        this->_layerType_   = LayerType::Input;
         this->_initialized_ = true;
     }
 

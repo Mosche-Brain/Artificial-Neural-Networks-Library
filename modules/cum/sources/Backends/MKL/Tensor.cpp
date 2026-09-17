@@ -25,7 +25,10 @@
 
 #include "cum/Tensor.hpp"
 
-/* This implementation have a lot of redundant code */
+/*
+ * This implementation has a lot of redundant code.
+ * We plan to move significant part to other .cpp files
+ */
 
 namespace cum
 {
@@ -129,10 +132,6 @@ namespace cum
 		return -1;
 	}
 
-}
-#include <print>
-namespace cum
-{
 	/**------------------------------------------------------------------------------------------------
 	 *                                         Constructors
 	 *------------------------------------------------------------------------------------------------**/
@@ -200,7 +199,7 @@ namespace cum
 	 *                                         Fabriques
 	 *------------------------------------------------------------------------------------------------**/
 
-	Tensor Tensor::take_memory(Shape shape, void* data, datatype dtype, layout layout)
+	Tensor Tensor::take_memory(const Shape& shape, void* data, datatype dtype, layout layout)
 	{
 		Tensor tensor;
 
@@ -211,7 +210,7 @@ namespace cum
 		return tensor;
 	}
 
-	Tensor Tensor::Random(Shape shape, cumeric_t min, cumeric_t max, datatype dtype, layout layout)
+	Tensor Tensor::Random(const Shape& shape, cumeric_t min, cumeric_t max, datatype dtype, layout layout)
 	{
     	Tensor tensor;
     	tensor.__desc__ = std::make_unique<neural_primitives::Descriptor>(shape, dtype, layout);
@@ -313,6 +312,11 @@ namespace cum
 	/**------------------------------------------------------------------------------------------------
 	 *                                         Memory
 	 *------------------------------------------------------------------------------------------------**/
+
+	Tensor& Tensor::cast(datatype dtype)
+	{
+		return *this;
+	}
 
 	Tensor& Tensor::prefetch()
 	{
@@ -552,12 +556,10 @@ namespace cum
 
 	cumeric_t Tensor::sum()
     {
-    	// cumeric_t* sum_buff = memory::allocate(1);
 		cumeric_t* sum_buff = sycl::malloc_shared<cumeric_t>(1, internal::device(), internal::sycl_context());
     	sum_buff[0] = 0;
 
     	dnnl::memory::desc sum_desc {
-    		// shp, dnnl_data_type(default_type), dnnl::memory::format_tag::any
     		Shape(this->dims(), 1), dnnl_data_type(default_type), dnnl_format_tag(format())
     	};
 
@@ -592,7 +594,7 @@ namespace cum
 
 	cumeric_t Tensor::mean()
 	{
-
+		return this->sum() / this->lenght();
 	}
 
 	cumeric_t Tensor::amean()
@@ -601,12 +603,69 @@ namespace cum
 	}
 
 
-	Tensor Tensor::colwise_sum()
+	cumeric_t Tensor::squaredNorm()
 	{
-
+		return this->squared_norm();
 	}
 
-	Tensor Tensor::rowwise_sum()
+	cumeric_t Tensor::squared_norm()
+	{
+		cumeric_t* sum_buff = sycl::malloc_shared<cumeric_t>(1, internal::device(), internal::sycl_context());
+		sum_buff[0] = 0;
+
+		dnnl::memory::desc sum_desc {
+			Shape(this->dims(), 1), dnnl_data_type(default_type), dnnl_format_tag(format())
+		};
+
+		dnnl::memory sum_memory = dnnl::sycl_interop::make_memory(
+			sum_desc, internal::engine(), dnnl::sycl_interop::memory_kind::usm, sum_buff
+		);
+
+		// Internal cache has 2048 * 2048 * cumeric_t size bytes
+		Tensor square_tensor = take_memory(this->shape(), internal::cache(), this->type(), this->format());
+
+		dnnl::eltwise_forward::primitive_desc square_desc(
+			internal::engine(),
+			dnnl::prop_kind::forward,
+			dnnl::algorithm::eltwise_square,
+			this->descriptor()->handle().desc,
+			square_tensor.descriptor()->handle().desc
+		);
+
+		dnnl::eltwise_forward(square_desc).execute(
+			internal::stream(),
+			{
+				{ DNNL_ARG_SRC, __memr__->handle().memory },
+				{ DNNL_ARG_DST, square_tensor.__memr__->handle().memory }
+			}
+		);
+
+		dnnl::reduction::primitive_desc reduction_desc(
+			internal::engine(),
+			dnnl::algorithm::reduction_sum,
+			square_tensor.descriptor()->handle().desc,
+			sum_desc,
+			0.0f,   // p
+			0.0f  // eps
+		);
+
+		dnnl::reduction(reduction_desc).execute(
+			internal::stream(),
+			{
+				{DNNL_ARG_SRC, square_tensor.memory()->handle().memory},
+				{DNNL_ARG_DST, sum_memory}
+			}
+		);
+
+		internal::stream().wait();
+
+		cumeric_t result = sum_buff[0];
+		memory::free(sum_buff);
+
+		return result;
+	}
+
+	Tensor Tensor::colwise_sum()
 	{
 		if(dims() != 2)
 			throw std::invalid_argument("rowwise_sum requires a two-dimensional tensor");
@@ -633,9 +692,58 @@ namespace cum
 		return result;
 	}
 
+	Tensor Tensor::rowwise_sum()
+	{
+		if(dims() != 2)
+			throw std::invalid_argument("colwise_sum requires a two-dimensional tensor");
+
+		const Shape source_shape = shape();
+		Tensor result({1, source_shape[0]}, type(), layout::IO);
+		dnnl::reduction::primitive_desc primitive_desc(
+			internal::engine(),
+			dnnl::algorithm::reduction_sum,
+			__desc__->handle().desc,
+			result.__desc__->handle().desc,
+			0.0f,
+			0.0f
+		);
+
+		dnnl::reduction(primitive_desc).execute(
+			internal::stream(),
+			{
+				{DNNL_ARG_SRC, __memr__->handle().memory},
+				{DNNL_ARG_DST, result.__memr__->handle().memory}
+			}
+		);
+		internal::stream().wait();
+		return result;
+	}
+
 	Tensor Tensor::channelwise_sum()
 	{
+		if(dims() != 3)
+			throw std::invalid_argument("channelwise_sum requires a tree-dimensional tensor");
 
+		const Shape source_shape = shape();
+		Tensor result({1, source_shape[0]}, type(), layout::IO);
+		dnnl::reduction::primitive_desc primitive_desc(
+			internal::engine(),
+			dnnl::algorithm::reduction_sum,
+			__desc__->handle().desc,
+			result.__desc__->handle().desc,
+			0.0f,
+			0.0f
+		);
+
+		dnnl::reduction(primitive_desc).execute(
+			internal::stream(),
+			{
+				{DNNL_ARG_SRC, __memr__->handle().memory},
+				{DNNL_ARG_DST, result.__memr__->handle().memory}
+			}
+		);
+		internal::stream().wait();
+		return result;
 	}
 
 	/**------------------------------------------------------------------------------------------------

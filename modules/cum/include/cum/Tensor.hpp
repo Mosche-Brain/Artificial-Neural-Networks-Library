@@ -14,6 +14,10 @@
 #include "cum/neural_primitives/opaque_types.hpp"
 #include "functions/function_id.hpp"
 
+/* TODO:
+ *  Add templated overloads for member functions returning cumeric_t
+ */
+
 namespace cum
 {
     enum class Axis
@@ -53,19 +57,21 @@ namespace cum
             return Tensor(shape, T, layout);
         }
 
-        static Tensor take_memory(Shape shape, void* data, datatype dtype = datatype::FP32, layout layout = layout::ANY);
+        static Tensor take_memory(const Shape& shape, void* data, datatype dtype = datatype::FP32, layout layout = layout::ANY);
 
         static Tensor make_cube(dim_t width, dim_t height, dim_t deepth, datatype dtype = default_type, layout layout = layout::OI);
         static Tensor make_matrix(dim_t rows, dim_t cols, datatype dtype = default_type, layout layout = layout::OI);
         static Tensor make_vector(dim_t lenght, datatype dtype = default_type, layout layout = layout::X);
         static Tensor make_scalar(datatype dtype = default_type, layout layout = layout::X);
 
-        static Tensor Random(Shape shape, cumeric_t min = -1_c, cumeric_t max = 1_c, datatype dtype = datatype::FP32, layout layout = layout::ANY);
+        static Tensor Random(const Shape& shape, cumeric_t min = -1_c, cumeric_t max = 1_c, datatype dtype = datatype::FP32, layout layout = layout::ANY);
         static Tensor Zeros(const Shape& shape, datatype dtype = datatype::FP32, layout layout = layout::ANY);
         static Tensor Ones(const Shape& shape, datatype dtype = datatype::FP32, layout layout = layout::ANY);
         static Tensor Linspace(cumeric_t start, cumeric_t end, dim_t num); // vector
 
         /* Memory */
+
+        Tensor& cast(datatype dtype); // In place
 
         Tensor& prefetch();
 
@@ -147,12 +153,12 @@ namespace cum
         cumeric_t mean();
         cumeric_t amean();
 
-        cumeric_t squaredNorm() {}
-        cumeric_t squared_norm() {}
+        cumeric_t squaredNorm();
+        cumeric_t squared_norm();
 
         Tensor colwise_sum();
         Tensor rowwise_sum();
-        Tensor channelwise_sum();
+        Tensor channelwise_sum(); // for 3D channel-first tensors
 
         /* elementwise */
 

@@ -14,7 +14,7 @@ namespace cum::functions
         leaky_relu,
         gelu,
         elu,
-        sqrt,
+        sqrt, // not handler by transform function currently
         exp, // base e
         exp2,
         exp10,

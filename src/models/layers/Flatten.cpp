@@ -22,7 +22,7 @@ namespace yann::models::layers
         // input_cols = cols;
         // to_column_vector = true;
 
-        this->_layerType_ = LAYER_TYPE::FLATTEN;
+        this->_layerType_ = LayerType::Flatten;
     }
 
     cum::Tensor Flatten::forward(const cum::Tensor& input)

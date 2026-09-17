@@ -535,7 +535,10 @@ namespace cum::neural_primitives
 
     __event__ gelu(Tensor& src)
     {
+        handles::__memory__& memory = src.memory()->handle();
+        const handles::__desc__& desc = src.descriptor()->handle();
 
+        return gelu(memory, memory, desc, desc);
     }
 
     __event__ elu(Tensor& dst, const Tensor& src)
@@ -551,7 +554,10 @@ namespace cum::neural_primitives
 
     __event__ elu(Tensor& src)
     {
+        handles::__memory__& memory = src.memory()->handle();
+        const handles::__desc__& desc = src.descriptor()->handle();
 
+        return elu(memory, memory, desc, desc);
     }
 
     __event__ leaky_relu(Tensor& dst, const Tensor& src, const cumeric_t alpha)
@@ -567,6 +573,9 @@ namespace cum::neural_primitives
 
     __event__ leaky_relu(Tensor& src, const cumeric_t alpha)
     {
+        handles::__memory__& memory = src.memory()->handle();
+        const handles::__desc__& desc = src.descriptor()->handle();
 
+        return leaky_relu(memory, memory, desc, desc, alpha);
     }
 }

@@ -12,10 +12,15 @@
 #include "yann/models/layers/LayerType.hpp"
 #include "yann/Parameter.hpp"
 
+/*
+ * Activation should be moved to declaration of specyfic layer due to it is not universal feature for all layer types
+ * ForwardCache name may not be relevant due to storing dz and da, more general name like a `LayerCache` may be better
+ * TODO: Do not implicitly reserve memory necessary for training (da, dz, etc)
+ */
+
 namespace yann::models::layers
 {
-    // TODO: Do not implicitly reserve memory necessary for training (da, dz, etc)
-    struct ForwardCache // ForwardCache name may not be relevant due to storing dz and da, more general name like a `LayerCache` may be better
+    struct ForwardCache
     {
         cum::Tensor x;
         cum::Tensor z;
@@ -65,8 +70,10 @@ namespace yann::models::layers
 
         virtual void init_parameters(int output_features, int input_features) = 0; // I will swap output and input festures order
         virtual void init_parameters(const cum::Shape& input_shape, const cum::Shape& output_shape) {};
-        // dofdam też inicjalizator parametrów przyjmujący referencje do poprzedniej warstwy
-        
+
+        virtual const cum::Shape& input_shape() const;
+        virtual const cum::Shape& output_shape() const;
+
         virtual cum::Tensor forward(const cum::Tensor& input) = 0;
         virtual cum::Tensor backward(const cum::Tensor& input) = 0;
 
@@ -81,18 +88,17 @@ namespace yann::models::layers
         virtual cum::Tensor& weights();
         virtual cum::Tensor& biases();
         virtual cum::Tensor& biases_grad();
-        // utils::Activation activation;
         cum::functions::activation_t activation;
         
-        LAYER_TYPE layerType();
+        LayerType layerType();
     protected:
         ForwardCache cache;
-        // cum::Matrix outputs;
-        // cum::Matrix raw_outputs;
-        // cum::Matrix inputs;
-           
-        int _layerSize_;
+
+        cum::Shape __input_shape__;
+        cum::Shape __output_shape__;
+
+        int _layerSize_; // not longer relevant
         bool _initialized_ = false;
-        LAYER_TYPE _layerType_;
+        LayerType _layerType_;
     };
 }   

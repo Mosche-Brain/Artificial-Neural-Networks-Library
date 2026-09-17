@@ -2,13 +2,14 @@
 
 namespace yann::models::layers
 {    
-    enum class LAYER_TYPE
+    enum class LayerType
     {
-        INPUT,
-        LINEAR,
-        DENSE,
-        CONV2,
-        FLATTEN,
-        POOL
+        Input,
+        Linear,
+        Dense,
+        Conv2D,
+        Conv3D,
+        Flatten,
+        Pool
     };
 }

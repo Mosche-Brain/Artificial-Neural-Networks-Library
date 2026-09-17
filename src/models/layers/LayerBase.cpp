@@ -19,6 +19,17 @@ namespace yann::models::layers
         return this->_initialized_;
     }
 
+
+    const cum::Shape& LayerBase::input_shape() const
+    {
+        return __input_shape__;
+    }
+
+    const cum::Shape& LayerBase::output_shape() const
+    {
+        return __output_shape__;
+    }
+
     int LayerBase::size()
     {
         return this->_layerSize_;
@@ -56,7 +67,7 @@ namespace yann::models::layers
         // return this->biases.gradient;
     }
 
-    LAYER_TYPE LayerBase::layerType()
+    LayerType LayerBase::layerType()
     {
         return _layerType_;
     }

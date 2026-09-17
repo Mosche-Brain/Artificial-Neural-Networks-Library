@@ -44,5 +44,6 @@ TEST_CASE("Dense forward")
 
 TEST_CASE("Sequential forward")
 {
+    cum::cum(cum::DEVICE::GPU);
 
 }
