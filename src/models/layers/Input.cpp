@@ -30,7 +30,7 @@ namespace yann::models::layers
         this->_initialized_ = true;
     }
 
-    void Input::initParameters(int output_features, int input_features)
+    void Input::init_parameters(int output_features, int input_features)
     {
 
     }

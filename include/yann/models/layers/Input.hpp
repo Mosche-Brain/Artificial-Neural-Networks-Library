@@ -8,7 +8,7 @@ namespace yann::models::layers
     public:
         Input(int layerSize);
 
-        void initParameters(int output_features, int input_features) override;
+        void init_parameters(int output_features, int input_features) override;
 
         cum::Tensor forward(const cum::Tensor& input) override;
         cum::Tensor backward(const cum::Tensor& deltaOutput) override;

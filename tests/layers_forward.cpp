@@ -30,7 +30,7 @@ TEST_CASE("Dense forward")
     auto layer = yann::models::layers::Dense::createUnique(8, "relu");
     std::println("Created Dense layer");
 
-    layer->initParameters(4, 8);
+    layer->init_parameters(4, 8);
     std::println("Initialized Dense layer parameters");
 
     cum::Tensor Y = layer->forward(X);

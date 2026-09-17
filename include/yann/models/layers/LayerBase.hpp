@@ -14,7 +14,8 @@
 
 namespace yann::models::layers
 {
-    struct ForwardCache
+    // TODO: Do not implicitly reserve memory necessary for training (da, dz, etc)
+    struct ForwardCache // ForwardCache name may not be relevant due to storing dz and da, more general name like a `LayerCache` may be better
     {
         cum::Tensor x;
         cum::Tensor z;
@@ -38,9 +39,22 @@ namespace yann::models::layers
             dz  = cum::Tensor::make_matrix(out_features, batch_size);
         }
 
-        void resise(const cum::Shape& in_shape, const cum::Shape& out_shape, cum::dim_t batch_size)
+        void resise(const cum::Shape& input_shape, const cum::Shape& output_shape, cum::dim_t batch_size)
         {
+            cum::Shape in_shape = input_shape;
+            cum::Shape out_shape = input_shape;
 
+            if(batch_size > 1)
+            {
+                in_shape.insert(input_shape.begin(), batch_size);
+                out_shape.insert(output_shape.begin(), batch_size);
+            }
+
+            x   = cum::Tensor(in_shape);
+            z   = cum::Tensor(out_shape);
+            a   = cum::Tensor(out_shape);
+            dz  = cum::Tensor(out_shape);
+            da  = cum::Tensor(out_shape);
         }
     };
 
@@ -49,28 +63,18 @@ namespace yann::models::layers
     public:
         virtual ~LayerBase() = default;
 
-        virtual void initParameters(int output_features, int input_features) = 0;
+        virtual void init_parameters(int output_features, int input_features) = 0; // I will swap output and input festures order
+        virtual void init_parameters(const cum::Shape& input_shape, const cum::Shape& output_shape) {};
         // dofdam też inicjalizator parametrów przyjmujący referencje do poprzedniej warstwy
         
-        // virtual cum::Vector forward(const cum::Vector& input) = 0;
-        virtual cum::Tensor forward(const cum::Tensor& input) {};
-        virtual cum::Tensor backward(const cum::Tensor& input) {};
-
-        virtual cum::Matrix forward(const cum::Matrix& input) {};
-        virtual cum::Matrix backward(const cum::Matrix& deltaOutput) {};
+        virtual cum::Tensor forward(const cum::Tensor& input) = 0;
+        virtual cum::Tensor backward(const cum::Tensor& input) = 0;
 
         virtual void collect_parameters(std::vector<Parameter*>& params) = 0;
-        // virtual std::unique_ptr<LayerBase> getUnique() = 0;
-        
+
         bool initialized();
         virtual int size();
-        // virtual cum::Matrix& Outputs();
-        // virtual cum::Matrix& Inputs();
-        // virtual cum::Matrix& weights_grad();
-        // virtual cum::Matrix& weights();
-        // virtual cum::Matrix& biases();
-        // virtual cum::Matrix& biases_grad();
-        //
+
         virtual cum::Tensor& Outputs();
         virtual cum::Tensor& Inputs();
         virtual cum::Tensor& weights_grad();

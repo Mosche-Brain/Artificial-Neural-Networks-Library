@@ -40,13 +40,13 @@ namespace yann::models
 
     void Sequential::build()
     {
-        topology[0]->initParameters(topology[0]->size(), 1);
+        topology[0]->init_parameters(topology[0]->size(), 1);
         for(size_t i = 1 ; i < topology.size() ; i++)
         {
             int previous_layer_size = topology[i - 1]->size();
             int current_layer_size  = topology[  i  ]->size();
 
-            topology[i]->initParameters(current_layer_size, previous_layer_size);
+            topology[i]->init_parameters(current_layer_size, previous_layer_size);
         }
     }
 

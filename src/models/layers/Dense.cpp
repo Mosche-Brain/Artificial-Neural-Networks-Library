@@ -37,7 +37,7 @@ namespace yann::models::layers
         this->_layerType_ = LAYER_TYPE::DENSE;
     }
 
-    void Dense::initParameters(int output_features, int input_features)
+    void Dense::init_parameters(int output_features, int input_features)
     {
         this->weights_       = Parameter::Uniform(output_features, input_features);   /* neurons * input_length */
         this->biases_        = Parameter::Zeros(output_features, 1);                  /* Column-Vector */
