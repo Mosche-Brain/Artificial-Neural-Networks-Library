@@ -44,3 +44,21 @@ TEST_CASE("Dense backward")
 
     REQUIRE(true);
 }
+
+TEST_CASE("Linear backward")
+{
+
+}
+
+TEST_CASE("Sequential backward")
+{
+    cum::cum(cum::DEVICE::GPU);
+
+    yann::models::Sequential sequential({
+        yann::models::layers::Input::createUnique(2),
+        yann::models::layers::Dense::createUnique(3, "relu"),
+        yann::models::layers::Dense::createUnique(1, "sigmoid"),
+    });
+
+
+}

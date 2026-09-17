@@ -1,8 +1,6 @@
-`/AGENTS.md`
-
-```markdown
 # AGENTS.md
 
+---
 ## Project Overview
 
 YANN is a C++23 High Performance Computing and Machine Learning framework.
@@ -20,15 +18,14 @@ The main goals of the project are:
 - support for multiple execution backends
 - clean C++23 API design
 
----
-
+[//]: # (---)
 # Architecture
+
+---
 
 ## Dependency direction
 
 The dependency graph must always remain:
-
-```
 
 yann
 |
@@ -296,8 +293,8 @@ Current backends include:
 
 ```
 MKL
-Native
-CBLAS
+Native (not implemented)
+CBLAS (not implemented)
 ```
 
 Backend-specific code belongs only inside backend directories.
@@ -330,6 +327,7 @@ Prefer existing abstractions:
 ```cpp
 Parameter
 ForwardCache
+cum::Tensor
 cum::Matrix
 cum::Vector
 ```
@@ -339,10 +337,10 @@ Avoid creating duplicated storage.
 Layers usually operate on:
 
 ```cpp
-cum::Matrix
+cum::Tensor
 ```
 
-not raw arrays.
+not STL types.
 
 Reuse caches where possible.
 

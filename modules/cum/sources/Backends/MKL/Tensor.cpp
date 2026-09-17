@@ -972,7 +972,7 @@ namespace cum
 	Tensor operator * (const Tensor& A, const Tensor& B)
     {
 		Shape result_shape = {};
-		switch (A.format()) // Temporary implementation using switch statement
+		switch (A.format()) // Temporary solution
 		{
 			case layout::IO:
 			case layout::OI:
