@@ -132,6 +132,48 @@ namespace cum
 		return -1;
 	}
 
+	Tensor select_axis(const Tensor& source, Axis axis, dim_t index) // This method was synthetically generated, but at least I read it
+	{
+		const Shape source_shape = source.shape();
+		const int position = axis_position(source.format(), axis);
+		if(position < 0 || static_cast<std::size_t>(position) >= source_shape.size())
+			throw std::invalid_argument("requested axis is not present in tensor layout");
+		if(index < 0 || index >= source_shape[position])
+			throw std::out_of_range("tensor slice index is out of range");
+
+		Shape result_shape = source_shape;
+		result_shape.erase(result_shape.begin() + position);
+		if(result_shape.empty())
+			result_shape.push_back(1);
+
+		Tensor result(result_shape, source.type(), layout::ANY);
+		Shape source_indices(source_shape.size(), 0);
+		dim_t output_index = 0;
+
+		auto copy_values = [&](auto&& recurse, std::size_t dimension) -> void
+		{
+			if(dimension == source_shape.size())
+			{
+				result.data<cumeric_t>()[output_index++] = source.at(source_indices);
+				return;
+			}
+			if(static_cast<int>(dimension) == position)
+			{
+				source_indices[dimension] = index;
+				recurse(recurse, dimension + 1);
+				return;
+			}
+			for(dim_t value = 0; value < source_shape[dimension]; ++value)
+			{
+				source_indices[dimension] = value;
+				recurse(recurse, dimension + 1);
+			}
+		};
+
+		copy_values(copy_values, 0);
+		return result;
+	}
+
 	/**------------------------------------------------------------------------------------------------
 	 *                                         Constructors
 	 *------------------------------------------------------------------------------------------------**/
@@ -530,6 +572,32 @@ namespace cum
 	{
 		return this->at(Shape{idx0, idx1, idx2, idx3, idx4});
 	}
+
+
+	Tensor Tensor::batch(dim_t index) const
+	{
+		return select_axis(*this, Axis::Batches, index);
+	}
+
+	Tensor Tensor::channel(dim_t index) const
+	{
+		return select_axis(*this, Axis::Channels, index);
+	}
+
+	Tensor Tensor::row(dim_t index) const
+	{
+		return select_axis(*this, Axis::Rows, index);
+	}
+
+	Tensor Tensor::col(dim_t index) const
+	{
+		return select_axis(*this, Axis::Cols, index);
+	}
+
+
+
+
+
 
 	/**------------------------------------------------------------------------------------------------
 	*                                         Reshaping

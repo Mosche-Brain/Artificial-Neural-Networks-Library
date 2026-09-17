@@ -30,7 +30,7 @@ namespace yann::models
         topology.reserve(newTopology.size());
         for(auto& ptr : newTopology)
         {
-            topology.push_back(std::move(const_cast<std::unique_ptr<layers::LayerBase>&>(ptr)));
+            topology.push_back(std::move(const_cast<std::unique_ptr<layers::LayerBase>&>(ptr))); // This work properly with fresh layers pointers created by ::createUnique(...) fabriques
         }
 
         if(!build) return;
@@ -80,7 +80,8 @@ namespace yann::models
     {
         if (topology.empty()) return;
 
-        cum::Tensor curr_gradient = topology.back()->backward(d_output);
+        // cum::Tensor curr_gradient = topology.back()->backward(d_output);
+        cum::Tensor curr_gradient = d_output;
         // for (size_t i = topology.size() - 1; i > 0; --i)
         for (auto [index, layer] : topology | std::views::enumerate | std::views::reverse)
         {
@@ -111,19 +112,6 @@ namespace yann::models
         std::vector<Parameter*> params = this->parameters();
         const bool batched = batch_size > 1;
 
-        // std::vector<Batch> batches;
-        // if (batched)
-        // {
-        //     for (cum::dim_t begin = 0; begin < X.cols(); begin += batch_size) // przeniósł bym tą pętle do osobnej funkcji
-        //     {
-        //         const cum::dim_t samples = std::min(X.cols() - begin, batch_size);
-        //         batches.emplace_back(
-        //             X.slice(0, begin, X.rows(), samples),
-        //             Y.slice(0, begin, Y.rows(), samples),
-        //             Batch::ORIENTATION::COLUMN_SAMPLE);
-        //     }
-        // }
-
         YANN_LOG(1, "Started training for {} epochs...", epochs);
 
         cum::cumeric_t mean_loss = 0;
@@ -139,11 +127,16 @@ namespace yann::models
             YANN_LOG(1, "Epoch {}", epoch);
 
             // Mamy tutaj kopie, później można to na referencje zmiennić dla ograniczenia lokacji
-            cum::Tensor x;
-            cum::Tensor y;
+            // const cum::Shape& input_shape = X.shape();
+            const cum::Shape& input_shape = topology.front()->input_shape();
+            const cum::Shape& output_shape = topology.back()->output_shape();
+
+            cum::Tensor x(input_shape, cum::default_type, cum::layout::IO);
+            cum::Tensor y(output_shape, cum::default_type, cum::layout::IO);
+            YANN_LOG(1, "porno", epoch);
 
             // cum::dim_t n = batched ? batches.size() : X.cols();
-            cum::dim_t n = X.shape()[1];
+            cum::dim_t n = X.cols();
             for (batch = 0; batch < n; batch++)
             {
                 // cum::dim_t current_batch_size = batched ? batches[batch].size : 1;
@@ -151,29 +144,29 @@ namespace yann::models
 
                 if (batched)
                 {
-                    // x = batches[batch].inputs();
-                    // y = batches[batch].targets();
+                    x = X.batch(batch);
+                    y = X.batch(batch);
                 }
                 else
                 {
-                    // x = X.col(batch);
-                    // y = Y.col(batch);
+                    x = X.col(batch);
+                    y = Y.col(batch);
                 }
 
-                // cum::Matrix results = this->forward(x);
+                cum::Tensor results = this->forward(x);
 
-                // loss.compute(results, y);
+                loss.compute(results, y);
 
-                // loss::loss_t error = loss.result();
+                loss::loss_t error = loss.result();
 
-                // this->backward(error.gradient);
+                this->backward(error.gradient);
 
                 for (logging::ITrainingCallback*&  callback : callbacks)
                     callback->afterBackprop(ctx);
 
                 // optimizer.scale_grads(params, 1 / static_cast<cum::cumeric_t>(current_batch_size));
                 optimizer.step(params); // zerowanie gradientów jest dokonywanie niejawnie w kroku optymalizatora
-                // total_loss += error.value;
+                total_loss += error.value;
             }
 
             // mean_loss = total_loss / static_cast<cum::cumeric_t>(batched ? batches.size() : X.cols());

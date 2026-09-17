@@ -18,6 +18,9 @@
 #include <yann/models/Sequential.hpp>
 #include <yann/runtime_config.hpp>
 
+#include "loss/MeanSquaredError.hpp"
+#include "optimizers/SGD.hpp"
+
 TEST_CASE("Dense backward")
 {
 
@@ -60,5 +63,19 @@ TEST_CASE("Sequential backward")
         yann::models::layers::Dense::createUnique(1, "sigmoid"),
     });
 
+    cum::Tensor X(2, 4, cum::default_type, cum::layout::IO);
+    X.fill(0.2137);
 
+    cum::Tensor Y(1, 4, cum::default_type, cum::layout::IO);
+    Y.fill(0.69);
+
+    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.01);
+    yann::loss::Loss loss = yann::loss::MeanSquaredError::create();
+
+
+    yann::runtime_config::set_verbosity(5);
+    sequential.fit(X, Y, *loss, *optimizer, 1000);
+
+    REQUIRE(true);
 }
+

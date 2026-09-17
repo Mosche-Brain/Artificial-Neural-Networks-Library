@@ -141,6 +141,11 @@ namespace cum
         cumeric_t operator ()(dim_t idx0, dim_t idx1, dim_t idx2, dim_t idx3) const;
         cumeric_t operator ()(dim_t idx0, dim_t idx1, dim_t idx2, dim_t idx3, dim_t idx4) const;
 
+        Tensor batch(dim_t index) const;
+        Tensor channel(dim_t index) const;
+        Tensor row(dim_t index) const;
+        Tensor col(dim_t index) const;
+
         /* Reshaping */
         Tensor slice(const Shape& indices);
 
