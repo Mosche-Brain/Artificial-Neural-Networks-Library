@@ -35,7 +35,7 @@ namespace cum
     enum class layout : std::uint8_t {
         ANY,
 
-        X,
+        X, // Vector
 
         NC,
         BC = NC,       // Batch, Channels / Features

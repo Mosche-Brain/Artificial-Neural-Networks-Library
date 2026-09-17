@@ -924,7 +924,22 @@ namespace cum
 
 	Tensor operator * (const Tensor& A, const Tensor& B)
     {
-    	Tensor C(A.shape(), A.type(), A.format());
+		Shape result_shape = {};
+		// Temporary implementation using switch statement
+		switch (A.format())
+		{
+			case layout::IO:
+			{
+				result_shape = {A.rows(), B.cols()};
+				break;
+			}
+			default:
+			{
+				throw std::invalid_argument("Unsupported format for tensor multiplication");
+			}
+		}
+
+		Tensor C(result_shape, A.type(), A.format());
 
 	    dnnl::matmul::primitive_desc primitive_desc {
 			internal::engine(),

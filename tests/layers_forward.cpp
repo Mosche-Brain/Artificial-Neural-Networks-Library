@@ -7,6 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <cum/runtime.hpp>
 #include <cum/Matrix.hpp>
 #include <cum/cum.hpp>
 
@@ -14,7 +15,9 @@
 
 #include <print>
 
-#include <cum/runtime.hpp>
+
+#include <yann/models/Sequential.hpp>
+#include <yann/runtime_config.hpp>
 
 TEST_CASE("Dense forward")
 {
@@ -45,5 +48,26 @@ TEST_CASE("Dense forward")
 TEST_CASE("Sequential forward")
 {
     cum::cum(cum::DEVICE::GPU);
+
+    std::println("Created CUM context");
+
+    yann::models::Sequential sequential({
+        yann::models::layers::Input::createUnique(2),
+        yann::models::layers::Dense::createUnique(2, "relu"),
+        yann::models::layers::Dense::createUnique(1, "sigmoid"),
+    });
+
+    std::println("Created Sequential model");
+
+    cum::Tensor x(cum::Shape{2, 1}, cum::default_type, cum::layout::IO);
+    x.fill(0.2137);
+
+    std::println("Created input tensor");
+
+    yann::runtime_config::set_verbosity(5);
+
+    sequential.forward(x);
+
+    REQUIRE(true);
 
 }

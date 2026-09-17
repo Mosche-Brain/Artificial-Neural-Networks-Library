@@ -2,6 +2,7 @@
 #include <cum/Matrix.hpp>
 #include <stdexcept>
 #include <ranges>
+#include <print>
 
 #include <cum/runtime.hpp>
 
@@ -40,9 +41,11 @@ namespace yann::models
     void Sequential::build()
     {
         topology[0]->init_parameters(topology[0]->size(), 1);
-        // for(size_t i = 1 ; i < topology.size() ; i++)
+
         for(auto [index, layer] : topology | std::views::enumerate)
         {
+            if (index == 0) continue;
+
             int previous_layer_size = topology[index - 1]->size();
 
             layer->init_parameters(layer->size(), previous_layer_size);
@@ -61,9 +64,12 @@ namespace yann::models
 
     cum::Tensor Sequential::forward(const cum::Tensor& input)
     {
-        cum::Tensor result = topology[0]->forward(input);
+        // cum::Tensor result = topology.front()->forward(input);
+        cum::Tensor result = input;
+
         for (auto& layer : topology)
         {
+            std::println("forward");
             result = layer->forward(result);
         }
 
@@ -133,8 +139,8 @@ namespace yann::models
             YANN_LOG(1, "Epoch {}", epoch);
 
             // Mamy tutaj kopie, później można to na referencje zmiennić dla ograniczenia lokacji
-            cum::Matrix x;
-            cum::Matrix y;
+            cum::Tensor x;
+            cum::Tensor y;
 
             // cum::dim_t n = batched ? batches.size() : X.cols();
             cum::dim_t n = X.shape()[1];

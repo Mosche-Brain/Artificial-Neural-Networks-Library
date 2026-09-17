@@ -39,8 +39,10 @@ namespace yann::models::layers
     {
         // if (input.cols() != cache.x.cols()) // sprawdza czy batch jest taki sam
         // {
-        //     cache.resize(cache.x.rows(), cache.z.rows(), input.cols());
+            // cache.resize(cache.x.rows(), cache.z.rows(), input.cols());
         // }
+        // return input;
+
         this->cache.x = input;
         this->cache.a = input;
         return this->cache.a;

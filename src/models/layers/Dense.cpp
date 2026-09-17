@@ -54,6 +54,15 @@ namespace yann::models::layers
         constexpr bool YANN_DENSE_FORWARD_FUSED_PATH = true;
         constexpr bool YANN_DENSE_FORWARD_REFERENCE_PATH = true;
 
+        // check if number of weights cols is equal to number of input rows
+        if constexpr(ENABLE_RUNTIME_CHECKS)
+        {
+            if(input.rows() != weights_.cols())
+            {
+                throw std::runtime_error("Input dimension mismatch: " + std::to_string(input.rows()) + " != " + std::to_string(weights_.cols()));
+            }
+        }
+
         this->cache.x = input;
 
         if(runtime_config::fused_kernels())
@@ -72,8 +81,12 @@ namespace yann::models::layers
         {
             if constexpr(YANN_DENSE_FORWARD_REFERENCE_PATH)
             {
+                YANN_LOG(3, "cache.z = weights_.values * input", "");
+                YANN_LOG(4, "X: {}x{}, | W: {}x{}", input.rows(), input.cols(), weights_.values.rows(), weights_.values.cols());
                 cache.z = weights_.values * input;
 
+                YANN_LOG(3, "cache.z = cache.z + biases_.values", "");
+                YANN_LOG(4, "Z: {}x{} | B: {}x{}", cache.z.rows(), cache.z.cols(), biases_.values.rows(), biases_.values.cols());
                 cache.z = cache.z + biases_.values; // with broadcast
 
                 cache.a = cache.z.elementwise(activation.name);
