@@ -38,6 +38,69 @@ TEST_CASE("Tensor constructor exposes shape, type and layout")
     cum::decum();
 }
 
+TEST_CASE("Tensor axis getters follow the tensor layout")
+{
+    cum::cum(cum::DEVICE::CPU);
+
+    const cum::Tensor channels_first(cum::Shape{4, 7}, cum::default_type, cum::layout::NC);
+    REQUIRE(channels_first.batches() == 4);
+    REQUIRE(channels_first.channels() == 7);
+    REQUIRE(channels_first.rows() == 0);
+    REQUIRE(channels_first.cols() == 0);
+
+    const cum::Tensor matrix(cum::Shape{5, 6}, cum::default_type, cum::layout::IO);
+    REQUIRE(matrix.batches() == 0);
+    REQUIRE(matrix.channels() == 0);
+    REQUIRE(matrix.rows() == 5);
+    REQUIRE(matrix.cols() == 6);
+    cum::decum();
+}
+
+TEST_CASE("Tensor batch and channel getters return independent slices")
+{
+    cum::cum(cum::DEVICE::CPU);
+    cum::Tensor tensor(cum::Shape{2, 3}, cum::default_type, cum::layout::NC);
+    auto* values = tensor.data<cum::cumeric_t>();
+    values[0] = 1; values[1] = 2; values[2] = 3;
+    values[3] = 4; values[4] = 5; values[5] = 6;
+
+    auto batch = tensor.batch(1);
+    auto channel = tensor.channel(2);
+    REQUIRE(batch.shape() == (cum::Shape{3}));
+    REQUIRE(channel.shape() == (cum::Shape{2}));
+    REQUIRE(batch.at({0}) == 4);
+    REQUIRE(batch.at({2}) == 6);
+    REQUIRE(channel.at({0}) == 3);
+    REQUIRE(channel.at({1}) == 6);
+
+    batch.data<cum::cumeric_t>()[0] = 99;
+    REQUIRE(tensor.at({1, 0}) == 4);
+    cum::decum();
+}
+
+TEST_CASE("Tensor row and column getters return independent slices")
+{
+    cum::cum(cum::DEVICE::CPU);
+    cum::Tensor tensor(cum::Shape{2, 3}, cum::default_type, cum::layout::IO);
+    auto* values = tensor.data<cum::cumeric_t>();
+    values[0] = 1; values[1] = 2; values[2] = 3;
+    values[3] = 4; values[4] = 5; values[5] = 6;
+
+    auto row = tensor.row(1);
+    auto col = tensor.col(2);
+    REQUIRE(row.shape() == (cum::Shape{3}));
+    REQUIRE(col.shape() == (cum::Shape{2}));
+    REQUIRE(row.at({0}) == 2);
+    REQUIRE(row.at({1}) == 4);
+    REQUIRE(row.at({2}) == 6);
+    REQUIRE(col.at({0}) == 5);
+    REQUIRE(col.at({1}) == 6);
+
+    col.data<cum::cumeric_t>()[0] = 77;
+    REQUIRE(tensor.at({0, 2}) == 5);
+    cum::decum();
+}
+
 TEST_CASE("Tensor copy, move and assignment preserve independent values")
 {
     cum::cum(cum::DEVICE::CPU);
@@ -45,7 +108,7 @@ TEST_CASE("Tensor copy, move and assignment preserve independent values")
     original.fill(3);
 
     cum::Tensor copy(original);
-    copy.data()[0] = 8;
+    copy.data<cum::cumeric_t>()[0] = 8;
     REQUIRE(original.at({0, 0}) == 3);
     REQUIRE(copy.at({0, 0}) == 8);
 
@@ -90,7 +153,7 @@ TEST_CASE("Tensor take_memory uses supplied storage")
     storage[2] = 3;
     {
         auto tensor = cum::Tensor::take_memory({3}, storage, cum::default_type, cum::layout::X);
-        tensor.data()[1] = 9;
+        tensor.data<cum::cumeric_t>()[1] = 9;
         REQUIRE(storage[1] == 9);
         REQUIRE(tensor.at({2}) == 3);
     }

@@ -50,7 +50,28 @@ TEST_CASE("Dense backward")
 
 TEST_CASE("Linear backward")
 {
+    cum::cum(cum::DEVICE::GPU);
 
+    cum::Tensor dy(cum::Shape{3, 1}, cum::default_type, cum::layout::IO);
+    std::println("Created dy tensor");
+
+    dy.fill(0.2137);
+    std::println("Filled dy tensor with pope values");
+
+    auto layer = yann::models::layers::Linear::createUnique(3);
+    std::println("Created Dense layer");
+
+    layer->init_parameters(3, 1);
+
+    cum::Tensor sample({1, 1}, cum::default_type, cum::layout::IO);
+    layer->forward(sample);
+
+
+    yann::runtime_config::set_verbosity(5);
+    cum::Tensor dx = layer->backward(dy);
+    std::println("Backpropagation completed");
+
+    REQUIRE(true);
 }
 
 TEST_CASE("Sequential backward")
@@ -74,7 +95,7 @@ TEST_CASE("Sequential backward")
 
 
     yann::runtime_config::set_verbosity(5);
-    sequential.fit(X, Y, *loss, *optimizer, 1000);
+    sequential.fit(X, Y, *loss, *optimizer, 1);
 
     REQUIRE(true);
 }

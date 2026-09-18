@@ -119,7 +119,7 @@ namespace yann::models
         cum::dim_t batch = 0;
 
 
-        logging::TrainingContext ctx(*this, mean_loss, epoch, batch); // TODO: obecnie batch jest ignorowany, lepiej zrobię by ctx miał referencje do lossu, epoki, batcha, a nie kopie
+        logging::TrainingContext ctx(*this, mean_loss, epoch, batch); // TODO: obecnie batch jest ignorowany, lepiej zrobię by ctx miał referencje do lossu, epoki, batcha, a nie kopie (done some time ago)
         for(epoch = 0 ; epoch < epochs ; epoch++)
         {
             cum::cummulative_t total_loss = 0;
@@ -149,7 +149,10 @@ namespace yann::models
                 }
                 else
                 {
-                    x = X.col(batch);
+                    YANN_LOG(2, "Sampling X col", "");
+                    cum::Tensor x_ = X.col(batch);
+                    // x = X.col(batch);
+                    YANN_LOG(2, "Sampling Y col", "");
                     y = Y.col(batch);
                 }
 

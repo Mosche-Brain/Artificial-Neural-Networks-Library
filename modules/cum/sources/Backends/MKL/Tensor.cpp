@@ -146,7 +146,8 @@ namespace cum
 		if(result_shape.empty())
 			result_shape.push_back(1);
 
-		Tensor result(result_shape, source.type(), layout::ANY);
+		Tensor result(result_shape, source.type(),
+			result_shape.size() == 1 ? layout::X : layout::ANY);
 		Shape source_indices(source_shape.size(), 0);
 		dim_t output_index = 0;
 
