@@ -861,7 +861,7 @@ namespace cum
 	Tensor Tensor::colwise_sum()
 	{
 		if(dims() != 2)
-			throw std::invalid_argument("rowwise_sum requires a two-dimensional tensor");
+			throw std::invalid_argument("colwise_sum requires a two-dimensional tensor");
 
 		const Shape source_shape = shape();
 		Tensor result({source_shape[0], 1}, type(), layout::IO);
@@ -888,10 +888,13 @@ namespace cum
 	Tensor Tensor::rowwise_sum()
 	{
 		if(dims() != 2)
-			throw std::invalid_argument("colwise_sum requires a two-dimensional tensor");
+			throw std::invalid_argument("rowwise_sum requires a two-dimensional tensor");
 
-		const Shape source_shape = shape();
-		Tensor result({1, source_shape[0]}, type(), layout::IO);
+		Shape new_shape = shape();
+		new_shape[1] = 1;
+
+		Tensor result(new_shape, type(), format());
+
 		dnnl::reduction::primitive_desc primitive_desc(
 			internal::engine(),
 			dnnl::algorithm::reduction_sum,
@@ -903,7 +906,7 @@ namespace cum
 
 		dnnl::reduction(primitive_desc).execute(
 			internal::stream(),
-			{
+	{
 				{DNNL_ARG_SRC, _memr_->handle().memory},
 				{DNNL_ARG_DST, result._memr_->handle().memory}
 			}

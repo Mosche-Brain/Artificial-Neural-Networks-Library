@@ -5,6 +5,8 @@
  * @date:   13 September 2026 18:52:27
  */
 
+#include <print>
+
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
@@ -49,6 +51,19 @@ TEST_CASE("Tensor rowwise_sum reduces each matrix row")
     values[3] = 4; values[4] = 5; values[5] = 6;
 
     const auto result = tensor.rowwise_sum();
+
+    for (int i = 0; i < result.rows(); ++i)
+    {
+        for (int j = 0; j < result.cols(); ++j)
+        {
+            float value = result.at({i, j});
+            std::print("{}", value);
+            if (j != result.cols() - 1)
+                std::print(", ", value);
+        }
+        std::print("\n");
+    }
+
     REQUIRE(result.shape() == (cum::Shape{2, 1}));
     REQUIRE(result.at({0, 0}) == 6);
     REQUIRE(result.at({1, 0}) == 15);
@@ -82,12 +97,16 @@ TEST_CASE("Tensor compound operators mutate the left operand")
     other.fill(2);
 
     tensor += other;
+    std::println("add");
     require_values(tensor, {6, 6});
     tensor -= other;
+    std::println("sub");
     require_values(tensor, {4, 4});
-    tensor.cwiseProduct(other);
+    tensor.cwise_product_in_place(other);
+    std::println("mul");
     require_values(tensor, {8, 8});
     tensor /= other;
+    std::println("div");
     require_values(tensor, {4, 4});
     cum::decum();
 }
