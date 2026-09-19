@@ -20,56 +20,20 @@
 #endif
 
 #include "cum/experimental/__event__.hpp"
+#include "cum/layout.hpp"
+
 
 namespace cum
 {
     enum class DEVICE { AUTO, CPU, GPU };
 
     using __event__ = experimental::__event__;
-    using __depencies__ = std::vector<std::reference_wrapper<__event__>>;
+    using __events__ = std::vector<std::reference_wrapper<__event__>>;
 
     using dim_t = std::int64_t;
     using Shape = std::vector<cum::dim_t>;
     using Dims = std::vector<cum::dim_t>;
 
-    enum class layout : std::uint8_t {
-        ANY,
-
-        X, // Vector
-
-        NC,
-        BC = NC,       // Batch, Channels / Features
-
-        OI,
-        IO,
-
-        NCHW,
-        BCHW = NCHW,   // Batch, Channels, Height, Width
-
-        NHWC,
-        BHWC = NHWC,   // Batch, Height, Width, Channels
-
-        OIHW,
-
-        HWIO,
-
-        NCDHW,
-        BCDHW = NCDHW, // Batch, Channels, Depth, Height, Width
-
-        NDHWC,
-        BDHWC = NDHWC, // Batch, Depth, Height, Width, Channels
-
-        TNC,
-        SBC = TNC,     // Sequence, Batch, Channels
-        SBE = TNC,     // Sequence, Batch, Embedding
-
-        NTC,
-        BSC = NTC,     // Batch, Sequence, Channels
-        BSE = NTC,     // Batch, Sequence, Embedding
-
-        STRIDED,
-        UNDEF
-    };
 
     // give info ABOUT used precision in compile time for each precision
     #if CUM_USE_FP64

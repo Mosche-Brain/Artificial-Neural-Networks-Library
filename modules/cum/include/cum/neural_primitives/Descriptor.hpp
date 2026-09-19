@@ -20,6 +20,11 @@ namespace cum::neural_primitives
     public:
         Descriptor(Shape dims, datatype dtype, layout format);
         Descriptor(Descriptor& other);
+        Descriptor(const handles::__desc__& handle);
+        Descriptor(handles::__desc__& handle);
+
+        Descriptor(Descriptor&&) noexcept;
+        Descriptor& operator=(Descriptor&&) noexcept;
 
         dim_t size() const;
         dim_t ndims() const;

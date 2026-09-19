@@ -13,7 +13,7 @@
 
 namespace cum::LinearAlgebra
 {
-	__event__ mmul(cumeric_t* C, const cumeric_t* A, const cumeric_t* B, const dim_t m, const dim_t n, const dim_t k, __depencies__ depencies)
+	__event__ mmul(cumeric_t* C, const cumeric_t* A, const cumeric_t* B, const dim_t m, const dim_t n, const dim_t k, __events__ depencies)
 	{
 		// std::vector<sycl::event> events;
 		// for(__event__& dependency : depencies)
@@ -35,7 +35,7 @@ namespace cum::LinearAlgebra
 		return mmul(A, A, B, m, n, k);
 	}
 
-	__event__ mtrans(cumeric_t *At, const cumeric_t *A, const dim_t m, const dim_t n, __depencies__ depencies)
+	__event__ mtrans(cumeric_t *At, const cumeric_t *A, const dim_t m, const dim_t n, __events__ depencies)
 	{
 		auto& q = internal::getQueue();
         sycl::event event;
@@ -60,7 +60,7 @@ namespace cum::LinearAlgebra
 		return detail::event_handler::create(std::move(event));
 	}
 
-	__event__ mtrans(cumeric_t* A, const dim_t m, const dim_t n, __depencies__ depencies)
+	__event__ mtrans(cumeric_t* A, const dim_t m, const dim_t n, __events__ depencies)
 	{
 		return mtrans(A, A, m, n, depencies);
 	}

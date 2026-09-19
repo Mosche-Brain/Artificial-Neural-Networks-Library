@@ -31,6 +31,12 @@ namespace cum
         Cols = Width,
     };
 
+    struct AxisIndex
+    {
+        Axis axis;
+        dim_t index;
+    };
+
     class Tensor
     {
     public:
@@ -40,7 +46,7 @@ namespace cum
         Tensor(cumeric_t value, datatype dtype = default_type, layout layout = layout::X); // scalar constructor
         Tensor(dim_t lenght, datatype dtype = default_type, layout layout = layout::X); // vector constructor
         Tensor(dim_t rows, dim_t cols, datatype dtype = default_type, layout layout = layout::NC); // Matrix Constructor
-        Tensor(dim_t axis0, dim_t axis1, dim_t axis2, datatype dtype = default_type, layout layout = layout::NCHW); // 3-rd rank tensor constructor
+        Tensor(dim_t axis0, dim_t axis1, dim_t axis2, datatype dtype = default_type, layout layout = layout::ABC); // 3-rd rank tensor constructor
         Tensor(dim_t axis0, dim_t axis1, dim_t axis2, dim_t axis3, datatype dtype = default_type, layout layout = layout::NCHW); // 4-th rank tensor constructor
         Tensor(dim_t axis0, dim_t axis1, dim_t axis2, dim_t axis3, dim_t axis4, datatype dtype = default_type, layout layout = layout::NCDHW); // 5-th rank tensor constructor
 
@@ -82,6 +88,7 @@ namespace cum
         /* getters */
 
         dim_t size() const;
+        dim_t rank() const;
         dim_t dims() const;
         dim_t lenght() const;
         Shape shape() const;
@@ -113,7 +120,7 @@ namespace cum
                 throw std::runtime_error("datatype mismatch");
 
             const dim_t idx = compute_index(indices);
-            return static_cast<const T*>(__data__)[idx];
+            return static_cast<const T*>(data())[idx];
         }
 
 
@@ -124,10 +131,10 @@ namespace cum
 
 
         template<typename T>
-        T* data() { return static_cast<T*>(__data__); }
+        T* data() { return static_cast<T*>(data()); }
 
         template<typename T>
-        const T* data() const { return static_cast<const T*>(__data__); }
+        const T* data() const { return static_cast<const T*>(data()); }
 
         cumeric_t at(const Shape& indices);
         cumeric_t at(const Shape& indices) const;
@@ -147,7 +154,7 @@ namespace cum
         Tensor col(dim_t index) const;
 
         /* Reshaping */
-        Tensor slice(const Shape& indices);
+        Tensor slice(const Shape& offset, const Shape& shape) const;
 
         Tensor reshape(const Shape& shape) const;
         Tensor& reshape_in_place(const Shape& shape);
@@ -180,6 +187,8 @@ namespace cum
 
         Tensor multiply(const Tensor& tensor);
         Tensor cwiseProduct(const Tensor& tensor);
+
+        Tensor& cwise_product_in_place(const Tensor& other);
 
         Tensor sqrt() const;
         Tensor& sqrt_in_place();
@@ -216,11 +225,11 @@ namespace cum
         Tensor& operator = (const Tensor& other);
         Tensor& operator = (Tensor&& other) noexcept;
     private:
+        Tensor(neural_primitives::Descriptor&& desc, const neural_primitives::Memory& source);
         dim_t compute_index(const Shape& indices) const;
         void* compute_address(const Shape& indices);
 
-        std::unique_ptr<neural_primitives::Descriptor> __desc__;
-        std::unique_ptr<neural_primitives::Memory> __memr__;
-        void* __data__;
+        std::unique_ptr<neural_primitives::Descriptor> _desc_;
+        std::unique_ptr<neural_primitives::Memory> _memr_;
     };
 } // cum

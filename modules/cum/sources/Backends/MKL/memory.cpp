@@ -1,7 +1,9 @@
-#include "cum/memory.hpp"
+#include <sycl/sycl.hpp>
 
 #include "internal/context.hpp"
-#include <sycl/sycl.hpp>
+#include "cum/detail/vendor/oneapi/event_handler.hpp"
+
+#include "cum/memory.hpp"
 
 namespace cum::memory
 {
@@ -23,13 +25,17 @@ namespace cum::memory
         sycl::free(chunk, internal::getQueue());
     }
 
-    void memcopy(void* dst, const void* src, dim_t size)
+    __event__ memcopy(void* dst, const void* src, const dim_t size)
     {
-        internal::getQueue().memcpy(dst, src, size).wait();
+        sycl::event event = internal::getQueue().memcpy(dst, src, size);
+
+        return detail::event_handler::create(std::move(event));
     }
 
-    void prefetch(void* chunk, dim_t size)
+    __event__ prefetch(void* chunk, dim_t size)
     {
-        internal::getQueue().prefetch(chunk, size).wait();
+        sycl::event event = internal::getQueue().prefetch(chunk, size);
+
+        return detail::event_handler::create(std::move(event));
     }
 }

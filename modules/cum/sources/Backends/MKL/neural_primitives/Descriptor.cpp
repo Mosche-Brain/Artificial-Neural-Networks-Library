@@ -27,9 +27,17 @@ namespace cum::neural_primitives
         handle_ = std::make_unique<handles::__desc__>(other.handle_->desc);
     }
 
+    Descriptor::Descriptor(const handles::__desc__& handle) : fmt(cum::layout::ANY)
+    {
+        handle_ = std::make_unique<handles::__desc__>(handle);
+    }
+
+    Descriptor::Descriptor(Descriptor&&) noexcept = default;
+    Descriptor& Descriptor::operator=(Descriptor&&) noexcept = default;
 
     Descriptor::~Descriptor()
     {
+
     }
 
     dim_t Descriptor::size() const

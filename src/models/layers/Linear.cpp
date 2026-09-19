@@ -99,7 +99,10 @@ namespace yann::models::layers
                 cache.dz = deltaOutput;
 
                 YANN_LOG(4, "dL/B = cache.dz * cache.x.transpose()", "");
-                biases_.gradient += cache.dz.rowwise_sum();
+                if (cache.dz.cols() == 1)
+                    biases_.gradient += cache.dz;
+                else
+                    biases_.gradient += cache.dz.rowwise_sum();
 
                 YANN_LOG(4, "dL/dW = cache.dz * cache.x.transpose()", "");
                 weights_.gradient += cache.dz * cache.x.transpose();

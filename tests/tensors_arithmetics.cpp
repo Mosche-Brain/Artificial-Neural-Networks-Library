@@ -85,7 +85,7 @@ TEST_CASE("Tensor compound operators mutate the left operand")
     require_values(tensor, {6, 6});
     tensor -= other;
     require_values(tensor, {4, 4});
-    tensor *= other;
+    tensor.cwiseProduct(other);
     require_values(tensor, {8, 8});
     tensor /= other;
     require_values(tensor, {4, 4});

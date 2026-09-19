@@ -149,11 +149,11 @@ namespace yann::models
                 }
                 else
                 {
-                    YANN_LOG(2, "Sampling X col", "");
-                    cum::Tensor x_ = X.col(batch);
-                    // x = X.col(batch);
-                    YANN_LOG(2, "Sampling Y col", "");
+                    x = X.col(batch);
+                    YANN_LOG(2, "X: Sample: {}x{}", x.rows(), x.cols());
+
                     y = Y.col(batch);
+                    YANN_LOG(2, "Y: Sample: {}x{}", y.rows(), y.cols());
                 }
 
                 cum::Tensor results = this->forward(x);

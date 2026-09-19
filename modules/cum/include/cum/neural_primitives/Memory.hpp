@@ -21,10 +21,21 @@ namespace cum::neural_primitives
         Memory(const Descriptor& desc, Engine& engine);
         Memory(const Descriptor& desc, Engine& engine, void* data);
 
+        Memory(const Descriptor& desc, const Memory& source);
+
+        Memory(handles::__memory__& handle);
+
         ~Memory();
 
+        // Make view
+        // static Memory make_view(const Memory& memor);
+
         void* data();
+        const void* data() const;
+
         void  set_data(void* data);
+
+        std::shared_ptr<handles::__memory__> owner() const;
 
         const handles::__memory__& handle() const;
         handles::__memory__& handle();
@@ -32,7 +43,8 @@ namespace cum::neural_primitives
     private:
         friend class Tensor;
 
-        std::unique_ptr<handles::__memory__> handle_;
+        std::shared_ptr<handles::__memory__> handle_;
+        std::shared_ptr<handles::__memory__> owner_; // nullptr by default, point only when Memory object is a view over existing memory
     };
 
 } // cum
