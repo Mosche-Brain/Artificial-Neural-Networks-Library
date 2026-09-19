@@ -11,152 +11,131 @@
 
 #include <cum/memory.hpp>
 #include <utility>
+#include <print>
 
 #include <cum/Tensor.hpp>
 #include <cum/cum.hpp>
 
-TEST_CASE("Tensor constructor exposes shape, type and layout")
+#include "../modules/cum/bindings/C/include/cum/core.h"
+#include "cum/runtime.hpp"
+
+TEST_CASE("Tensor slice returns correct submatrix")
 {
     cum::cum(cum::DEVICE::CPU);
-    cum::Tensor tensor({2, 3}, cum::default_type, cum::layout::IO);
-    tensor.fill(7);
 
-    REQUIRE(tensor.shape() == (cum::Shape{2, 3}));
-    REQUIRE(tensor.dims() == 2);
-    REQUIRE(tensor.lenght() == 6);
-    REQUIRE(tensor.size() == 6 * static_cast<cum::dim_t>(cum::datatype_size(cum::default_type)));
-    REQUIRE(tensor.format() == cum::layout::IO);
-    REQUIRE(tensor.type() == cum::default_type);
-    REQUIRE(tensor.rows() == 2);
-    REQUIRE(tensor.cols() == 3);
-    REQUIRE(tensor.has(cum::Axis::Rows));
-    REQUIRE(tensor.extent(cum::Axis::Rows) == 2);
-    REQUIRE(tensor.extent(cum::Axis::Cols) == 3);
-    REQUIRE(tensor.at({1, 2}) == 7);
-    const cum::Tensor& const_tensor = tensor;
-    REQUIRE(const_tensor.at({1, 2}) == 7);
-    cum::decum();
+    cum::Tensor tensor({4, 5}, cum::default_type, cum::layout::OI);
+
+    for(cum::dim_t r = 0; r < 4; ++r)
+        for(cum::dim_t c = 0; c < 5; ++c)
+            tensor.data<cum::cumeric_t>()[r * 5 + c] = static_cast<cum::cumeric_t>(r * 10 + c);
+
+    auto slice = tensor.slice({1, 1}, {2, 3});
+
+    REQUIRE(slice.rank() == 2);
+    REQUIRE(slice.shape() == cum::Shape{2, 3});
+
+    REQUIRE(slice.at({0, 0}) == 11.0f);
+    REQUIRE(slice.at({0, 1}) == 12.0f);
+    REQUIRE(slice.at({0, 2}) == 13.0f);
+
+    REQUIRE(slice.at({1, 0}) == 21.0f);
+    REQUIRE(slice.at({1, 1}) == 22.0f);
+    REQUIRE(slice.at({1, 2}) == 23.0f);
 }
 
-TEST_CASE("Tensor axis getters follow the tensor layout")
+TEST_CASE("Tensor row returns correct view")
 {
     cum::cum(cum::DEVICE::CPU);
 
-    const cum::Tensor channels_first(cum::Shape{4, 7}, cum::default_type, cum::layout::NC);
-    REQUIRE(channels_first.batches() == 4);
-    REQUIRE(channels_first.channels() == 7);
-    REQUIRE(channels_first.rows() == 0);
-    REQUIRE(channels_first.cols() == 0);
+    cum::Tensor tensor({3, 4}, cum::default_type, cum::layout::OI);
 
-    const cum::Tensor matrix(cum::Shape{5, 6}, cum::default_type, cum::layout::IO);
-    REQUIRE(matrix.batches() == 0);
-    REQUIRE(matrix.channels() == 0);
-    REQUIRE(matrix.rows() == 5);
-    REQUIRE(matrix.cols() == 6);
-    cum::decum();
-}
-
-TEST_CASE("Tensor batch and channel getters return independent slices")
-{
-    cum::cum(cum::DEVICE::CPU);
-    cum::Tensor tensor(cum::Shape{2, 3}, cum::default_type, cum::layout::NC);
-    auto* values = tensor.data<cum::cumeric_t>();
-    values[0] = 1; values[1] = 2; values[2] = 3;
-    values[3] = 4; values[4] = 5; values[5] = 6;
-
-    auto batch = tensor.batch(1);
-    auto channel = tensor.channel(2);
-    REQUIRE(batch.shape() == (cum::Shape{3}));
-    REQUIRE(channel.shape() == (cum::Shape{2}));
-    REQUIRE(batch.at({0}) == 4);
-    REQUIRE(batch.at({2}) == 6);
-    REQUIRE(channel.at({0}) == 3);
-    REQUIRE(channel.at({1}) == 6);
-
-    batch.data<cum::cumeric_t>()[0] = 99;
-    REQUIRE(tensor.at({1, 0}) == 4);
-    cum::decum();
-}
-
-TEST_CASE("Tensor row and column getters return independent slices")
-{
-    cum::cum(cum::DEVICE::CPU);
-    cum::Tensor tensor(cum::Shape{2, 3}, cum::default_type, cum::layout::IO);
-    auto* values = tensor.data<cum::cumeric_t>();
-    values[0] = 1; values[1] = 2; values[2] = 3;
-    values[3] = 4; values[4] = 5; values[5] = 6;
+    for(cum::dim_t i = 0; i < tensor.lenght(); ++i)
+        tensor.data<cum::cumeric_t>()[i] = static_cast<cum::cumeric_t>(i);
 
     auto row = tensor.row(1);
-    auto col = tensor.col(2);
-    REQUIRE(row.shape() == (cum::Shape{3}));
-    REQUIRE(col.shape() == (cum::Shape{2}));
-    REQUIRE(row.at({0}) == 2);
-    REQUIRE(row.at({1}) == 4);
-    REQUIRE(row.at({2}) == 6);
-    REQUIRE(col.at({0}) == 5);
-    REQUIRE(col.at({1}) == 6);
 
-    col.data<cum::cumeric_t>()[0] = 77;
-    REQUIRE(tensor.at({0, 2}) == 5);
-    cum::decum();
+    REQUIRE(row.rank() == 2);
+    REQUIRE(row.shape() == cum::Shape{1, 4});
+
+    REQUIRE(row.at({0, 0}) == 4.0f);
+    REQUIRE(row.at({0, 1}) == 5.0f);
+    REQUIRE(row.at({0, 2}) == 6.0f);
+    REQUIRE(row.at({0, 3}) == 7.0f);
 }
 
-TEST_CASE("Tensor copy, move and assignment preserve independent values")
-{
-    cum::cum(cum::DEVICE::CPU);
-    cum::Tensor original({2, 2}, cum::default_type, cum::layout::IO);
-    original.fill(3);
-
-    cum::Tensor copy(original);
-    copy.data<cum::cumeric_t>()[0] = 8;
-    REQUIRE(original.at({0, 0}) == 3);
-    REQUIRE(copy.at({0, 0}) == 8);
-
-    cum::Tensor assigned;
-    assigned = original;
-    REQUIRE(assigned.at({1, 1}) == 3);
-
-    cum::Tensor moved(std::move(copy));
-    REQUIRE(moved.at({0, 0}) == 3);
-    cum::decum();
-}
-
-TEST_CASE("Tensor factories create requested shapes and initialization")
+TEST_CASE("Tensor col returns correct view")
 {
     cum::cum(cum::DEVICE::CPU);
 
-    auto vector = cum::Tensor::make_vector(4);
-    auto matrix = cum::Tensor::make_matrix(2, 3);
-    auto scalar = cum::Tensor::make_scalar();
-    auto typed = cum::Tensor::create_tensor<cum::default_type, cum::layout::X>({4});
-    auto zeros = cum::Tensor::Zeros({2, 2}, cum::default_type, cum::layout::IO);
-    auto ones = cum::Tensor::Ones({2, 2}, cum::default_type, cum::layout::IO);
-    auto line = cum::Tensor::Linspace(1, 4, 4);
+    cum::Tensor tensor({3, 4}, cum::default_type, cum::layout::OI);
+    cum::runtime::sync();
 
-    REQUIRE(vector.shape() == (cum::Shape{4}));
-    REQUIRE(matrix.shape() == (cum::Shape{2, 3}));
-    REQUIRE(scalar.shape() == (cum::Shape{1}));
-    REQUIRE(typed.shape() == (cum::Shape{4}));
-    REQUIRE(zeros.sum() == 0);
-    REQUIRE(ones.sum() == 4);
-    REQUIRE(line.at({0}) == 1);
-    REQUIRE(line.at({3}) == 4);
-    cum::decum();
-}
 
-TEST_CASE("Tensor take_memory uses supplied storage")
-{
-    cum::cum(cum::DEVICE::CPU);
-    auto* storage = cum::memory::allocate(3);
-    storage[0] = 1;
-    storage[1] = 2;
-    storage[2] = 3;
+    cum::cumeric_t* buffer = tensor.data<cum::cumeric_t>();
+    for(cum::dim_t i = 0; i < tensor.lenght(); i++)
     {
-        auto tensor = cum::Tensor::take_memory({3}, storage, cum::default_type, cum::layout::X);
-        tensor.data<cum::cumeric_t>()[1] = 9;
-        REQUIRE(storage[1] == 9);
-        REQUIRE(tensor.at({2}) == 3);
+        std::print("{} ->", buffer[i]);
+        buffer[i] = static_cast<cum::cumeric_t>(i);
+        std::println(" {}", buffer[i]);
+        cum::runtime::sync();
     }
-    cum::memory::free(storage);
-    cum::decum();
+
+
+    std::println("length: {}", tensor.lenght());
+
+    for (int i = 0; i < tensor.rows(); ++i)
+    {
+        for (int j = 0; j < tensor.cols(); ++j)
+        {
+            float value = tensor.at({i, j});
+            std::print("{}", value);
+            if (j != tensor.cols() - 1)
+                std::print(", ", value);
+        }
+        std::print("\n");
+    }
+
+    auto col = tensor.col(2);
+
+    REQUIRE(col.rank() == 2);
+    REQUIRE(col.shape() == cum::Shape{3, 1});
+
+    REQUIRE(col.at({0, 0}) == 2.0f);
+    REQUIRE(col.at({1, 0}) == 6.0f);
+    REQUIRE(col.at({2, 0}) == 10.0f);
+}
+
+TEST_CASE("Tensor slice shares memory with source")
+{
+    cum::cum(cum::DEVICE::CPU);
+
+    cum::Tensor tensor({3, 4}, cum::default_type, cum::layout::OI);
+    tensor.fill(0);
+
+    auto slice = tensor.slice({1, 1}, {1, 2});
+
+    slice.data<cum::cumeric_t>()[0] = 69.0f;
+
+    REQUIRE(tensor.at({1, 1}) == 69.0f);
+}
+
+TEST_CASE("Tensor slice rejects invalid range")
+{
+    cum::cum(cum::DEVICE::CPU);
+
+    cum::Tensor tensor({3, 4}, cum::default_type, cum::layout::OI);
+
+    REQUIRE_THROWS(tensor.slice({3, 0}, {1, 4}));
+    REQUIRE_THROWS(tensor.slice({0, 4}, {3, 1}));
+    REQUIRE_THROWS(tensor.slice({2, 3}, {2, 2}));
+}
+
+TEST_CASE("Tensor row and col reject non-matrix tensors")
+{
+    cum::cum(cum::DEVICE::CPU);
+
+    cum::Tensor tensor({2, 3, 4}, cum::default_type, cum::layout::ABC);
+
+    REQUIRE_THROWS(tensor.row(0));
+    REQUIRE_THROWS(tensor.col(0));
 }

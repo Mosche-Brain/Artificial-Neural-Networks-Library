@@ -11,16 +11,9 @@
     #include <sycl/ext/oneapi/bfloat16.hpp>
 #endif
 
-#if !CUM_USE_FP64 && \
-    !CUM_USE_FP32 && \
-    !CUM_USE_FP16 && \
-    !CUM_USE_BF16 && \
-    !CUM_USE_INT8
-    #error "No CUM numeric type was configured"
-#endif
-
 #include "cum/experimental/__event__.hpp"
 #include "cum/layout.hpp"
+#include "cum/datatypes.hpp"
 
 
 namespace cum
@@ -36,31 +29,6 @@ namespace cum
 
 
     // give info ABOUT used precision in compile time for each precision
-    #if CUM_USE_FP64
-        using cumeric_t = double;
-        using cummulative_t = double;
-        constexpr datatype default_type = datatype::FP64;
-    #elif CUM_USE_FP32
-        using cumeric_t = float;
-        constexpr cumeric_t EPSILON = 1e-9f;
-        using cummulative_t = double;
-        constexpr datatype default_type = datatype::FP32;
-    #elif CUM_USE_FP16
-        using cumeric_t = cum::float16;
-        constexpr cumeric_t EPSILON = 1e-4f16;
-        using cummulative_t = float;
-        constexpr datatype default_type = datatype::FP16;
-    #elif CUM_USE_BF16
-        using cumeric_t = cum::bfloat16;
-        constexpr cumeric_t EPSILON = 1e-3bf16;
-        using cummulative_t = float;
-        constexpr datatype default_type = datatype::BF16;
-    #elif CUM_USE_INT8
-        using cumeric_t = int8_t;
-        constexpr cumeric_t EPSILON = 1e1;
-        using cummulative_t = float;
-        constexpr datatype default_type = datatype::S8;
-    #endif
 
     constexpr std::size_t datatype_size(datatype type)
     {

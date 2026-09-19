@@ -112,53 +112,56 @@ namespace cum
 	{
 		switch(rank)
 		{
-		case 1:
-			return axis == Axis::Width ? 0 : -1;
-
-		case 2:
-		{
-			switch(axis)
+			case 1:
 			{
-				case Axis::Batches:  return 0;
-				case Axis::Channels: return 1;
-				default:             return -1;
+					return axis == Axis::Width ? 0 : -1;
 			}
-		}
-		case 3:
-		{
-			switch(axis)
+			case 2:
 			{
-				case Axis::Batches:  return 0;
-				case Axis::Channels: return 1;
-				case Axis::Width:    return 2;
-				default:             return -1;
+				switch(axis)
+				{
+					case Axis::Batches:
+					case Axis::Rows:  return 0;
+					case Axis::Channels:
+					case Axis::Cols: return 1;
+					default:             return -1;
+				}
 			}
-		}
-		case 4:
-		{
-			switch(axis)
+			case 3:
 			{
-				case Axis::Batches:  return 0;
-				case Axis::Channels: return 1;
-				case Axis::Height:   return 2;
-				case Axis::Width:    return 3;
-				default:             return -1;
+				switch(axis)
+				{
+					case Axis::Batches:  return 0;
+					case Axis::Channels: return 1;
+					case Axis::Width:    return 2;
+					default:             return -1;
+				}
 			}
-		}
-		case 5:
-		{
-			switch(axis)
+			case 4:
 			{
-				case Axis::Batches:  return 0;
-				case Axis::Channels: return 1;
-				case Axis::Depth:    return 2;
-				case Axis::Height:   return 3;
-				case Axis::Width:    return 4;
-				default:             return -1;
+				switch(axis)
+				{
+					case Axis::Batches:  return 0;
+					case Axis::Channels: return 1;
+					case Axis::Height:   return 2;
+					case Axis::Width:    return 3;
+					default:             return -1;
+				}
 			}
-		}
-		default:
-			return -1;
+			case 5:
+			{
+				switch(axis)
+				{
+					case Axis::Batches:  return 0;
+					case Axis::Channels: return 1;
+					case Axis::Depth:    return 2;
+					case Axis::Height:   return 3;
+					case Axis::Width:    return 4;
+					default:             return -1;
+				}
+			}
+			default:
+				return -1;
 		}
 	}
 
@@ -563,12 +566,13 @@ namespace cum
 
 	cumeric_t Tensor::at(const Shape& indices)
 	{
-		dim_t idx = compute_index(indices);
+		Tensor element = slice(indices, Shape(rank(), 1));
 
+		void* element_data = element.data();
 		cumeric_t result;
-		dispatch_datatype(this->type(), [&]<typename T>(){
-			T value = static_cast<T*>(data())[idx];
-			result = static_cast<cumeric_t>(value);
+		dispatch_datatype(this->type(), [&]<typename T>() -> void
+		{
+			result = static_cast<cumeric_t>(static_cast<const T*>(element_data)[0]);
 		});
 
 		return result;
@@ -576,11 +580,14 @@ namespace cum
 
 	cumeric_t Tensor::at(const Shape& indices) const
 	{
-		dim_t idx = compute_index(indices);
+		// dim_t idx = compute_index(indices);
+		Tensor element = slice(indices, Shape(rank(), 1));
 
+		void* element_data = element.data();
 		cumeric_t result;
-		dispatch_datatype(this->type(), [&]<typename T>(){
-			T value = static_cast<const T*>(data())[idx];
+		dispatch_datatype(this->type(), [&]<typename T>() -> void
+		{
+			T value = static_cast<const T*>(element_data)[0];
 			result = static_cast<cumeric_t>(value);
 		});
 
@@ -590,12 +597,12 @@ namespace cum
 
 	const void* Tensor::data() const
     {
-	    return _memr_->data();
+	    return static_cast<void*>(static_cast<std::byte*>(_memr_->data()) + _desc_->offset() * datatype_size(type()));
     }
 
 	void* Tensor::data()
     {
-    	return _memr_->data();
+	    return static_cast<void*>(static_cast<std::byte*>(_memr_->data()) + _desc_->offset() * datatype_size(type()));
     }
 
 	cumeric_t Tensor::operator ()(const dim_t row, const dim_t col) const
@@ -631,12 +638,22 @@ namespace cum
 
 	Tensor Tensor::row(dim_t index) const
 	{
+		if (this->rank() != 2)
+			throw std::runtime_error("Tensor::row(): rank != 2");
+
+		return slice({index, 0}, {1, cols()});
+
 		return select_axis(*this, Axis::Rows, index);
 	}
 
 	Tensor Tensor::col(dim_t index) const
 	{
-		return select_axis(*this, Axis::Cols, index);
+		if (this->rank() != 2)
+			throw std::runtime_error("Tensor::col(): rank != 2");
+
+		return slice({0, index}, {rows(), 1});
+
+		// return select_axis(*this, Axis::Cols, index);
 	}
 
 	/**------------------------------------------------------------------------------------------------
@@ -722,9 +739,7 @@ namespace cum
 		Shape new_shape = _desc_->shape();
 		std::swap(new_shape[0], new_shape[1]);
 
-		// _desc_->handle() = std::make_unique<neural_primitives::handles::_desc_>(_desc_->handle().desc.reshape(new_shape));
 		_desc_->handle().desc = _desc_->handle().desc.reshape(new_shape); // Is it safe? probably not
-		// std::swap(_desc_, std::make_unique<neural_primitives::Descriptor>(desc));
 		return *this;
     }
 
@@ -1404,11 +1419,10 @@ namespace cum
     	auto desc = std::make_unique<neural_primitives::Descriptor>(other.shape(), other.type(), other.format());
     	auto memr = std::make_unique<neural_primitives::Memory>(*_desc_, data());
 
-    	// dispatch_datatype(this->type(), [&]<typename T>(){
-			// data() = sycl::malloc_shared<T>(other.lenght(), internal::device(), internal::sycl_context());
-		// });
-
     	internal::queue().memcpy(memr->data(), other.data(), other.lenght() * datatype_size(this->type())).wait();
+
+		_desc_ = std::move(desc);
+		_memr_ = std::move(memr);
 
     	return *this;
     }

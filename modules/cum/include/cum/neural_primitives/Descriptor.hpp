@@ -31,6 +31,8 @@ namespace cum::neural_primitives
         Shape shape() const;
         datatype type() const;
         layout format() const;
+        dim_t stride() const;
+        dim_t offset() const;
 
         const handles::__desc__& handle() const;
         handles::__desc__& handle();

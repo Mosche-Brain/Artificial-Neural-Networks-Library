@@ -76,6 +76,17 @@ namespace cum::neural_primitives
         // return cum_format_tag(handle_->desc.get_format_kind());
     }
 
+    dim_t Descriptor::stride() const
+    {
+        return 69;
+        // return handle_->desc.get_strides();
+    }
+
+    dim_t Descriptor::offset() const
+    {
+        return handle_->desc.get_submemory_offset();
+    }
+
     Descriptor& Descriptor::operator = (Descriptor& other)
     {
         if (this == &other) return *this;
