@@ -46,9 +46,24 @@ TEST_CASE("Tensor rowwise_sum reduces each matrix row")
 {
     cum::cum(cum::DEVICE::CPU);
     cum::Tensor tensor(cum::Shape{2, 3}, cum::default_type, cum::layout::IO);
-    auto* values = tensor.data<cum::cumeric_t>();
-    values[0] = 1; values[1] = 2; values[2] = 3;
-    values[3] = 4; values[4] = 5; values[5] = 6;
+    cum::cumeric_t* values = tensor.data<cum::cumeric_t>();
+    // values[0] = 1; values[1] = 2; values[2] = 3;
+    // values[3] = 4; values[4] = 5; values[5] = 6;
+
+    for (int i = 0; i < tensor.rows(); ++i)
+    {
+        for (int j = 0; j < tensor.cols(); ++j)
+        {
+            tensor.at<cum::cumeric_t>({i, j}) = i * (tensor.rows() + 1) + j + 1;
+        }
+    }
+
+    REQUIRE(tensor.at({0, 0}) == 1);
+    REQUIRE(tensor.at({0, 1}) == 2);
+    REQUIRE(tensor.at({0, 2}) == 3);
+    REQUIRE(tensor.at({1, 0}) == 4);
+    REQUIRE(tensor.at({1, 1}) == 5);
+    REQUIRE(tensor.at({1, 2}) == 6);
 
     const auto result = tensor.rowwise_sum();
 
@@ -56,7 +71,7 @@ TEST_CASE("Tensor rowwise_sum reduces each matrix row")
     {
         for (int j = 0; j < result.cols(); ++j)
         {
-            float value = result.at({i, j});
+            float value = result.at<cum::cumeric_t>({i, j});
             std::print("{}", value);
             if (j != result.cols() - 1)
                 std::print(", ", value);
@@ -65,8 +80,8 @@ TEST_CASE("Tensor rowwise_sum reduces each matrix row")
     }
 
     REQUIRE(result.shape() == (cum::Shape{2, 1}));
-    REQUIRE(result.at({0, 0}) == 6);
-    REQUIRE(result.at({1, 0}) == 15);
+    REQUIRE(result.at<cum::cumeric_t>({0, 0}) == 6);
+    REQUIRE(result.at<cum::cumeric_t>({1, 0}) == 15);
     cum::decum();
 }
 

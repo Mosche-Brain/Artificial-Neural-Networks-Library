@@ -113,22 +113,19 @@ namespace cum
         const std::unique_ptr<neural_primitives::Memory>& memory() const;
 		 
         /* accesors */
-        template<typename T>
-        const T& at(const Shape& indices) const
-        {
-            if (type() != datatype_of<T>())
-                throw std::runtime_error("datatype mismatch");
-
-            const dim_t idx = compute_index(indices);
-            return static_cast<const T*>(data())[idx];
-        }
-
+        // template<typename T>
+        // const T& at(const Shape& indices) const
+        // {
+        //     if (type() != datatype_of<T>())
+        //         throw std::runtime_error("datatype mismatch");
+        //
+        //     const dim_t idx = compute_index(indices);
+        //     return static_cast<const T*>(data())[idx];
+        // }
 
 
         const void* data() const; // I should add templated data getter
         void* data();
-
-
 
         template<typename T>
         T* data() { return static_cast<T*>(data()); }
@@ -136,9 +133,26 @@ namespace cum
         template<typename T>
         const T* data() const { return static_cast<const T*>(data()); }
 
-        cumeric_t at(const Shape& indices);
         cumeric_t at(const Shape& indices) const;
+        // cumeric_t at(const Shape& indices) const;
 
+        template<typename T>
+        T& at(const Shape& indices)
+        {
+            if (sizeof(T) != datatype_size(this->type()))
+                throw std::runtime_error("datatype size mismatch");
+
+            return *slice(indices, Shape(rank(), 1)).data<T>();
+        }
+
+        template<typename T>
+        const T& at(const Shape& indices) const
+        {
+            if (sizeof(T) != datatype_size(this->type()))
+                throw std::runtime_error("datatype size mismatch");
+
+            return *slice(indices, Shape(rank(), 1)).data<T>();
+        }
 
         cumeric_t& operator () (const Shape& indices);
         const cumeric_t& operator () (const Shape& indices) const;

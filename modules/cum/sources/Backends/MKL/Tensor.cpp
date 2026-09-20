@@ -564,7 +564,7 @@ namespace cum
 	}
 
 
-	cumeric_t Tensor::at(const Shape& indices)
+	cumeric_t Tensor::at(const Shape& indices) const
 	{
 		Tensor element = slice(indices, Shape(rank(), 1));
 
@@ -578,21 +578,21 @@ namespace cum
 		return result;
 	}
 
-	cumeric_t Tensor::at(const Shape& indices) const
-	{
-		// dim_t idx = compute_index(indices);
-		Tensor element = slice(indices, Shape(rank(), 1));
-
-		void* element_data = element.data();
-		cumeric_t result;
-		dispatch_datatype(this->type(), [&]<typename T>() -> void
-		{
-			T value = static_cast<const T*>(element_data)[0];
-			result = static_cast<cumeric_t>(value);
-		});
-
-		return result;
-	}
+	// cumeric_t Tensor::at(const Shape& indices) const
+	// {
+	// 	// dim_t idx = compute_index(indices);
+	// 	Tensor element = slice(indices, Shape(rank(), 1));
+	//
+	// 	void* element_data = element.data();
+	// 	cumeric_t result;
+	// 	dispatch_datatype(this->type(), [&]<typename T>() -> void
+	// 	{
+	// 		T value = static_cast<const T*>(element_data)[0];
+	// 		result = static_cast<cumeric_t>(value);
+	// 	});
+	//
+	// 	return result;
+	// }
 
 
 	const void* Tensor::data() const
@@ -1160,24 +1160,30 @@ namespace cum
 		}
 
 		Tensor C(result_shape, A.type(), A.format());
-	    dnnl::matmul::primitive_desc primitive_desc {
-			internal::engine(),
-	    	A._desc_->handle().desc,
-	    	B._desc_->handle().desc,
-	    	C._desc_->handle().desc,
+		dnnl::memory::desc& A_DESC = A._desc_->handle().desc;
+		dnnl::memory::desc& B_DESC = B._desc_->handle().desc;
+		dnnl::memory::desc& C_DESC = C._desc_->handle().desc;
+
+		dnnl::memory& A_MEMORY = A._memr_->handle().memory;
+		dnnl::memory& B_MEMORY = B._memr_->handle().memory;
+		dnnl::memory& C_MEMORY = C._memr_->handle().memory;
+
+	    dnnl::matmul::primitive_desc pd {
+			internal::engine(), A_DESC, B_DESC, C_DESC,
 	    };
 
-    	dnnl::matmul(primitive_desc).execute(
-    		internal::stream(),
-    		{
-				{ DNNL_ARG_SRC, A._memr_->handle().memory },
-				{ DNNL_ARG_WEIGHTS, B._memr_->handle().memory },
-				{ DNNL_ARG_DST, C._memr_->handle().memory }
+    	dnnl::matmul primitive(pd);
+		primitive.execute(internal::stream(),
+    {
+				{ DNNL_ARG_SRC, A_MEMORY },
+				{ DNNL_ARG_WEIGHTS, B_MEMORY },
+				{ DNNL_ARG_DST, C_MEMORY }
     		}
     	);
 
     	internal::stream().wait();
-    	return C;
+
+		return C;
     }
 
 	Tensor operator / (const Tensor& A, const Tensor& B)
