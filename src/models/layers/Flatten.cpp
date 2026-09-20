@@ -31,6 +31,6 @@ namespace yann::models::layers
 
     cum::Tensor Flatten::backward(const cum::Tensor& deltaOutput)
     {
-        return deltaOutput.reshape(__input_shape__);
+        return deltaOutput.reshape(input_shape_);
     }
 } // yann::models::layers

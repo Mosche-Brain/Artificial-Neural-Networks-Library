@@ -94,7 +94,7 @@ namespace yann::models::layers
     protected:
         ForwardCache cache;
 
-        cum::Shape __input_shape__;
+        cum::Shape input_shape_;
         cum::Shape __output_shape__;
 
         int _layerSize_; // not longer relevant

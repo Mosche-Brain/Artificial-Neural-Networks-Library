@@ -67,9 +67,9 @@ namespace yann::models
         // cum::Tensor result = topology.front()->forward(input);
         cum::Tensor result = input;
 
-        for (auto& layer : topology)
+        for (auto [index, layer] : topology | std::views::enumerate)
         {
-            std::println("forward");
+            std::println("forward layerd {}", index);
             result = layer->forward(result);
         }
 

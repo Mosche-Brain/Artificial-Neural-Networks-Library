@@ -22,7 +22,7 @@ namespace yann::models::layers
 
     const cum::Shape& LayerBase::input_shape() const
     {
-        return __input_shape__;
+        return input_shape_;
     }
 
     const cum::Shape& LayerBase::output_shape() const

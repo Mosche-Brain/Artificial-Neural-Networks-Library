@@ -997,7 +997,7 @@ namespace cum
     	return *this;
 	}
 
-	Tensor Tensor::multiply(const Tensor& tensor)
+	Tensor Tensor::multiply(const Tensor& tensor) const
     {
     	Tensor C(shape(), type(), format());
 
@@ -1029,7 +1029,7 @@ namespace cum
 		return *this;
 	}
 
-	Tensor Tensor::cwiseProduct(const Tensor& tensor)
+	Tensor Tensor::cwiseProduct(const Tensor& tensor) const
 	{
 		return this->multiply(tensor);
 	}
@@ -1086,6 +1086,15 @@ namespace cum
 	{
     	neural_primitives::square(_memr_->handle(), _desc_->handle());
     	return *this;
+	}
+
+	/**------------------------------------------------------------------------------------------------
+	 *                                        Matrix multiplication
+	 *------------------------------------------------------------------------------------------------**/
+
+	Tensor Tensor::matmul(const Tensor& other) const
+	{
+
 	}
 
 	/**------------------------------------------------------------------------------------------------

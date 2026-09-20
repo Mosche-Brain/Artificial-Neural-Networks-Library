@@ -6,6 +6,7 @@
 #include <initializer_list>
 #include <memory>
 #include <stdexcept>
+#include <valarray>
 
 #include "Matrix.hpp"
 #include "cum/Core.hpp"
@@ -30,6 +31,9 @@ namespace cum
         Rows = Height,
         Cols = Width,
     };
+
+    // Inefficient container for storing references for arbitrary datatypes nonspecified in compile time
+    // std::variant_alternative<>
 
     struct AxisIndex
     {
@@ -58,10 +62,7 @@ namespace cum
         /* fabriques */
 
         template<datatype T, layout layout>
-        static Tensor create_tensor(Shape shape)
-        {
-            return Tensor(shape, T, layout);
-        }
+        static Tensor create_tensor(const Shape& shape);
 
         static Tensor take_memory(const Shape& shape, void* data, datatype dtype = datatype::FP32, layout layout = layout::ANY);
 
@@ -137,22 +138,10 @@ namespace cum
         // cumeric_t at(const Shape& indices) const;
 
         template<typename T>
-        T& at(const Shape& indices)
-        {
-            if (sizeof(T) != datatype_size(this->type()))
-                throw std::runtime_error("datatype size mismatch");
-
-            return *slice(indices, Shape(rank(), 1)).data<T>();
-        }
+        T& at(const Shape& indices);
 
         template<typename T>
-        const T& at(const Shape& indices) const
-        {
-            if (sizeof(T) != datatype_size(this->type()))
-                throw std::runtime_error("datatype size mismatch");
-
-            return *slice(indices, Shape(rank(), 1)).data<T>();
-        }
+        const T& at(const Shape& indices) const;
 
         cumeric_t& operator () (const Shape& indices);
         const cumeric_t& operator () (const Shape& indices) const;
@@ -199,8 +188,8 @@ namespace cum
 
         Tensor& fill(cumeric_t scalar);
 
-        Tensor multiply(const Tensor& tensor);
-        Tensor cwiseProduct(const Tensor& tensor);
+        Tensor multiply(const Tensor& tensor) const;
+        Tensor cwiseProduct(const Tensor& tensor) const;
 
         Tensor& cwise_product_in_place(const Tensor& other);
 
@@ -211,6 +200,10 @@ namespace cum
         Tensor& square_in_place();
 
         Tensor& scale(cumeric_t scalar);
+
+        /* matmul */
+
+        Tensor matmul(const Tensor& other) const;
 
         /* operator overloads */
 
@@ -246,4 +239,31 @@ namespace cum
         std::unique_ptr<neural_primitives::Descriptor> _desc_;
         std::unique_ptr<neural_primitives::Memory> _memr_;
     };
+
+
+    template<datatype T, layout layout>
+    Tensor Tensor::create_tensor(const Shape& shape)
+    {
+        return {shape, T, layout};
+    }
+
+    template<typename T>
+    T& Tensor::at(const Shape& indices)
+    {
+        if (sizeof(T) != datatype_size(this->type()))
+            throw std::runtime_error("datatype size mismatch");
+
+        return *slice(indices, Shape(rank(), 1)).data<T>();
+    }
+
+    template<typename T>
+    const T& Tensor::at(const Shape& indices) const
+    {
+        if (sizeof(T) != datatype_size(this->type()))
+            throw std::runtime_error("datatype size mismatch");
+
+        return *slice(indices, Shape(rank(), 1)).data<T>();
+    }
+
+
 } // cum

@@ -24,7 +24,7 @@ namespace yann::models::layers
         // this->weights = Parameter::Ones(layerSize, 1);
 
         // this->biases  = Parameter::Zeros(layerSize, 1);
-
+        this->input_shape_ = cum::Shape{layerSize, 1};
         this->_layerSize_   = layerSize;
         this->_layerType_   = LayerType::Input;
         this->_initialized_ = true;
@@ -37,15 +37,12 @@ namespace yann::models::layers
 
     cum::Tensor Input::forward(const cum::Tensor& input)
     {
-        // if (input.cols() != cache.x.cols()) // sprawdza czy batch jest taki sam
+        if (input.rows() != cache.x.c) // sprawdza czy batch jest taki sam
         // {
             // cache.resize(cache.x.rows(), cache.z.rows(), input.cols());
         // }
-        // return input;
 
-        this->cache.x = input;
-        this->cache.a = input;
-        return this->cache.a;
+        return input;
     }
 
     cum::Tensor Input::backward(const cum::Tensor& deltaOutput)
