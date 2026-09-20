@@ -25,7 +25,8 @@ namespace yann::optimizers
 		if(!second_momentum.contains(&param))
 			second_momentum.emplace(&param, cum::Tensor::Zeros({param.rows(), param.cols()}));
 
-		current_step++;
+		// We need a way to measure wchich iteration over all parameters is it
+		// current_step++;
 
 		cum::Tensor& m = momentum.at(&param);
 		cum::Tensor& v = second_momentum.at(&param);

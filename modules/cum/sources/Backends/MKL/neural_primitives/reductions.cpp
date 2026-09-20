@@ -5,4 +5,9 @@
  * @date:   20 September 2026 16:40:44
  */
 
-#include "reductions.hpp"
+#include "cum/neural_primitives/reductions.hpp"
+
+namespace cum::neural_primitives
+{
+
+}

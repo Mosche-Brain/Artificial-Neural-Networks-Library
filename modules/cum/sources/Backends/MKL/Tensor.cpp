@@ -564,18 +564,32 @@ namespace cum
 	}
 
 
-	cumeric_t Tensor::at(const Shape& indices) const
+	cumeric_t& Tensor::at(const Shape& indices)
 	{
-		Tensor element = slice(indices, Shape(rank(), 1));
+		// Tensor element = slice(indices, Shape(rank(), 1));
+		//
+		// void* element_data = element.data();
+		// cumeric_t result;
+		// dispatch_datatype(this->type(), [&]<typename T>() -> void
+		// {
+		// 	result = static_cast<cumeric_t>(static_cast<const T*>(element_data)[0]);
+		// });
 
-		void* element_data = element.data();
-		cumeric_t result;
-		dispatch_datatype(this->type(), [&]<typename T>() -> void
-		{
-			result = static_cast<cumeric_t>(static_cast<const T*>(element_data)[0]);
-		});
+		return at<cumeric_t>(indices);
+	}
 
-		return result;
+	const cumeric_t& Tensor::at(const Shape& indices) const
+	{
+		// Tensor element = slice(indices, Shape(rank(), 1));
+		//
+		// void* element_data = element.data();
+		// cumeric_t result;
+		// dispatch_datatype(this->type(), [&]<typename T>() -> void
+		// {
+		// 	result = static_cast<cumeric_t>(static_cast<const T*>(element_data)[0]);
+		// });
+
+		return at<cumeric_t>(indices);
 	}
 
 	// cumeric_t Tensor::at(const Shape& indices) const
@@ -1094,7 +1108,31 @@ namespace cum
 
 	Tensor Tensor::matmul(const Tensor& other) const
 	{
+		if (this->cols() != other.rows())
+		{
+			throw std::invalid_argument("A cols != B rows");
+		}
 
+		Shape result_shape = {};
+		switch (this->format()) // Temporary solution
+		{
+			case layout::BA:
+			case layout::AB:
+			{
+				result_shape = {this->rows(), other.cols()};
+				break;
+			}
+		default:
+			{
+				throw std::invalid_argument("Unsupported format for tensor matmul");
+			}
+		}
+
+		Tensor C(result_shape, type(), format());
+
+		neural_primitives::matmul(C, *this, other);
+
+		return C;
 	}
 
 	/**------------------------------------------------------------------------------------------------
@@ -1105,22 +1143,7 @@ namespace cum
     {
     	Tensor C(A.shape(), A.type(), A.format());
 
-	    dnnl::binary::primitive_desc primitive_desc {
-			internal::engine(),
-	    	dnnl::algorithm::binary_add,
-	    	A._desc_->handle().desc,
-	    	B._desc_->handle().desc,
-	    	C._desc_->handle().desc,
-	    };
-
-    	dnnl::binary(primitive_desc).execute(
-    		internal::stream(),
-    		{
-				{ DNNL_ARG_SRC_0, A._memr_->handle().memory },
-				{ DNNL_ARG_SRC_1, B._memr_->handle().memory },
-				{ DNNL_ARG_DST, C._memr_->handle().memory }
-    		}
-    	);
+	    neural_primitives::add(C, A, B);
 
     	internal::stream().wait();
     	return C;
@@ -1130,22 +1153,7 @@ namespace cum
     {
     	Tensor C(A.shape(), A.type(), A.format());
 
-	    dnnl::binary::primitive_desc primitive_desc {
-			internal::engine(),
-	    	dnnl::algorithm::binary_sub,
-	    	A._desc_->handle().desc,
-	    	B._desc_->handle().desc,
-	    	C._desc_->handle().desc,
-	    };
-
-    	dnnl::binary(primitive_desc).execute(
-    		internal::stream(),
-    {
-				{ DNNL_ARG_SRC_0, A._memr_->handle().memory },
-				{ DNNL_ARG_SRC_1, B._memr_->handle().memory },
-				{ DNNL_ARG_DST, C._memr_->handle().memory }
-    		}
-    	);
+		neural_primitives::sub(C, A, B);
 
     	internal::stream().wait();
     	return C;
@@ -1153,46 +1161,7 @@ namespace cum
 
 	Tensor operator * (const Tensor& A, const Tensor& B)
     {
-		Shape result_shape = {};
-		switch (A.format()) // Temporary solution
-		{
-			case layout::IO:
-			case layout::OI:
-			{
-				result_shape = {A.rows(), B.cols()};
-				break;
-			}
-			default:
-			{
-				throw std::invalid_argument("Unsupported format for tensor matmul");
-			}
-		}
-
-		Tensor C(result_shape, A.type(), A.format());
-		dnnl::memory::desc& A_DESC = A._desc_->handle().desc;
-		dnnl::memory::desc& B_DESC = B._desc_->handle().desc;
-		dnnl::memory::desc& C_DESC = C._desc_->handle().desc;
-
-		dnnl::memory& A_MEMORY = A._memr_->handle().memory;
-		dnnl::memory& B_MEMORY = B._memr_->handle().memory;
-		dnnl::memory& C_MEMORY = C._memr_->handle().memory;
-
-	    dnnl::matmul::primitive_desc pd {
-			internal::engine(), A_DESC, B_DESC, C_DESC,
-	    };
-
-    	dnnl::matmul primitive(pd);
-		primitive.execute(internal::stream(),
-    {
-				{ DNNL_ARG_SRC, A_MEMORY },
-				{ DNNL_ARG_WEIGHTS, B_MEMORY },
-				{ DNNL_ARG_DST, C_MEMORY }
-    		}
-    	);
-
-    	internal::stream().wait();
-
-		return C;
+		return A.matmul(B);
     }
 
 	Tensor operator / (const Tensor& A, const Tensor& B)
@@ -1431,6 +1400,7 @@ namespace cum
 
 	Tensor& Tensor::operator = (const Tensor& other)
     {
+		std::println("Assignment operator called");
     	if (this == &other)
     		return *this;
 
@@ -1446,6 +1416,18 @@ namespace cum
     }
 
 	Tensor& Tensor::operator = (Tensor&&) noexcept = default;
+	// Tensor& Tensor::operator = (Tensor&& other) noexcept
+	// {
+	// 	std::println("Move assignment operator called");
+	// 	if (this == &other)
+	// 		return *this;
+	//
+	// 	_desc_ = std::move(other._desc_);
+	// 	_memr_ = std::move(other._memr_);
+	//
+	// 	// internal::queue().copy(_memr)
+	// 	return *this;
+	// }
   //   {
 		// _desc_ = std::move
   //   }

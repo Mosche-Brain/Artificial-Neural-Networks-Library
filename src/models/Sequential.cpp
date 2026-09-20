@@ -65,12 +65,15 @@ namespace yann::models
     cum::Tensor Sequential::forward(const cum::Tensor& input)
     {
         // cum::Tensor result = topology.front()->forward(input);
+        std::println("Sequential::forward");
+        // cum::Tensor result(input.shape(), input.type(), input.format());
         cum::Tensor result = input;
 
         for (auto [index, layer] : topology | std::views::enumerate)
         {
             std::println("forward layerd {}", index);
             result = layer->forward(result);
+            // result = layer->cache.a;
         }
 
         return result;
@@ -81,6 +84,7 @@ namespace yann::models
         if (topology.empty()) return;
 
         // cum::Tensor curr_gradient = topology.back()->backward(d_output);
+        // cum::Tensor
         cum::Tensor curr_gradient = d_output;
         // for (size_t i = topology.size() - 1; i > 0; --i)
         for (auto [index, layer] : topology | std::views::enumerate | std::views::reverse)
@@ -89,7 +93,6 @@ namespace yann::models
                 break;
 
             cum::Tensor next_gradient = layer->backward(curr_gradient);
-
 
             curr_gradient = std::move(next_gradient);
 
@@ -157,6 +160,7 @@ namespace yann::models
                 }
 
                 cum::Tensor results = this->forward(x);
+                YANN_LOG(2, "results: {}x{}", results.rows(), results.cols() );
 
                 loss.compute(results, y);
 

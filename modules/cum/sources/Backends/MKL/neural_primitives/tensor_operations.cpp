@@ -136,7 +136,7 @@ namespace cum::neural_primitives
 			internal::engine(),
 	    	a_desc.desc,
 	    	b_desc.desc,
-	    	b_desc.desc,
+	    	c_desc.desc,
 	    };
 
     	dnnl::primitive primitive = dnnl::matmul(primitive_desc);
@@ -145,8 +145,8 @@ namespace cum::neural_primitives
             primitive, 
             internal::stream(), 
             {
-				{ DNNL_ARG_SRC_0, A.memory },
-				{ DNNL_ARG_SRC_1, B.memory },
+				{ DNNL_ARG_SRC, A.memory },
+				{ DNNL_ARG_WEIGHTS, B.memory },
 				{ DNNL_ARG_DST, C.memory }
             }
         );

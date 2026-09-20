@@ -92,6 +92,7 @@ namespace yann::models::layers
         
         LayerType layerType();
     protected:
+        friend class Sequential;
         ForwardCache cache;
 
         cum::Shape input_shape_;

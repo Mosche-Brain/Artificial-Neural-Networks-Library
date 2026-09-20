@@ -5,7 +5,9 @@
  * @date:   20 September 2026 16:40:44
  */
 
-#ifndef YANN_REDUCTIONS_HPP
-#define YANN_REDUCTIONS_HPP
+#pragma once
 
-#endif //YANN_REDUCTIONS_HPP
+namespace cum::neural_primitives
+{
+
+}

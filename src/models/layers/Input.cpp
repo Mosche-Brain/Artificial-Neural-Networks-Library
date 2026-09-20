@@ -1,4 +1,5 @@
-#include "Input.hpp"
+
+#include <ranges>
 
 #include <cum/functions.hpp>
 #include <cum/Core.hpp>
@@ -9,6 +10,7 @@
 #endif
 
 #include "yann/runtime_config.hpp"
+#include "Input.hpp"
 
 namespace yann::models::layers
 {
@@ -37,10 +39,20 @@ namespace yann::models::layers
 
     cum::Tensor Input::forward(const cum::Tensor& input)
     {
-        if (input.rows() != cache.x.c) // sprawdza czy batch jest taki sam
+        // if () // sprawdza czy batch jest taki sam
         // {
             // cache.resize(cache.x.rows(), cache.z.rows(), input.cols());
         // }
+        constexpr bool INPUT_FORWARD_RUNTIME_CHECKS = true;
+
+        if constexpr(INPUT_FORWARD_RUNTIME_CHECKS)
+        {
+            for (auto [index, dim] : input_shape_ | std::views::enumerate)
+            {
+                if (dim != input.shape().at(index))
+                    throw std::invalid_argument("Input shape mismatch");
+            }
+        }
 
         return input;
     }

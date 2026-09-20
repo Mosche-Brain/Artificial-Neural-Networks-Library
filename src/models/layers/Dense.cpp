@@ -129,9 +129,9 @@ namespace yann::models::layers
                 cache.dz = cache.da.cwiseProduct(deltaOutput);
 
                 YANN_LOG(3, "dL/dB = rowwise sum of cache.dz", "");
-                // if (cache.dz.cols() == 1)
-                    // biases_.gradient += cache.dz;
-                // else
+                if (cache.dz.cols() == 1)
+                    biases_.gradient += cache.dz;
+                else
                     biases_.gradient += cache.dz.rowwise_sum();
 
                 YANN_LOG(3, "dL/dW = cache.dz * cache.x.transpose()", "");
