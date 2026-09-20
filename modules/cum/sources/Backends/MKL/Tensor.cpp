@@ -6,6 +6,7 @@
 #include <print>
 
 #include <oneapi/dnnl/dnnl.hpp>
+#include <oneapi/dnnl/dnnl.h>
 
 #include "cum/Core.hpp"
 #include "cum/memory.hpp"
@@ -90,6 +91,21 @@ namespace cum
 		}
 	}
 
+	layout concrete_layout(std::size_t rank, layout requested)
+	{
+		if(requested != layout::ANY)
+			return requested;
+		switch(rank)
+		{
+			case 1: return layout::A;
+			case 2: return layout::BA;
+			case 3: return layout::ABC;
+			case 4: return layout::ABCD;
+			case 5: return layout::ABCDE;
+			default: throw std::invalid_argument("unsupported tensor rank");
+		}
+	}
+
 	/**------------------------------------------------------------------------------------------------
 	 *                                         Constructors
 	 *------------------------------------------------------------------------------------------------**/
@@ -102,20 +118,15 @@ namespace cum
 	}
 
 	Tensor::Tensor(const Tensor& tensor)
+		: _desc_(std::make_unique<neural_primitives::Descriptor>(
+			tensor.shape(), tensor.type(),
+			concrete_layout(tensor.rank(), tensor.format())))
 	{
-		std::println("copy contructor called");
-		_desc_ = std::make_unique<neural_primitives::Descriptor>(tensor.shape(), tensor.type(), tensor.format());
-
-		std::println("rank: {}", tensor.rank()); // 2
-		std::println("format: {}", static_cast<unsigned char>(tensor.format())); // 1 (ANY)
-		// dispatch_datatype(this->type(), [&]<typename T>(){
-		// 	data() = sycl::malloc_shared<T>(tensor.lenght(), internal::device(), internal::sycl_context());
-		// });
-		// _memr_ = std::make_unique<neural_primitives::Memory>(*_desc_, data());
-		_memr_ = std::make_unique<neural_primitives::Memory>(*_desc_); // <--- This line
-
-		internal::queue().memcpy(data(), tensor.data(), tensor.lenght() * datatype_size(this->type()));
-
+		_memr_ = std::make_unique<neural_primitives::Memory>(*_desc_);
+		internal::queue().memcpy(
+			data(), tensor.data(),
+			tensor.lenght() * datatype_size(tensor.type())
+		).wait();
 	}
 
 	Tensor::Tensor(Tensor&& tensor) noexcept : _desc_(std::move(tensor._desc_)), _memr_(std::move(tensor._memr_))
@@ -571,7 +582,8 @@ namespace cum
 
 		const dnnl::memory::desc& md = _desc_->handle().desc;
 
-		const dnnl::memory::desc sub_md= md.submemory_desc(shape, offset);
+		const dnnl::memory::desc sub_md = md.submemory_desc(shape, offset);
+
 
 		return Tensor(neural_primitives::Descriptor({sub_md}), *_memr_);
     }
@@ -680,21 +692,11 @@ namespace cum
 		return this->squared_norm();
 	}
 
-	cumeric_t Tensor::squared_norm()
+#if 0
+	cumeric_t Tensor::squared_norm() // previous oneDNN implementation
 	{
-		cumeric_t* sum_buff = sycl::malloc_shared<cumeric_t>(1, internal::device(), internal::sycl_context());
-		sum_buff[0] = 0;
-
-		dnnl::memory::desc sum_desc {
-			Shape(this->dims(), 1), dnnl_data_type(default_type), dnnl_format_tag(format())
-		};
-
-		dnnl::memory sum_memory = dnnl::sycl_interop::make_memory(
-			sum_desc, internal::engine(), dnnl::sycl_interop::memory_kind::usm, sum_buff
-		);
-
 		// Internal cache has 2048 * 2048 * cumeric_t size bytes
-		Tensor square_tensor = take_memory(this->shape(), internal::cache(), this->type(), this->format());
+		Tensor square_tensor(this->shape(), this->type(), this->format());
 
 		dnnl::eltwise_forward::primitive_desc square_desc(
 			internal::engine(),
@@ -711,30 +713,163 @@ namespace cum
 				{ DNNL_ARG_DST, square_tensor._memr_->handle().memory }
 			}
 		);
+		internal::stream().wait();
+
+		bool is_scalar = true;
+		for (dim_t dim : square_tensor.shape())
+			if (dim != 1)
+				is_scalar = false;
+
+		cumeric_t result;
+		if (is_scalar)
+		{
+			cumeric_t* host_value = sycl::malloc_shared<cumeric_t>(
+				1,
+				internal::device(),
+				internal::sycl_context()
+			);
+			internal::queue().memcpy(
+				host_value,
+				square_tensor.data(),
+				sizeof(cumeric_t)
+			).wait();
+			result = *host_value;
+			sycl::free(host_value, internal::sycl_context());
+		}
+		else
+		{
+			cumeric_t* sum_buff = sycl::malloc_shared<cumeric_t>(
+				1,
+				internal::device(),
+				internal::sycl_context()
+			);
+			sum_buff[0] = 0;
+
+			dnnl::memory::desc sum_desc {
+				Shape(this->rank(), 1),
+				dnnl_data_type(default_type),
+				dnnl_format_tag(format())
+			};
+
+			dnnl::memory sum_memory = dnnl::sycl_interop::make_memory(
+				sum_desc,
+				internal::engine(),
+				dnnl::sycl_interop::memory_kind::usm,
+				sum_buff
+			);
+
+			dnnl::reduction::primitive_desc reduction_desc(
+				internal::engine(),
+				dnnl::algorithm::reduction_sum,
+				square_tensor.descriptor()->handle().desc,
+				sum_desc,
+				0.0f,
+				0.0f
+			);
+
+			dnnl::reduction(reduction_desc).execute(
+				internal::stream(),
+				{
+					{DNNL_ARG_SRC, square_tensor.memory()->handle().memory},
+					{DNNL_ARG_DST, sum_memory}
+				}
+			);
+			internal::stream().wait();
+
+			result = sum_buff[0];
+			sycl::free(sum_buff, internal::sycl_context());
+		}
+
+		return result;
+	}
+#endif
+
+	cumeric_t Tensor::squared_norm()
+	{
+		Tensor square_tensor(this->shape(), this->type(), this->format());
+
+		dnnl::eltwise_forward::primitive_desc square_desc(
+			internal::engine(),
+			dnnl::prop_kind::forward,
+			dnnl::algorithm::eltwise_square,
+			_desc_->handle().desc,
+			square_tensor._desc_->handle().desc
+		);
+
+		dnnl::eltwise_forward(square_desc).execute(
+			internal::stream(),
+			{
+				{DNNL_ARG_SRC, _memr_->handle().memory},
+				{DNNL_ARG_DST, square_tensor._memr_->handle().memory}
+			}
+		);
+
+		const Shape reduced_shape(shape().size(), 1);
+		layout reduced_layout;
+		switch (rank())
+		{
+			case 1: reduced_layout = layout::A; break;
+			case 2: reduced_layout = layout::AB; break;
+			case 3: reduced_layout = layout::ABC; break;
+			case 4: reduced_layout = layout::ABCD; break;
+			case 5: reduced_layout = layout::ABCDE; break;
+			default: throw std::invalid_argument("unsupported tensor rank");
+		}
+
+		dnnl::memory::desc result_desc(
+			reduced_shape,
+			dnnl_data_type(default_type),
+			dnnl_format_tag(reduced_layout)
+		);
+
+		cumeric_t* result = sycl::malloc_shared<cumeric_t>(
+			1,
+			internal::device(),
+			internal::sycl_context()
+		);
+
+		dnnl::memory result_memory = dnnl::sycl_interop::make_memory(
+			result_desc,
+			internal::engine(),
+			dnnl::sycl_interop::memory_kind::usm,
+			result
+		);
+		if (lenght() == 1)
+		{
+			internal::stream().wait();
+			internal::queue().memcpy(
+				result,
+				square_tensor.data(),
+				sizeof(cumeric_t)
+			).wait();
+
+			const cumeric_t value = *result;
+			sycl::free(result, internal::sycl_context());
+			return value;
+		}
+
 
 		dnnl::reduction::primitive_desc reduction_desc(
 			internal::engine(),
 			dnnl::algorithm::reduction_sum,
-			square_tensor.descriptor()->handle().desc,
-			sum_desc,
-			0.0f,   // p
-			0.0f  // eps
+			square_tensor._desc_->handle().desc,
+			result_desc,
+			0.0f,
+			0.0f
 		);
 
 		dnnl::reduction(reduction_desc).execute(
 			internal::stream(),
 			{
-				{DNNL_ARG_SRC, square_tensor.memory()->handle().memory},
-				{DNNL_ARG_DST, sum_memory}
+				{DNNL_ARG_SRC, square_tensor._memr_->handle().memory},
+				{DNNL_ARG_DST, result_memory}
 			}
 		);
-
 		internal::stream().wait();
 
-		cumeric_t result = sum_buff[0];
-		memory::free(sum_buff);
-
-		return result;
+		const cumeric_t value = *result;
+		sycl::free(result, internal::sycl_context());
+		return value;
 	}
 
 	Tensor Tensor::colwise_sum()
@@ -1251,18 +1386,20 @@ namespace cum
 
 	Tensor& Tensor::operator = (const Tensor& other)
     {
-		std::println("Assignment operator called");
-    	if (this == &other)
+    	if(this == &other)
     		return *this;
 
-    	auto desc = std::make_unique<neural_primitives::Descriptor>(other.shape(), other.type(), other.format());
-    	auto memr = std::make_unique<neural_primitives::Memory>(*_desc_, data());
-
-    	internal::queue().memcpy(memr->data(), other.data(), other.lenght() * datatype_size(this->type())).wait();
+		auto desc = std::make_unique<neural_primitives::Descriptor>(
+			other.shape(), other.type(),
+			concrete_layout(other.rank(), other.format()));
+		auto memr = std::make_unique<neural_primitives::Memory>(*desc);
+		internal::queue().memcpy(
+			memr->data(), other.data(),
+			other.lenght() * datatype_size(other.type())
+		).wait();
 
 		_desc_ = std::move(desc);
 		_memr_ = std::move(memr);
-
     	return *this;
     }
 

@@ -244,7 +244,8 @@ namespace cum
         if (sizeof(T) != datatype_size(this->type()))
             throw std::runtime_error("datatype size mismatch");
 
-        return *slice(indices, Shape(rank(), 1)).data<T>();
+        return data<T>()[compute_index(indices)];
+        // return *slice(indices, Shape(rank(), 1)).data<T>();
     }
 
     template<typename T>
@@ -253,7 +254,8 @@ namespace cum
         if (sizeof(T) != datatype_size(this->type()))
             throw std::runtime_error("datatype size mismatch");
 
-        return *slice(indices, Shape(rank(), 1)).data<T>();
+        return data<T>()[compute_index(indices)];
+        // return *slice(indices, Shape(rank(), 1)).data<T>();
     }
 
 
