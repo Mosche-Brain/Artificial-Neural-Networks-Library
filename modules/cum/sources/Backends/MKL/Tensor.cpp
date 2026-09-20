@@ -32,81 +32,6 @@
 
 namespace cum
 {
-	// int axis_position(layout format, Axis axis)
-	// {
-	// 	int axis_position(layout format, Axis axis)
-	// 	{
-	// 		switch(format)
-	// 		{
-	// 		case layout::X:
-	// 			if(axis == Axis::Channels || axis == Axis::Width)
-	// 				return 0;
-	// 			break;
-	//
-	// 		case layout::NC:
-	// 			if(axis == Axis::Batches)  return 0;
-	// 			if(axis == Axis::Channels) return 1;
-	// 			break;
-	//
-	// 		case layout::OI:
-	// 		case layout::IO:
-	// 			// oi = ab, io = ba: ten sam logiczny kształt (O, I),
-	// 			// różnica dotyczy wyłącznie fizycznych stride'ów.
-	// 			if(axis == Axis::Rows) return 0;
-	// 			if(axis == Axis::Cols) return 1;
-	// 			break;
-	//
-	// 		case layout::NCHW:
-	// 		case layout::NHWC:
-	// 			// nchw = abcd, nhwc = acdb: ten sam logiczny układ (N, C, H, W);
-	// 			// nhwc permutuje tylko stride'y w pamięci, nie kolejność osi.
-	// 			if(axis == Axis::Batches)  return 0;
-	// 			if(axis == Axis::Channels) return 1;
-	// 			if(axis == Axis::Height)   return 2;
-	// 			if(axis == Axis::Width)    return 3;
-	// 			break;
-	//
-	// 		case layout::OIHW:
-	// 		case layout::HWIO:
-	// 			// oihw = abcd, hwio = cdba: ten sam logiczny układ (O, I, H, W).
-	// 			// Axis::Channels odnosi się tu do kanałów wyjściowych (pozycja 0);
-	// 			// brak jeszcze osobnej osi na kanały wejściowe (pozycja 1).
-	// 			if(axis == Axis::Channels) return 0;
-	// 			if(axis == Axis::Height)   return 2;
-	// 			if(axis == Axis::Width)    return 3;
-	// 			break;
-	//
-	// 		case layout::NCDHW:
-	// 		case layout::NDHWC:
-	// 			// ncdhw = abcde, ndhwc = acdeb: ten sam logiczny układ
-	// 			// (N, C, D, H, W); ndhwc permutuje tylko stride'y.
-	// 			if(axis == Axis::Batches)  return 0;
-	// 			if(axis == Axis::Channels) return 1;
-	// 			if(axis == Axis::Depth)    return 2;
-	// 			if(axis == Axis::Height)   return 3;
-	// 			if(axis == Axis::Width)    return 4;
-	// 			break;
-	//
-	// 		case layout::TNC:
-	// 			// tnc = abc: dims (T, N, C) — inny logiczny tensor niż ntc,
-	// 			// nie tylko permutacja stride'ów.
-	// 			if(axis == Axis::Batches)  return 1;
-	// 			if(axis == Axis::Channels) return 2;
-	// 			break;
-	//
-	// 		case layout::NTC:
-	// 			// ntc = bac: dims (N, T, C).
-	// 			if(axis == Axis::Batches)  return 0;
-	// 			if(axis == Axis::Channels) return 2;
-	// 			break;
-	//
-	// 		default:
-	// 			break;
-	// 		}
-	//
-	// 		return -1;
-	// 	}
-	// }
 
 	int axis_position(std::size_t rank, Axis axis)
 	{
@@ -165,63 +90,6 @@ namespace cum
 		}
 	}
 
-	Tensor select_axis(const Tensor& source, const Axis axis, const dim_t index) // Jeszcze muszę to pare razy przeczytać
-	{
-		// const Shape source_shape = source.shape();
-		// const int position = axis_position(source.format(), axis);
-		// if(position < 0 || static_cast<std::size_t>(position) >= source_shape.size())
-		// 	throw std::invalid_argument("requested axis is not present in tensor layout");
-		// if(index < 0 || index >= source_shape[position])
-		// 	throw std::out_of_range("tensor slice index is out of range");
-		//
-		// Shape result_shape = source_shape;
-		// result_shape.erase(result_shape.begin() + position);
-		// if(result_shape.empty())
-		// 	result_shape.push_back(1);
-		//
-		// Tensor result(result_shape, source.type(), result_shape.size() == 1 ? layout::X : layout::ANY);
-		//
-		// // Zakładamy row-major, ciągły bufor `source`: elementy "za" wybraną
-		// // osią (`inner_count`) leżą obok siebie, a każdy krok po osi przed nią
-		// // przeskakuje o `axis_size * inner_count` elementów.
-		// const std::size_t rank = source_shape.size();
-		//
-		// dim_t outer_count = 1;
-		// for(std::size_t d = 0; d < static_cast<std::size_t>(position); ++d)
-		// 	outer_count *= source_shape[d];
-		//
-		// dim_t inner_count = 1;
-		// for(std::size_t d = position + 1; d < rank; ++d)
-		// 	inner_count *= source_shape[d];
-		//
-		// const dim_t axis_size  = source_shape[position];
-		// const dim_t block_size = axis_size * inner_count;
-		// const dim_t base       = index * inner_count;
-		//
-		// dispatch_datatype(source.type(), [&]<typename T>() -> void
-		// {
-		// 	const T* src = source.data<T>();
-		// 	T* dst = result.data<T>();
-		//
-		// 	std::vector<sycl::event> events;
-		// 	dim_t out_index = 0;
-		// 	for(dim_t outer = 0; outer < outer_count; ++outer)
-		// 	{
-		// 		const T* src_block = src + outer * block_size + base;
-		// 		T* dst_block = dst + outer * inner_count;
-		// 		events.push_back(internal::queue().memcpy(dst_block, src_block, inner_count * sizeof(T)));
-		//
-		// 		out_index += inner_count;
-		// 	}
-		//
-		// 	for(auto& e : events)
-		// 		e.wait();
-		//
-		// });
-		//
-		// return result;
-	}
-
 	/**------------------------------------------------------------------------------------------------
 	 *                                         Constructors
 	 *------------------------------------------------------------------------------------------------**/
@@ -235,13 +103,16 @@ namespace cum
 
 	Tensor::Tensor(const Tensor& tensor)
 	{
+		std::println("copy contructor called");
 		_desc_ = std::make_unique<neural_primitives::Descriptor>(tensor.shape(), tensor.type(), tensor.format());
 
+		std::println("rank: {}", tensor.rank()); // 2
+		std::println("format: {}", static_cast<unsigned char>(tensor.format())); // 1 (ANY)
 		// dispatch_datatype(this->type(), [&]<typename T>(){
 		// 	data() = sycl::malloc_shared<T>(tensor.lenght(), internal::device(), internal::sycl_context());
 		// });
 		// _memr_ = std::make_unique<neural_primitives::Memory>(*_desc_, data());
-		_memr_ = std::make_unique<neural_primitives::Memory>(*_desc_);
+		_memr_ = std::make_unique<neural_primitives::Memory>(*_desc_); // <--- This line
 
 		internal::queue().memcpy(data(), tensor.data(), tensor.lenght() * datatype_size(this->type()));
 
@@ -343,8 +214,7 @@ namespace cum
 		Tensor tensor(cum::Shape{num}, default_type, layout::X);
 		void* values = tensor.data();
 		const cumeric_t step = num == 1 ? cumeric_t(0) : (end - start) / static_cast<cumeric_t>(num - 1);
-		// for(dim_t i = 0; i < num; ++i)
-		// static_cast<cu>(values)[i] = start + static_cast<cumeric_t>(i) * step;
+
 
 		dispatch_datatype(tensor.type(), [&]<typename T>() -> void
 		{
@@ -354,7 +224,6 @@ namespace cum
 					static_cast<T*>(values)[idx] = static_cast<T>(start) + static_cast<cumeric_t>(idx) * step;
 				});
 			});
-			// static_cast<T*>(values)[0] = static_cast<T>(start) + ;
 		});
 
 		return tensor;
@@ -642,12 +511,10 @@ namespace cum
 
 	Tensor Tensor::batch(dim_t index) const
 	{
-		return select_axis(*this, Axis::Batches, index);
 	}
 
 	Tensor Tensor::channel(dim_t index) const
 	{
-		return select_axis(*this, Axis::Channels, index);
 	}
 
 	Tensor Tensor::row(dim_t index) const
@@ -656,8 +523,6 @@ namespace cum
 			throw std::runtime_error("Tensor::row(): rank != 2");
 
 		return slice({index, 0}, {1, cols()});
-
-		return select_axis(*this, Axis::Rows, index);
 	}
 
 	Tensor Tensor::col(dim_t index) const
@@ -1328,41 +1193,27 @@ namespace cum
 
 	Tensor operator / (const Tensor& tensor, cumeric_t scalar)
     {
-    	Tensor C(tensor.shape(), tensor.type(), tensor.format());
+    	Tensor result(tensor.shape(), tensor.type(), tensor.format());
 
     	cumeric_t* scalar_buff = memory::allocate(1);
     	scalar_buff[0] = scalar;
 
-    	dnnl::memory::desc scalar_desc {
-    		Shape(tensor.dims(), 1), dnnl_data_type(default_type),
-			tensor.dims() == 1 ? dnnl::memory::format_tag::x : dnnl::memory::format_tag::any
-    	};
+		neural_primitives::Descriptor scalar_descriptor(Shape(tensor.rank(), 1), tensor.type(), tensor.format());
 
-    	dnnl::memory scalar_memory = dnnl::sycl_interop::make_memory(
-    		scalar_desc, internal::engine(), dnnl::sycl_interop::memory_kind::usm, scalar_buff
-    	);
+		neural_primitives::Memory scalar_memory(scalar_descriptor, scalar_buff);
 
-    	dnnl::binary::primitive_desc primitive_desc {
-    		internal::engine(),
-			dnnl::algorithm::binary_div,
-			tensor._desc_->handle().desc,
-			scalar_desc,
-			C._desc_->handle().desc,
-		};
-
-    	dnnl::binary(primitive_desc).execute(
-			internal::stream(),
-			{
-				{ DNNL_ARG_SRC_0, tensor._memr_->handle().memory },
-				{ DNNL_ARG_SRC_1, scalar_memory },
-				{ DNNL_ARG_DST, C._memr_->handle().memory }
-			}
+		neural_primitives::div(
+			*result.memory(),
+			*tensor.memory(),
+			scalar_memory,
+			*result.descriptor(),
+			*tensor.descriptor(),
+			scalar_descriptor
 		);
 
-    	internal::stream().wait();
     	memory::free(scalar_buff);
 
-    	return C;
+    	return result;
     }
 
 	Tensor operator / (const cumeric_t scalar, const Tensor& tensor)

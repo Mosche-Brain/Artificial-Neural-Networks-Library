@@ -28,7 +28,7 @@ namespace cum::neural_primitives
 	    	dnnl::algorithm::binary_add,
 	    	a_desc.desc,
 	    	b_desc.desc,
-	    	b_desc.desc,
+	    	c_desc.desc,
 	    };
 
     	dnnl::primitive primitive = dnnl::binary(primitive_desc);
@@ -55,7 +55,7 @@ namespace cum::neural_primitives
 	    	dnnl::algorithm::binary_sub,
 	    	a_desc.desc,
 	    	b_desc.desc,
-	    	b_desc.desc,
+	    	c_desc.desc,
 	    };
 
     	dnnl::primitive primitive = dnnl::binary(primitive_desc);
@@ -109,7 +109,7 @@ namespace cum::neural_primitives
 	    	dnnl::algorithm::binary_div,
 	    	a_desc.desc,
 	    	b_desc.desc,
-	    	b_desc.desc,
+	    	c_desc.desc,
 	    };
 
     	dnnl::primitive primitive = dnnl::binary(primitive_desc);
