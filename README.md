@@ -1,9 +1,9 @@
+![C++23](https://img.shields.io/badge/C%2B%2B-23-blue)
+![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Czuowuek-SOS/Artificial-Neural-Networks-Library/graphs/commit-activity)
+
 # YANN - Yet Another Neural Networks library
 
 A lightweight, modular minimalistic and easy to use C++ library for machine learning
-
-![C++23](https://img.shields.io/badge/C%2B%2B-23-blue)
-![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Czuowuek-SOS/Artificial-Neural-Networks-Library/graphs/commit-activity)
 
 ## 📜 Content
 
@@ -201,13 +201,13 @@ Full documentation will be avaible [here](brain.mosche.dev/docs)
 * ⚠️ Dynamic computational graphs
 * ⚠️ Convolutional layers
 * ⚠️ Compile time code traces pruning
+* ⚠️ Reasonable unit tests
 * ⚠️ [Dedicated graphical envionment](https://github.com/Mosche-Brain/MLStudio) (work in progress)
 * ❌ CUDA support
 * ❌ ROCm support
 * ❌ BF16, Q8 support
 * ❌ Python binding
-* ❌ C binding
-* ❌ Reasonable unit tests
+* ❌ C binding 
 * ❌ Recurrent Neural Networks
 * ❌ Transformers
 * ❌ Wielogłowicowa uwaga

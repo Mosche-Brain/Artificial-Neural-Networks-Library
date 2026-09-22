@@ -92,6 +92,7 @@ namespace yann::models::layers
                 cache.z = cache.z + biases_.values; // with broadcast
 
                 cache.a = cache.z.elementwise(activation.name);
+                YANN_LOG(3, "forward completed", "");
 
                 return cache.a;
             }

@@ -66,6 +66,7 @@ namespace yann::models
     {
         // cum::Tensor result = topology.front()->forward(input);
         std::println("Sequential::forward");
+        std::println("format przed wejsciem: {}", static_cast<unsigned char>(input.format()));
         cum::Tensor result = input; // This work during forward pass, but crashes while calling it from fit method
 
         for (auto [index, layer] : topology | std::views::enumerate)
@@ -157,7 +158,7 @@ namespace yann::models
                     y = Y.col(batch);
                     YANN_LOG(2, "Y: Sample: {}x{}", y.rows(), y.cols());
                 }
-
+                cum::runtime::sync();
                 cum::Tensor results = this->forward(x);
                 YANN_LOG(2, "results: {}x{}", results.rows(), results.cols() );
 

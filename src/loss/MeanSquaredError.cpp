@@ -3,6 +3,7 @@
 //
 
 #include <ranges>
+#include <print>
 #include <cum/runtime.hpp>
 
 #include "yann/loss/MeanSquaredError.hpp"
@@ -28,24 +29,27 @@ namespace yann::loss
 
             for (auto [index, axis] : predicted.shape() | std::ranges::views::enumerate)
                 if (axis != target.shape()[index])
-                    throw std::invalid_argument("binary_cross_entropy: result and target dimensions must match");
+                    throw std::invalid_argument("MeanSquaredError::compute: result and target dimensions must match");
 
 
             // if (predicted.cols() == 0)
                 // throw std::runtime_error("Number of columns in result is zero");
 
             // const std::size_t N = predicted.cols();
-            const std::size_t N = 1;
+            const cum::dim_t N = predicted.lenght();
             // const std::size_t N = predicted.rows() * predicted.cols()                        ;
             // if (!result.allFinite() || !target.allFinite()) {
             //     throw std::runtime_error("Input matrices contain NaN or inf values");
             // }
 
             cum::Tensor diff = predicted - target;
+            cum::cumeric_t sample = diff.at(cum::Shape(diff.rank(), 0));
+            std::println("sexy");
 
             // loss.value = diff.squaredNorm();
             // loss.gradient = (diff * 2);
-            loss.value = diff.squaredNorm() / static_cast<cum::cumeric_t>(N);
+            loss.value = diff.lenght() > 1 ? diff.squaredNorm() : std::powf(diff.at(cum::Shape(diff.rank(), 0)), 2.f);// / static_cast<cum::cumeric_t>(N);
+            std::println("sex");
             loss.gradient = (diff * 2) / static_cast<cum::cumeric_t>(N);
         }
     }
