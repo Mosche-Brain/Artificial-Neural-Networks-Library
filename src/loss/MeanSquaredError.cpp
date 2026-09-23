@@ -42,9 +42,10 @@ namespace yann::loss
             //     throw std::runtime_error("Input matrices contain NaN or inf values");
             // }
 
-            cum::Tensor diff = predicted - target;
-            cum::cumeric_t sample = diff.at(cum::Shape(diff.rank(), 0));
-            std::println("sexy");
+            cum::Tensor diff = predicted - target;\
+            std::println("sexo");
+            cum::cumeric_t sample = diff.get_value(cum::Shape(diff.rank(), 0));
+            std::println("sexy {}", sample);
 
             // loss.value = diff.squaredNorm();
             // loss.gradient = (diff * 2);

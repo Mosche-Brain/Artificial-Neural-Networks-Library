@@ -111,10 +111,11 @@ namespace cum
 	 *------------------------------------------------------------------------------------------------**/
 
 	Tensor::Tensor(const Shape& shape, datatype dtype, layout layout)
-		: _desc_(std::make_unique<neural_primitives::Descriptor>(shape, dtype, layout)),
-		  _memr_(std::make_unique<neural_primitives::Memory>(*_desc_))
+		: _desc_(std::make_unique<neural_primitives::Descriptor>(shape, dtype, layout))//,
+		  // _memr_(std::make_unique<neural_primitives::Memory>(*_desc_))
 	{
-
+		_data = sycl::malloc_shared<std::byte>(_desc_->size(), internal::device(), internal::sycl_context());
+		_memr_ = std::make_unique<neural_primitives::Memory>(*_desc_, _data);
 	}
 
 	Tensor::Tensor(const Tensor& tensor)
@@ -122,14 +123,16 @@ namespace cum
 			tensor.shape(), tensor.type(),
 			concrete_layout(tensor.rank(), tensor.format())))
 	{
-		_memr_ = std::make_unique<neural_primitives::Memory>(*_desc_);
+		// _data = sycl::malloc_shared<std::byte>(_desc_->size(), internal::device(), internal::sycl_context());
+		memory::memcopy(_data, tensor.data(), tensor.size());
+		_memr_ = std::make_unique<neural_primitives::Memory>(*_desc_, _data);
 		internal::queue().memcpy(
 			data(), tensor.data(),
 			tensor.lenght() * datatype_size(tensor.type())
 		).wait();
 	}
 
-	Tensor::Tensor(Tensor&& tensor) noexcept : _desc_(std::move(tensor._desc_)), _memr_(std::move(tensor._memr_))
+	Tensor::Tensor(Tensor&& tensor) noexcept : _desc_(std::move(tensor._desc_)), _memr_(std::move(tensor._memr_)), _data(tensor.data())
 	{
 
 	}
@@ -164,7 +167,7 @@ namespace cum
 
 	Tensor::~Tensor()
 	{
-
+		sycl::free(_data, internal::sycl_context());
 	}
 
 	/**------------------------------------------------------------------------------------------------
@@ -499,6 +502,22 @@ namespace cum
 	    return static_cast<void*>(static_cast<std::byte*>(_memr_->data()) + _desc_->offset() * datatype_size(type()));
     }
 
+	cumeric_t Tensor::get_value(const Shape& indices) const
+	{
+		cumeric_t value;
+
+		auto *device_ptr = data<cumeric_t>();
+
+		internal::queue().memcpy(
+			&value,
+			device_ptr + compute_index(indices),
+			sizeof(cumeric_t)
+		).wait();
+
+		return value;
+	}
+
+
 	cumeric_t Tensor::operator ()(const dim_t row, const dim_t col) const
 	{
 		return this->at(Shape{row, col});
@@ -563,7 +582,8 @@ namespace cum
 
 	Tensor::Tensor(neural_primitives::Descriptor&& desc, const neural_primitives::Memory& source)
 		: _desc_(std::make_unique<neural_primitives::Descriptor>(std::move(desc))),
-		  _memr_(std::make_unique<neural_primitives::Memory>(*_desc_, source))
+		  _memr_(std::make_unique<neural_primitives::Memory>(*_desc_, source)),
+		  _data(_memr_->handle().memory.get_data_handle())
 	{
 
 	}
@@ -786,6 +806,7 @@ namespace cum
 
 	cumeric_t Tensor::squared_norm()
 	{
+		std::print("called squared_norm function");
 		Tensor square_tensor(this->shape(), this->type(), this->format());
 
 		dnnl::eltwise_forward::primitive_desc square_desc(

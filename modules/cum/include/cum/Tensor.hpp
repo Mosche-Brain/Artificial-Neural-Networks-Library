@@ -133,6 +133,7 @@ namespace cum
         cumeric_t& at(const Shape& indices);
         const cumeric_t& at(const Shape& indices) const;
 
+        cumeric_t get_value(const Shape& indices) const;
 
         cumeric_t& operator () (const Shape& indices);
         const cumeric_t& operator () (const Shape& indices) const;
@@ -229,6 +230,7 @@ namespace cum
 
         std::unique_ptr<neural_primitives::Descriptor> _desc_;
         std::unique_ptr<neural_primitives::Memory> _memr_;
+        void* _data = nullptr;
     };
 
 
