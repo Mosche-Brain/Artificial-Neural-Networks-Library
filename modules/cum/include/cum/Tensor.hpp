@@ -231,8 +231,10 @@ namespace cum
         std::unique_ptr<neural_primitives::Descriptor> _desc_;
         std::unique_ptr<neural_primitives::Memory> _memr_;
         void* _data = nullptr;
-    };
+        bool _owns_data = true;
 
+
+    };
 
     template<datatype T, layout layout>
     Tensor Tensor::create_tensor(const Shape& shape)

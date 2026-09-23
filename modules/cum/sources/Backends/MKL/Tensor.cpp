@@ -3,6 +3,7 @@
 //
 
 #include <cstdint>
+#include <new>
 #include <print>
 
 #include <oneapi/dnnl/dnnl.hpp>
@@ -111,30 +112,40 @@ namespace cum
 	 *------------------------------------------------------------------------------------------------**/
 
 	Tensor::Tensor(const Shape& shape, datatype dtype, layout layout)
-		: _desc_(std::make_unique<neural_primitives::Descriptor>(shape, dtype, layout))//,
-		  // _memr_(std::make_unique<neural_primitives::Memory>(*_desc_))
+		: _desc_(std::make_unique<neural_primitives::Descriptor>(shape, dtype, layout)),
+		  _data(sycl::malloc_shared<std::byte>(
+			  _desc_->size(), internal::device(), internal::sycl_context()))
 	{
-		_data = sycl::malloc_shared<std::byte>(_desc_->size(), internal::device(), internal::sycl_context());
+		if(_data == nullptr)
+			throw std::bad_alloc();
 		_memr_ = std::make_unique<neural_primitives::Memory>(*_desc_, _data);
 	}
 
 	Tensor::Tensor(const Tensor& tensor)
 		: _desc_(std::make_unique<neural_primitives::Descriptor>(
 			tensor.shape(), tensor.type(),
-			concrete_layout(tensor.rank(), tensor.format())))
+			concrete_layout(tensor.rank(), tensor.format()))),
+		  _data(sycl::malloc_shared<std::byte>(
+			  _desc_->size(), internal::device(), internal::sycl_context()))
 	{
-		// _data = sycl::malloc_shared<std::byte>(_desc_->size(), internal::device(), internal::sycl_context());
-		memory::memcopy(_data, tensor.data(), tensor.size());
+		if(_data == nullptr)
+			throw std::bad_alloc();
 		_memr_ = std::make_unique<neural_primitives::Memory>(*_desc_, _data);
 		internal::queue().memcpy(
-			data(), tensor.data(),
-			tensor.lenght() * datatype_size(tensor.type())
+			_data,
+			tensor.data(),
+			static_cast<std::size_t>(tensor.size())
 		).wait();
 	}
 
-	Tensor::Tensor(Tensor&& tensor) noexcept : _desc_(std::move(tensor._desc_)), _memr_(std::move(tensor._memr_)), _data(tensor.data())
+	Tensor::Tensor(Tensor&& tensor) noexcept
+		: _desc_(std::move(tensor._desc_)),
+		  _memr_(std::move(tensor._memr_)),
+		  _data(tensor._data),
+		  _owns_data(tensor._owns_data)
 	{
-
+		tensor._data = nullptr;
+		tensor._owns_data = false;
 	}
 
 
@@ -167,7 +178,8 @@ namespace cum
 
 	Tensor::~Tensor()
 	{
-		sycl::free(_data, internal::sycl_context());
+		if(_owns_data && _data != nullptr)
+			sycl::free(_data, internal::sycl_context());
 	}
 
 	/**------------------------------------------------------------------------------------------------
@@ -176,11 +188,11 @@ namespace cum
 
 	Tensor Tensor::take_memory(const Shape& shape, void* data, datatype dtype, layout layout)
 	{
-		Tensor tensor;
+		if(data == nullptr)
+			throw std::invalid_argument("take_memory requires a non-null data pointer");
 
-		tensor._desc_ = std::make_unique<neural_primitives::Descriptor>(shape, dtype, layout);
-		tensor._memr_ = std::make_unique<neural_primitives::Memory>(*tensor._desc_, data);
-
+		Tensor tensor(shape, dtype, layout);
+		internal::queue().memcpy(tensor._data, data, static_cast<std::size_t>(tensor.size())).wait();
 		return tensor;
 	}
 
@@ -188,6 +200,11 @@ namespace cum
 	{
 		Tensor tensor;
 		tensor._desc_ = std::make_unique<neural_primitives::Descriptor>(shape, dtype, layout);
+		tensor._data = sycl::malloc_shared<std::byte>(
+			tensor._desc_->size(), internal::device(), internal::sycl_context());
+		if(tensor._data == nullptr)
+			throw std::bad_alloc();
+		tensor._memr_ = std::make_unique<neural_primitives::Memory>(*tensor._desc_, tensor._data);
 		dim_t count = tensor.lenght();
 
 		float* temp = sycl::malloc_shared<float>(count, internal::device(), internal::sycl_context());
@@ -200,9 +217,7 @@ namespace cum
 		sycl::event rng_event = oneapi::mkl::rng::generate(dist, engine, count, temp);
 
 		sycl::event kernel_event;
-
-		tensor._memr_ = std::make_unique<neural_primitives::Memory>(*tensor._desc_);
-		void* data = tensor.data();
+		void* data = tensor._data;
 
 		dispatch_datatype(tensor.type(), [&]<typename T>(){
 			kernel_event = internal::queue().submit([&](sycl::handler& cgh) {
@@ -494,12 +509,18 @@ namespace cum
 
 	const void* Tensor::data() const
     {
-	    return static_cast<void*>(static_cast<std::byte*>(_memr_->data()) + _desc_->offset() * datatype_size(type()));
+	    return static_cast<const void*>(
+		    static_cast<const std::byte*>(_data)
+		    + _desc_->offset() * datatype_size(type())
+	    );
     }
 
 	void* Tensor::data()
     {
-	    return static_cast<void*>(static_cast<std::byte*>(_memr_->data()) + _desc_->offset() * datatype_size(type()));
+	    return static_cast<void*>(
+		    static_cast<std::byte*>(_data)
+		    + _desc_->offset() * datatype_size(type())
+	    );
     }
 
 	cumeric_t Tensor::get_value(const Shape& indices) const
@@ -583,9 +604,9 @@ namespace cum
 	Tensor::Tensor(neural_primitives::Descriptor&& desc, const neural_primitives::Memory& source)
 		: _desc_(std::make_unique<neural_primitives::Descriptor>(std::move(desc))),
 		  _memr_(std::make_unique<neural_primitives::Memory>(*_desc_, source)),
-		  _data(_memr_->handle().memory.get_data_handle())
+		  _data(const_cast<void*>(source.data())),
+		  _owns_data(false)
 	{
-
 	}
 
 	Tensor Tensor::slice(const Shape& offset, const Shape& shape) const
@@ -1413,30 +1434,45 @@ namespace cum
 		auto desc = std::make_unique<neural_primitives::Descriptor>(
 			other.shape(), other.type(),
 			concrete_layout(other.rank(), other.format()));
-		auto memr = std::make_unique<neural_primitives::Memory>(*desc);
+		void* data = sycl::malloc_shared<std::byte>(
+			desc->size(), internal::device(), internal::sycl_context());
+		if(data == nullptr)
+			throw std::bad_alloc();
+
+		auto memr = std::make_unique<neural_primitives::Memory>(*desc, data);
 		internal::queue().memcpy(
-			memr->data(), other.data(),
-			other.lenght() * datatype_size(other.type())
+			data,
+			other.data(),
+			static_cast<std::size_t>(other.size())
 		).wait();
+
+		if(_owns_data && _data != nullptr)
+			sycl::free(_data, internal::sycl_context());
 
 		_desc_ = std::move(desc);
 		_memr_ = std::move(memr);
+		_data = data;
+		_owns_data = true;
     	return *this;
     }
 
-	Tensor& Tensor::operator = (Tensor&&) noexcept = default;
-	// Tensor& Tensor::operator = (Tensor&& other) noexcept
-	// {
-	// 	std::println("Move assignment operator called");
-	// 	if (this == &other)
-	// 		return *this;
-	//
-	// 	_desc_ = std::move(other._desc_);
-	// 	_memr_ = std::move(other._memr_);
-	//
-	// 	// internal::queue().copy(_memr)
-	// 	return *this;
-	// }
+	Tensor& Tensor::operator = (Tensor&& other) noexcept
+	{
+		if(this == &other)
+			return *this;
+
+		if(_owns_data && _data != nullptr)
+			sycl::free(_data, internal::sycl_context());
+
+		_desc_ = std::move(other._desc_);
+		_memr_ = std::move(other._memr_);
+		_data = other._data;
+		_owns_data = other._owns_data;
+
+		other._data = nullptr;
+		other._owns_data = false;
+		return *this;
+	}
   //   {
 		// _desc_ = std::move
   //   }
