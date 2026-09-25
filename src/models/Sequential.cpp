@@ -68,7 +68,7 @@ namespace yann::models
         std::println("Sequential::forward");
         std::println("format przed wejsciem: {}", static_cast<unsigned char>(input.format()));
         cum::Tensor result = input; // This work during forward pass, but crashes while calling it from fit method
-
+        std::println("ok");
         for (auto [index, layer] : topology | std::views::enumerate)
         {
             std::println("forward layerd {}", index);
@@ -129,16 +129,14 @@ namespace yann::models
 
             YANN_LOG(1, "Epoch {}", epoch);
 
-            // Mamy tutaj kopie, później można to na referencje zmiennić dla ograniczenia lokacji
-            // const cum::Shape& input_shape = X.shape();
             const cum::Shape& input_shape = topology.front()->input_shape();
             const cum::Shape& output_shape = topology.back()->output_shape();
 
+            // Mamy tutaj kopie, później można to na referencje zmiennić dla ograniczenia lokacji
             cum::Tensor x(input_shape, cum::default_type, cum::layout::IO);
             cum::Tensor y(output_shape, cum::default_type, cum::layout::IO);
-            YANN_LOG(1, "porno", epoch);
+            YANN_LOG(1, "porno {}", epoch);
 
-            // cum::dim_t n = batched ? batches.size() : X.cols();
             cum::dim_t n = X.cols();
             for (batch = 0; batch < n; batch++)
             {
@@ -146,19 +144,13 @@ namespace yann::models
                 // YANN_LOG(2, "{} batch, {} samples", batch, current_batch_size);
 
                 YANN_LOG(2, "batch: ", batch);
-                if (batched)
-                {
-                    x = X.batch(batch);
-                    y = X.batch(batch);
-                }
-                else
-                {
+
                     x = X.col(batch);
                     YANN_LOG(2, "X: Sample: {}x{}", x.rows(), x.cols());
 
                     y = Y.col(batch);
                     YANN_LOG(2, "Y: Sample: {}x{}", y.rows(), y.cols());
-                }
+
                 cum::runtime::sync();
                 cum::Tensor results = this->forward(x);
                 YANN_LOG(2, "results: {}x{}", results.rows(), results.cols() );
@@ -172,7 +164,7 @@ namespace yann::models
                 for (logging::ITrainingCallback*&  callback : callbacks)
                     callback->afterBackprop(ctx);
 
-                // optimizer.scale_grads(params, 1 / static_cast<cum::cumeric_t>(current_batch_size));
+                // optimizer.scale_grads(params, 1 / static_cast<cum::cumeric_t>());
                 optimizer.step(params); // zerowanie gradientów jest dokonywanie niejawnie w kroku optymalizatora
                 total_loss += error.value;
             }

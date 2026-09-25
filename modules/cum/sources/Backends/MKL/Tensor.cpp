@@ -148,14 +148,22 @@ namespace cum
 		  _data(sycl::malloc_shared<std::byte>(
 			  _desc_->size(), internal::device(), internal::sycl_context()))
 	{
-		if(_data == nullptr)
+		std::println("copy constructor called");
+		if (!_data)
 			throw std::bad_alloc();
-		_memr_ = std::make_unique<neural_primitives::Memory>(*_desc_, _data);
-		internal::queue().memcpy(
-			_data,
-			tensor.data(),
-			static_cast<std::size_t>(tensor.size())
-		).wait();
+
+		_memr_ = std::make_unique<Memory>(*_desc_, _data);
+
+		dnnl::reorder(
+			tensor.memory()->handle().memory,
+			_memr_->handle().memory
+		).execute(
+			internal::stream(),
+			tensor.memory()->handle().memory,
+			_memr_->handle().memory
+		);
+
+		internal::stream().wait();
 	}
 
 	Tensor::Tensor(Tensor&& tensor) noexcept

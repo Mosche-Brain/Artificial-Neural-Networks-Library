@@ -95,7 +95,7 @@ TEST_CASE("Sequential backward")
 
 
     yann::runtime_config::set_verbosity(5);
-    sequential.fit(X, Y, *loss, *optimizer, 1);
+    sequential.fit(X, Y, *loss, *optimizer, 3);
 
     REQUIRE(true);
 }

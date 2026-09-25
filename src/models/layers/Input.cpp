@@ -43,7 +43,7 @@ namespace yann::models::layers
         // {
             // cache.resize(cache.x.rows(), cache.z.rows(), input.cols());
         // }
-        constexpr bool INPUT_FORWARD_RUNTIME_CHECKS = true;
+        constexpr bool INPUT_FORWARD_RUNTIME_CHECKS = false;
 
         if constexpr(INPUT_FORWARD_RUNTIME_CHECKS)
         {
