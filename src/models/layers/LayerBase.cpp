@@ -27,7 +27,7 @@ namespace yann::models::layers
 
     const cum::Shape& LayerBase::output_shape() const
     {
-        return __output_shape__;
+        return output_shape_;
     }
 
     int LayerBase::size()

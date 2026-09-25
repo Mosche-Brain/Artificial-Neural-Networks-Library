@@ -21,6 +21,7 @@ namespace cum::neural_primitives
         Descriptor(Shape dims, datatype dtype, layout format);
         Descriptor(Descriptor& other);
         Descriptor(const handles::__desc__& handle);
+        Descriptor(const handles::__desc__& handle, layout format);
         Descriptor(handles::__desc__& handle);
 
         Descriptor(Descriptor&&) noexcept;
@@ -34,6 +35,10 @@ namespace cum::neural_primitives
         dim_t stride() const;
         dim_t offset() const;
 
+        Descriptor reshape(const Shape& shape);
+        Descriptor& reshape_in_place(const Shape& shape);
+
+
         const handles::__desc__& handle() const;
         handles::__desc__& handle();
 
@@ -43,8 +48,8 @@ namespace cum::neural_primitives
         friend class Memory;
         friend class Tensor;
 
-        layout fmt;
         std::unique_ptr<handles::__desc__> handle_;
+        layout fmt;
     };
 } // cum
 

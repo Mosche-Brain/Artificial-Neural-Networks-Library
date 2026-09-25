@@ -32,6 +32,11 @@ namespace cum::neural_primitives
         handle_ = std::make_unique<handles::__desc__>(handle);
     }
 
+    Descriptor::Descriptor(const handles::__desc__& handle, layout format) : fmt(format)
+    {
+        handle_ = std::make_unique<handles::__desc__>(handle);
+    }
+
     Descriptor::Descriptor(Descriptor&&) noexcept = default;
     Descriptor& Descriptor::operator=(Descriptor&&) noexcept = default;
 
@@ -85,6 +90,25 @@ namespace cum::neural_primitives
     dim_t Descriptor::offset() const
     {
         return handle_->desc.get_submemory_offset();
+    }
+
+
+    Descriptor Descriptor::reshape(const Shape& shape)
+    {
+        // return Descriptor(shape, type(), format());
+        return Descriptor({handle_->desc.reshape(shape)}, format());
+    }
+
+    Descriptor& Descriptor::reshape_in_place(const Shape& shape)
+    {
+        // Check is the sum of elements in old and new shape equak
+        size_t sum_a = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<size_t>());
+        size_t sum_b = std::accumulate(handle_->desc.get_dims().begin(), handle_->desc.get_dims().end(), 1, std::multiplies<size_t>());
+
+        if (sum_a != sum_b) throw std::runtime_error("Cannot reshape tensor: products of old and new dimensions vector aren't equal");
+
+        handle_ = std::make_unique<handles::__desc__>(handle_->desc.reshape(shape));
+        return *this;
     }
 
     Descriptor& Descriptor::operator = (Descriptor& other)

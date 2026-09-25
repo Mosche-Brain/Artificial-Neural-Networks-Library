@@ -96,7 +96,7 @@ namespace yann::models::layers
         ForwardCache cache;
 
         cum::Shape input_shape_;
-        cum::Shape __output_shape__;
+        cum::Shape output_shape_;
 
         int _layerSize_; // not longer relevant
         bool _initialized_ = false;

@@ -87,7 +87,7 @@ TEST_CASE("Tensor rowwise_sum reduces each matrix row")
 
 TEST_CASE("Tensor scalar operators work in both operand orders")
 {
-    cum::cum(cum::DEVICE::CPU);
+    cum::cum(cum::DEVICE::GPU);
     cum::Tensor tensor(cum::Shape{2}, cum::default_type, cum::layout::X);
     tensor.data<cum::cumeric_t>()[0] = 2;
     tensor.data<cum::cumeric_t>()[1] = 4;

@@ -145,6 +145,7 @@ namespace yann::models
                 // cum::dim_t current_batch_size = batched ? batches[batch].size : 1;
                 // YANN_LOG(2, "{} batch, {} samples", batch, current_batch_size);
 
+                YANN_LOG(2, "batch: ", batch);
                 if (batched)
                 {
                     x = X.batch(batch);

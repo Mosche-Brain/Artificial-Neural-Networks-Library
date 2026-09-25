@@ -47,11 +47,14 @@ namespace yann::loss
             cum::cumeric_t sample = diff.get_value(cum::Shape(diff.rank(), 0));
             std::println("sexy {}", sample);
 
-            // loss.value = diff.squaredNorm();
+            loss.value = diff.squared_norm();
             // loss.gradient = (diff * 2);
-            loss.value = diff.lenght() > 1 ? diff.squaredNorm() : std::powf(diff.at(cum::Shape(diff.rank(), 0)), 2.f);// / static_cast<cum::cumeric_t>(N);
+            // loss.value = diff.lenght() > 1 ? diff.squaredNorm() : std::powf(diff.at(cum::Shape(diff.rank(), 0)), 2.f);// / static_cast<cum::cumeric_t>(N);
             std::println("sex");
-            loss.gradient = (diff * 2) / static_cast<cum::cumeric_t>(N);
+
+            loss.gradient = (diff * 2);
+            // loss.gradient = (diff * 2) / static_cast<cum::cumeric_t>(N);
+            std::println("proffesional debug log");
         }
     }
 

@@ -32,8 +32,28 @@
  * We plan to move significant part to other .cpp files
  */
 
+
 namespace cum
 {
+	using namespace neural_primitives::handles;
+	using neural_primitives::Descriptor;
+	using neural_primitives::Memory;
+	// using namespace neural_primitives;
+	layout default_layout_from_rank(dim_t rank)
+	{
+		switch(rank)
+		{
+			case 0:
+			case 1: return layout::A;
+			case 2: return layout::AB;
+			case 3: return layout::ABC;
+			case 4: return layout::ABCD;
+			case 5: return layout::ABCDE;
+			case 6: return layout::ABCDEF;
+			case 7: return layout::ABCDEFG;
+			default: return layout::ANY;
+		}
+	}
 
 	int axis_position(std::size_t rank, Axis axis)
 	{
@@ -41,7 +61,7 @@ namespace cum
 		{
 			case 1:
 			{
-					return axis == Axis::Width ? 0 : -1;
+				return axis == Axis::Width ? 0 : -1;
 			}
 			case 2:
 			{
@@ -369,6 +389,11 @@ namespace cum
 	    return _desc_->type();
     }
 
+	bool Tensor::is_scalar()
+	{
+		return _desc_->size() == dnnl::memory::data_type_size(dnnl_data_type(type()));
+	}
+
 	bool Tensor::has(Axis axis) const
 	{
 		const Shape tensor_shape = _desc_->shape();
@@ -632,28 +657,67 @@ namespace cum
 
 	Tensor Tensor::transpose()
 	{
-		Tensor result = *this;
+		// Tensor result = *this;
 
-		result.transpose_in_place();
+		if(is_scalar())
+			return *this;
+
+		if(rank() != 2)
+			throw std::invalid_argument("transpose requires a two-dimensional tensor");
+
+		Tensor result({shape()[1], shape()[0]}, type(), format());
+
+		layout permuted_format = this->format() == layout::BA ? layout::AB : layout::BA;
+
+		dnnl::memory::desc& src_md = _desc_->handle().desc;
+
+		Descriptor dst_md(this->shape(), this->type(), permuted_format);
+		dnnl::reorder::primitive_desc primitive_desc(
+			internal::engine(),
+			src_md,
+			internal::engine(),
+			dst_md.handle().desc
+		);
+
+		dnnl::memory& src_mem = _memr_->handle().memory;
+		dnnl::memory& dst_mem = result._memr_->handle().memory;
+
+		dnnl::reorder(primitive_desc).execute(
+		internal::stream(),
+	{
+				{ DNNL_ARG_SRC, src_mem },
+				{ DNNL_ARG_DST, dst_mem }
+			}
+		);
+
+		internal::stream().wait();
+
 		return result;
     }
 
-	Tensor& Tensor::transpose_in_place()
-    {
+	Tensor& Tensor::transpose_in_place() // this function may not work properly due to obvious problem with in place permutations
+	{
+		if (is_scalar())
+		{
+			std::println("is_scalar");
+			return *this;
+		}
+
 		if(dims() != 2)
 			throw std::invalid_argument("transpose requires a two-dimensional tensor");
 
-		layout format = this->format() == layout::IO ? layout::OI : layout::IO;
+		layout format = this->format() == layout::BA ? layout::AB : layout::BA;
 
 
-		neural_primitives::Descriptor desc(this->shape(), this->type(), format);
-		// neural_primitives::Memory mem(desc);
+		Descriptor desc(this->shape(), this->type(), format);
 		dnnl::reorder::primitive_desc primitive_desc(
 			internal::engine(),
 			_desc_->handle().desc,
 			internal::engine(),
 			desc.handle().desc
 		);
+
+		Memory memr(desc, *_memr_);
 
 		dnnl::reorder(primitive_desc).execute(
 			internal::stream(),
@@ -665,13 +729,21 @@ namespace cum
 
 		internal::stream().wait();
 
-
-		// _desc_ = std::make_unique<neural_primitives::Descriptor>(desc);
+		std::make_unique<neural_primitives::Descriptor>(desc);
 
 		Shape new_shape = _desc_->shape();
+
+
 		std::swap(new_shape[0], new_shape[1]);
 
-		_desc_->handle().desc = _desc_->handle().desc.reshape(new_shape); // Is it safe? probably not
+		std::println("new: [{}, {}]", new_shape[0], new_shape[1]);
+		std::println("old: [{}, {}]", _desc_->shape()[0], _desc_->shape()[1]);
+
+		_desc_->reshape_in_place(new_shape);
+
+		// *this = this->transpose();
+		// this may work properly, I will check it later
+
 		return *this;
     }
 
@@ -703,7 +775,7 @@ namespace cum
 
     	dnnl::reduction(pd).execute(
 			internal::stream(),
-			{
+	{
 				{DNNL_ARG_SRC, _memr_->handle().memory},
 				{DNNL_ARG_DST, sum_memory}
 			}
@@ -829,7 +901,7 @@ namespace cum
 	{
 		std::print("called squared_norm function");
 		Tensor square_tensor(this->shape(), this->type(), this->format());
-
+		std::println("created square_tensor");
 		dnnl::eltwise_forward::primitive_desc square_desc(
 			internal::engine(),
 			dnnl::prop_kind::forward,
@@ -837,7 +909,7 @@ namespace cum
 			_desc_->handle().desc,
 			square_tensor._desc_->handle().desc
 		);
-
+		std::println("created square_desc");
 		dnnl::eltwise_forward(square_desc).execute(
 			internal::stream(),
 			{
@@ -845,31 +917,31 @@ namespace cum
 				{DNNL_ARG_DST, square_tensor._memr_->handle().memory}
 			}
 		);
-
+		std::println("executed square_desc");
 		const Shape reduced_shape(shape().size(), 1);
-		layout reduced_layout;
-		switch (rank())
-		{
-			case 1: reduced_layout = layout::A; break;
-			case 2: reduced_layout = layout::AB; break;
-			case 3: reduced_layout = layout::ABC; break;
-			case 4: reduced_layout = layout::ABCD; break;
-			case 5: reduced_layout = layout::ABCDE; break;
-			default: throw std::invalid_argument("unsupported tensor rank");
-		}
+		layout reduced_layout = default_layout_from_rank(rank());
+		// switch (rank())
+		// {
+		// 	case 1: reduced_layout = layout::A; break;
+		// 	case 2: reduced_layout = layout::AB; break;
+		// 	case 3: reduced_layout = layout::ABC; break;
+		// 	case 4: reduced_layout = layout::ABCD; break;
+		// 	case 5: reduced_layout = layout::ABCDE; break;
+		// 	default: throw std::invalid_argument("unsupported tensor rank");
+		// }
 
 		dnnl::memory::desc result_desc(
 			reduced_shape,
 			dnnl_data_type(default_type),
 			dnnl_format_tag(reduced_layout)
 		);
-
+		std::println("created result_desc");
 		cumeric_t* result = sycl::malloc_shared<cumeric_t>(
 			1,
 			internal::device(),
 			internal::sycl_context()
 		);
-
+		std::println("created result");
 		dnnl::memory result_memory = dnnl::sycl_interop::make_memory(
 			result_desc,
 			internal::engine(),
@@ -878,18 +950,22 @@ namespace cum
 		);
 		if (lenght() == 1)
 		{
-			internal::stream().wait();
-			internal::queue().memcpy(
-				result,
-				square_tensor.data(),
-				sizeof(cumeric_t)
-			).wait();
-
-			const cumeric_t value = *result;
+			std::println("scalar trace");
+			// internal::stream().wait();
+			// internal::queue().memcpy(
+			// 	result,
+			// 	square_tensor.data(),
+			// 	sizeof(cumeric_t)
+			// ).wait();
+			std::println("copied scalar");
+			const cumeric_t value = square_tensor.get_value(Shape(square_tensor.rank(), 0));
+			std::println(" dziewczynki");
+			// const cumeric_t value = *result;
+			runtime::sync();
 			sycl::free(result, internal::sycl_context());
 			return value;
 		}
-
+		std::println("tensor trace");
 
 		dnnl::reduction::primitive_desc reduction_desc(
 			internal::engine(),
@@ -1332,8 +1408,8 @@ namespace cum
     	scalar_buff[0] = scalar;
 
     	dnnl::memory::desc scalar_desc {
-    		Shape(tensor.dims(), 1), dnnl_data_type(default_type),
-			tensor.dims() == 1 ? dnnl::memory::format_tag::x : dnnl::memory::format_tag::any
+    		Shape(tensor.rank(), 1), dnnl_data_type(default_type),
+			tensor.dims() == 1 ? dnnl::memory::format_tag::x : dnnl_format_tag(default_layout_from_rank(tensor.rank()))
     	};
 
     	dnnl::memory scalar_memory = dnnl::sycl_interop::make_memory(

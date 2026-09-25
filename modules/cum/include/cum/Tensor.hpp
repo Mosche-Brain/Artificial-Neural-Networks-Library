@@ -96,6 +96,9 @@ namespace cum
         layout format() const;
         datatype type() const;
 
+        bool is_scalar();
+        // bool is_vector();
+        // bool is_matrix();
         bool has(Axis axis) const;
         dim_t extent(Axis axis) const;
 

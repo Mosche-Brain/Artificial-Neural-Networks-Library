@@ -35,6 +35,8 @@ namespace yann::models::layers
         cum::functions::get_function_by_name(&activation, func);
         _layerSize_ = layerSize;
 
+        output_shape_ = { layerSize, 1 };
+
         this->_layerType_ = LayerType::Dense;
     }
 
