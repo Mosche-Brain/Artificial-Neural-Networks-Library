@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include <print>
+#include <string_view>
 
 #include <cum/memory.hpp>
 #include <cum/runtime.hpp>
@@ -29,6 +30,38 @@
 
 namespace yann::models::layers
 {
+
+    /*
+    static void dump_tensor(std::string_view name, const cum::Tensor& t, bool show_values = true)
+    {
+        std::println("=== DUMP: {} ===", name);
+        const cum::Shape shape = t.shape();
+        std::print("  Shape: [");
+        for (size_t i = 0; i < shape.size(); ++i)
+        {
+            std::print("{}{}", (i > 0 ? " x " : ""), shape[i]);
+        }
+        std::println("]");
+        std::println("  Mean: {}", t.mean());
+        std::println("  Norm: {}", t.norm());
+
+        if (show_values)
+        {
+            std::println("  Values:");
+            for (int64_t r = 0; r < static_cast<int64_t>(t.rows()); ++r)
+            {
+                std::print("   [");
+                for (int64_t c = 0; c < static_cast<int64_t>(t.cols()); ++c)
+                {
+                    std::print("{}{:8.4f}", (c > 0 ? ", " : ""), t.at(cum::Shape{r, c}));
+                }
+                std::println("]");
+            }
+        }
+        std::println("==================");
+    }
+    */
+
     Dense::Dense(const int layerSize, const char* func)
     {
         YANN_LOG(1, "Initializing Dense layer with {} neurons and {} activation function...", layerSize, func);
@@ -95,6 +128,7 @@ namespace yann::models::layers
 
                 cache.a = cache.z.elementwise(activation.name);
                 YANN_LOG(3, "forward completed", "");
+                cache.a = cache.z.elementwise(activation.name);
 
                 return cache.a;
             }
@@ -145,7 +179,7 @@ namespace yann::models::layers
                 YANN_LOG(3, "dL/dX = weights.transpose() * cache.dz", "");
                 YANN_LOG(4, "W: {}x{}, | dZ: {}x{}", weights_.values.rows(), weights_.values.cols(), cache.dz.rows(), cache.dz.cols());
 
-                return weights_.values.transpose() * cache.dz;
+                return weights_.values.transpose() * cache.dz;;
             }
             else
             {

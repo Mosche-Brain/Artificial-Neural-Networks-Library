@@ -398,7 +398,7 @@ namespace cum
 	    return _desc_->type();
     }
 
-	bool Tensor::is_scalar()
+	bool Tensor::is_scalar() const
 	{
 		return _desc_->size() == dnnl::memory::data_type_size(dnnl_data_type(type()));
 	}
@@ -761,8 +761,11 @@ namespace cum
 	 *                                         Reductions
 	 *------------------------------------------------------------------------------------------------**/
 
-	cumeric_t Tensor::sum()
+	cumeric_t Tensor::sum() const
     {
+		if (is_scalar())
+			return at(Shape(rank(), 0));
+
 		cumeric_t* sum_buff = sycl::malloc_shared<cumeric_t>(1, internal::device(), internal::sycl_context());
     	sum_buff[0] = 0;
 
@@ -799,30 +802,30 @@ namespace cum
     	return result;
     }
 
-	cumeric_t Tensor::mean()
+	cumeric_t Tensor::mean() const
 	{
 		return this->sum() / this->lenght();
 	}
 
-	cumeric_t Tensor::amean()
+	cumeric_t Tensor::amean() const
 	{
 
 	}
 
 
-	cumeric_t Tensor::squaredNorm()
+	cumeric_t Tensor::squaredNorm() const
 	{
 		return this->squared_norm();
 	}
 
-	cumeric_t Tensor::norm()
+	cumeric_t Tensor::norm() const
 	{
 		return static_cast<cumeric_t>(std::sqrt(static_cast<double>(squared_norm())));
 	}
 
 
 
-	cumeric_t Tensor::squared_norm()
+	cumeric_t Tensor::squared_norm() const
 	{
 		Tensor square_tensor(this->shape(), this->type(), this->format());
 		dnnl::eltwise_forward::primitive_desc square_desc(

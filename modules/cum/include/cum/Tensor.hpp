@@ -96,7 +96,7 @@ namespace cum
         layout format() const;
         datatype type() const;
 
-        bool is_scalar();
+        bool is_scalar() const;
         // bool is_vector();
         // bool is_matrix();
         bool has(Axis axis) const;
@@ -162,12 +162,12 @@ namespace cum
 
         /* reductions */
 
-        cumeric_t sum();
-        cumeric_t mean();
-        cumeric_t amean();
-        cumeric_t norm();
-        cumeric_t squaredNorm();
-        cumeric_t squared_norm();
+        cumeric_t sum() const;
+        cumeric_t mean() const;
+        cumeric_t amean() const;
+        cumeric_t norm() const;
+        cumeric_t squaredNorm() const;
+        cumeric_t squared_norm() const;
 
         Tensor colwise_sum();
         Tensor rowwise_sum();
