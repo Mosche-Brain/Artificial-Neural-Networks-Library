@@ -10,7 +10,7 @@ namespace yann::runtime_config
     /*
      * 1 - Training Level
      * 2 - Epoch level
-     * 3 - Sample level
+     * 3 - Batch level
      * 4 - Layer level
      * 5 - Operation level
      */
@@ -39,8 +39,7 @@ namespace yann
         bool fused_kernels;
         bool cached_preactivations;
         bool enable_telemetry;
-
-        // utils::Logger logger;
+        // cum::dim_t batch_axis;
 
         RuntimeConfig();
     public:

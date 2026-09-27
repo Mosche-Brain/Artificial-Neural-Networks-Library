@@ -9,55 +9,8 @@
 
 namespace cum
 {
-
-    // enum class layout : std::uint8_t {
-    //     ANY,
-    //
-    //     A,
-    //     AB,
-    //
-    //     BA,
-    //
-    //     X = A, // Vector
-    //
-    //     NC = AB,
-    //     BC = NC,       // Batch, Channels / Features
-    //
-    //     CN = BA,
-    //
-    //     OI = AB,
-    //     IO = BA,
-    //
-    //     NCHW,
-    //     BCHW = NCHW,   // Batch, Channels, Height, Width
-    //
-    //     NHWC,
-    //     BHWC = NHWC,   // Batch, Height, Width, Channels
-    //
-    //     OIHW,
-    //
-    //     HWIO,
-    //
-    //     NCDHW,
-    //     BCDHW = NCDHW, // Batch, Channels, Depth, Height, Width
-    //
-    //     NDHWC,
-    //     BDHWC = NDHWC, // Batch, Depth, Height, Width, Channels
-    //
-    //     TNC,
-    //     SBC = TNC,     // Sequence, Batch, Channels
-    //     SBE = TNC,     // Sequence, Batch, Embedding
-    //
-    //     NTC,
-    //     BSC = NTC,     // Batch, Sequence, Channels
-    //     BSE = NTC,     // Batch, Sequence, Embedding
-    //
-    //     STRIDED,
-    //     UNDEF
-    // };
-
     /*
-     * @info: This part was derived from one of the oneDNN header
+     * @info: This part was derived from one of the oneDNN headers
      * @source: https://github.com/uxlfoundation/oneDNN/blob/main/include/oneapi/dnnl/dnnl.hpp
      * @license: Apache 2.0
      */

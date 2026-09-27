@@ -2,101 +2,90 @@
  * @author: jaro
  * @name:   backpropagation
  * @file:   tests/backpropagation.cpp
- * @date:   17 September 2026 18:51:22
  */
 
-#include <catch2/catch_test_macros.hpp>
-#include <print>
+#include <vector>
 
-#include <cum/runtime.hpp>
-#include <cum/Matrix.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+
 #include <cum/cum.hpp>
 
 #include <yann/models/layers/Dense.hpp>
 #include <yann/models/layers/Linear.hpp>
 
-#include <yann/models/Sequential.hpp>
-#include <yann/runtime_config.hpp>
-
-#include "loss/MeanSquaredError.hpp"
-#include "optimizers/SGD.hpp"
-
-TEST_CASE("Dense backward")
+namespace
 {
+    void set_values(cum::Tensor& tensor, std::initializer_list<cum::cumeric_t> values)
+    {
+        REQUIRE(tensor.lenght() == static_cast<cum::dim_t>(values.size()));
+        auto value = values.begin();
+        for (cum::dim_t row = 0; row < tensor.rows(); ++row)
+            for (cum::dim_t col = 0; col < tensor.cols(); ++col)
+                tensor.at<cum::cumeric_t>({row, col}) = *value++;
+    }
 
-    cum::cum(cum::DEVICE::GPU);
-
-    cum::Tensor dy(cum::Shape{3, 1}, cum::default_type, cum::layout::IO);
-    std::println("Created dy tensor");
-
-    dy.fill(0.2137);
-    std::println("Filled dy tensor with pope values");
-
-    auto layer = yann::models::layers::Dense::createUnique(3, "relu");
-    std::println("Created Dense layer");
-
-    layer->init_parameters(3, 1);
-
-    cum::Tensor sample({1, 1}, cum::default_type, cum::layout::IO);
-    layer->forward(sample);
-
-
-    yann::runtime_config::set_verbosity(5);
-    cum::Tensor dx = layer->backward(dy);
-    std::println("Backpropagation completed");
-
-    REQUIRE(true);
+    void require_values(const cum::Tensor& tensor, std::initializer_list<cum::cumeric_t> expected)
+    {
+        REQUIRE(tensor.lenght() == static_cast<cum::dim_t>(expected.size()));
+        auto value = expected.begin();
+        for (cum::dim_t row = 0; row < tensor.rows(); ++row)
+            for (cum::dim_t col = 0; col < tensor.cols(); ++col)
+                REQUIRE_THAT(tensor.at<cum::cumeric_t>({row, col}),
+                             Catch::Matchers::WithinAbs(*value++, static_cast<cum::cumeric_t>(1e-5)));
+    }
+    std::vector<yann::Parameter*> set_linear_parameters(yann::models::layers::LayerBase& layer)
+    {
+        std::vector<yann::Parameter*> parameters;
+        layer.collect_parameters(parameters);
+        REQUIRE(parameters.size() == 2);
+        set_values(parameters[0]->values, {1, -2, 0.5, 3});
+        set_values(parameters[1]->values, {0.25, -0.5});
+        return parameters;
+    }
 }
 
-TEST_CASE("Linear backward")
+TEST_CASE("Linear backward computes input and parameter gradients")
 {
-    cum::cum(cum::DEVICE::GPU);
+    cum::cum(cum::DEVICE::CPU);
 
-    cum::Tensor dy(cum::Shape{3, 1}, cum::default_type, cum::layout::IO);
-    std::println("Created dy tensor");
+    yann::models::layers::Linear layer(2);
+    layer.init_parameters(2, 2);
+    const auto parameters = set_linear_parameters(layer);
 
-    dy.fill(0.2137);
-    std::println("Filled dy tensor with pope values");
+    cum::Tensor input({2, 2}, cum::default_type, cum::layout::IO);
+    set_values(input, {2, -1, 1, 4});
+    layer.forward(input);
 
-    auto layer = yann::models::layers::Linear::createUnique(3);
-    std::println("Created Dense layer");
+    cum::Tensor output_gradient({2, 2}, cum::default_type, cum::layout::IO);
+    set_values(output_gradient, {2, -1, 3, 4});
+    const cum::Tensor input_gradient = layer.backward(output_gradient);
 
-    layer->init_parameters(3, 1);
-
-    cum::Tensor sample({1, 1}, cum::default_type, cum::layout::IO);
-    layer->forward(sample);
-
-
-    yann::runtime_config::set_verbosity(5);
-    cum::Tensor dx = layer->backward(dy);
-    std::println("Backpropagation completed");
-
-    REQUIRE(true);
+    require_values(input_gradient, {3.5, 1, 5, 14});
+    require_values(parameters[0]->gradient, {5, -2, 2, 19});
+    require_values(parameters[1]->gradient, {1, 7});
+    cum::decum();
 }
 
-TEST_CASE("Sequential backward")
+TEST_CASE("Dense backward includes the ReLU derivative")
 {
-    cum::cum(cum::DEVICE::GPU);
+    cum::cum(cum::DEVICE::CPU);
 
-    yann::models::Sequential sequential({
-        yann::models::layers::Input::createUnique(2),
-        yann::models::layers::Dense::createUnique(3, "relu"),
-        yann::models::layers::Dense::createUnique(1, "sigmoid"),
-    });
+    yann::models::layers::Dense layer(2, "relu");
+    layer.init_parameters(2, 2);
+    const auto parameters = set_linear_parameters(layer);
 
-    cum::Tensor X(2, 4, cum::default_type, cum::layout::IO);
-    X.fill(0.2137);
+    cum::Tensor input({2, 2}, cum::default_type, cum::layout::IO);
+    set_values(input, {2, -1, 1, 4});
+    layer.forward(input);
 
-    cum::Tensor Y(1, 4, cum::default_type, cum::layout::IO);
-    Y.fill(0.69);
+    cum::Tensor output_gradient({2, 2}, cum::default_type, cum::layout::IO);
+    set_values(output_gradient, {2, -1, 3, 4});
+    const cum::Tensor input_gradient = layer.backward(output_gradient);
 
-    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.01);
-    yann::loss::Loss loss = yann::loss::MeanSquaredError::create();
-
-
-    yann::runtime_config::set_verbosity(5);
-    sequential.fit(X, Y, *loss, *optimizer, 3);
-
-    REQUIRE(true);
+    require_values(input_gradient, {3.5, 2, 5, 12});
+    require_values(parameters[0]->gradient, {4, 2, 2, 19});
+    require_values(parameters[1]->gradient, {2, 7});
+    cum::decum();
 }
 

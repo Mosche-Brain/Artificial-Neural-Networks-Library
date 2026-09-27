@@ -148,7 +148,6 @@ namespace cum
 		  _data(sycl::malloc_shared<std::byte>(
 			  _desc_->size(), internal::device(), internal::sycl_context()))
 	{
-		std::println("copy constructor called");
 		if (!_data)
 			throw std::bad_alloc();
 
@@ -707,12 +706,12 @@ namespace cum
 	{
 		if (is_scalar())
 		{
-			std::println("is_scalar");
+			// std::println("is_scalar");
 			return *this;
 		}
 
 		if(dims() != 2)
-			throw std::invalid_argument("transpose requires a two-dimensional tensor");
+			throw std::invalid_argument("transposition requires a two-dimensional tensor");
 
 		layout format = this->format() == layout::BA ? layout::AB : layout::BA;
 
@@ -744,8 +743,8 @@ namespace cum
 
 		std::swap(new_shape[0], new_shape[1]);
 
-		std::println("new: [{}, {}]", new_shape[0], new_shape[1]);
-		std::println("old: [{}, {}]", _desc_->shape()[0], _desc_->shape()[1]);
+		// std::println("new: [{}, {}]", new_shape[0], new_shape[1]);
+		// std::println("old: [{}, {}]", _desc_->shape()[0], _desc_->shape()[1]);
 
 		_desc_->reshape_in_place(new_shape);
 
@@ -907,9 +906,7 @@ namespace cum
 
 	cumeric_t Tensor::squared_norm()
 	{
-		std::print("called squared_norm function");
 		Tensor square_tensor(this->shape(), this->type(), this->format());
-		std::println("created square_tensor");
 		dnnl::eltwise_forward::primitive_desc square_desc(
 			internal::engine(),
 			dnnl::prop_kind::forward,
@@ -917,7 +914,6 @@ namespace cum
 			_desc_->handle().desc,
 			square_tensor._desc_->handle().desc
 		);
-		std::println("created square_desc");
 		dnnl::eltwise_forward(square_desc).execute(
 			internal::stream(),
 			{
@@ -925,31 +921,23 @@ namespace cum
 				{DNNL_ARG_DST, square_tensor._memr_->handle().memory}
 			}
 		);
-		std::println("executed square_desc");
+
 		const Shape reduced_shape(shape().size(), 1);
 		layout reduced_layout = default_layout_from_rank(rank());
-		// switch (rank())
-		// {
-		// 	case 1: reduced_layout = layout::A; break;
-		// 	case 2: reduced_layout = layout::AB; break;
-		// 	case 3: reduced_layout = layout::ABC; break;
-		// 	case 4: reduced_layout = layout::ABCD; break;
-		// 	case 5: reduced_layout = layout::ABCDE; break;
-		// 	default: throw std::invalid_argument("unsupported tensor rank");
-		// }
 
 		dnnl::memory::desc result_desc(
 			reduced_shape,
 			dnnl_data_type(default_type),
 			dnnl_format_tag(reduced_layout)
 		);
-		std::println("created result_desc");
+
+
 		cumeric_t* result = sycl::malloc_shared<cumeric_t>(
 			1,
 			internal::device(),
 			internal::sycl_context()
 		);
-		std::println("created result");
+
 		dnnl::memory result_memory = dnnl::sycl_interop::make_memory(
 			result_desc,
 			internal::engine(),
@@ -958,22 +946,11 @@ namespace cum
 		);
 		if (lenght() == 1)
 		{
-			std::println("scalar trace");
-			// internal::stream().wait();
-			// internal::queue().memcpy(
-			// 	result,
-			// 	square_tensor.data(),
-			// 	sizeof(cumeric_t)
-			// ).wait();
-			std::println("copied scalar");
 			const cumeric_t value = square_tensor.get_value(Shape(square_tensor.rank(), 0));
-			std::println(" dziewczynki");
-			// const cumeric_t value = *result;
-			runtime::sync();
+			runtime::sync(); // global synchronization ⚠️
 			sycl::free(result, internal::sycl_context());
 			return value;
 		}
-		std::println("tensor trace");
 
 		dnnl::reduction::primitive_desc reduction_desc(
 			internal::engine(),
@@ -1089,7 +1066,7 @@ namespace cum
 	Tensor Tensor::elementwise(functions::function_id function) const
 	{
 		Tensor result = Tensor(shape(), type(), format());
-		neural_primitives::eltwise(result._memr_->handle(), result._desc_->handle(), function, neural_primitives::prop_kind::forward);
+		neural_primitives::eltwise(result, *this, function, neural_primitives::prop_kind::forward);
 		return result;
 	}
 
@@ -1103,7 +1080,8 @@ namespace cum
 	Tensor Tensor::elementwise_diff(functions::function_id function) const
 	{
 		Tensor result = Tensor(shape(), type(), format());
-		neural_primitives::eltwise_diff(result._memr_->handle(), result._desc_->handle(), function, neural_primitives::prop_kind::backward);
+		result.fill(1);
+		neural_primitives::eltwise_diff(result, *this, function, neural_primitives::prop_kind::backward);
 		return result;
 	}
 

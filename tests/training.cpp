@@ -15,6 +15,7 @@
 #include <yann/models/Sequential.hpp>
 #include <yann/runtime_config.hpp>
 
+#include "logging/LossTracker.hpp"
 #include "loss/MeanSquaredError.hpp"
 #include "optimizers/SGD.hpp"
 
@@ -32,16 +33,21 @@ TEST_CASE("MLP binary classifier for XOR")
     X.at({0, 0}) = 0; X.at({1, 0}) = 0;;
     X.at({0, 1}) = 0; X.at({1, 1}) = 1;
     X.at({0, 2}) = 1; X.at({1, 2}) = 0;
-    X.at({1, 1}) = 1; X.at({0, 3}) = 1;
+    X.at({0, 3}) = 1; X.at({1, 3}) = 1;
 
     cum::Tensor Y(1, 4, cum::default_type, cum::layout::AB);
-    Y.at({0, 0}) = 0; Y.at({1, 0}) = 1;
-    Y.at({0, 1}) = 1; Y.at({1, 1}) = 0;
+    Y.at({0, 0}) = 0;
+    Y.at({0, 1}) = 1;
+    Y.at({0, 2}) = 1;
+    Y.at({0, 3}) = 0;
 
-    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.01);
+    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.1);
     yann::loss::Loss loss = yann::loss::MeanSquaredError::create();
 
-    yann::runtime_config::set_verbosity(1);
+    // yann::logging::LossTracker loss_tracker = yann::logging::LossTracker();
+    // std::array<yann::logging::ITrainingCallback*, 2> callbacks = { &loss_tracker };
+
+    yann::runtime_config::set_verbosity(2);
 
     cum::Tensor Y_pred = sequential.forward(X);
 
@@ -49,7 +55,7 @@ TEST_CASE("MLP binary classifier for XOR")
         std::println("[{}, {}] -> {}", X(0, i), X(1, i), Y_pred(i, 0));
 
 
-    sequential.fit(X, Y, *loss, *optimizer, 300);
+    sequential.fit(X, Y, *loss, *optimizer, 100, 4);
     std::println("---------------------------------------");
     cum::Tensor Y_pred_2 = sequential.forward(X);
 

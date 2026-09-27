@@ -75,7 +75,7 @@ namespace yann::models::layers
         virtual const cum::Shape& output_shape() const;
 
         virtual cum::Tensor forward(const cum::Tensor& input) = 0;
-        virtual cum::Tensor backward(const cum::Tensor& input) = 0;
+        virtual cum::Tensor backward(const cum::Tensor& gradient) = 0;
 
         virtual void collect_parameters(std::vector<Parameter*>& params) = 0;
 
