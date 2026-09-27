@@ -1,7 +1,7 @@
 ![C++23](https://img.shields.io/badge/C%2B%2B-23-blue)
-![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Czuowuek-SOS/Artificial-Neural-Networks-Library/graphs/commit-activity)
-
-# YANN - Yet Another Neural Networks library
+![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Czuowuek-SOS/Artificial-Neural-Networks-Library/graphs/commit-activity)
+# Yet Another Neural Networks library
 
 A lightweight, modular minimalistic and easy to use C++ library for machine learning
 
@@ -17,6 +17,8 @@ A lightweight, modular minimalistic and easy to use C++ library for machine lear
 * I used very poor english due to sleep quality.
 * Library is currently under active development, there is no production ready realase (first is planned for 7 oct 2026)
 
+# Architecture
+
 ## ⬇️ Installaction and building process
 
 #### Requirements
@@ -28,10 +30,7 @@ A lightweight, modular minimalistic and easy to use C++ library for machine lear
 * ~~At least one sexual crime in lifetime~~
 
 #### Notes
-* Supported numeric types
-  `CUM_USE_FP64` `CUM_USE_FP32` `CUM_USE_FP16` ~~`CUM_USE_BF16`~~ ~~`CUM_USE_INT8`~~
-* Currently supported backends `CUM_USE_MKL`
-* BF16 and Q8 may not compile properly
+* I deleted this section due to the latest changes, I must rewrite significant part of this document.
 
 ### 🐧 Linux and GNU/Linux
 ```bash
@@ -107,9 +106,15 @@ int main()
     A.fill(67._c);
     B.fill(0.2137_c);
     
-    cum::Tensor C = A * B;
+    cum::Tensor C = A * B; // matmul on the last two dims
     
-    // You can try to print the result somehow
+    cum::cumeric_t scalar = C.at({6, 7, 1});
+    
+    B = A.multiply(B) // elementwise multiplication
+    
+    A = B.square(); // elementwise x^2
+    
+    // You can try to print the results, it really works
 
     return 67;
 }
@@ -118,35 +123,54 @@ int main()
 ### Creating and fitting sequential model
 * In constructor of `yann::models::Sequential` class your can put initializer list filled with fabric methods of various layers types.
 ```cpp
+#include <print>
+
 #include <yann/models/Sequential.hpp>
 
 using namespace yann::models;
 
 int main()
 {
-    int input_layer_size = 2;
-    int hidden_layer_size = 69;
-    int outut_layer_size = 1;
+    cum::cum(cum::DEVICE::GPU); // In this case CPU will be much faster
+
     Sequential model({
-        layers::Input::createUnique(input_layer_size),
-        layers::Dense::createUnique(hidden_layer_size, "relu"),
-        layers::Dense::createUnique(outut_layer_size, "atan")
+        layers::Input::createUnique(2),
+        layers::Dense::createUnique(3, "tanh"),
+        layers::Dense::createUnique(outut_layer_size, "sigmoid")
     }); 
 
-    int number_of_samples = 4;
-    cum::Matrix x_train(number_of_samples, input_layer_size);
-    cum::Matrix y_train(number_of_samples, input_layer_size);
+    cum::Tensor X(2, 4);
+    X.at({0, 0}) = 0; X.at({1, 0}) = 0;;
+    X.at({0, 1}) = 0; X.at({1, 1}) = 1;
+    X.at({0, 2}) = 1; X.at({1, 2}) = 0;
+    X.at({0, 3}) = 1; X.at({1, 3}) = 1;
 
-    /* Fill training data here */
+    cum::Tensor Y(1, 4);
+    Y.at({0, 0}) = 0;
+    Y.at({0, 1}) = 1;
+    Y.at({0, 2}) = 1;
+    Y.at({0, 3}) = 0;
 
     cum::cumeric_t learning_rate = 0.1_c;
-    cum::dim_t epochs = 200;
+    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.1);
+    yann::loss::Loss loss = yann::loss::BinaryCrossEntropy::create();
 
-    yann::loss::Loss loss = yann::loss::MeanSquaredError::create();
-    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(learning_rate);
+    yann::runtime_config::set_verbosity(1);
+
+    cum::Tensor Y_pred = model.forward(X);
+
+    for (int i = 0 ; i < X.cols() ; i++)
+        std::println("[{}, {}] -> {}", X(0, i), X(1, i), Y_pred(0, i));
+
+    cum::dim_t epochs = 500;
+    cum::dim_t batch = 4;
+    model.fit(X, Y, *loss, *optimizer, epochs, batch);
+    std::println("---------------------------------------");
+    cum::Tensor Y_pred_2 = model.forward(X);
     
-    model.fit(x_train, y_train, *loss, *optimizer, epochs);
-    
+    for (int i = 0 ; i < X.cols() ; i++)
+        std::println("[{}, {}] -> {}", X(0, i), X(1, i), Y_pred_2(0, i));
+
     return 0;
 }
 ```
@@ -160,17 +184,17 @@ using namespace yann::models;
 
 int main()
 {
-    int perceptron_input_size = 2;
+    cum::dim_t perceptron_input_size = 2;
     Perceptron model(perceptron_input_size, "gelu");
 
-    int number_of_samples = 2137;
+    cum::dim_t number_of_samples = 2137;
     cum::Matrix x_train(number_of_samples, perceptron_input_size);
     cum::Vector y_train(number_of_samples);
 
     /* Filling training data */
 
     cum::cumeric_t learning_rate = 0.1_c;
-    int epochs = 200;
+    cum::dim_t epochs = 200;
 
     model.fit(x_train, y_train, learning_rate, epochs);
     return 0;
@@ -183,32 +207,41 @@ Full documentation will be avaible [here](brain.mosche.dev/docs)
 
 ## 🔨 Features
 
-* ✅ Sequential models
+* ✅ Sequential neural networks
 * ✅ Dense layers
-* ✅ Polymorphic optimizers and loss functions
+* ✅ Perceptrons
+* ✅ Reasonable design
 * ✅ Working backward pass (Yes, this is insane)
-* ✅ Compile time precision selections
 * ✅ FP16 support
+* ✅ Callbacks system
 * ✅ Runtime device selection
 * ✅ Multicore CPU acceleration
 * ✅ GPU acceleration
-* ✅ Templates-free math framework
+* ✅ Whole math framework
 * ✅ OneAPI support
-* ✅ Compiling code (finally)
-* ✅ N-dimensional Tensors *(almost)*
-* ⚠️ BF16 support
+* ✅ Compiling code 
+* ✅ ND Tensors
+* ⚠️ BF16 support (probably works now)
+* ⚠️ int8&uint8 support (probably)
+* ⚠️ Reasonable unit tests (maybe)
 * ⚠️ Fused kernels for neural networks
 * ⚠️ Dynamic computational graphs
 * ⚠️ Convolutional layers
 * ⚠️ Compile time code traces pruning
-* ⚠️ Reasonable unit tests
 * ⚠️ [Dedicated graphical envionment](https://github.com/Mosche-Brain/MLStudio) (work in progress)
 * ❌ CUDA support
 * ❌ ROCm support
-* ❌ BF16, Q8 support
-* ❌ Python binding
+* ❌ Embbeded version (for xtensa or arm bare metal)
+* ❌ [Python binding](https://pypi.org/project/cumpy/0.1.0/)
 * ❌ C binding 
+* ❌ FP8
+* ❌ Safetensors format
 * ❌ Recurrent Neural Networks
+* ❌ Pooling layers
+* ❌ Normalization layers
+* ❌ Hoppfield networks
+* ❌ SVM's
+* ❌ RL Stuff
 * ❌ Transformers
 * ❌ Wielogłowicowa uwaga
 * ❌ Built in telemetry
@@ -235,4 +268,4 @@ Full documentation will be avaible [here](brain.mosche.dev/docs)
 * Name refactoring tasks
 * Generating boilerplate
 * Basic inline code autocompletion from free github copilot credits
-* I also spend 0.05$ for Grok API tokens
+* I also spend ~~0.05$~~ 2.67\$ for Grok and Kimi tokens

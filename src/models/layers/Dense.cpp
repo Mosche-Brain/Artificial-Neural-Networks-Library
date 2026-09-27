@@ -109,7 +109,7 @@ namespace yann::models::layers
                 // todo: implement this
                 return cache.a;
             }
-            else
+            else    
             {
                 throw std::runtime_error("YANN_DENSE_FORWARD_FUSED_PATH weren't compiled");
             }
@@ -128,7 +128,6 @@ namespace yann::models::layers
 
                 cache.a = cache.z.elementwise(activation.name);
                 YANN_LOG(3, "forward completed", "");
-                cache.a = cache.z.elementwise(activation.name);
 
                 return cache.a;
             }

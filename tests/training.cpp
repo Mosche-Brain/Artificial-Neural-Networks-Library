@@ -5,24 +5,20 @@
 #include <catch2/catch_test_macros.hpp>
 #include <print>
 
-#include <cum/runtime.hpp>
 #include <cum/Matrix.hpp>
 #include <cum/cum.hpp>
 
 #include <yann/models/layers/Dense.hpp>
-#include <yann/models/layers/Linear.hpp>
 
 #include <yann/models/Sequential.hpp>
 #include <yann/runtime_config.hpp>
 
-#include "logging/LossTracker.hpp"
-#include "loss/BinaryCrossEntropy.hpp"
-#include "loss/MeanSquaredError.hpp"
-#include "optimizers/SGD.hpp"
+#include <yann/loss/BinaryCrossEntropy.hpp>
+#include <yann/optimizers/SGD.hpp>
 
 TEST_CASE("MLP binary classifier for XOR")
 {
-    cum::cum(cum::DEVICE::CPU);
+    cum::cum(cum::DEVICE::CPU); //
 
     yann::models::Sequential sequential({
         yann::models::layers::Input::createUnique(2),
@@ -66,3 +62,8 @@ TEST_CASE("MLP binary classifier for XOR")
     REQUIRE(static_cast<int>(std::round(Y_pred_2(0, 3))) == 0);
 }
 
+TEST_CASE("MLP reggresion")
+{
+    // todo
+    REQUIRE(true);
+}
