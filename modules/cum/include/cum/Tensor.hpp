@@ -165,7 +165,7 @@ namespace cum
         cumeric_t sum();
         cumeric_t mean();
         cumeric_t amean();
-
+        cumeric_t norm();
         cumeric_t squaredNorm();
         cumeric_t squared_norm();
 
@@ -193,6 +193,9 @@ namespace cum
 
         Tensor square() const;
         Tensor& square_in_place();
+
+        Tensor abs() const;
+        Tensor& abs_in_place();
 
         Tensor clamp(cumeric_t min, cumeric_t max) const;
         Tensor& clamp_in_place(cumeric_t min, cumeric_t max);

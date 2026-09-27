@@ -31,29 +31,15 @@ namespace yann::loss
                     throw std::invalid_argument("binary_cross_entropy: result and target dimensions must match");
             }
 
-            const cum::cumeric_t batches = target.shape()[1];
+            const cum::cumeric_t batch_size = target.shape()[1];
 
-            const cum::cumeric_t eps = 1e-5_c; // epsilon nie powinien być hardcoded wewnątrz funkcji, tylko raczej być globalnym makrem lub zmienną, ale nie dałem to na potrzeby debug
+            const cum::cumeric_t eps = 1e-6_c; // epsilon nie powinien być hardcoded wewnątrz funkcji, tylko raczej być globalnym makrem lub zmienną, ale nie dałem to na potrzeby debug
 
             const cum::Tensor P = predicted.clamp(eps, 1 - eps);
 
             loss.value = (-1 * (target.multiply(P.log()) + (1 - target).multiply((1 - P).log()))).mean();
-            loss.gradient = ((1 - target) / (1 - P) - target / P) / batches;
+            loss.gradient = ((1 - target) / (1 - P) - target / P) / batch_size;
 
-            // cum::Shape indices(shape.size(), 0);
-            // for (cum::dim_t axis = 0; axis < shape.size(); axis++)
-            // {
-            // for (cum::dim_t n = shape[axis] ; indices[axis] < n; indices[axis]++)
-            // {
-            // const cum::cumeric_t y = target.at(indices);
-            // const cum::cumeric_t p = cum::functions::various::clamp(predicted.at(indices), eps, 1 - eps);
-            //
-            //
-            // loss.value += -(y * cum::functions::exponential::log(p) + (1 - y) * cum::functions::exponential::log(1 - p));
-            // loss.gradient.at(indices) = ((1 - y) / (1 - p) - y / p);
-            // }
-            // indices[axis] = 0;
-            // }
         }
     }
 

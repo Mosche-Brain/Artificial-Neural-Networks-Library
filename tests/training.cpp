@@ -26,7 +26,7 @@ TEST_CASE("MLP binary classifier for XOR")
 
     yann::models::Sequential sequential({
         yann::models::layers::Input::createUnique(2),
-        yann::models::layers::Dense::createUnique(2, "tanh"),
+        yann::models::layers::Dense::createUnique(3, "tanh"),
         yann::models::layers::Dense::createUnique(1, "sigmoid"),
     });
 
@@ -48,7 +48,7 @@ TEST_CASE("MLP binary classifier for XOR")
     // yann::logging::LossTracker loss_tracker = yann::logging::LossTracker();
     // std::array<yann::logging::ITrainingCallback*, 2> callbacks = { &loss_tracker };
 
-    yann::runtime_config::set_verbosity(1);
+    yann::runtime_config::set_verbosity(2);
 
     cum::Tensor Y_pred = sequential.forward(X);
 
@@ -56,7 +56,7 @@ TEST_CASE("MLP binary classifier for XOR")
         std::println("[{}, {}] -> {}", X(0, i), X(1, i), Y_pred(i, 0));
 
 
-    sequential.fit(X, Y, *loss, *optimizer, 100, 4);
+    sequential.fit(X, Y, *loss, *optimizer, 1000, 4);
     std::println("---------------------------------------");
     cum::Tensor Y_pred_2 = sequential.forward(X);
 

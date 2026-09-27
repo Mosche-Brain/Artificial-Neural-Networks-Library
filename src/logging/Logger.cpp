@@ -35,7 +35,11 @@ namespace yann::logging
     void Logger::log(unsigned char verbose_level, const std::string& fmt) const // verbose_level tells in wchich verbosity level the message should be logged
     {
         if (verbose_level <= verbosity_level)
-           std::println("{}", fmt);
+        {
+            for (unsigned char i = 0 ; i < verbose_level ; i++)
+                std::print("\t");
+            std::println("{}", fmt);
+        }
     }
 
 

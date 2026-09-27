@@ -815,97 +815,12 @@ namespace cum
 		return this->squared_norm();
 	}
 
-#if 0
-	cumeric_t Tensor::squared_norm() // previous oneDNN implementation
+	cumeric_t Tensor::norm()
 	{
-		// Internal cache has 2048 * 2048 * cumeric_t size bytes
-		Tensor square_tensor(this->shape(), this->type(), this->format());
-
-		dnnl::eltwise_forward::primitive_desc square_desc(
-			internal::engine(),
-			dnnl::prop_kind::forward,
-			dnnl::algorithm::eltwise_square,
-			this->descriptor()->handle().desc,
-			square_tensor.descriptor()->handle().desc
-		);
-
-		dnnl::eltwise_forward(square_desc).execute(
-			internal::stream(),
-			{
-				{ DNNL_ARG_SRC, _memr_->handle().memory },
-				{ DNNL_ARG_DST, square_tensor._memr_->handle().memory }
-			}
-		);
-		internal::stream().wait();
-
-		bool is_scalar = true;
-		for (dim_t dim : square_tensor.shape())
-			if (dim != 1)
-				is_scalar = false;
-
-		cumeric_t result;
-		if (is_scalar)
-		{
-			cumeric_t* host_value = sycl::malloc_shared<cumeric_t>(
-				1,
-				internal::device(),
-				internal::sycl_context()
-			);
-			internal::queue().memcpy(
-				host_value,
-				square_tensor.data(),
-				sizeof(cumeric_t)
-			).wait();
-			result = *host_value;
-			sycl::free(host_value, internal::sycl_context());
-		}
-		else
-		{
-			cumeric_t* sum_buff = sycl::malloc_shared<cumeric_t>(
-				1,
-				internal::device(),
-				internal::sycl_context()
-			);
-			sum_buff[0] = 0;
-
-			dnnl::memory::desc sum_desc {
-				Shape(this->rank(), 1),
-				dnnl_data_type(default_type),
-				dnnl_format_tag(format())
-			};
-
-			dnnl::memory sum_memory = dnnl::sycl_interop::make_memory(
-				sum_desc,
-				internal::engine(),
-				dnnl::sycl_interop::memory_kind::usm,
-				sum_buff
-			);
-
-			dnnl::reduction::primitive_desc reduction_desc(
-				internal::engine(),
-				dnnl::algorithm::reduction_sum,
-				square_tensor.descriptor()->handle().desc,
-				sum_desc,
-				0.0f,
-				0.0f
-			);
-
-			dnnl::reduction(reduction_desc).execute(
-				internal::stream(),
-				{
-					{DNNL_ARG_SRC, square_tensor.memory()->handle().memory},
-					{DNNL_ARG_DST, sum_memory}
-				}
-			);
-			internal::stream().wait();
-
-			result = sum_buff[0];
-			sycl::free(sum_buff, internal::sycl_context());
-		}
-
-		return result;
+		return static_cast<cumeric_t>(std::sqrt(static_cast<double>(squared_norm())));
 	}
-#endif
+
+
 
 	cumeric_t Tensor::squared_norm()
 	{
@@ -1206,6 +1121,21 @@ namespace cum
 	Tensor& Tensor::square_in_place()
 	{
     	neural_primitives::square(_memr_->handle(), _desc_->handle());
+    	return *this;
+	}
+
+	Tensor Tensor::abs() const
+	{
+		Tensor result = *this;
+
+    	neural_primitives::abs(result._memr_->handle(), _memr_->handle(), result._desc_->handle(), _desc_->handle());
+
+    	return result;
+	}
+
+	Tensor& Tensor::abs_in_place()
+	{
+    	neural_primitives::abs(_memr_->handle(), _desc_->handle());
     	return *this;
 	}
 

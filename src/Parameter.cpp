@@ -39,7 +39,7 @@ namespace yann
 
     Parameter Parameter::Uniform(const cum::dim_t rows, const cum::dim_t cols)
     {
-        constexpr cum::cumeric_t ampl = 0.1;
+        constexpr cum::cumeric_t ampl = 0.5;
 
         Parameter param;
 
@@ -52,7 +52,7 @@ namespace yann
 
     Parameter Parameter::Uniform(const cum::Shape& shape) // +-0.1
     {
-        constexpr cum::cumeric_t ampl = 0.1;
+        constexpr cum::cumeric_t ampl = 0.2;
 
         Parameter param;
 

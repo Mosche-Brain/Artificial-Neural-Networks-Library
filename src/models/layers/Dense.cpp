@@ -121,7 +121,7 @@ namespace yann::models::layers
                 throw std::runtime_error("YANN_DENSE_BACKWARD_FUSED_PATH weren't compiled");
             }
         }
-        else
+        else // ta ścieżka jest używana
         {
             if constexpr(YANN_DENSE_BACKWARD_REFERENCE_PATH) // We may move transpositions to compute kernel, but for now it's fine
             {

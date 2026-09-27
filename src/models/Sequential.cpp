@@ -1,5 +1,3 @@
-#include "LayerType.hpp"
-#include <cum/Matrix.hpp>
 #include <stdexcept>
 #include <ranges>
 #include <print>
@@ -11,10 +9,16 @@
 #include "utils/formating.hpp"
 #endif
 
+#include "yann/models/layers/LayerType.hpp"
+
 #include "yann/loss/LossBase.hpp"
 #include "yann/runtime_config.hpp"
 
 #include "yann/models/Sequential.hpp"
+
+/* TODO:
+ *  Dobrze było by ustalić sposób na niesienie informacji o tym, która oś tensora jest batchem, można by to zrobić jako globalną zmienną w singletonowym runtime_config, chociaż to było by dziwne.
+ */
 
 namespace yann::models
 {
@@ -64,10 +68,7 @@ namespace yann::models
 
     cum::Tensor Sequential::forward(const cum::Tensor& input)
     {
-        // cum::Tensor result = topology.front()->forward(input);
-        // std::println("Sequential::forward");
-        // std::println("format przed wejsciem: {}", static_cast<unsigned char>(input.format()));
-        cum::Tensor result = input; // This work during forward pass, but crashes while calling it from fit method
+        cum::Tensor result = input;
         // std::println("ok");
         for (auto [index, layer] : topology | std::views::enumerate)
         {
@@ -93,13 +94,13 @@ namespace yann::models
             cum::Tensor next_gradient = layer->backward(curr_gradient);
 
             curr_gradient = std::move(next_gradient);
-            YANN_LOG(2, "grad mean: {}", curr_gradient.mean());
+            YANN_LOG(2, "||dL/dX||: {},\t mean|dL/dX|: {}", curr_gradient.norm(), curr_gradient.abs().mean());
         }
     }
 
     /* TODO: (obsolete)
-     * Przenieść budowaniu batcht do wyspecjalizowanej funkcji/klasy
-     * Dodać przeładowanie pozwalające na przyjęcie zamiast X i Y zbioru batchy
+     *  budowaniu batchy do wyspecjalizowanej funkcji/klasy
+     *  Dodać przeładowanie pozwalające na przyjęcie zamiast X i Y zbioru batchy
      */
 
     void Sequential::fit(const cum::Tensor& X, const cum::Tensor& Y, loss::LossBase& loss, optimizers::OptimizerBase& optimizer, cum::dim_t epochs, cum::dim_t batch_size, std::span<logging::ITrainingCallback*> callbacks)
@@ -122,11 +123,10 @@ namespace yann::models
         cum::dim_t batch = 0;
 
         logging::TrainingContext ctx(*this, mean_loss, epoch, batch);
-        for( ; epoch < epochs ; epoch++) // I accidentally deleted for statement somehow
+        for( ; epoch < epochs ; epoch++)
         {
             cum::cummulative_t total_loss = 0;
 
-            // YANN_LOG(1, "Epoch {}", epoch);
 
             cum::Shape input_shape = topology.front()->input_shape();
             cum::Shape output_shape = topology.back()->output_shape();
@@ -135,44 +135,40 @@ namespace yann::models
             input_shape.push_back(batch_size);
             output_shape.push_back(batch_size);
 
-            // std::println("x shape: [");
 
-            // Mamy tutaj kopie, później można to na referencje zmiennić dla ograniczenia lokacji
             cum::Tensor x(input_shape, cum::default_type);
             cum::Tensor y(output_shape, cum::default_type);
 
-            cum::dim_t n = X.cols();
-            for (batch = 0; batch < n; batch += batch_size) // aktualnie liczba próbek musi być podzielna przez rozmiar batcha, to do naprawy
+            cum::dim_t n = X.cols(); // assuming batch last logic layout, and 2D tensors
+            cum::dim_t batches = n / batch_size;
+            n % batch_size > 0 ? batches++ : NULL;
+            for (batch = 0; batch < batches; batch++)
             {
-                // cum::dim_t current_batch_size = batched ? batches[batch].size : 1;
-                // YANN_LOG(2, "{} batch, {} samples", batch, current_batch_size);
-
-                YANN_LOG(2, "batch: {}", batch);
-
-                // x = X.col(batch);
-                // x = X.col(batch);
+                cum::dim_t num_samples = (batch + 1) * batch_size > n ? n % batch_size : batch_size;
+                cum::dim_t sample_idx = batch * batch_size;
+                YANN_LOG(3, "batch: {}", batch);
 
                 cum::Shape input_batch_shape = input_shape;
-                input_batch_shape.at(input_batch_shape.size() - 1) = batch_size;
+                input_batch_shape.at(input_batch_shape.size() - 1) = num_samples;
 
                 cum::Shape input_batch_indices(input_shape.size(), 0);
-                input_batch_indices[batch_axis] = batch;
+                input_batch_indices[batch_axis] = sample_idx;
 
                 x = X.slice(input_batch_indices, input_batch_shape);
-                YANN_LOG(2, "X: Sample: {}x{}", x.rows(), x.cols());
+                YANN_LOG(3, "X: Sample: {}x{}", x.rows(), x.cols());
 
                 cum::Shape target_batch_shape = output_shape;
-                target_batch_shape.at(target_batch_shape.size() - 1) = batch_size;
+                target_batch_shape.at(target_batch_shape.size() - 1) = num_samples;
 
                 cum::Shape target_batch_indices(target_batch_shape.size(), 0);
-                target_batch_indices.at(batch_axis) = batch;
+                target_batch_indices.at(batch_axis) = sample_idx;
 
                 y = Y.slice(target_batch_indices, target_batch_shape);
-                YANN_LOG(2, "Y: Sample: {}x{}", y.rows(), y.cols());
+                YANN_LOG(3, "Y: Sample: {}x{}", y.rows(), y.cols());
 
                 cum::runtime::sync();
                 cum::Tensor results = this->forward(x);
-                YANN_LOG(2, "results: {}x{}", results.rows(), results.cols() );
+                YANN_LOG(3, "results: {}x{}", results.rows(), results.cols() );
 
                 loss.compute(results, y);
 
@@ -183,13 +179,12 @@ namespace yann::models
                 for (logging::ITrainingCallback*&  callback : callbacks)
                     callback->afterBackprop(ctx);
 
-                // optimizer.scale_grads(params, 1 / static_cast<cum::cumeric_t>(batch_size));
                 optimizer.step(params); // zerowanie gradientów jest dokonywanie niejawnie w kroku optymalizatora
                 total_loss += error.value;
             }
 
             mean_loss_prev = mean_loss;
-            mean_loss = total_loss / static_cast<cum::cumeric_t>(batch_size);
+            mean_loss = total_loss / static_cast<cum::cumeric_t>(batches);
 
             cum::cumeric_t diff_loss = mean_loss - mean_loss_prev;
             YANN_LOG(1, "Epoch: {}\t| Loss: {}\t| dL: {}", epoch, mean_loss, diff_loss);
