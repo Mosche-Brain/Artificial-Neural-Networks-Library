@@ -16,6 +16,7 @@
 #include <yann/runtime_config.hpp>
 
 #include "logging/LossTracker.hpp"
+#include "loss/BinaryCrossEntropy.hpp"
 #include "loss/MeanSquaredError.hpp"
 #include "optimizers/SGD.hpp"
 
@@ -25,7 +26,7 @@ TEST_CASE("MLP binary classifier for XOR")
 
     yann::models::Sequential sequential({
         yann::models::layers::Input::createUnique(2),
-        yann::models::layers::Dense::createUnique(3, "sigmoid"),
+        yann::models::layers::Dense::createUnique(2, "tanh"),
         yann::models::layers::Dense::createUnique(1, "sigmoid"),
     });
 
@@ -42,12 +43,12 @@ TEST_CASE("MLP binary classifier for XOR")
     Y.at({0, 3}) = 0;
 
     yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.1);
-    yann::loss::Loss loss = yann::loss::MeanSquaredError::create();
+    yann::loss::Loss loss = yann::loss::BinaryCrossEntropy::create();
 
     // yann::logging::LossTracker loss_tracker = yann::logging::LossTracker();
     // std::array<yann::logging::ITrainingCallback*, 2> callbacks = { &loss_tracker };
 
-    yann::runtime_config::set_verbosity(2);
+    yann::runtime_config::set_verbosity(1);
 
     cum::Tensor Y_pred = sequential.forward(X);
 

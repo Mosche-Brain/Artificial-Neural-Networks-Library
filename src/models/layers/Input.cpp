@@ -26,7 +26,7 @@ namespace yann::models::layers
         // this->weights = Parameter::Ones(layerSize, 1);
 
         // this->biases  = Parameter::Zeros(layerSize, 1);
-        this->input_shape_ = cum::Shape{layerSize, 1};
+        this->input_shape_ = cum::Shape{layerSize};
         this->_layerSize_   = layerSize;
         this->_layerType_   = LayerType::Input;
         this->_initialized_ = true;

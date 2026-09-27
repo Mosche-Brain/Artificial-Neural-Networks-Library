@@ -318,6 +318,127 @@ namespace cum::neural_primitives
         return square(src, src, desc, desc);
     }
 
+    __event__ exp(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc)
+    {
+        dnnl::eltwise_forward::primitive_desc primitive_desc {
+            internal::engine(),
+            dnnl::prop_kind::forward_inference,
+            dnnl::algorithm::eltwise_exp,
+            src_desc.desc,
+            dst_desc.desc
+        };
+
+        dnnl::primitive primitive = dnnl::eltwise_forward(primitive_desc);
+
+        sycl::event event = dnnl::sycl_interop::execute(
+            primitive,
+            internal::stream(),
+            {
+                { DNNL_ARG_SRC, src.memory },
+                { DNNL_ARG_DST, dst.memory }
+            }
+        );
+
+        internal::stream().wait();
+        return detail::event_handler::create(std::move(event));
+    }
+
+    __event__ exp(handles::__memory__& src, const handles::__desc__& desc)
+    {
+        return exp(src, src, desc, desc);
+    }
+
+    __event__ log(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc)
+    {
+        dnnl::eltwise_forward::primitive_desc primitive_desc {
+            internal::engine(),
+            dnnl::prop_kind::forward_inference,
+            dnnl::algorithm::eltwise_log,
+            src_desc.desc,
+            dst_desc.desc
+        };
+
+        dnnl::primitive primitive = dnnl::eltwise_forward(primitive_desc);
+
+        sycl::event event = dnnl::sycl_interop::execute(
+            primitive,
+            internal::stream(),
+            {
+                { DNNL_ARG_SRC, src.memory },
+                { DNNL_ARG_DST, dst.memory }
+            }
+        );
+
+        internal::stream().wait();
+        return detail::event_handler::create(std::move(event));
+    }
+
+    __event__ log(handles::__memory__& src, const handles::__desc__& desc)
+    {
+        return log(src, src, desc, desc);
+    }
+
+    __event__ abs(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc)
+    {
+        dnnl::eltwise_forward::primitive_desc primitive_desc {
+            internal::engine(),
+            dnnl::prop_kind::forward_inference,
+            dnnl::algorithm::eltwise_abs,
+            src_desc.desc,
+            dst_desc.desc
+        };
+
+        dnnl::primitive primitive = dnnl::eltwise_forward(primitive_desc);
+
+        sycl::event event = dnnl::sycl_interop::execute(
+            primitive,
+            internal::stream(),
+            {
+                { DNNL_ARG_SRC, src.memory },
+                { DNNL_ARG_DST, dst.memory }
+            }
+        );
+
+        internal::stream().wait();
+        return detail::event_handler::create(std::move(event));
+    }
+
+    __event__ abs(handles::__memory__& src, const handles::__desc__& desc)
+    {
+        return abs(src, src, desc, desc);
+    }
+
+    __event__ clamp(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc, cumeric_t min, cumeric_t max)
+    {
+        dnnl::eltwise_forward::primitive_desc primitive_desc {
+            internal::engine(),
+            dnnl::prop_kind::forward_inference,
+            dnnl::algorithm::eltwise_clip_v2,
+            src_desc.desc,
+            dst_desc.desc,
+            min, max
+        };
+
+        dnnl::primitive primitive = dnnl::eltwise_forward(primitive_desc);
+
+        sycl::event event = dnnl::sycl_interop::execute(
+            primitive,
+            internal::stream(),
+            {
+                { DNNL_ARG_SRC, src.memory },
+                { DNNL_ARG_DST, dst.memory }
+            }
+        );
+
+        internal::stream().wait();
+        return detail::event_handler::create(std::move(event));
+    }
+
+    __event__ clamp(handles::__memory__& src, const handles::__desc__& desc, cumeric_t min, cumeric_t max)
+    {
+        return square(src, src, desc, desc);
+    }
+
 
 
     /* RAII wrappers overloads */
@@ -439,6 +560,91 @@ namespace cum::neural_primitives
         const handles::__desc__& src_descriptor = src_desc.handle();
 
         return sqrt(dst_memory, src_memory, dst_descriptor, src_descriptor);
+    }
+
+    __event__ sqrt(Memory& src, const Descriptor& desc)
+    {
+        return sqrt(src, src, desc, desc);
+    }
+
+    __event__ square(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc)
+    {
+        handles::__memory__& dst_memory = dst.handle();
+        const handles::__memory__& src_memory = src.handle();
+
+        const handles::__desc__& dst_descriptor = dst_desc.handle();
+        const handles::__desc__& src_descriptor = src_desc.handle();
+
+        return square(dst_memory, src_memory, dst_descriptor, src_descriptor);
+    }
+
+    __event__ square(Memory& src, const Descriptor& desc)
+    {
+        return square(src, src, desc, desc);
+    }
+
+    __event__ exp(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc)
+    {
+        handles::__memory__& dst_memory = dst.handle();
+        const handles::__memory__& src_memory = src.handle();
+
+        const handles::__desc__& dst_descriptor = dst_desc.handle();
+        const handles::__desc__& src_descriptor = src_desc.handle();
+
+        return exp(dst_memory, src_memory, dst_descriptor, src_descriptor);
+    }
+
+    __event__ exp(Memory& src, const Descriptor& desc)
+    {
+        return exp(src, src, desc, desc);
+    }
+
+    __event__ log(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc)
+    {
+        handles::__memory__& dst_memory = dst.handle();
+        const handles::__memory__& src_memory = src.handle();
+
+        const handles::__desc__& dst_descriptor = dst_desc.handle();
+        const handles::__desc__& src_descriptor = src_desc.handle();
+
+        return log(dst_memory, src_memory, dst_descriptor, src_descriptor);
+    }
+
+    __event__ log(Memory& src, const Descriptor& desc)
+    {
+        return log(src, src, desc, desc);
+    }
+
+    __event__ abs(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc)
+    {
+        handles::__memory__& dst_memory = dst.handle();
+        const handles::__memory__& src_memory = src.handle();
+
+        const handles::__desc__& dst_descriptor = dst_desc.handle();
+        const handles::__desc__& src_descriptor = src_desc.handle();
+
+        return abs(dst_memory, src_memory, dst_descriptor, src_descriptor);
+    }
+
+    __event__ abs(Memory& src, const Descriptor& desc)
+    {
+        return abs(src, src, desc, desc);
+    }
+
+    __event__ clamp(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc, cumeric_t min, cumeric_t max)
+    {
+        handles::__memory__& dst_memory = dst.handle();
+        const handles::__memory__& src_memory = src.handle();
+
+        const handles::__desc__& dst_descriptor = dst_desc.handle();
+        const handles::__desc__& src_descriptor = src_desc.handle();
+
+        return clamp(dst_memory, src_memory, dst_descriptor, src_descriptor, min, max);
+    }
+
+    __event__ clamp(Memory& src, const Descriptor& desc, cumeric_t min, cumeric_t max)
+    {
+        return sqrt(src, src, desc, desc);
     }
 
     /* Objective tensors overloads */
@@ -577,5 +783,117 @@ namespace cum::neural_primitives
         const handles::__desc__& desc = src.descriptor()->handle();
 
         return leaky_relu(memory, memory, desc, desc, alpha);
+    }
+
+    __event__ sqrt(Tensor& dst, const Tensor& src)
+    {
+        handles::__memory__& dst_memory = dst.memory()->handle();
+        const handles::__memory__& src_memory = src.memory()->handle();
+
+        const handles::__desc__& dst_descriptor = dst.descriptor()->handle();
+        const handles::__desc__& a_descriptor = src.descriptor()->handle();
+
+        return sqrt(dst_memory, src_memory, dst_descriptor, a_descriptor);
+    }
+
+    __event__ sqrt(Tensor& src)
+    {
+        handles::__memory__& memory = src.memory()->handle();
+        const handles::__desc__& desc = src.descriptor()->handle();
+
+        return sqrt(memory, memory, desc, desc);
+    }
+
+    __event__ square(Tensor& dst, const Tensor& src)
+    {
+        handles::__memory__& dst_memory = dst.memory()->handle();
+        const handles::__memory__& src_memory = src.memory()->handle();
+
+        const handles::__desc__& dst_descriptor = dst.descriptor()->handle();
+        const handles::__desc__& a_descriptor = src.descriptor()->handle();
+
+        return square(dst_memory, src_memory, dst_descriptor, a_descriptor);
+    }
+
+    __event__ square(Tensor& src)
+    {
+        handles::__memory__& memory = src.memory()->handle();
+        const handles::__desc__& desc = src.descriptor()->handle();
+
+        return square(memory, memory, desc, desc);
+    }
+    __event__ exp(Tensor& dst, const Tensor& src)
+    {
+        handles::__memory__& dst_memory = dst.memory()->handle();
+        const handles::__memory__& src_memory = src.memory()->handle();
+
+        const handles::__desc__& dst_descriptor = dst.descriptor()->handle();
+        const handles::__desc__& a_descriptor = src.descriptor()->handle();
+
+        return exp(dst_memory, src_memory, dst_descriptor, a_descriptor);
+    }
+
+    __event__ exp(Tensor& src)
+    {
+        handles::__memory__& memory = src.memory()->handle();
+        const handles::__desc__& desc = src.descriptor()->handle();
+
+        return exp(memory, memory, desc, desc);
+    }
+    __event__ log(Tensor& dst, const Tensor& src)
+    {
+        handles::__memory__& dst_memory = dst.memory()->handle();
+        const handles::__memory__& src_memory = src.memory()->handle();
+
+        const handles::__desc__& dst_descriptor = dst.descriptor()->handle();
+        const handles::__desc__& a_descriptor = src.descriptor()->handle();
+
+        return log(dst_memory, src_memory, dst_descriptor, a_descriptor);
+    }
+
+    __event__ log(Tensor& src)
+    {
+        handles::__memory__& memory = src.memory()->handle();
+        const handles::__desc__& desc = src.descriptor()->handle();
+
+        return log(memory, memory, desc, desc);
+    }
+
+    __event__ abs(Tensor& dst, const Tensor& src)
+    {
+        handles::__memory__& dst_memory = dst.memory()->handle();
+        const handles::__memory__& src_memory = src.memory()->handle();
+
+        const handles::__desc__& dst_descriptor = dst.descriptor()->handle();
+        const handles::__desc__& a_descriptor = src.descriptor()->handle();
+
+        return abs(dst_memory, src_memory, dst_descriptor, a_descriptor);
+    }
+
+    __event__ abs(Tensor& src)
+    {
+        handles::__memory__& memory = src.memory()->handle();
+        const handles::__desc__& desc = src.descriptor()->handle();
+
+        return abs(memory, memory, desc, desc);
+    }
+
+    __event__ clamp(Tensor& dst, const Tensor& src, cumeric_t min, cumeric_t max)
+    {
+        handles::__memory__& dst_memory = dst.memory()->handle();
+        const handles::__memory__& src_memory = src.memory()->handle();
+
+        const handles::__desc__& dst_descriptor = dst.descriptor()->handle();
+        const handles::__desc__& a_descriptor = src.descriptor()->handle();
+
+        return clamp(dst_memory, src_memory, dst_descriptor, a_descriptor, min, max);
+    }
+
+    __event__ clamp(Tensor& src, cumeric_t min, cumeric_t max)
+    {
+        handles::__memory__& memory = src.memory()->handle();
+        const handles::__desc__& desc = src.descriptor()->handle();
+
+        return clamp(memory, memory, desc, desc, min, max);
     }
 }

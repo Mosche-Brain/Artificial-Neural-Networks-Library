@@ -42,17 +42,24 @@ namespace yann
         constexpr cum::cumeric_t ampl = 0.1;
 
         Parameter param;
-        std::println("creating randomm tensor");
-        cum::runtime::sync();
+
         param.values = cum::Tensor::Random({rows, cols}, -ampl, ampl, cum::default_type, cum::layout::IO);
-        cum::runtime::sync();
-        std::println("creating zeroed tensor");
-        cum::runtime::sync();
+
         param.gradient = cum::Tensor({rows, cols}, cum::default_type, cum::layout::IO);
         param.gradient.fill(0);
-        // param.gradient = cum::Tensor::Zeros({rows, cols}, cum::default_type, cum::layout::IO);
-        cum::runtime::sync();
-        std::println("created");
+        return param;
+    }
+
+    Parameter Parameter::Uniform(const cum::Shape& shape) // +-0.1
+    {
+        constexpr cum::cumeric_t ampl = 0.1;
+
+        Parameter param;
+
+        param.values = cum::Tensor::Random(shape, -ampl, ampl, cum::default_type);
+        param.gradient = cum::Tensor(shape, cum::default_type);
+        param.gradient.fill(0);
+
         return param;
     }
 

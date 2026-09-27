@@ -73,6 +73,18 @@ namespace cum::neural_primitives
     __event__ square(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc);
     __event__ square(handles::__memory__& src, const handles::__desc__& desc);
 
+    __event__ exp(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc); // base e
+    __event__ exp(handles::__memory__& src, const handles::__desc__& desc); // base e
+
+    __event__ log(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc); // base e
+    __event__ log(handles::__memory__& src, const handles::__desc__& desc); // base e
+
+    __event__ abs(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc);
+    __event__ abs(handles::__memory__& src, const handles::__desc__& desc);
+
+    __event__ clamp(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& dst_desc, const handles::__desc__& src_desc, cumeric_t min, cumeric_t max);
+    __event__ clamp(handles::__memory__& src, const handles::__desc__& desc, cumeric_t min, cumeric_t max);
+
     /* RsrcII wrappers overloads */
     __event__ eltwise(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc, functions::function_id algorithm, prop_kind prop_kind);
 
@@ -100,6 +112,21 @@ namespace cum::neural_primitives
     __event__ sqrt(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc);
     __event__ sqrt(Memory& src, const Descriptor& desc);
 
+    __event__ square(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc);
+    __event__ square(Memory& src, const Descriptor& desc);
+
+    __event__ exp(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc); // base e
+    __event__ exp(Memory& src, const Descriptor& desc); // base e
+
+    __event__ log(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc); // base e
+    __event__ log(Memory& src, const Descriptor& desc); // base e
+
+    __event__ abs(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc);
+    __event__ abs(Memory& src, const Descriptor& desc);
+
+    __event__ clamp(Memory& dst, const Memory& src, const Descriptor& dst_desc, const Descriptor& src_desc, cumeric_t min, cumeric_t max);
+    __event__ clamp(Memory& src, const Descriptor& desc, cumeric_t min, cumeric_t max);
+
     /* Objective tensors overloads */
     __event__ eltwise(Tensor& dst, const Tensor& src, functions::function_id algorithm, prop_kind prop_kind);
     __event__ eltwise(Tensor& tensor, functions::function_id algorithm, prop_kind prop_kind);
@@ -124,4 +151,19 @@ namespace cum::neural_primitives
 
     __event__ sqrt(Tensor& dst, const Tensor& src);
     __event__ sqrt(Tensor& src);
+
+    __event__ square(Tensor& dst, const Tensor& src);
+    __event__ square(Tensor& src);
+
+    __event__ exp(Tensor& dst, const Tensor& src); // base e
+    __event__ exp(Tensor& src); // base e
+
+    __event__ log(Tensor& dst, const Tensor& src); // base e
+    __event__ log(Tensor& src); // base e
+
+    __event__ abs(Tensor& dst, const Tensor& src);
+    __event__ abs(Tensor& src);
+
+    __event__ clamp(Tensor& dst, const Tensor& src, cumeric_t min, cumeric_t max);
+    __event__ clamp(Tensor& src, cumeric_t min, cumeric_t max);
 }

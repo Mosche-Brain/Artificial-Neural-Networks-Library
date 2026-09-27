@@ -191,8 +191,14 @@ namespace cum
         Tensor sqrt() const;
         Tensor& sqrt_in_place();
 
-        Tensor square();
+        Tensor square() const;
         Tensor& square_in_place();
+
+        Tensor clamp(cumeric_t min, cumeric_t max) const;
+        Tensor& clamp_in_place(cumeric_t min, cumeric_t max);
+
+        Tensor log() const;
+        Tensor& log_in_place();
 
         Tensor& scale(cumeric_t scalar);
 

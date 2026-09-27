@@ -132,17 +132,19 @@ namespace cum
 	 *------------------------------------------------------------------------------------------------**/
 
 	Tensor::Tensor(const Shape& shape, datatype dtype, layout layout)
-		: _desc_(std::make_unique<neural_primitives::Descriptor>(shape, dtype, layout)),
-		  _data(sycl::malloc_shared<std::byte>(
-			  _desc_->size(), internal::device(), internal::sycl_context()))
+		: _desc_(std::make_unique<Descriptor>(shape, dtype, layout == layout::ANY ? default_layout_from_rank(shape.size()) : layout)),
+		  _data(sycl::malloc_shared<byte>(_desc_->size(), internal::device(), internal::sycl_context()))
 	{
 		if(_data == nullptr)
+		{
+			std::println("sex: {}", _desc_->size());
 			throw std::bad_alloc();
-		_memr_ = std::make_unique<neural_primitives::Memory>(*_desc_, _data);
+		}
+		_memr_ = std::make_unique<Memory>(*_desc_, _data);
 	}
 
 	Tensor::Tensor(const Tensor& tensor)
-		: _desc_(std::make_unique<neural_primitives::Descriptor>(
+		: _desc_(std::make_unique<Descriptor>(
 			tensor.shape(), tensor.type(),
 			concrete_layout(tensor.rank(), tensor.format()))),
 		  _data(sycl::malloc_shared<std::byte>(
@@ -647,8 +649,10 @@ namespace cum
 			throw std::invalid_argument("offset and shape must have the same size");
 
 		if(offset.size() != this->rank())
+		{
+			std::println("offset rank: {}, tensor rank: {}", offset.size(), this->rank());
 			throw std::invalid_argument("offset and shape must have the same rank");
-
+		}
 		for(dim_t i = 0; i < shape.size(); i++)
 			if(offset[i] + shape[i] > this->shape()[i])
 				throw std::invalid_argument("offset + shape > tensor size");
@@ -657,8 +661,7 @@ namespace cum
 
 		const dnnl::memory::desc sub_md = md.submemory_desc(shape, offset);
 
-
-		return Tensor(neural_primitives::Descriptor({sub_md}), *_memr_);
+		return Tensor(Descriptor({sub_md}), *_memr_);
     }
 
 
@@ -1191,7 +1194,7 @@ namespace cum
     	return *this;
 	}
 
-	Tensor Tensor::square()
+	Tensor Tensor::square() const
 	{
 		Tensor result = *this;
 
@@ -1205,6 +1208,37 @@ namespace cum
     	neural_primitives::square(_memr_->handle(), _desc_->handle());
     	return *this;
 	}
+
+	Tensor Tensor::log() const
+	{
+		Tensor result = *this;
+
+		neural_primitives::log(result, *this);
+
+		return result;
+	}
+
+	Tensor& Tensor::log_in_place()
+	{
+		neural_primitives::log(*this);
+		return *this;
+	}
+
+	Tensor Tensor::clamp(cumeric_t min, cumeric_t max) const
+	{
+		Tensor result = *this;
+
+		neural_primitives::clamp(result, *this, min, max);
+
+		return result;
+	}
+
+	Tensor& Tensor::clamp_in_place(cumeric_t min, cumeric_t max)
+	{
+		neural_primitives::clamp(*this, min, max);
+		return *this;
+	}
+
 
 	/**------------------------------------------------------------------------------------------------
 	 *                                        Matrix multiplication

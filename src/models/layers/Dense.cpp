@@ -35,7 +35,7 @@ namespace yann::models::layers
         cum::functions::get_function_by_name(&activation, func);
         _layerSize_ = layerSize;
 
-        output_shape_ = { layerSize, 1 };
+        output_shape_ = { layerSize };
 
         this->_layerType_ = LayerType::Dense;
     }
@@ -44,10 +44,10 @@ namespace yann::models::layers
     {
         this->weights_      = Parameter::Uniform(output_features, input_features);   /* neurons * input_length */
         this->biases_       = Parameter::Zeros(output_features, 1);                  /* Column-Vector */
-        this->cache.a       = cum::Tensor({output_features, 1}, cum::default_type, cum::layout::IO);                 /* Column-Vector */
-        this->cache.z   	= cum::Tensor({output_features, 1}, cum::default_type, cum::layout::IO);                 /* Column-Vector */
-        this->cache.x       = cum::Tensor({input_features, 1}, cum::default_type, cum::layout::IO);                  /* Column-Vector */
-        this->cache.da      = cum::Tensor({output_features, 1}, cum::default_type, cum::layout::IO);                 /* Column-Vector */
+        this->cache.a       = cum::Tensor(cum::Shape{output_features}, cum::default_type);                 /* Column-Vector */
+        this->cache.z   	= cum::Tensor(cum::Shape{output_features}, cum::default_type);                 /* Column-Vector */
+        this->cache.x       = cum::Tensor(cum::Shape{input_features}, cum::default_type);                  /* Column-Vector */
+        this->cache.da      = cum::Tensor(cum::Shape{output_features}, cum::default_type);                 /* Column-Vector */
         this->_initialized_ = true;
     }
 
@@ -55,7 +55,7 @@ namespace yann::models::layers
     cum::Tensor Dense::forward(const cum::Tensor& input) // temporary implementation for compatibility
     {
         // those const expresions will be moved to build config
-        constexpr bool YANN_DENSE_FORWARD_FUSED_PATH = true;
+        constexpr bool YANN_DENSE_FORWARD_FUSED_PATH = false;
         constexpr bool YANN_DENSE_FORWARD_REFERENCE_PATH = true;
 
         // check if number of weights cols is equal to number of input rows
@@ -86,11 +86,11 @@ namespace yann::models::layers
             if constexpr(YANN_DENSE_FORWARD_REFERENCE_PATH)
             {
                 YANN_LOG(3, "cache.z = weights_.values * input", "");
-                YANN_LOG(4, "X: {}x{}, | W: {}x{}", input.rows(), input.cols(), weights_.values.rows(), weights_.values.cols());
+                // YANN_LOG(4, "X: {}x{}, | W: {}x{}", input.rows(), input.cols(), weights_.values.rows(), weights_.values.cols());
                 cache.z = weights_.values * input;
 
                 YANN_LOG(3, "cache.z = cache.z + biases_.values", "");
-                YANN_LOG(4, "Z: {}x{} | B: {}x{}", cache.z.rows(), cache.z.cols(), biases_.values.rows(), biases_.values.cols());
+                // YANN_LOG(4, "Z: {}x{} | B: {}x{}", cache.z.rows(), cache.z.cols(), biases_.values.rows(), biases_.values.cols());
                 cache.z = cache.z + biases_.values; // with broadcast
 
                 cache.a = cache.z.elementwise(activation.name);
@@ -107,7 +107,7 @@ namespace yann::models::layers
 
     cum::Tensor Dense::backward(const cum::Tensor& deltaOutput)
     {
-        constexpr bool YANN_DENSE_BACKWARD_FUSED_PATH = true;
+        constexpr bool YANN_DENSE_BACKWARD_FUSED_PATH = false;
         constexpr bool YANN_DENSE_BACKWARD_REFERENCE_PATH = true;
 
         if(runtime_config::fused_kernels())
@@ -142,12 +142,9 @@ namespace yann::models::layers
 
                 weights_.gradient += cache.dz * cache.x.transpose();
 
-                YANN_LOG(3, "dL/dX = weights.transpose() * cahce.dz", "");
+                YANN_LOG(3, "dL/dX = weights.transpose() * cache.dz", "");
                 YANN_LOG(4, "W: {}x{}, | dZ: {}x{}", weights_.values.rows(), weights_.values.cols(), cache.dz.rows(), cache.dz.cols());
-                // cum::Tensor transposed_weights = weights_.values.transpose();
-                // YANN_LOG(4, "W: {}x{}", transposed_weights.rows(), transposed_weights.cols());
 
-                // return transposed_weights * cache.dz;
                 return weights_.values.transpose() * cache.dz;
             }
             else

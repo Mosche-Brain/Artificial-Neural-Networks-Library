@@ -52,7 +52,7 @@ TEST_CASE("Linear forward computes affine transformation")
     layer.init_parameters(2, 2);
     set_linear_parameters(layer);
 
-    cum::Tensor input({2, 2}, cum::default_type, cum::layout::IO);
+    cum::Tensor input({2, 2}, cum::default_type, cum::layout::AB);
     set_values(input, {2, -1, 1, 4});
 
     const cum::Tensor output = layer.forward(input);
