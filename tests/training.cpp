@@ -9,12 +9,14 @@
 #include <cum/cum.hpp>
 
 #include <yann/models/layers/Dense.hpp>
+#include <yann/models/layers/Input.hpp>
 
 #include <yann/models/Sequential.hpp>
 #include <yann/runtime_config.hpp>
 
 #include <yann/loss/BinaryCrossEntropy.hpp>
 #include <yann/optimizers/SGD.hpp>
+
 
 TEST_CASE("MLP binary classifier for XOR")
 {

@@ -33,6 +33,7 @@ namespace yann::models::layers
             x.fill(0);
             z.fill(0);
             a.fill(0);
+            da.fill(0);
             dz.fill(0);
         }
 
@@ -98,7 +99,9 @@ namespace yann::models::layers
         cum::Shape input_shape_;
         cum::Shape output_shape_;
 
+        [[deprecated("No longer used")]]
         int _layerSize_; // not longer relevant
+
         bool _initialized_ = false;
         LayerType _layerType_;
     };

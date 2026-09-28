@@ -10,6 +10,7 @@
 
 #include "Matrix.hpp"
 #include "cum/Core.hpp"
+#include "cum/memory.hpp"
 #include "cum/neural_primitives/Descriptor.hpp"
 #include "cum/neural_primitives/Memory.hpp"
 #include "cum/neural_primitives/opaque_types.hpp"
@@ -105,7 +106,9 @@ namespace cum
 
         const std::unique_ptr<neural_primitives::Descriptor>& descriptor() const;
         const std::unique_ptr<neural_primitives::Memory>& memory() const;
-		 
+
+        Tensor clone() const;
+
         /* accesors */
 
         template<typename T>
@@ -220,8 +223,8 @@ namespace cum
         Tensor& operator *= (const Tensor& other);
         Tensor& operator /= (const Tensor& other);
 
-        bool friend operator == (Tensor& A, Tensor& B);
-        bool friend operator != (Tensor& A, Tensor& B);
+        bool friend operator == (const Tensor& A, const Tensor& B);
+        bool friend operator != (const Tensor& A, const Tensor& B);
 
         Tensor& operator = (const Tensor& other);
         Tensor& operator = (Tensor&& other) noexcept;
@@ -246,7 +249,7 @@ namespace cum
             throw std::invalid_argument("Tensor constructor: PI(dims) != lenght of values");
 
         const T* data = values.data();
-        memory::memcopy(_data, data, elements_count * sizeof(T));
+        cum::memory::memcopy(_data, data, elements_count * sizeof(T));
     }
 
     template<datatype T, layout layout>

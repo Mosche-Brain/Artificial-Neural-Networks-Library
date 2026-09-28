@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include "cum/Core.hpp"
 #include "cum/config.hpp"
 
 #include <stdfloat>
@@ -146,5 +145,32 @@ namespace cum
     constexpr datatype default_type = datatype::S8;
 #endif
 
+    // give info ABOUT used precision in compile time for each precision
+
+    constexpr std::size_t datatype_size(datatype type)
+    {
+        switch (type)
+        {
+        case datatype::FP64: return 8;
+        case datatype::FP32: return 4;
+        case datatype::FP16: return 2;
+        case datatype::BF16: return 2;
+        case datatype::FP8:  return 1;
+
+        case datatype::S64:  return 8;
+        case datatype::S32:  return 4;
+        case datatype::S16:  return 2;
+        case datatype::S8:   return 1;
+
+        case datatype::U64:  return 8;
+        case datatype::U32:  return 4;
+        case datatype::U16:  return 2;
+        case datatype::U8:   return 1;
+
+        case datatype::UNDEF:
+        default:
+            return 1;
+        }
+    }
 
 }

@@ -270,3 +270,4 @@ Full documentation will be avaible [here](brain.mosche.dev/docs)
 * Generating boilerplate
 * Basic inline code autocompletion from free github copilot credits
 * I also spend ~~0.05$~~ 2.67\$ for Grok and Kimi tokens
+* Testing Nemotron 3.5 Lightning 30B A3B for generating doxygen

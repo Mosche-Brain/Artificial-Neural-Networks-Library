@@ -62,7 +62,7 @@ namespace cum
 		switch(rank)
 		{
 			case 1: return layout::A;
-			case 2: return layout::BA;
+			case 2: return layout::AB;
 			case 3: return layout::ABC;
 			case 4: return layout::ABCD;
 			case 5: return layout::ABCDE;
@@ -371,6 +371,11 @@ namespace cum
 	std::unique_ptr<neural_primitives::Memory>& Tensor::memory() // Should this be in accessors section
 	{
 		return _memr_;
+	}
+
+	Tensor Tensor::clone() const
+	{
+		return *this;
 	}
 
 	/**-----------------------------------------------------------------------------------------------------------------------
@@ -1406,9 +1411,54 @@ namespace cum
 		other._owns_data = false;
 		return *this;
 	}
-  //   {
-		// _desc_ = std::move
-  //   }
+
+
+	bool operator != (const Tensor& A, const Tensor& B)
+	{
+
+	}
+
+	bool operator == (const Tensor& A, const Tensor& B)
+	{
+		if (&A == &B)
+			return true;
+
+		if (A.type() != B.type() || A.shape() != B.shape())
+			return false;
+
+		runtime::sync(); // dane w USM mogą być jeszcze zapisywane przez kernele
+
+		const Shape shape = A.shape();
+		const dim_t rank = static_cast<dim_t>(shape.size());
+
+		dim_t count = 1;
+		for (const dim_t extent : shape)
+			count *= extent;
+
+		bool equal = true;
+
+		dispatch_datatype(A.type(), [&]<typename T>()
+		{
+			const T* a = static_cast<const T*>(A.data());
+			const T* b = static_cast<const T*>(B.data());
+
+			Shape indices(rank, 0);
+			for (dim_t i = 0; i < count && equal; i++)
+			{
+				if (a[A.compute_index(indices)] != b[B.compute_index(indices)])
+					equal = false;
+
+				for (dim_t axis = rank; axis-- > 0; )
+				{
+					if (++indices[axis] < shape[axis])
+						break;
+					indices[axis] = 0;
+				}
+			}
+		});
+
+		return equal;
+	}
 
 
 } // cum

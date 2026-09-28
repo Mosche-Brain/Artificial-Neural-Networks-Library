@@ -11,10 +11,11 @@
 #define SAFETENSORS_MAX_STRING_SIZE 2048
 #define SAFETENSORS_MAX_METADATA_SIZE 8192
 
-#include <algorithm>
+#include <print>
 #include <fstream>
 #include <cstring>
 #include <climits>
+#include <algorithm>
 #include <string>
 
 #include <fcntl.h> // What is this?
@@ -172,10 +173,12 @@ namespace yann::utils
 
                     std::string type_tag = parseString();
 
-                    type_tag == "F64" ? dtype = cum::datatype::FP64 :
-                    type_tag == "F32" ? dtype = cum::datatype::FP32 :
-                    type_tag == "F16" ? dtype = cum::datatype::FP16 :
-                    type_tag == "BF16" ? dtype = cum::datatype::BF16 :
+                    // type_tag == "F64" ? dtype = cum::datatype::FP64 :
+                    // type_tag == "F32" ? dtype = cum::datatype::FP32 :
+                    // type_tag == "F16" ? dtype = cum::datatype::FP16 :
+                    // type_tag == "BF16" ? dtype = cum::datatype::BF16 :
+
+                    dtype = get_cum_dtype(type_tag);
 
                     info.dtype = dtype;
                 }
@@ -289,7 +292,7 @@ namespace yann::utils
         return dest.u;
     }
 
-    inline std::unordered_map<std::string, cum::Tensor> load_safetensors(const std::string &filename)
+    std::unordered_map<std::string, cum::Tensor> load_safetensors(const std::string &filename)
     {
         int fd = open(filename.c_str(), O_RDONLY);
         if (fd == -1)
@@ -361,12 +364,46 @@ namespace yann::utils
                 //                                options)
                 //                                .clone(); // Clone to own the data
 
-                cum::Tensor tensor(info.shape, info.dtype);
+                // cum::Tensor tensor(info.shape, info.dtype);
+
+                // cum::Tensor tensor = cum::Tensor::take_memory(info.shape, data_start + info.data_offsets[0], info.dtype).clone();
+
+                const auto* bytes =
+    reinterpret_cast<const std::uint8_t*>(
+        data_start + info.data_offsets[0]
+    );
+
+                std::println(
+                    "LOAD '{}': {:02x} {:02x} {:02x} {:02x}",
+                    name,
+                    bytes[0],
+                    bytes[1],
+                    bytes[2],
+                    bytes[3]
+                );
+
+                auto tensor = cum::Tensor::take_memory(
+                   info.shape,
+                   data_start + info.data_offsets[0],
+                   info.dtype
+               );
+
+                std::println(
+                    "LOAD '{}': rank={} type={} format={} size={} first={}",
+                    name,
+                    tensor.rank(),
+                    static_cast<int>(tensor.type()),
+                    static_cast<int>(tensor.format()),
+                    tensor.size(),
+                    tensor.at<float>({0})
+                );
+
+                tensors[name] = std::move(tensor);
 
                 if (is_big_endian() && (info.dtype == cum::datatype::FP16 || info.dtype == cum::datatype::FP32 || info.dtype == cum::datatype::FP64))
                 {
                     // auto data_ptr = static_cast<char *>(cpu_tensor.data_ptr());
-                    auto data_ptr = tensor.data<char>();
+                    char* data_ptr = tensor.data<char>();
                     cum::dim_t datatype_size = cum::datatype_size(tensor.type());
                     for (cum::dim_t i = 0; i < tensor.size(); i += datatype_size)
                     {
@@ -390,7 +427,9 @@ namespace yann::utils
         }
     }
 
-    inline void save_safetensors(const std::unordered_map<std::string, cum::Tensor> &tensors, const std::string &filename, const std::unordered_map<std::string, std::string> &metadata = {})
+    // void save_safetensor(const)
+
+    void save_safetensors(const std::unordered_map<std::string, cum::Tensor> &tensors, const std::string &filename, const std::unordered_map<std::string, std::string> &metadata)
     {
         if (tensors.size() > SAFETENSORS_MAX_TENSORS)
         {
@@ -422,12 +461,47 @@ namespace yann::utils
         {
             validate_string_length(name, "Tensor name");
 
+            std::println(
+    "SAVE '{}': first = {}",
+    name,
+    tensor.at<float>({0})
+            );
+
+            std::println(
+                "SAVE '{}': rank={} type={} format={} size={} data={}",
+                name,
+                tensor.rank(),
+                static_cast<int>(tensor.type()),
+                static_cast<int>(tensor.format()),
+                tensor.size(),
+                tensor.data()
+            );
+
+            // auto clone = tensor.clone();
+            cum::Tensor tensor_clone = tensor.clone();
+
+
+            const auto* bytes =
+    static_cast<const std::uint8_t*>(tensor.data());
+
+            std::println(
+                "SAVE '{}': {:02x} {:02x} {:02x} {:02x}",
+                name,
+                bytes[0],
+                bytes[1],
+                bytes[2],
+                bytes[3]
+            );
+            std::println("SAVE '{}': clone OK", name);
+
 
             if (tensor.type() == cum::datatype::FP16 || tensor.type() == cum::datatype::FP32 || tensor.type() == cum::datatype::FP64)
             {
+
                 // tensor = tensor.to(torch::kCPU, tensor.dtype(), /*non_blocking=*/false, /*copy=*/true);
+                // tensor_clone = tensor.clone();
                 // auto data_ptr = static_cast<char *>(tensor.data_ptr());
-                auto data_ptr = tensor.data<char>();
+                auto data_ptr = tensor_clone.data<char>();
                 cum::dim_t datatype_size = cum::datatype_size(tensor.type());
                 for (cum::dim_t i = 0; i < tensor.size() ; i += datatype_size)
                 {
@@ -440,11 +514,11 @@ namespace yann::utils
                 throw std::runtime_error("Tensor dimension exceeds maximum allowed");
             }
 
-            auto dtype = get_safetensors_dtype(tensor.type());
+            auto dtype = get_safetensors_dtype(tensor_clone.type());
             // auto shape = tensor.sizes().vec();
-            auto shape = tensor.shape();
+            auto shape = tensor_clone.shape();
             // size_t tensor_size = tensor.numel() * tensor.element_size();
-            size_t tensor_size = tensor.size();
+            size_t tensor_size = tensor_clone.size();
 
             if (header_json.length() > 1)
                 header_json += ",";
@@ -462,7 +536,7 @@ namespace yann::utils
             header_json += "}";
 
             // const char *tensor_data = static_cast<const char *>(tensor.data_ptr());
-            const char* tensor_data = tensor.data<const char>();
+            const char* tensor_data = tensor_clone.data<const char>();
             data_buffer.insert(data_buffer.end(), tensor_data, tensor_data + tensor_size);
 
             current_offset += tensor_size;
