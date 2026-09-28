@@ -253,6 +253,7 @@ Full documentation will be avaible [here](brain.mosche.dev/docs)
 * [Eigen3](https://eigen.tuxfamily.org/) - C++ Linear Algebra library used in early stage of development
 * [Nlohmann JSON](https://github.com/nlohmann/json) - C++ library for parsing JSON format
 * [Easy3D](https://github.com/LiangliangNan/Easy3D) - 3D visualizations library used in examples
+* [safetensors.cpp](https://github.com/carsonpo/safetensors.cpp) - Base for my implementation of Hugging Face safetensors format
 * [Sarvel](https://sarvel.xyz/) - Literally Digital God
 
 ## 🥱 Other useless informations

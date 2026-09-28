@@ -245,8 +245,8 @@ namespace cum
         if (values.size() != elements_count)
             throw std::invalid_argument("Tensor constructor: PI(dims) != lenght of values");
 
-        // const T* data
-        // memory::memcopy()
+        const T* data = values.data();
+        memory::memcopy(_data, data, elements_count * sizeof(T));
     }
 
     template<datatype T, layout layout>
@@ -275,7 +275,7 @@ namespace cum
         // return *slice(indices, Shape(rank(), 1)).data<T>();
     }
 
-
+    // I will move these specializations to another header, problably cum/datatypes.hpp
     template<>
     struct datatype_of<double>
     {
