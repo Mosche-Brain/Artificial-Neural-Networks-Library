@@ -11,28 +11,31 @@
 #define SAFETENSORS_MAX_STRING_SIZE 2048
 #define SAFETENSORS_MAX_METADATA_SIZE 8192
 
-#include <print>
-#include <fstream>
-#include <cstring>
-#include <climits>
 #include <algorithm>
+#include <array>
+#include <cctype>
+#include <cstdint>
+#include <cstring>
+#include <fstream>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
-#include <fcntl.h> // What is this?
-#include <unistd.h> // We must eliminate this dependency
-#include <sys/mman.h> // This also
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "yann/utils/safetensors.hpp"
 
-// tbh, original version of this code is even stranger than mine
+// tbh, original version of this code is even stranger than mine, really
+// https://github.com/carsonpo/safetensors.cpp
 
 namespace yann::utils
 {
-
-    inline cum::datatype get_cum_dtype(const std::string &dtype_str)
+    inline cum::datatype get_cum_dtype(const std::string& dtype_str)
     {
         static const std::unordered_map<std::string, cum::datatype> dtype_map = {
-            // {"BOOL", torch::kBool},
             {"U8", cum::datatype::U8},
             {"I8", cum::datatype::S8},
             {"U16", cum::datatype::U16},
@@ -44,22 +47,19 @@ namespace yann::utils
             {"F16", cum::datatype::FP16},
             {"BF16", cum::datatype::BF16},
             {"F32", cum::datatype::FP32},
-            {"F64", cum::datatype::FP64}};
+            {"F64", cum::datatype::FP64},
+        };
 
-        auto it = dtype_map.find(dtype_str);
-        if (it != dtype_map.end())
-        {
-            return it->second;
-        }
+        const auto it = dtype_map.find(dtype_str);
+        if (it == dtype_map.end())
+            throw std::runtime_error("Unknown dtype: " + dtype_str);
 
-        throw std::runtime_error("Unknown dtype: " + dtype_str);
+        return it->second;
     }
-
 
     inline std::string get_safetensors_dtype(cum::datatype dtype)
     {
         static const std::unordered_map<cum::datatype, std::string> dtype_map = {
-            // {torch::kBool, "BOOL"},
             {cum::datatype::U8, "U8"},
             {cum::datatype::S8, "I8"},
             {cum::datatype::U16, "U16"},
@@ -71,116 +71,338 @@ namespace yann::utils
             {cum::datatype::FP16, "F16"},
             {cum::datatype::BF16, "BF16"},
             {cum::datatype::FP32, "F32"},
-            {cum::datatype::FP64, "F64"}};
+            {cum::datatype::FP64, "F64"},
+        };
 
-        auto it = dtype_map.find(dtype);
-        if (it != dtype_map.end())
-        {
-            return it->second;
-        }
-        throw std::runtime_error("Unsupported dtype");
+        const auto it = dtype_map.find(dtype);
+        if (it == dtype_map.end())
+            throw std::runtime_error("Unsupported dtype");
+
+        return it->second;
     }
 
+    inline bool is_big_endian()
+    {
+        const std::uint32_t value = 0x01020304;
+        const auto* bytes = reinterpret_cast<const std::uint8_t*>(&value);
 
-    // Class definitions
+        return bytes[0] == 0x01;
+    }
+
+    template <typename T>
+    inline T swap_endian(T value)
+    {
+        static_assert(CHAR_BIT == 8, "CHAR_BIT != 8");
+
+        T result{};
+
+        const auto* source =
+            reinterpret_cast<const std::uint8_t*>(&value);
+
+        auto* destination =
+            reinterpret_cast<std::uint8_t*>(&result);
+
+        for (std::size_t i = 0; i < sizeof(T); ++i)
+            destination[i] = source[sizeof(T) - i - 1];
+
+        return result;
+    }
+
+    inline void validate_string_length(
+        const std::string& str,
+        const std::string& context)
+    {
+        if (str.length() > SAFETENSORS_MAX_STRING_SIZE)
+            throw std::runtime_error(
+                context + " exceeds maximum allowed length");
+    }
+
     class SimpleJSONParser
     {
     private:
-        const char *json;
-        size_t pos;
+        const char* json;
+        std::size_t pos;
 
         inline void skipWhitespace()
         {
-            while (json[pos] == ' ' || json[pos] == '\n' || json[pos] == '\r' || json[pos] == '\t')
-                pos++;
+            while (
+                json[pos] == ' ' ||
+                json[pos] == '\n' ||
+                json[pos] == '\r' ||
+                json[pos] == '\t')
+            {
+                ++pos;
+            }
         }
 
         inline std::string parseString()
         {
+            if (json[pos] != '"')
+                throw std::runtime_error("Expected JSON string");
+
+            ++pos;
+
             std::string result;
-            pos++; // Skip opening quote
+
             while (json[pos] != '"')
             {
                 if (json[pos] == '\\')
                 {
-                    pos++;
-                    if (json[pos] == 'u')
+                    ++pos;
+
+                    switch (json[pos])
                     {
-                        // Handle Unicode escape (simplified)
-                        pos += 4;
+                        case '"':
+                            result += '"';
+                            ++pos;
+                            break;
+
+                        case '\\':
+                            result += '\\';
+                            ++pos;
+                            break;
+
+                        case '/':
+                            result += '/';
+                            ++pos;
+                            break;
+
+                        case 'b':
+                            result += '\b';
+                            ++pos;
+                            break;
+
+                        case 'f':
+                            result += '\f';
+                            ++pos;
+                            break;
+
+                        case 'n':
+                            result += '\n';
+                            ++pos;
+                            break;
+
+                        case 'r':
+                            result += '\r';
+                            ++pos;
+                            break;
+
+                        case 't':
+                            result += '\t';
+                            ++pos;
+                            break;
+
+                        case 'u':
+                            throw std::runtime_error(
+                                "Unicode JSON escapes are not supported");
+
+                        default:
+                            throw std::runtime_error(
+                                "Invalid JSON escape sequence");
                     }
+
+                    continue;
                 }
+
                 result += json[pos++];
             }
-            pos++; // Skip closing quote
+
+            ++pos;
             return result;
         }
 
-        inline std::vector<int64_t> parseArray()
+        inline std::vector<std::int64_t> parseArray()
         {
-            std::vector<int64_t> result;
-            pos++; // Skip opening bracket
-            while (json[pos] != ']')
+            if (json[pos] != '[')
+                throw std::runtime_error("Expected JSON array");
+
+            ++pos;
+
+            std::vector<std::int64_t> result;
+
+            skipWhitespace();
+
+            if (json[pos] == ']')
+            {
+                ++pos;
+                return result;
+            }
+
+            while (true)
             {
                 skipWhitespace();
-                size_t num_start = pos;
-                while (std::isdigit(json[pos]))
-                    pos++;
-                result.push_back(std::stoll(std::string(json + num_start, pos - num_start)));
+
+                bool negative = false;
+
+                if (json[pos] == '-')
+                {
+                    negative = true;
+                    ++pos;
+                }
+
+                if (!std::isdigit(
+                        static_cast<unsigned char>(json[pos])))
+                {
+                    throw std::runtime_error(
+                        "Expected integer in JSON array");
+                }
+
+                std::int64_t value = 0;
+
+                while (std::isdigit(
+                    static_cast<unsigned char>(json[pos])))
+                {
+                    value =
+                        value * 10 +
+                        (json[pos] - '0');
+
+                    ++pos;
+                }
+
+                result.push_back(negative ? -value : value);
+
                 skipWhitespace();
-                if (json[pos] == ',')
-                    pos++;
+
+                if (json[pos] == ']')
+                {
+                    ++pos;
+                    return result;
+                }
+
+                if (json[pos] != ',')
+                    throw std::runtime_error(
+                        "Expected ',' in JSON array");
+
+                ++pos;
             }
-            pos++; // Skip closing bracket
-            return result;
         }
 
-        inline std::array<size_t, 2> parseDataOffsets()
+        inline std::array<std::size_t, 2> parseDataOffsets()
         {
-            std::array<size_t, 2> result;
-            pos++; // Skip opening bracket
+            const auto values = parseArray();
+
+            if (values.size() != 2)
+                throw std::runtime_error(
+                    "data_offsets must contain exactly two values");
+
+            if (values[0] < 0 || values[1] < 0)
+                throw std::runtime_error(
+                    "data_offsets cannot contain negative values");
+
+            return {
+                static_cast<std::size_t>(values[0]),
+                static_cast<std::size_t>(values[1])
+            };
+        }
+
+        inline void skipValue()
+        {
             skipWhitespace();
-            size_t num_start = pos;
-            while (std::isdigit(json[pos]))
-                pos++;
-            result[0] = std::stoull(std::string(json + num_start, pos - num_start));
-            skipWhitespace();
-            pos++; // Skip comma
-            skipWhitespace();
-            num_start = pos;
-            while (std::isdigit(json[pos]))
-                pos++;
-            result[1] = std::stoull(std::string(json + num_start, pos - num_start));
-            skipWhitespace();
-            pos++; // Skip closing bracket
-            return result;
+
+            if (json[pos] == '"')
+            {
+                parseString();
+                return;
+            }
+
+            if (json[pos] != '{' && json[pos] != '[')
+            {
+                while (
+                    json[pos] != ',' &&
+                    json[pos] != '}' &&
+                    json[pos] != '\0')
+                {
+                    ++pos;
+                }
+
+                return;
+            }
+
+            const char opening = json[pos];
+            const char closing =
+                opening == '{' ? '}' : ']';
+
+            int depth = 0;
+            bool inside_string = false;
+            bool escaped = false;
+
+            while (json[pos] != '\0')
+            {
+                const char c = json[pos++];
+
+                if (inside_string)
+                {
+                    if (escaped)
+                    {
+                        escaped = false;
+                    }
+                    else if (c == '\\')
+                    {
+                        escaped = true;
+                    }
+                    else if (c == '"')
+                    {
+                        inside_string = false;
+                    }
+
+                    continue;
+                }
+
+                if (c == '"')
+                {
+                    inside_string = true;
+                }
+                else if (c == opening)
+                {
+                    ++depth;
+                }
+                else if (c == closing)
+                {
+                    --depth;
+
+                    if (depth == 0)
+                        return;
+                }
+            }
+
+            throw std::runtime_error(
+                "Unexpected end of JSON value");
         }
 
         inline TensorInfo parseTensorInfo()
         {
-            TensorInfo info;
-            pos++; // Skip opening brace
-            while (json[pos] != '}')
+            if (json[pos] != '{')
+                throw std::runtime_error(
+                    "Expected tensor info object");
+
+            ++pos;
+
+            TensorInfo info{};
+
+            while (true)
             {
                 skipWhitespace();
-                std::string key = parseString();
+
+                if (json[pos] == '}')
+                {
+                    ++pos;
+                    return info;
+                }
+
+                const std::string key = parseString();
+
                 skipWhitespace();
-                pos++; // Skip colon
+
+                if (json[pos] != ':')
+                    throw std::runtime_error(
+                        "Expected ':' after JSON key");
+
+                ++pos;
                 skipWhitespace();
+
                 if (key == "dtype")
                 {
-                    cum::datatype dtype;
-
-                    std::string type_tag = parseString();
-
-                    // type_tag == "F64" ? dtype = cum::datatype::FP64 :
-                    // type_tag == "F32" ? dtype = cum::datatype::FP32 :
-                    // type_tag == "F16" ? dtype = cum::datatype::FP16 :
-                    // type_tag == "BF16" ? dtype = cum::datatype::BF16 :
-
-                    dtype = get_cum_dtype(type_tag);
-
-                    info.dtype = dtype;
+                    info.dtype = get_cum_dtype(parseString());
                 }
                 else if (key == "shape")
                 {
@@ -192,226 +414,304 @@ namespace yann::utils
                 }
                 else
                 {
-                    // Skip unknown fields
-                    while (json[pos] != ',' && json[pos] != '}')
-                        pos++;
+                    skipValue();
                 }
+
                 skipWhitespace();
+
                 if (json[pos] == ',')
-                    pos++;
+                {
+                    ++pos;
+                    continue;
+                }
+
+                if (json[pos] == '}')
+                {
+                    ++pos;
+                    return info;
+                }
+
+                throw std::runtime_error(
+                    "Expected ',' or '}' in tensor info");
             }
-            pos++; // Skip closing brace
-            return info;
         }
 
     public:
-        inline SimpleJSONParser(const char *json_str) : json(json_str), pos(0) {}
+        explicit SimpleJSONParser(const char* json_str)
+            : json(json_str), pos(0)
+        {
+        }
 
         inline std::unordered_map<std::string, TensorInfo> parse()
         {
             std::unordered_map<std::string, TensorInfo> result;
+
             skipWhitespace();
-            if (json[pos++] != '{')
-                throw std::runtime_error("Expected object");
-            while (json[pos] != '}')
+
+            if (json[pos] != '{')
+                throw std::runtime_error(
+                    "Expected JSON object");
+
+            ++pos;
+
+            while (true)
             {
                 skipWhitespace();
-                std::string key = parseString();
+
+                if (json[pos] == '}')
+                    return result;
+
+                const std::string key = parseString();
+
                 skipWhitespace();
-                pos++; // Skip colon
+
+                if (json[pos] != ':')
+                    throw std::runtime_error(
+                        "Expected ':' after JSON key");
+
+                ++pos;
                 skipWhitespace();
-                if (key != "__metadata__")
+
+                if (key == "__metadata__")
                 {
-                    result[key] = parseTensorInfo();
+                    skipValue();
                 }
                 else
                 {
-                    // Skip metadata
-                    while (json[pos] != ',' && json[pos] != '}')
-                        pos++;
+                    result.emplace(
+                        key,
+                        parseTensorInfo());
                 }
+
                 skipWhitespace();
+
                 if (json[pos] == ',')
-                    pos++;
+                {
+                    ++pos;
+                    continue;
+                }
+
+                if (json[pos] == '}')
+                    return result;
+
+                throw std::runtime_error(
+                    "Expected ',' or '}' in JSON object");
             }
-            return result;
         }
     };
 
-
-    inline std::unordered_map<std::string, TensorInfo> parse_safetensors_header_info(const char *data, size_t size)
+    inline std::uint64_t read_header_size(
+        const void* data,
+        std::size_t file_size)
     {
-        if (size < 8)
+        if (file_size < sizeof(std::uint64_t))
             throw std::runtime_error("Invalid file size");
 
-        uint64_t header_size;
-        std::memcpy(&header_size, data, sizeof(uint64_t));
+        std::uint64_t header_size{};
 
-        if (8 + header_size > size)
-            throw std::runtime_error("Invalid header size");
+        std::memcpy(
+            &header_size,
+            data,
+            sizeof(header_size));
+
+        if (is_big_endian())
+            header_size = swap_endian(header_size);
+
+        return header_size;
+    }
+
+    inline std::unordered_map<std::string, TensorInfo>
+    parse_safetensors_header_info(
+        const char* data,
+        std::size_t size)
+    {
+        const std::uint64_t header_size =
+            read_header_size(data, size);
+
+        if (
+            header_size >
+            size - sizeof(std::uint64_t))
+        {
+            throw std::runtime_error(
+                "Invalid header size");
+        }
 
         SimpleJSONParser parser(data + 8);
+
         return parser.parse();
     }
 
-    inline void validate_string_length(const std::string &str, const std::string &context)
+    inline bool is_byte_swappable_dtype(cum::datatype dtype)
     {
-        if (str.length() > SAFETENSORS_MAX_STRING_SIZE)
+        return
+            dtype == cum::datatype::FP16 ||
+            dtype == cum::datatype::BF16 ||
+            dtype == cum::datatype::FP32 ||
+            dtype == cum::datatype::FP64;
+    }
+
+    inline void swap_tensor_endian(cum::Tensor& tensor)
+    {
+        const auto element_size =
+            cum::datatype_size(tensor.type());
+
+        if (element_size <= 1)
+            return;
+
+        auto* data = tensor.data<char>();
+
+        for (
+            cum::dim_t offset = 0;
+            offset < tensor.size();
+            offset += element_size)
         {
-            throw std::runtime_error(context + " exceeds maximum allowed length");
+            std::reverse(
+                data + offset,
+                data + offset + element_size);
         }
     }
 
-    inline bool is_big_endian()
+    std::unordered_map<std::string, cum::Tensor>
+    load_safetensors(const std::string& filename)
     {
-        union
-        {
-            uint32_t i;
-            char c[4];
-        } bint = {0x01020304};
+        const int fd = open(
+            filename.c_str(),
+            O_RDONLY);
 
-        return bint.c[0] == 1;
-    }
-
-    template <typename T>
-    inline T swap_endian(T u)
-    {
-        static_assert(CHAR_BIT == 8, "CHAR_BIT != 8");
-
-        union
-        {
-            T u;
-            unsigned char u8[sizeof(T)];
-        } source, dest;
-
-        source.u = u;
-
-        for (size_t k = 0; k < sizeof(T); k++)
-            dest.u8[k] = source.u8[sizeof(T) - k - 1];
-
-        return dest.u;
-    }
-
-    std::unordered_map<std::string, cum::Tensor> load_safetensors(const std::string &filename)
-    {
-        int fd = open(filename.c_str(), O_RDONLY);
         if (fd == -1)
         {
-            throw std::runtime_error("Failed to open file: " + filename);
+            throw std::runtime_error(
+                "Failed to open file: " + filename);
         }
 
-        struct stat sb;
+        struct stat sb{};
+
         if (fstat(fd, &sb) == -1)
         {
             close(fd);
-            throw std::runtime_error("Failed to get file size");
+
+            throw std::runtime_error(
+                "Failed to get file size");
         }
-        size_t file_size = sb.st_size;
+
+        const std::size_t file_size =
+            static_cast<std::size_t>(sb.st_size);
 
         if (file_size > SAFETENSORS_MAX_FILE_SIZE)
         {
             close(fd);
-            throw std::runtime_error("File size exceeds maximum allowed size");
+
+            throw std::runtime_error(
+                "File size exceeds maximum allowed size");
         }
 
-        void *mapped_file = mmap(nullptr, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
+        void* mapped_file = mmap(
+            nullptr,
+            file_size,
+            PROT_READ,
+            MAP_PRIVATE,
+            fd,
+            0);
+
         if (mapped_file == MAP_FAILED)
         {
             close(fd);
-            throw std::runtime_error("Failed to memory map file");
+
+            throw std::runtime_error(
+                "Failed to memory map file");
         }
 
         try
         {
-            uint64_t header_size;
-            std::memcpy(&header_size, mapped_file, sizeof(uint64_t));
-            if (is_big_endian())
+            const std::uint64_t header_size =
+                read_header_size(
+                    mapped_file,
+                    file_size);
+
+            if (
+                header_size >
+                file_size - sizeof(std::uint64_t))
             {
-                header_size = swap_endian(header_size);
+                throw std::runtime_error(
+                    "Invalid header size");
             }
 
-            if (8 + header_size > file_size)
-                throw std::runtime_error("Invalid header size");
+            const auto tensor_infos =
+                parse_safetensors_header_info(
+                    static_cast<const char*>(mapped_file),
+                    file_size);
 
-            auto tensor_infos = parse_safetensors_header_info(static_cast<char *>(mapped_file), file_size);
-
-            if (tensor_infos.size() > SAFETENSORS_MAX_TENSORS)
+            if (tensor_infos.size() >
+                SAFETENSORS_MAX_TENSORS)
             {
-                throw std::runtime_error("Number of tensors exceeds maximum allowed");
+                throw std::runtime_error(
+                    "Number of tensors exceeds maximum allowed");
             }
+
+            const std::size_t data_start_offset =
+                sizeof(std::uint64_t) +
+                static_cast<std::size_t>(header_size);
+
+            const std::size_t data_size =
+                file_size - data_start_offset;
+
+            const auto* data_start =
+                static_cast<const char*>(mapped_file) +
+                data_start_offset;
 
             std::unordered_map<std::string, cum::Tensor> tensors;
-            char *data_start = static_cast<char *>(mapped_file) + 8 + header_size;
 
-            for (const auto &[name, info] : tensor_infos)
+            tensors.reserve(tensor_infos.size());
+
+            for (const auto& [name, info] : tensor_infos)
             {
-                validate_string_length(name, "Tensor name");
+                validate_string_length(
+                    name,
+                    "Tensor name");
 
-                if (info.shape.size() > SAFETENSORS_MAX_DIM)
+                if (info.shape.size() >
+                    SAFETENSORS_MAX_DIM)
                 {
-                    throw std::runtime_error("Tensor dimension exceeds maximum allowed");
+                    throw std::runtime_error(
+                        "Tensor dimension exceeds maximum allowed");
                 }
 
-                // cum::datatype dtype = info.dtype);
+                const std::size_t begin =
+                    info.data_offsets[0];
 
-                // auto options = cum::TensorOptions()
-                //                    .dtype(dtype)
-                //                    .device(torch::kCPU);
+                const std::size_t end =
+                    info.data_offsets[1];
 
-                // cum::Tensor cpu_tensor = torch::from_blob(
-                //                                data_start + info.data_offsets[0],
-                //                                info.shape,
-                //                                options)
-                //                                .clone(); // Clone to own the data
-
-                // cum::Tensor tensor(info.shape, info.dtype);
-
-                // cum::Tensor tensor = cum::Tensor::take_memory(info.shape, data_start + info.data_offsets[0], info.dtype).clone();
-
-                const auto* bytes =
-    reinterpret_cast<const std::uint8_t*>(
-        data_start + info.data_offsets[0]
-    );
-
-                std::println(
-                    "LOAD '{}': {:02x} {:02x} {:02x} {:02x}",
-                    name,
-                    bytes[0],
-                    bytes[1],
-                    bytes[2],
-                    bytes[3]
-                );
-
-                auto tensor = cum::Tensor::take_memory(
-                   info.shape,
-                   data_start + info.data_offsets[0],
-                   info.dtype
-               );
-
-                std::println(
-                    "LOAD '{}': rank={} type={} format={} size={} first={}",
-                    name,
-                    tensor.rank(),
-                    static_cast<int>(tensor.type()),
-                    static_cast<int>(tensor.format()),
-                    tensor.size(),
-                    tensor.at<float>({0})
-                );
-
-                tensors[name] = std::move(tensor);
-
-                if (is_big_endian() && (info.dtype == cum::datatype::FP16 || info.dtype == cum::datatype::FP32 || info.dtype == cum::datatype::FP64))
+                if (begin > end)
                 {
-                    // auto data_ptr = static_cast<char *>(cpu_tensor.data_ptr());
-                    char* data_ptr = tensor.data<char>();
-                    cum::dim_t datatype_size = cum::datatype_size(tensor.type());
-                    for (cum::dim_t i = 0; i < tensor.size(); i += datatype_size)
-                    {
-                        std::reverse(data_ptr + i, data_ptr + i + datatype_size);
-                    }
+                    throw std::runtime_error(
+                        "Invalid tensor data offsets");
                 }
 
-                tensors[name] = tensor;
+                if (end > data_size)
+                {
+                    throw std::runtime_error(
+                        "Tensor data offsets exceed file size");
+                }
+
+                auto tensor =
+                    cum::Tensor::take_memory(
+                        info.shape,
+                        const_cast<char*>(
+                            data_start + begin),
+                        info.dtype);
+
+                if (
+                    is_big_endian() &&
+                    is_byte_swappable_dtype(
+                        tensor.type()))
+                {
+                    swap_tensor_endian(tensor);
+                }
+
+                tensors.emplace(
+                    name,
+                    std::move(tensor));
             }
 
             munmap(mapped_file, file_size);
@@ -427,154 +727,192 @@ namespace yann::utils
         }
     }
 
-    // void save_safetensor(const)
-
-    void save_safetensors(const std::unordered_map<std::string, cum::Tensor> &tensors, const std::string &filename, const std::unordered_map<std::string, std::string> &metadata)
+    void save_safetensors(
+        const std::unordered_map<std::string, cum::Tensor>& tensors,
+        const std::string& filename,
+        const std::unordered_map<std::string, std::string>& metadata)
     {
-        if (tensors.size() > SAFETENSORS_MAX_TENSORS)
+        if (tensors.size() >
+            SAFETENSORS_MAX_TENSORS)
         {
-            throw std::runtime_error("Number of tensors exceeds maximum allowed");
+            throw std::runtime_error(
+                "Number of tensors exceeds maximum allowed");
         }
 
         std::string header_json = "{";
         std::vector<char> data_buffer;
-        size_t current_offset = 0;
+
+        std::size_t current_offset = 0;
 
         if (!metadata.empty())
         {
             header_json += "\"__metadata__\":{";
-            bool first_meta = true;
-            for (const auto &[key, value] : metadata)
-            {
-                validate_string_length(key, "Metadata key");
-                validate_string_length(value, "Metadata value");
 
-                if (!first_meta)
+            bool first = true;
+
+            for (const auto& [key, value] : metadata)
+            {
+                validate_string_length(
+                    key,
+                    "Metadata key");
+
+                validate_string_length(
+                    value,
+                    "Metadata value");
+
+                if (!first)
                     header_json += ",";
-                header_json += "\"" + key + "\":\"" + value + "\"";
-                first_meta = false;
+
+                header_json +=
+                    "\"" + key + "\":\"" + value + "\"";
+
+                first = false;
             }
+
             header_json += "},";
         }
 
-        for (const auto &[name, tensor] : tensors)
+        for (const auto& [name, tensor] : tensors)
         {
-            validate_string_length(name, "Tensor name");
-
-            std::println(
-    "SAVE '{}': first = {}",
-    name,
-    tensor.at<float>({0})
-            );
-
-            std::println(
-                "SAVE '{}': rank={} type={} format={} size={} data={}",
+            validate_string_length(
                 name,
-                tensor.rank(),
-                static_cast<int>(tensor.type()),
-                static_cast<int>(tensor.format()),
-                tensor.size(),
-                tensor.data()
-            );
+                "Tensor name");
 
-            // auto clone = tensor.clone();
-            cum::Tensor tensor_clone = tensor.clone();
-
-
-            const auto* bytes =
-    static_cast<const std::uint8_t*>(tensor.data());
-
-            std::println(
-                "SAVE '{}': {:02x} {:02x} {:02x} {:02x}",
-                name,
-                bytes[0],
-                bytes[1],
-                bytes[2],
-                bytes[3]
-            );
-            std::println("SAVE '{}': clone OK", name);
-
-
-            if (tensor.type() == cum::datatype::FP16 || tensor.type() == cum::datatype::FP32 || tensor.type() == cum::datatype::FP64)
+            if (tensor.rank() >
+                SAFETENSORS_MAX_DIM)
             {
-
-                // tensor = tensor.to(torch::kCPU, tensor.dtype(), /*non_blocking=*/false, /*copy=*/true);
-                // tensor_clone = tensor.clone();
-                // auto data_ptr = static_cast<char *>(tensor.data_ptr());
-                auto data_ptr = tensor_clone.data<char>();
-                cum::dim_t datatype_size = cum::datatype_size(tensor.type());
-                for (cum::dim_t i = 0; i < tensor.size() ; i += datatype_size)
-                {
-                    std::reverse(data_ptr + i, data_ptr + i + datatype_size);
-                }
+                throw std::runtime_error(
+                    "Tensor dimension exceeds maximum allowed");
             }
 
-            if (tensor.rank() > SAFETENSORS_MAX_DIM)
+            auto tensor_clone = tensor.clone();
+
+            if (
+                is_big_endian() &&
+                is_byte_swappable_dtype(
+                    tensor_clone.type()))
             {
-                throw std::runtime_error("Tensor dimension exceeds maximum allowed");
+                swap_tensor_endian(tensor_clone);
             }
 
-            auto dtype = get_safetensors_dtype(tensor_clone.type());
-            // auto shape = tensor.sizes().vec();
-            auto shape = tensor_clone.shape();
-            // size_t tensor_size = tensor.numel() * tensor.element_size();
-            size_t tensor_size = tensor_clone.size();
+            const auto dtype =
+                get_safetensors_dtype(
+                    tensor_clone.type());
+
+            const auto shape =
+                tensor_clone.shape();
+
+            const std::size_t tensor_size =
+                static_cast<std::size_t>(
+                    tensor_clone.size());
 
             if (header_json.length() > 1)
                 header_json += ",";
-            header_json += "\"" + name + "\":{";
-            header_json += "\"dtype\":\"" + dtype + "\",";
+
+            header_json +=
+                "\"" + name + "\":{";
+
+            header_json +=
+                "\"dtype\":\"" + dtype + "\",";
+
             header_json += "\"shape\":[";
-            for (size_t i = 0; i < shape.size(); ++i)
+
+            for (std::size_t i = 0;
+                 i < shape.size();
+                 ++i)
             {
                 if (i > 0)
                     header_json += ",";
-                header_json += std::to_string(shape[i]);
-            }
-            header_json += "],";
-            header_json += "\"data_offsets\":[" + std::to_string(current_offset) + "," + std::to_string(current_offset + tensor_size) + "]";
-            header_json += "}";
 
-            // const char *tensor_data = static_cast<const char *>(tensor.data_ptr());
-            const char* tensor_data = tensor_clone.data<const char>();
-            data_buffer.insert(data_buffer.end(), tensor_data, tensor_data + tensor_size);
+                header_json +=
+                    std::to_string(shape[i]);
+            }
+
+            header_json += "],";
+
+            header_json +=
+                "\"data_offsets\":[" +
+                std::to_string(current_offset) +
+                "," +
+                std::to_string(
+                    current_offset + tensor_size) +
+                "]}";
+
+            const char* tensor_data =
+                tensor_clone.data<const char>();
+
+            data_buffer.insert(
+                data_buffer.end(),
+                tensor_data,
+                tensor_data + tensor_size);
 
             current_offset += tensor_size;
         }
 
         header_json += "}";
-        uint64_t header_size = header_json.size();
 
-        if (header_size > SAFETENSORS_MAX_METADATA_SIZE)
+        const std::uint64_t header_size =
+            static_cast<std::uint64_t>(
+                header_json.size());
+
+        if (header_size >
+            SAFETENSORS_MAX_METADATA_SIZE)
         {
-            throw std::runtime_error("Metadata size exceeds maximum allowed size");
+            throw std::runtime_error(
+                "Metadata size exceeds maximum allowed size");
         }
 
-        if (8 + header_size + data_buffer.size() > SAFETENSORS_MAX_FILE_SIZE)
+        if (
+            sizeof(std::uint64_t) +
+            header_size +
+            data_buffer.size() >
+            SAFETENSORS_MAX_FILE_SIZE)
         {
-            throw std::runtime_error("Total file size exceeds maximum allowed size");
+            throw std::runtime_error(
+                "Total file size exceeds maximum allowed size");
         }
 
-        std::ofstream file(filename, std::ios::binary);
+        std::ofstream file(
+            filename,
+            std::ios::binary);
+
         if (!file)
         {
-            throw std::runtime_error("Failed to open file for writing: " + filename);
+            throw std::runtime_error(
+                "Failed to open file for writing: " +
+                filename);
         }
 
-        uint64_t little_endian_header_size = header_size;
+        std::uint64_t stored_header_size =
+            header_size;
+
         if (is_big_endian())
+            stored_header_size =
+                swap_endian(stored_header_size);
+
+        file.write(
+            reinterpret_cast<const char*>(
+                &stored_header_size),
+            sizeof(stored_header_size));
+
+        file.write(
+            header_json.data(),
+            static_cast<std::streamsize>(
+                header_json.size()));
+
+        if (!data_buffer.empty())
         {
-            little_endian_header_size = swap_endian(header_size);
+            file.write(
+                data_buffer.data(),
+                static_cast<std::streamsize>(
+                    data_buffer.size()));
         }
-        file.write(reinterpret_cast<const char *>(&little_endian_header_size), sizeof(uint64_t));
-
-        file.write(header_json.data(), header_json.size());
-
-        file.write(data_buffer.data(), data_buffer.size());
 
         if (!file)
         {
-            throw std::runtime_error("Failed to write to file: " + filename);
+            throw std::runtime_error(
+                "Failed to write file: " +
+                filename);
         }
     }
 
