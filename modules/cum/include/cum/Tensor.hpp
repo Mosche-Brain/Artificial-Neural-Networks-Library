@@ -21,43 +21,33 @@
 
 namespace cum
 {
-    enum class Axis
-    {
-        Batches,
-        Channels,
-        Depth,
-        Height,
-        Width,
-        Rows = Height,
-        Cols = Width,
-    };
-
     // Inefficient container for storing references for arbitrary datatypes nonspecified in compile time
     // std::variant_alternative<>
 
-    struct AxisIndex
-    {
-        Axis axis;
-        dim_t index;
-    };
+    template<typename T>
+    struct datatype_of;
 
     class Tensor
     {
     public:
         /* Constructors */
         Tensor(const Shape& shape, datatype dtype = default_type, layout layout = layout::ANY); // FP32, ANY
-
-        Tensor(cumeric_t value, datatype dtype = default_type, layout layout = layout::X); // scalar constructor
-        Tensor(dim_t lenght, datatype dtype = default_type, layout layout = layout::X); // vector constructor
-        Tensor(dim_t rows, dim_t cols, datatype dtype = default_type, layout layout = layout::NC); // Matrix Constructor
-        Tensor(dim_t axis0, dim_t axis1, dim_t axis2, datatype dtype = default_type, layout layout = layout::ABC); // 3-rd rank tensor constructor
-        Tensor(dim_t axis0, dim_t axis1, dim_t axis2, dim_t axis3, datatype dtype = default_type, layout layout = layout::NCHW); // 4-th rank tensor constructor
-        Tensor(dim_t axis0, dim_t axis1, dim_t axis2, dim_t axis3, dim_t axis4, datatype dtype = default_type, layout layout = layout::NCDHW); // 5-th rank tensor constructor
-
         Tensor() = default;
+
+        Tensor(cumeric_t value, datatype dtype = default_type, layout layout = layout::A); // scalar constructor
+        Tensor(dim_t lenght, datatype dtype = default_type, layout layout = layout::A); // vector constructor
+        Tensor(dim_t rows, dim_t cols, datatype dtype = default_type, layout layout = layout::AB); // Matrix Constructor
+        Tensor(dim_t axis0, dim_t axis1, dim_t axis2, datatype dtype = default_type, layout layout = layout::ABC); // 3-rd rank tensor constructor
+        Tensor(dim_t axis0, dim_t axis1, dim_t axis2, dim_t axis3, datatype dtype = default_type, layout layout = layout::ABCD); // 4-th rank tensor constructor
+        Tensor(dim_t axis0, dim_t axis1, dim_t axis2, dim_t axis3, dim_t axis4, datatype dtype = default_type, layout layout = layout::ABCDE); // 5-th rank tensor constructor
+
         Tensor(const Tensor& tensor);
         Tensor(Tensor&& tensor) noexcept;
-		~Tensor();
+
+        template<typename T, dim_t... dims> // Eigen3-style tensor constructor
+        Tensor(const std::vector<T>& values);
+
+        ~Tensor();
 
         /* fabriques */
 
@@ -99,14 +89,14 @@ namespace cum
         bool is_scalar() const;
         // bool is_vector();
         // bool is_matrix();
-        bool has(Axis axis) const;
-        dim_t extent(Axis axis) const;
+        // bool has(Axis axis) const;
+        // dim_t extent(Axis axis) const;
 
-        dim_t batches() const;
-        dim_t channels() const;
-        dim_t depth() const;
-        dim_t height() const;
-        dim_t width() const;
+        // dim_t batches() const;
+        // dim_t channels() const;
+        // dim_t depth() const;
+        // dim_t height() const;
+        // dim_t width() const;
         dim_t rows() const;    // alias height()
         dim_t cols() const;    // alias width()
 
@@ -244,9 +234,20 @@ namespace cum
         std::unique_ptr<neural_primitives::Memory> _memr_;
         void* _data = nullptr;
         bool _owns_data = true;
-
-
     };
+
+
+    template<typename T, dim_t... dims>
+    Tensor::Tensor(const std::vector<T>& values) : Tensor(Shape{dims...}, datatype_of<T>())
+    {
+        constexpr dim_t elements_count = (dims * ...);
+
+        if (values.size() != elements_count)
+            throw std::invalid_argument("Tensor constructor: PI(dims) != lenght of values");
+
+        // const T* data
+        // memory::memcopy()
+    }
 
     template<datatype T, layout layout>
     Tensor Tensor::create_tensor(const Shape& shape)
@@ -274,5 +275,83 @@ namespace cum
         // return *slice(indices, Shape(rank(), 1)).data<T>();
     }
 
+
+    template<>
+    struct datatype_of<double>
+    {
+        static constexpr datatype value = datatype::FP64;
+    };
+
+    template<>
+    struct datatype_of<float>
+    {
+        static constexpr datatype value = datatype::FP32;
+    };
+
+    template<>
+    struct datatype_of<cum::float16>
+    {
+        static constexpr datatype value = datatype::FP16;
+    };
+
+    template<>
+    struct datatype_of<cum::bfloat16>
+    {
+        static constexpr datatype value = datatype::BF16;
+    };
+
+    template<>
+    struct datatype_of<cum::float8>
+    {
+        static constexpr datatype value = datatype::FP8;
+    };
+
+    template<>
+    struct datatype_of<std::int64_t>
+    {
+        static constexpr datatype value = datatype::S64;
+    };
+
+    template<>
+    struct datatype_of<std::int32_t>
+    {
+        static constexpr datatype value = datatype::S32;
+    };
+
+    template<>
+    struct datatype_of<std::int16_t>
+    {
+        static constexpr datatype value = datatype::S16;
+    };
+
+    template<>
+    struct datatype_of<std::int8_t>
+    {
+        static constexpr datatype value = datatype::S8;
+    };
+
+    template<>
+    struct datatype_of<std::uint64_t>
+    {
+        static constexpr datatype value = datatype::U64;
+    };
+
+    template<>
+    struct datatype_of<std::uint32_t>
+    {
+        static constexpr datatype value = datatype::U32;
+    };
+
+    template<>
+    struct datatype_of<std::uint16_t>
+    {
+        static constexpr datatype value = datatype::U16;
+    };
+
+    template<>
+    struct datatype_of<std::uint8_t>
+    {
+        static constexpr datatype value = datatype::U8;
+    };
 
 } // cum

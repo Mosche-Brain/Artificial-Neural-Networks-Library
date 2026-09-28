@@ -55,63 +55,6 @@ namespace cum
 		}
 	}
 
-	int axis_position(std::size_t rank, Axis axis)
-	{
-		switch(rank)
-		{
-			case 1:
-			{
-				return axis == Axis::Width ? 0 : -1;
-			}
-			case 2:
-			{
-				switch(axis)
-				{
-					case Axis::Batches:
-					case Axis::Rows:  return 0;
-					case Axis::Channels:
-					case Axis::Cols: return 1;
-					default:             return -1;
-				}
-			}
-			case 3:
-			{
-				switch(axis)
-				{
-					case Axis::Batches:  return 0;
-					case Axis::Channels: return 1;
-					case Axis::Width:    return 2;
-					default:             return -1;
-				}
-			}
-			case 4:
-			{
-				switch(axis)
-				{
-					case Axis::Batches:  return 0;
-					case Axis::Channels: return 1;
-					case Axis::Height:   return 2;
-					case Axis::Width:    return 3;
-					default:             return -1;
-				}
-			}
-			case 5:
-			{
-				switch(axis)
-				{
-					case Axis::Batches:  return 0;
-					case Axis::Channels: return 1;
-					case Axis::Depth:    return 2;
-					case Axis::Height:   return 3;
-					case Axis::Width:    return 4;
-					default:             return -1;
-				}
-			}
-			default:
-				return -1;
-		}
-	}
-
 	layout concrete_layout(std::size_t rank, layout requested)
 	{
 		if(requested != layout::ANY)
@@ -403,60 +346,21 @@ namespace cum
 		return _desc_->size() == dnnl::memory::data_type_size(dnnl_data_type(type()));
 	}
 
-	bool Tensor::has(Axis axis) const
-	{
-		const Shape tensor_shape = _desc_->shape();
-		const int position =        axis_position(rank(), axis);
-
-		return position >= 0 &&
-			static_cast<std::size_t>(position) < tensor_shape.size();
-	}
-
-	dim_t Tensor::extent(Axis axis) const
-	{
-		const Shape tensor_shape = _desc_->shape();
-		const int position = axis_position(rank(), axis);
-
-		if(position < 0 ||
-			static_cast<std::size_t>(position) >= tensor_shape.size())
-			return 0;
-
-		return tensor_shape[position];
-	}
-
-	dim_t Tensor::batches() const
-	{
-		return extent(Axis::Batches);
-    }
-
-	dim_t Tensor::channels() const
-    {
-		return extent(Axis::Channels);
-    }
-
-	dim_t Tensor::depth() const
-    {
-		return extent(Axis::Depth);
-    }
-
-	dim_t Tensor::height() const
-    {
-		return extent(Axis::Height);
-    }
-
-	dim_t Tensor::width() const
-    {
-		return extent(Axis::Width);
-    }
 
 	dim_t Tensor::rows() const
     {
-	    return height();
+		if (rank() != 2)
+			throw std::runtime_error("Tensor::rows() called on not 2'nd rank tensor");
+
+	    return shape()[0];
     }
 
 	dim_t Tensor::cols() const
     {
-	    return width();
+		if (rank() != 2)
+			throw std::runtime_error("Tensor::cols() called on not 2'nd rank tensor");
+
+	    return shape()[1];
     }
 
 	std::unique_ptr<neural_primitives::Descriptor>& Tensor::descriptor()
@@ -1185,7 +1089,7 @@ namespace cum
 		}
 
 		Shape result_shape = {};
-		switch (this->format()) // Temporary solution
+		switch (this->format()) // Temporary solution, later we should check two last dimensions
 		{
 			case layout::BA:
 			case layout::AB:
