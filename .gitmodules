@@ -1,0 +1,3 @@
+[submodule "modules/safetensors.cpp"]
+	path = modules/safetensors.cpp
+	url = https://github.com/Mosche-Brain/safetensors.cpp
