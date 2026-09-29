@@ -12,12 +12,16 @@
 
 namespace yann::loss
 {
-    class CategoricalCrossEntropy
+    class CategoricalCrossEntropy : public LossBase
     {
     public:
+        CategoricalCrossEntropy(bool from_logits = false);
+
         void compute(const cum::Tensor& predicted, const cum::Tensor& target) override;
-        static std::unique_ptr<LossBase> create();
+        static std::unique_ptr<CategoricalCrossEntropy> create(bool from_logits = false);
+    private:
+        bool from_logits_;
     };
-} // yann
+} // yann::loss
 
 #endif //YANN_CATEGORICALCROSSENTROPY_HPP

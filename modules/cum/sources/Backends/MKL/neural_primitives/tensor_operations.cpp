@@ -145,12 +145,11 @@ namespace cum::neural_primitives
             primitive, 
             internal::stream(), 
             {
-				{ DNNL_ARG_SRC, A.memory },
-				{ DNNL_ARG_WEIGHTS, B.memory },
-				{ DNNL_ARG_DST, C.memory }
+				{ DNNL_ARG_SRC,	   A.memory },
+				{ DNNL_ARG_WEIGHTS,   B.memory },
+				{ DNNL_ARG_DST,	C.memory }
             }
         );
-
 
     	internal::stream().wait();
         return detail::event_handler::create(std::move(event));

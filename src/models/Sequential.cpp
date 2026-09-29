@@ -172,15 +172,15 @@ namespace yann::models
 
                 loss.compute(results, y);
 
-                loss::loss_t error = loss.result();
+                auto [error, gradient] = loss.result();
 
-                this->backward(error.gradient);
+                this->backward(gradient);
 
                 for (logging::ITrainingCallback*&  callback : callbacks)
                     callback->afterBackprop(ctx);
 
                 optimizer.step(params); // zerowanie gradientów jest dokonywanie niejawnie w kroku optymalizatora
-                total_loss += error.value;
+                total_loss += error;
             }
 
             mean_loss_prev = mean_loss;

@@ -1350,6 +1350,16 @@ namespace cum
     	return sex / tensor;
     }
 
+	Tensor Tensor::operator + ()
+	{
+		return *this;
+	}
+
+	Tensor Tensor::operator - () const
+	{
+		return *this * -1;
+	}
+
 	Tensor& Tensor::operator += (const Tensor& other)
     {
 	    neural_primitives::add(*_memr_, *other._memr_, *_desc_, *other._desc_);

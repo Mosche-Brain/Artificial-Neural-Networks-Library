@@ -2,7 +2,7 @@
 #include <cum/Matrix.hpp>
 #include <cum/runtime.hpp>
 
-#include <yann/loss/BinaryCrossEntropy.hpp>
+#include <yann/loss/CategoricalCrossEntropy.hpp>
 #include <yann/optimizers/SGD.hpp>
 #include <yann/optimizers/Momentum.hpp>
 #include <yann/models/Sequential.hpp>
@@ -198,7 +198,7 @@ int main(int argc, char** argv)
             yann::models::layers::Dense::createUnique(10, "sigmoid")
         });
 
-        yann::loss::Loss loss = yann::loss::BinaryCrossEntropy::create();
+        yann::loss::Loss loss = yann::loss::CategoricalCrossEntropy::create();
         yann::optimizers::Optimizer optimizer = yann::optimizers::Momentum::create(0.01f);
 
         yann::logging::LossTracker loss_tracker;

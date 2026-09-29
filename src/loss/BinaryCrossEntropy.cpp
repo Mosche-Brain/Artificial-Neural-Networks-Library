@@ -31,13 +31,10 @@ namespace yann::loss
                     throw std::invalid_argument("binary_cross_entropy: result and target dimensions must match");
             }
 
-            // const cum::cumeric_t batch_size = target.shape()[1];
-
             const cum::cumeric_t eps = 1e-6_c; // epsilon nie powinien być hardcoded wewnątrz funkcji, tylko raczej być globalnym makrem lub zmienną, ale nie dałem to na potrzeby debug
 
             const cum::Tensor P = predicted.clamp(eps, 1 - eps);
 
-            // loss.value = (-1 * (target.multiply(P.log()) + (1 - target).multiply((1 - P).log()))).mean();
             loss.value = (-1 * (target.multiply(P.log()) + (1 - target).multiply((1 - P).log()))).sum();
             loss.gradient = ((1 - target) / (1 - P) - target / P);
 

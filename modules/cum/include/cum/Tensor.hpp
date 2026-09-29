@@ -219,10 +219,15 @@ namespace cum
         Tensor friend operator / (const Tensor& tensor, cumeric_t scalar);
         Tensor friend operator / (cumeric_t scalar, const Tensor& tensor);
 
+        Tensor operator + ();
+        Tensor operator - () const;
+
         Tensor& operator += (const Tensor& other);
         Tensor& operator -= (const Tensor& other);
         Tensor& operator *= (const Tensor& other);
         Tensor& operator /= (const Tensor& other);
+
+
 
         bool friend operator == (const Tensor& A, const Tensor& B);
         bool friend operator != (const Tensor& A, const Tensor& B);
