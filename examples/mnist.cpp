@@ -1,4 +1,3 @@
-#include "runtime_config.hpp"
 #include <cum/cum.hpp>
 #include <cum/Matrix.hpp>
 #include <cum/runtime.hpp>
@@ -6,8 +5,12 @@
 #include <yann/loss/BinaryCrossEntropy.hpp>
 #include <yann/optimizers/SGD.hpp>
 #include <yann/models/Sequential.hpp>
+#include <yann/models/layers/Dense.hpp>
+#include <yann/models/layers/Input.hpp>
 #include <yann/optimizers/OptimizerBase.hpp>
 #include <yann/logging/LossTracker.hpp>
+#include <yann/utils/serialize.hpp>
+#include <yann/runtime_config.hpp>
 
 #include <matplot/matplot.h>
 
@@ -19,13 +22,14 @@
 #include <string>
 #include <numeric>
 #include <array>
+
 class MnistDataLoader
 {
 public:
     struct Dataset
     {
-        cum::Matrix images; // 784 x samples, normalized to [0, 1]
-        cum::Matrix labels; // 10 x samples, one-hot encoded
+        cum::Tensor images; // 784 x samples, normalized to [0, 1]
+        cum::Tensor labels; // 10 x samples, one-hot encoded
     };
 
     static Dataset load(const std::string& directory, const std::string& split)
@@ -93,9 +97,10 @@ public:
 
             gzclose(images_file);
             gzclose(labels_file);
-            return {
-                cum::Matrix(image_size, image_count, image_data.data()),
-                cum::Matrix(10, label_count, label_data.data())
+            return
+            {
+                cum::Tensor::copy_memory({static_cast<cum::dim_t>(image_size), image_count}, image_data.data()),
+                cum::Tensor::copy_memory({10, label_count}, label_data.data())
             };
         }
         catch (...)
@@ -213,6 +218,8 @@ int main(int argc, char** argv)
             batch_size,
             callbacks);
 
+        yann::utils::model_serialize_to_safetensors(model, "mnist-resolver.safetensors");
+
         const auto loss_history = loss_tracker.getLossHistory();
         std::vector<double> epoch_range(loss_history.size());
         std::iota(epoch_range.begin(), epoch_range.end(), 0.0);
@@ -230,6 +237,8 @@ int main(int argc, char** argv)
         std::cerr << "MNIST loader error: " << error.what() << '\n';
         return 1;
     }
+
+
 
     cum::decum();
     return 0;

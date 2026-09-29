@@ -168,6 +168,16 @@ namespace cum
 		return tensor;
 	}
 
+	Tensor Tensor::copy_memory(const Shape& shape, void* data, datatype dtype, layout layout)
+	{
+		if(data == nullptr)
+			throw std::invalid_argument("take_memory requires a non-null data pointer");
+
+		Tensor tensor(shape, dtype, layout);
+		internal::queue().memcpy(tensor._data, data, static_cast<std::size_t>(tensor.size())).wait();
+		return tensor;
+	}
+
 	Tensor Tensor::Random(const Shape& shape, cumeric_t min, cumeric_t max, datatype dtype, layout layout)
 	{
 		Tensor tensor;

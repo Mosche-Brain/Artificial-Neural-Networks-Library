@@ -520,17 +520,11 @@ namespace yann::utils
         return header_size;
     }
 
-    inline std::unordered_map<std::string, TensorInfo>
-    parse_safetensors_header_info(
-        const char* data,
-        std::size_t size)
+    inline std::unordered_map<std::string, TensorInfo> parse_safetensors_header_info(const char* data,std::size_t size)
     {
-        const std::uint64_t header_size =
-            read_header_size(data, size);
+        const std::uint64_t header_size = read_header_size(data, size);
 
-        if (
-            header_size >
-            size - sizeof(std::uint64_t))
+        if (header_size > size - sizeof(std::uint64_t))
         {
             throw std::runtime_error(
                 "Invalid header size");
@@ -552,36 +546,29 @@ namespace yann::utils
 
     inline void swap_tensor_endian(cum::Tensor& tensor)
     {
-        const auto element_size =
-            cum::datatype_size(tensor.type());
+        const auto element_size = cum::datatype_size(tensor.type());
 
         if (element_size <= 1)
             return;
 
-        auto* data = tensor.data<char>();
+        char* data = tensor.data<char>();
 
-        for (
-            cum::dim_t offset = 0;
-            offset < tensor.size();
-            offset += element_size)
+        for(cum::dim_t offset = 0;offset < tensor.size(); offset += element_size)
         {
             std::reverse(
                 data + offset,
-                data + offset + element_size);
+                data + offset + element_size
+            );
         }
     }
 
-    std::unordered_map<std::string, cum::Tensor>
-    load_safetensors(const std::string& filename)
+    std::unordered_map<std::string, cum::Tensor> load_safetensors(const std::string& filename)
     {
-        const int fd = open(
-            filename.c_str(),
-            O_RDONLY);
+        const int fd = open(filename.c_str(), O_RDONLY);
 
         if (fd == -1)
         {
-            throw std::runtime_error(
-                "Failed to open file: " + filename);
+            throw std::runtime_error("Failed to open file: " + filename);
         }
 
         struct stat sb{};
@@ -590,56 +577,37 @@ namespace yann::utils
         {
             close(fd);
 
-            throw std::runtime_error(
-                "Failed to get file size");
+            throw std::runtime_error("Failed to get file size");
         }
 
-        const std::size_t file_size =
-            static_cast<std::size_t>(sb.st_size);
+        const std::size_t file_size = static_cast<std::size_t>(sb.st_size);
 
         if (file_size > SAFETENSORS_MAX_FILE_SIZE)
         {
             close(fd);
 
-            throw std::runtime_error(
-                "File size exceeds maximum allowed size");
+            throw std::runtime_error("File size exceeds maximum allowed size");
         }
 
-        void* mapped_file = mmap(
-            nullptr,
-            file_size,
-            PROT_READ,
-            MAP_PRIVATE,
-            fd,
-            0);
+        void* mapped_file = mmap(nullptr, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
 
         if (mapped_file == MAP_FAILED)
         {
             close(fd);
 
-            throw std::runtime_error(
-                "Failed to memory map file");
+            throw std::runtime_error("Failed to memory map file");
         }
 
         try
         {
-            const std::uint64_t header_size =
-                read_header_size(
-                    mapped_file,
-                    file_size);
+            const std::uint64_t header_size = read_header_size(mapped_file, file_size);
 
-            if (
-                header_size >
-                file_size - sizeof(std::uint64_t))
+            if (header_size > file_size - sizeof(std::uint64_t))
             {
-                throw std::runtime_error(
-                    "Invalid header size");
+                throw std::runtime_error("Invalid header size");
             }
 
-            const auto tensor_infos =
-                parse_safetensors_header_info(
-                    static_cast<const char*>(mapped_file),
-                    file_size);
+            const auto tensor_infos = parse_safetensors_header_info(static_cast<const char*>(mapped_file), file_size);
 
             if (tensor_infos.size() >
                 SAFETENSORS_MAX_TENSORS)
@@ -648,9 +616,7 @@ namespace yann::utils
                     "Number of tensors exceeds maximum allowed");
             }
 
-            const std::size_t data_start_offset =
-                sizeof(std::uint64_t) +
-                static_cast<std::size_t>(header_size);
+            const std::size_t data_start_offset = sizeof(std::uint64_t) + static_cast<std::size_t>(header_size);
 
             const std::size_t data_size =
                 file_size - data_start_offset;
@@ -665,53 +631,54 @@ namespace yann::utils
 
             for (const auto& [name, info] : tensor_infos)
             {
-                validate_string_length(
-                    name,
-                    "Tensor name");
+                validate_string_length(name, "Tensor name");
 
-                if (info.shape.size() >
-                    SAFETENSORS_MAX_DIM)
+                if (info.shape.size() > SAFETENSORS_MAX_DIM)
+                    throw std::runtime_error("Tensor dimension exceeds maximum allowed");
+
+                const std::size_t elem = cum::datatype_size(info.dtype);
+                std::size_t numel = 1;
+                for (const cum::dim_t d : info.shape)
                 {
-                    throw std::runtime_error(
-                        "Tensor dimension exceeds maximum allowed");
+                    if (d < 0)
+                        throw std::runtime_error("Negative dimension");
+                    if (d != 0 && numel > std::numeric_limits<std::size_t>::max() / static_cast<std::size_t>(d))
+                        throw std::runtime_error("Tensor shape overflow");
+                    numel *= static_cast<std::size_t>(d);
                 }
 
-                const std::size_t begin =
-                    info.data_offsets[0];
+                // const std::size_t begin = info.data_offsets[0];
+                //
+                // const std::size_t end = info.data_offsets[1];
 
-                const std::size_t end =
-                    info.data_offsets[1];
 
-                if (begin > end)
-                {
-                    throw std::runtime_error(
-                        "Invalid tensor data offsets");
-                }
+                const std::size_t expected_bytes = numel * elem;
+                const auto [begin, end] = std::pair{info.data_offsets[0], info.data_offsets[1]};
 
-                if (end > data_size)
-                {
-                    throw std::runtime_error(
-                        "Tensor data offsets exceed file size");
-                }
+                if (begin > end || end > data_size)
+                    throw std::runtime_error("Invalid tensor data offsets");
 
-                auto tensor =
-                    cum::Tensor::take_memory(
-                        info.shape,
-                        const_cast<char*>(
-                            data_start + begin),
-                        info.dtype);
+                if (end - begin != expected_bytes)
+                    throw std::runtime_error("data_offsets do not match shape and dtype");
 
-                if (
-                    is_big_endian() &&
-                    is_byte_swappable_dtype(
-                        tensor.type()))
-                {
+
+
+                // if (begin > end)
+                //     throw std::runtime_error("Invalid tensor data offsets");
+                //
+                //
+                // if (end > data_size)
+                //     throw std::runtime_error("Tensor data offsets exceed file size");
+
+
+                cum::Tensor tensor = cum::Tensor::copy_memory(info.shape, const_cast<char*>(data_start + begin),  info.dtype);
+
+                // if (is_big_endian() && is_byte_swappable_dtype(tensor.type()))
+                if (is_big_endian())
                     swap_tensor_endian(tensor);
-                }
 
-                tensors.emplace(
-                    name,
-                    std::move(tensor));
+
+                tensors.emplace(name,std::move(tensor));
             }
 
             munmap(mapped_file, file_size);

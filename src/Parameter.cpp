@@ -43,9 +43,9 @@ namespace yann
 
         Parameter param;
 
-        param.values = cum::Tensor::Random({rows, cols}, -ampl, ampl, cum::default_type, cum::layout::IO);
+        param.values = cum::Tensor::Random({rows, cols}, -ampl, ampl, cum::default_type, cum::layout::AB);
 
-        param.gradient = cum::Tensor({rows, cols}, cum::default_type, cum::layout::IO);
+        param.gradient = cum::Tensor({rows, cols}, cum::default_type, cum::layout::AB);
         param.gradient.fill(0);
         return param;
     }
@@ -78,8 +78,8 @@ namespace yann
     Parameter Parameter::Zeros(const cum::dim_t rows, const cum::dim_t cols)
     {
         Parameter param;
-        param.values = cum::Tensor({rows, cols}, cum::default_type, cum::layout::IO);
-        param.gradient = cum::Tensor({rows, cols}, cum::default_type, cum::layout::IO);
+        param.values = cum::Tensor({rows, cols}, cum::default_type, cum::layout::AB);
+        param.gradient = cum::Tensor({rows, cols}, cum::default_type, cum::layout::AB);
 
         param.values.fill(0);
         param.gradient.fill(0);

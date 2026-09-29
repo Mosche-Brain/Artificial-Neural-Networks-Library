@@ -122,6 +122,7 @@ if(CUM_USE_Q8)
 endif()
 
 add_subdirectory(modules/cum)
+#add_subdirectory(modules/safetensors.cpp)
 add_subdirectory(src)
 
 if(BUILD_EXAMPLES)

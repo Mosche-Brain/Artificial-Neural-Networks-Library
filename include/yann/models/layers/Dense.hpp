@@ -118,6 +118,9 @@ namespace yann::models::layers
         //! @see createUnique is a convenience factory for creating layers in ownership-transfer contexts.
         static std::unique_ptr<LayerBase> createUnique(int layerSize, const char* func);
 
+        cum::Tensor& weights() override { return weights_.values; };
+        cum::Tensor& biases() override { return biases_.values; };
+
     private:
         Parameter weights_;
         Parameter biases_;

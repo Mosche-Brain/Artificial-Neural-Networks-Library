@@ -56,6 +56,7 @@ namespace cum
         static Tensor create_tensor(const Shape& shape);
 
         static Tensor take_memory(const Shape& shape, void* data, datatype dtype = datatype::FP32, layout layout = layout::ANY);
+        static Tensor copy_memory(const Shape& shape, void* data, datatype dtype = datatype::FP32, layout layout = layout::ANY);
 
         static Tensor make_cube(dim_t width, dim_t height, dim_t deepth, datatype dtype = default_type, layout layout = layout::OI);
         static Tensor make_matrix(dim_t rows, dim_t cols, datatype dtype = default_type, layout layout = layout::OI);
