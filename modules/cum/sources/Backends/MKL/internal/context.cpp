@@ -20,12 +20,14 @@ namespace cum
             }
             case DEVICE::CPU:
             {
-                this->queue = sycl::queue(sycl::cpu_selector_v, sycl::property::queue::in_order{});
+                this->queue = sycl::queue(sycl::cpu_selector_v);
+                // this->queue = sycl::queue(sycl::cpu_selector_v, sycl::property::queue::in_order{});
                 break;
             }
             case DEVICE::GPU:
             {
-                this->queue = sycl::queue(sycl::gpu_selector_v, sycl::property::queue::in_order{});
+                this->queue = sycl::queue(sycl::gpu_selector_v);
+                // this->queue = sycl::queue(sycl::gpu_selector_v, sycl::property::queue::in_order{});
                 break;
             }
             default:

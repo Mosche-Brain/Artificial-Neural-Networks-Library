@@ -21,9 +21,9 @@ namespace yann::optimizers
                                                                                                                   
         void step(Parameter& params) override;
                                                                
-        void step(std::vector<Parameter*>& params) override;                                                       
-                                                                                                                  
-        std::unique_ptr<Momentum> create(cum::cumeric_t rate, cum::cumeric_t beta = 0.5);                               
+        void step(std::vector<Parameter*>& params) override;
+
+        static std::unique_ptr<Momentum> create(cum::cumeric_t rate, cum::cumeric_t beta = 0.5);
                                                                                                    
     private:                                                                                       
         cum::cumeric_t b;                                                                          

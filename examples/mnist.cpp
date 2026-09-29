@@ -4,6 +4,7 @@
 
 #include <yann/loss/BinaryCrossEntropy.hpp>
 #include <yann/optimizers/SGD.hpp>
+#include <yann/optimizers/Momentum.hpp>
 #include <yann/models/Sequential.hpp>
 #include <yann/models/layers/Dense.hpp>
 #include <yann/models/layers/Input.hpp>
@@ -198,14 +199,14 @@ int main(int argc, char** argv)
         });
 
         yann::loss::Loss loss = yann::loss::BinaryCrossEntropy::create();
-        yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.01f);
+        yann::optimizers::Optimizer optimizer = yann::optimizers::Momentum::create(0.01f);
 
         yann::logging::LossTracker loss_tracker;
         std::array<yann::logging::ITrainingCallback*, 1> callbacks = {
             &loss_tracker
         };
 
-		yann::runtime_config::set_verbosity(2);
+		yann::runtime_config::set_verbosity(1);
 
         constexpr std::size_t epochs = 128;
         constexpr std::size_t batch_size = 1024;
