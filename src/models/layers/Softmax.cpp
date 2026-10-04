@@ -19,6 +19,7 @@ namespace yann::models::layers
     Softmax::Softmax(const cum::Shape& shape ,const cum::dim_t axis) : axis_(axis)
     {
         output_shape_ = shape;
+        _layerType_ = LayerType::Softmax;
     }
 
     void Softmax::init_parameters(int output_features, int input_features)
@@ -35,8 +36,10 @@ namespace yann::models::layers
     {
         cache.x = input;
 
-        cum::neural_primitives::softmax(cache.a, cache.x, axis_);
-
+        YANN_LOG(3, "Y = softmax(X) over {} axis |", axis_);
+        // cum::neural_primitives::softmax(cache.a, cache.x, axis_);
+        cache.a = cache.x.softmax(axis_);
+        YANN_LOG(3, "pońćzochy", "");
         return cache.a;
     }
 
@@ -60,10 +63,15 @@ namespace yann::models::layers
         {
             if constexpr(YANN_SOFTMAX_BACKWARD_REFERENCE_PATH)
             {
-                cum::Tensor grad_output_product_sum = gradient.multiply(cache.da).sum(axis_, true);
+                YANN_LOG(3, "(dL_dY * Y).sum(axis={})", axis_);
+                cum::Tensor grad_output_product_sum = gradient.multiply(cache.a).sum(axis_, true);
 
-                cum::Tensor dL_dX = cache.da * (gradient - grad_output_product_sum);
+                cache.da = cum::Tensor(cache.a.shape(), cache.a.type(), cache.a.format());
 
+                YANN_LOG(3, "dL_dX = dL_dY (dL_dY - grad_outpu_product_sum)", axis_);
+                cum::Tensor dL_dX = cache.a.multiply(gradient - grad_output_product_sum);
+
+                YANN_LOG(3, "zabezpieczenie", 0);
                 return dL_dX;
             }
             else

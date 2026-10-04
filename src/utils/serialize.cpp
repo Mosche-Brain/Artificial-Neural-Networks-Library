@@ -21,7 +21,7 @@ namespace yann::utils
 
         for (auto [index, layer] : model.getTopology() | std::views::enumerate)
         {
-            if (layer->layerType() == models::layers::LayerType::Input)
+            if (layer->layerType() == models::layers::LayerType::Input || layer->layerType() == models::layers::LayerType::Softmax)
                 continue;
 
             std::string weights_tag = std::to_string(index) + '_' + 'w';

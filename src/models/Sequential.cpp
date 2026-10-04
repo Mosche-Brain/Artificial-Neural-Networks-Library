@@ -94,7 +94,7 @@ namespace yann::models
             cum::Tensor next_gradient = layer->backward(curr_gradient);
 
             curr_gradient = std::move(next_gradient);
-            YANN_LOG(2, "||dL/dX||: {},\t mean|dL/dX|: {}", curr_gradient.norm(), curr_gradient.abs().mean());
+            // YANN_LOG(2, "||dL/dX||: {},\t mean|dL/dX|: {}", curr_gradient.norm(), curr_gradient.abs().mean());
         }
     }
 
@@ -168,11 +168,14 @@ namespace yann::models
 
                 cum::runtime::sync();
                 cum::Tensor results = this->forward(x);
-                YANN_LOG(3, "results: {}x{}", results.rows(), results.cols() );
+                YANN_LOG(2, "results: {}x{} | norm: {} | mean: {}", results.rows(), results.cols(), results.norm(), results.mean());
+
 
                 loss.compute(results, y);
 
                 auto [error, gradient] = loss.result();
+
+                YANN_LOG(2, "error gradient | norm: {} | mean: {}", error, gradient.norm(), gradient.mean());
 
                 this->backward(gradient);
 

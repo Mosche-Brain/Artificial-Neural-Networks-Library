@@ -17,6 +17,7 @@
 #include "cum/neural_primitives/Memory.hpp"
 #include "cum/neural_primitives/Descriptor.hpp"
 #include "cum/neural_primitives/elementwise.hpp"
+#include "cum/neural_primitives/reductions.hpp"
 #include "cum/detail/vendor/oneapi/opaque_types.hpp"
 #include "cum/neural_primitives/elementwise_diffs.hpp"
 #include "cum/neural_primitives/tensor_operations.hpp"
@@ -844,11 +845,13 @@ namespace cum
 
 	Tensor Tensor::sum(dim_t axis, bool keep_dims) const
 	{
-		if(axis < 0) axis += rank();
-		if(axis > this->rank() || axis < 0)
+		// if(axis < 0) axis += rank();
+		axis < 0 ? axis = this->rank() - 1 : NULL;
+
+		if(axis > this->rank())
 			throw std::invalid_argument("Tensor::sum(): provided axis argument is higher than tensor rank");
 
-		Shape new_shape = shape();
+		Shape new_shape = this->shape();
 		new_shape[axis] = 1;
 
 		Tensor result(new_shape, this->type(), this->format());
@@ -884,6 +887,16 @@ namespace cum
 		{
 			return result;
 		}
+	}
+
+	Tensor Tensor::softmax(dim_t axis) const
+	{
+		// Tensor result(this->shape(), this->type(), this->format());
+		Tensor result(this->shape(), this->type(), default_layout_from_rank(this->rank()));
+
+		neural_primitives::softmax(result, *this, axis);
+
+		return result;
 	}
 
 	Tensor Tensor::rowwise_sum()

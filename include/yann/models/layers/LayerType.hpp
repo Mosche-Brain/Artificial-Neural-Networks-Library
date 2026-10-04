@@ -10,6 +10,7 @@ namespace yann::models::layers
         Conv2D,
         Conv3D,
         Flatten,
-        Pool
+        Pool,
+        Softmax,
     };
 }

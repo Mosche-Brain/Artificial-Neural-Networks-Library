@@ -17,6 +17,7 @@
 #include <matplot/matplot.h>
 
 #include <algorithm>
+#include <print>
 #include <cstdint>
 #include <zlib.h>
 #include <filesystem>
@@ -187,16 +188,18 @@ int main(int argc, char** argv)
     const auto train = MnistDataLoader::load(mnist_directory, "train");
     const auto test = MnistDataLoader::load(mnist_directory, "test");
 
-    std::cout << "MNIST loaded: "
-              << train.images.cols() << " training samples, "
-              << test.images.cols() << " test samples\n";
-    std::cout << "Images: " << train.images.rows() << " x " << train.images.cols() << "\n";
-    std::cout << "Labels: " << train.labels.rows() << " x " << train.labels.cols() << "\n";
 
-    yann::models::Sequential model({
+    std::println("MNIST loaded");
+    std::println("training samples: {} | test samples: {}", train.images.cols(), test.images.cols());
+    std::println("Imgaes: {}x{}", train.images.rows(), train.images.cols());
+    std::println("Labels: {}x{}", train.labels.rows(), train.labels.cols());
+
+
+    Sequential model({
         layers::Input::createUnique(28 * 28),
-        layers::Dense::createUnique(256, "relu"),
-        layers::Dense::createUnique(64, "relu"),
+        layers::Dense::createUnique(256, "leaky_relu"),
+        layers::Dense::createUnique(64, "leaky_relu"),
+        layers::Dense::createUnique(10, "leaky_relu"),
         layers::Softmax::createUnique(10)
     });
 
@@ -208,9 +211,9 @@ int main(int argc, char** argv)
         &loss_tracker
     };
 
-	yann::runtime_config::set_verbosity(1);
+	yann::runtime_config::set_verbosity(2);
 
-    constexpr std::size_t epochs = 32;
+    constexpr std::size_t epochs = 8;
     constexpr std::size_t batch_size = 1024;
     model.fit(train.images, train.labels, *loss, *optimizer, epochs, batch_size, callbacks);
 

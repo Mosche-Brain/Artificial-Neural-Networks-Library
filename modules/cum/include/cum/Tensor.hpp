@@ -164,6 +164,7 @@ namespace cum
         cumeric_t squared_norm() const;
 
         Tensor sum(dim_t axis, bool keed_dims=true) const;
+        Tensor softmax(dim_t axis = -1) const;
 
         Tensor colwise_sum();
         Tensor rowwise_sum();
