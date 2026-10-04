@@ -21,6 +21,11 @@ namespace yann::loss
     void CategoricalCrossEntropy::compute(const cum::Tensor& predicted, const cum::Tensor& target)
     {
         constexpr bool YANN_CCE_FUSED_PATH = false;
+        constexpr bool YANN_CCE_REFERENCE_PATH = true; // It will be moved to cmake config
+
+        for (auto [index, axis] : predicted.shape() | std::ranges::views::enumerate)
+            if (axis != target.shape()[index])
+                throw std::invalid_argument("CategoricalCrossEntropy::compute: result and target dimensions must match");
 
         if(runtime_config::fused_kernels())
         {
@@ -35,15 +40,18 @@ namespace yann::loss
         }
         else
         {
-            for (auto [index, axis] : predicted.shape() | std::ranges::views::enumerate)
-                if (axis != target.shape()[index])
-                    throw std::invalid_argument("CategoricalCrossEntropy::compute: result and target dimensions must match");
+            if constexpr (YANN_CCE_REFERENCE_PATH)
+            {
+                constexpr cum::cumeric_t epsilon = 1e-5;
 
-            constexpr cum::cumeric_t epsilon = 1e-5;
+                loss.value = -target.multiply(predicted.clamp(epsilon, 1 - epsilon).log()).sum();
 
-            loss.value = -target.multiply(predicted.clamp(epsilon, 1 - epsilon).log()).sum();
-
-            loss.gradient = -(target / predicted);
+                loss.gradient = -(target / predicted);
+            }
+            else
+            {
+                throw std::runtime_error("YANN_CCE_REFERENCE_PATH wasn't compiled");
+            }
         }
     }
 

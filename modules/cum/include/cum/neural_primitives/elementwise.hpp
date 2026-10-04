@@ -55,9 +55,6 @@ namespace cum::neural_primitives
     __event__ tanh(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& r_desc, const handles::__desc__& a_desc);
     __event__ tanh(handles::__memory__& src, const handles::__desc__& desc);
 
-    __event__ softmax(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& r_desc, const handles::__desc__& a_desc);
-    __event__ softmax(handles::__memory__& src, const handles::__desc__& desc);
-
     __event__ gelu(handles::__memory__& dst, const handles::__memory__& src, const handles::__desc__& r_desc, const handles::__desc__& a_desc);
     __event__ gelu(handles::__memory__& src, const handles::__desc__& desc);
 
@@ -97,9 +94,6 @@ namespace cum::neural_primitives
     __event__ tanh(Memory& dst, const Memory& src, const Descriptor& r_desc, const Descriptor& a_desc);
     __event__ tanh(Memory& src, const Descriptor& desc);
 
-    __event__ softmax(Memory& dst, const Memory& src, const Descriptor& r_desc, const Descriptor& a_desc);
-    __event__ softmax(Memory& src, const Descriptor& desc);
-
     __event__ gelu(Memory& dst, const Memory& src, const Descriptor& r_desc, const Descriptor& a_desc);
     __event__ gelu(Memory& src, const Descriptor& desc);
 
@@ -136,9 +130,6 @@ namespace cum::neural_primitives
 
     __event__ tanh(Tensor& dst, const Tensor& src);
     __event__ tanh(Tensor& src);
-
-    __event__ softmax(Tensor& dst, const Tensor& src);
-    __event__ softmax(Tensor& src);
 
     __event__ gelu(Tensor& dst, const Tensor& src);
     __event__ gelu(Tensor& src);

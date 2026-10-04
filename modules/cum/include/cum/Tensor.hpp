@@ -163,6 +163,8 @@ namespace cum
         cumeric_t squaredNorm() const;
         cumeric_t squared_norm() const;
 
+        Tensor sum(dim_t axis, bool keed_dims=true) const;
+
         Tensor colwise_sum();
         Tensor rowwise_sum();
         Tensor channelwise_sum(); // for 3D channel-first tensors

@@ -842,6 +842,50 @@ namespace cum
 		return result;
 	}
 
+	Tensor Tensor::sum(dim_t axis, bool keep_dims) const
+	{
+		if(axis < 0) axis += rank();
+		if(axis > this->rank() || axis < 0)
+			throw std::invalid_argument("Tensor::sum(): provided axis argument is higher than tensor rank");
+
+		Shape new_shape = shape();
+		new_shape[axis] = 1;
+
+		Tensor result(new_shape, this->type(), this->format());
+
+		const dnnl::memory::desc& src_desc = _desc_->handle().desc;
+		const dnnl::memory::desc& dst_desc = result.descriptor()->handle().desc;
+
+		dnnl::reduction::primitive_desc primitive_desc(
+			internal::engine(),
+			dnnl::algorithm::reduction_sum,
+			src_desc,
+			dst_desc,
+			0.0f,
+			0.0f
+		);
+
+		dnnl::reduction(primitive_desc).execute(
+			internal::stream(),
+	{
+				{DNNL_ARG_SRC, _memr_->handle().memory},
+				{DNNL_ARG_DST, result._memr_->handle().memory}
+			}
+		);
+		internal::stream().wait();
+
+		if(!keep_dims)
+		{
+			Shape squeezed = new_shape;
+			squeezed.erase(squeezed.begin() + axis);
+			return result.reshape(squeezed);
+		}
+		else
+		{
+			return result;
+		}
+	}
+
 	Tensor Tensor::rowwise_sum()
 	{
 		if(dims() != 2)

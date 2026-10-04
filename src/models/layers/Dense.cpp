@@ -118,12 +118,10 @@ namespace yann::models::layers
         {
             if constexpr(YANN_DENSE_FORWARD_REFERENCE_PATH)
             {
-                YANN_LOG(3, "cache.z = weights_.values * input", "");
-                // YANN_LOG(4, "X: {}x{}, | W: {}x{}", input.rows(), input.cols(), weights_.values.rows(), weights_.values.cols());
+                YANN_LOG(3, "cache.z = weights_.values * input | X: {}x{}, | W: {}x{}", input.rows(), input.cols(), weights_.values.rows(), weights_.values.cols());
                 cache.z = weights_.values * input;
 
-                YANN_LOG(3, "cache.z = cache.z + biases_.values", "");
-                // YANN_LOG(4, "Z: {}x{} | B: {}x{}", cache.z.rows(), cache.z.cols(), biases_.values.rows(), biases_.values.cols());
+                YANN_LOG(3, "cache.z = cache.z + biases_.values | Z: {}x{} | B: {}x{}", cache.z.rows(), cache.z.cols(), biases_.values.rows(), biases_.values.cols());
                 cache.z = cache.z + biases_.values; // with broadcast
 
                 cache.a = cache.z.elementwise(activation.name);
@@ -165,19 +163,12 @@ namespace yann::models::layers
                 cache.dz = cache.da.cwiseProduct(deltaOutput);
 
                 YANN_LOG(3, "dL/dB = rowwise sum of cache.dz", "");
-                if (cache.dz.cols() == 1)
-                    biases_.gradient += cache.dz;
-                else
-                    biases_.gradient += cache.dz.rowwise_sum();
+                cache.dz.cols() > 1 ? biases_.gradient += cache.dz.rowwise_sum() : biases_.gradient += cache.dz;
 
-                YANN_LOG(3, "dL/dW = cache.dz * cache.x.transpose()", "");
-                YANN_LOG(4, "dZ: {}x{} | X: {}x{}", cache.dz.rows(), cache.dz.cols(), cache.x.rows(), cache.x.cols());
-
+                YANN_LOG(3, "dL/dW = cache.dz * cache.x.transpose() | dZ: {}x{} | X: {}x{}", cache.dz.rows(), cache.dz.cols(), cache.x.rows(), cache.x.cols());
                 weights_.gradient += cache.dz * cache.x.transpose();
 
-                YANN_LOG(3, "dL/dX = weights.transpose() * cache.dz", "");
-                YANN_LOG(4, "W: {}x{}, | dZ: {}x{}", weights_.values.rows(), weights_.values.cols(), cache.dz.rows(), cache.dz.cols());
-
+                YANN_LOG(3, "dL/dX = weights.transpose() * cache.dz | W: {}x{}, | dZ: {}x{}", weights_.values.rows(), weights_.values.cols(), cache.dz.rows(), cache.dz.cols());
                 return weights_.values.transpose() * cache.dz;;
             }
             else

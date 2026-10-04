@@ -7,6 +7,7 @@
 #include <yann/optimizers/Momentum.hpp>
 #include <yann/models/Sequential.hpp>
 #include <yann/models/layers/Dense.hpp>
+#include <yann/models/layers/Softmax.hpp>
 #include <yann/models/layers/Input.hpp>
 #include <yann/optimizers/OptimizerBase.hpp>
 #include <yann/logging/LossTracker.hpp>
@@ -175,69 +176,57 @@ private:
     }
 };
 
+using namespace yann::models;
+
 int main(int argc, char** argv)
 {
     cum::cum(cum::DEVICE::GPU);
 
     const std::string mnist_directory = argc > 1 ? argv[1] : "/home/jaro/Development/Yann/Assets/mnist";
-    try
-    {
-        const auto train = MnistDataLoader::load(mnist_directory, "train");
-        const auto test = MnistDataLoader::load(mnist_directory, "test");
 
-        std::cout << "MNIST loaded: "
-                  << train.images.cols() << " training samples, "
-                  << test.images.cols() << " test samples\n";
-        std::cout << "Images: " << train.images.rows() << " x " << train.images.cols() << "\n";
-        std::cout << "Labels: " << train.labels.rows() << " x " << train.labels.cols() << "\n";
+    const auto train = MnistDataLoader::load(mnist_directory, "train");
+    const auto test = MnistDataLoader::load(mnist_directory, "test");
 
-        yann::models::Sequential model({
-            yann::models::layers::Input::createUnique(28 * 28),
-            yann::models::layers::Dense::createUnique(256, "relu"),
-            yann::models::layers::Dense::createUnique(64, "relu"),
-            yann::models::layers::Dense::createUnique(10, "sigmoid")
-        });
+    std::cout << "MNIST loaded: "
+              << train.images.cols() << " training samples, "
+              << test.images.cols() << " test samples\n";
+    std::cout << "Images: " << train.images.rows() << " x " << train.images.cols() << "\n";
+    std::cout << "Labels: " << train.labels.rows() << " x " << train.labels.cols() << "\n";
 
-        yann::loss::Loss loss = yann::loss::CategoricalCrossEntropy::create();
-        yann::optimizers::Optimizer optimizer = yann::optimizers::Momentum::create(0.01f);
+    yann::models::Sequential model({
+        layers::Input::createUnique(28 * 28),
+        layers::Dense::createUnique(256, "relu"),
+        layers::Dense::createUnique(64, "relu"),
+        layers::Softmax::createUnique(10)
+    });
 
-        yann::logging::LossTracker loss_tracker;
-        std::array<yann::logging::ITrainingCallback*, 1> callbacks = {
-            &loss_tracker
-        };
+    yann::loss::Loss loss = yann::loss::CategoricalCrossEntropy::create();
+    yann::optimizers::Optimizer optimizer = yann::optimizers::Momentum::create(0.01f);
 
-		yann::runtime_config::set_verbosity(1);
+    yann::logging::LossTracker loss_tracker;
+    std::array<yann::logging::ITrainingCallback*, 1> callbacks = {
+        &loss_tracker
+    };
 
-        constexpr std::size_t epochs = 128;
-        constexpr std::size_t batch_size = 1024;
-        model.fit(
-            train.images,
-            train.labels,
-            *loss,
-            *optimizer,
-            epochs,
-            batch_size,
-            callbacks);
+	yann::runtime_config::set_verbosity(1);
 
-        yann::utils::model_serialize_to_safetensors(model, "mnist-resolver.safetensors");
+    constexpr std::size_t epochs = 32;
+    constexpr std::size_t batch_size = 1024;
+    model.fit(train.images, train.labels, *loss, *optimizer, epochs, batch_size, callbacks);
 
-        const auto loss_history = loss_tracker.getLossHistory();
-        std::vector<double> epoch_range(loss_history.size());
-        std::iota(epoch_range.begin(), epoch_range.end(), 0.0);
+    yann::utils::model_serialize_to_safetensors(model, "mnist-resolver.safetensors");
 
-        auto figure = matplot::figure(true);
-        matplot::plot(epoch_range, loss_history);
-        matplot::title("MNIST training loss");
-        matplot::xlabel("epoch");
-        matplot::ylabel("loss");
-        figure->size(1200, 800);
-        matplot::show();
-    }
-    catch (const std::exception& error)
-    {
-        std::cerr << "MNIST loader error: " << error.what() << '\n';
-        return 1;
-    }
+    const auto loss_history = loss_tracker.getLossHistory();
+    std::vector<double> epoch_range(loss_history.size());
+    std::iota(epoch_range.begin(), epoch_range.end(), 0.0);
+
+    auto figure = matplot::figure(true);
+    matplot::plot(epoch_range, loss_history);
+    matplot::title("MNIST training loss");
+    matplot::xlabel("epoch");
+    matplot::ylabel("loss");
+    figure->size(1200, 800);
+    matplot::show();
 
 
 

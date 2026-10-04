@@ -20,7 +20,7 @@
 
 namespace yann::models::layers
 {
-    struct ForwardCache
+    struct LayerCache
     {
         cum::Tensor x;
         cum::Tensor z;
@@ -94,7 +94,7 @@ namespace yann::models::layers
         LayerType layerType();
     protected:
         friend class Sequential;
-        ForwardCache cache;
+        LayerCache cache;
 
         cum::Shape input_shape_;
         cum::Shape output_shape_;
