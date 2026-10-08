@@ -113,6 +113,7 @@ namespace yann::models
             throw std::invalid_argument("X and Y must contain the same number of samples");
 
         std::vector<Parameter*> params = this->parameters();
+        YANN_LOG(1, "Found {} parameters tensors", params.size());
         const bool batched = batch_size > 1;
 
         YANN_LOG(1, "Started training for {} epochs...", epochs);

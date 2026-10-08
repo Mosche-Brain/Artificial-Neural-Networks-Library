@@ -15,7 +15,7 @@ A lightweight, modular minimalistic and easy to use C++ library for machine lear
 
 ## ❗ Disclaimers
 * I used very poor english due to sleep quality.
-* Library is currently under active development, there is no production ready realase (first is planned for 7 oct 2026)
+* Library is currently under active development, there is no production ready realase (first is planned for ~~7~~ 10 oct 2026)
 
 # Architecture
 

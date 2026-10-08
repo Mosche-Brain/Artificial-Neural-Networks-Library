@@ -2,9 +2,13 @@
 // Created by jaro on 7/17/26.
 //
 
-#include "optimizers/SGD.hpp"
+#include <print>
 
-#include "cum/runtime.hpp"
+#include <cum/runtime.hpp>
+
+#include "yann/logging/Logger.hpp"
+
+#include "yann/optimizers/SGD.hpp"
 
 namespace yann::optimizers
 {
@@ -27,6 +31,7 @@ namespace yann::optimizers
     {
         for (Parameter* param : params)
         {
+            YANN_LOG(2, "values norm: {} | grad norm: {}", param->values.norm(), param->gradient.norm());
             param->values -= param->gradient * learning_rate;
             param->clear_gradient();
         }

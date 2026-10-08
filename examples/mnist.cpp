@@ -204,7 +204,7 @@ int main(int argc, char** argv)
     });
 
     yann::loss::Loss loss = yann::loss::CategoricalCrossEntropy::create();
-    yann::optimizers::Optimizer optimizer = yann::optimizers::Momentum::create(0.01f);
+    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.01f);
 
     yann::logging::LossTracker loss_tracker;
     std::array<yann::logging::ITrainingCallback*, 1> callbacks = {

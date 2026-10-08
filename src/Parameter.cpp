@@ -52,7 +52,7 @@ namespace yann
 
     Parameter Parameter::Uniform(const cum::Shape& shape) // +-0.1
     {
-        constexpr cum::cumeric_t ampl = 0.5;
+        constexpr cum::cumeric_t ampl = 0.2;
 
         Parameter param;
 
