@@ -52,35 +52,9 @@ target_include_directories(${CYANN_TARGET}
 # ------------------------------------------------------------------
 target_link_libraries(${CYANN_TARGET}
     PRIVATE
-        ${YANN_MAIN_TARGET}          # ← This is the original "yann" target
-        OpenMP::OpenMP_CXX
-        cum::Core
+        ${YANN_MAIN_TARGET}
+        yann_compiler_flags
 )
-
-# ------------------------------------------------------------------
-# SYCL / MKL
-# ------------------------------------------------------------------
-if(BUILD_USE_MKL)
-    target_link_libraries(${CYANN_TARGET}
-        PRIVATE
-            cum::MKL
-            cum_MKL
-    )
-    target_compile_definitions(${CYANN_TARGET} PRIVATE fsycl fPIC)
-    target_compile_options(${CYANN_TARGET} PRIVATE -fsycl)
-endif()
-
-target_compile_options(${CYANN_TARGET} PRIVATE
-    -qopenmp
-    -march=native
-    -Wall
-    -O3
-    -ffast-math
-)
-
-if(DEFINED YANN_COMPILE_DEFINITIONS)
-    target_compile_definitions(${CYANN_TARGET} PRIVATE ${YANN_COMPILE_DEFINITIONS})
-endif()
 
 if(UNIX AND NOT APPLE)
     set_target_properties(${CYANN_TARGET} PROPERTIES

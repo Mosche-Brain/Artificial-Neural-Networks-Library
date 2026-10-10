@@ -39,6 +39,8 @@ namespace yann::optimizers
 			v = b * v + (1 - b) * g;
 
 			w -= v;
+
+			param->clear_gradient();
 		}
 	}
 

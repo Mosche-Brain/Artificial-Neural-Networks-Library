@@ -27,7 +27,15 @@ elseif(BUILD_USE_NONE)
     message(STATUS "Native backend is selected but not implemented; only cum::Core will be built")
 endif()
 
-install(TARGETS ${CUM_PROJECT_NAME}_Core
+add_library(${CUM_PROJECT_NAME} INTERFACE)
+add_library(${CUM_PROJECT_NAME}::${CUM_PROJECT_NAME} ALIAS ${CUM_PROJECT_NAME})
+target_link_libraries(${CUM_PROJECT_NAME} INTERFACE ${CUM_PROJECT_NAME}::Core)
+
+if(BUILD_USE_MKL)
+    target_link_libraries(${CUM_PROJECT_NAME} INTERFACE ${CUM_PROJECT_NAME}::MKL)
+endif()
+
+install(TARGETS ${CUM_PROJECT_NAME}_Core ${CUM_PROJECT_NAME}
         EXPORT cumTargets
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -36,3 +44,30 @@ install(TARGETS ${CUM_PROJECT_NAME}_Core
 install(DIRECTORY ${CUM_SOURCE_DIR}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES ${CUM_GENERATED_INCLUDE_DIR}/cum/config.hpp
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/cum)
+
+install(EXPORT cumTargets
+        FILE cumTargets.cmake
+        NAMESPACE cum::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cum
+)
+
+include(CMakePackageConfigHelpers)
+set(CUM_CONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/cum")
+
+configure_package_config_file(
+    "${CUM_SOURCE_DIR}/cmake/cumConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/cumConfig.cmake"
+    INSTALL_DESTINATION "${CUM_CONFIG_INSTALL_DIR}"
+)
+
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/cumConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/cumConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/cumConfigVersion.cmake"
+    DESTINATION "${CUM_CONFIG_INSTALL_DIR}"
+)

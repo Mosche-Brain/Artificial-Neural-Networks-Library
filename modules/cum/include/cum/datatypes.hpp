@@ -30,17 +30,36 @@
     #error "No CUM numeric type was configured"
 #endif
 
+typedef struct fp8_e4_3m_impl
+{
+    unsigned char data;
+
+    fp8_e4_3m_impl(float val) : data( (unsigned char) (val * 255)) {}
+    operator float() const { return (float) data; }
+
+    operator float()
+    {
+        return 69;
+    }
+} fp8_e4_3m_impl;
+
+// typedef struct float16_impl
 
 namespace cum
 {
     using float64 = double;
     using float32 = float;
 #if CUM_USE_MKL
-    using float16 = sycl::half;
-    using bfloat16 = sycl::ext::oneapi::bfloat16;
+    // using float16 = sycl::half;
+    // using bfloat16 = sycl::ext::oneapi::bfloat16;
+    // using float16 = std::float16_t;
+    // using bfloat16 = std::bfloat16_t;;
+    using float16 = uint16_t;
+    using bfloat16 = uint16_t;
 #else
 #ifdef __STDCPP_FLOAT16_T__
     using float16 = std::float16;
+    using bfloat16 = std::bfloat16;
 #else
     using float16 = float;
 #warning float16 not supported by compiler, fallback to float32
@@ -52,18 +71,7 @@ namespace cum
 #warning bfloat16 not supported by compiler, fallback to float32
 #endif
 #endif
-    typedef struct fp8_e4_3m_impl
-    {
-        unsigned char data;
 
-        fp8_e4_3m_impl(float val) : data( (unsigned char) (val * 255)) {}
-        operator float() const { return (float) data; }
-
-        operator float() 
-        { 
-            return 69;
-        }
-    } fp8_e4_3m_impl;
     using float8 = fp8_e4_3m_impl;
 
     using int64 = signed long long;

@@ -1,64 +1,79 @@
 file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS "*.cpp")
-file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS "*.hpp" "*.h")
 
 add_library(${PROJECT_NAME} ${PROJECT_SOURCES})
+add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/yann>
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/yann/models>
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/yann/models/layers>
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/yann/utils>
     $<INSTALL_INTERFACE:include>
+    $<INSTALL_INTERFACE:include/yann>
+    PRIVATE
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>
 )
-
-target_compile_definitions(${PROJECT_NAME} PUBLIC ${YANN_COMPILE_DEFINITIONS})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 23
     CXX_STANDARD_REQUIRED ON
     CXX_EXTENSIONS OFF
-    PUBLIC_HEADER "${HEADER_FILES}"
-)
-
-target_compile_options(${PROJECT_NAME} PRIVATE
-    -qopenmp
-    -march=native
-    -Wall
-    -O3
-    -fsycl
-    -ffast-math
-    -mavxvnni
-    -DENABLE_DEBUG_OUTPUT
+    INSTALL_RPATH "$ORIGIN:${CMAKE_INSTALL_FULL_LIBDIR}"
 )
 
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
-        ${YANN_BACKEND_LIBS}
+        cum::cum
         OpenMP::OpenMP_CXX
     PRIVATE
         nlohmann_json::nlohmann_json
         ${CMAKE_DL_LIBS}
+        yann_compiler_flags
 )
 
-# install(TARGETS ${PROJECT_NAME}
-#     EXPORT ${PROJECT_NAME}Targets
-#     LIBRARY DESTINATION lib
-#     ARCHIVE DESTINATION lib
-#     RUNTIME DESTINATION bin
-#     INCLUDES DESTINATION include
-# )
+if(ENABLE_DEBUG_OUTPUT)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC ENABLE_DEBUG_OUTPUT)
+endif()
 
-# install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
-#     DESTINATION include/
-#     FILES_MATCHING
-#         PATTERN "*.hpp"
-#         PATTERN "*.h"
-# )
+install(TARGETS ${PROJECT_NAME}
+    EXPORT ${PROJECT_NAME}Targets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
 
-# install(EXPORT ${PROJECT_NAME}Targets
-#     FILE ${PROJECT_NAME}Targets.cmake
-#     NAMESPACE ${PROJECT_NAME}::
-#     DESTINATION lib/cmake/${PROJECT_NAME}
-# )
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    FILES_MATCHING
+        PATTERN "*.hpp"
+        PATTERN "*.h"
+)
+
+install(EXPORT ${PROJECT_NAME}Targets
+    FILE ${PROJECT_NAME}Targets.cmake
+    NAMESPACE ${PROJECT_NAME}::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+)
+
+include(CMakePackageConfigHelpers)
+set(YANN_CONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
+
+configure_package_config_file(
+    "${CMAKE_SOURCE_DIR}/cmake/YANNConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/YANNConfig.cmake"
+    INSTALL_DESTINATION "${YANN_CONFIG_INSTALL_DIR}"
+)
+
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/YANNConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/YANNConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/YANNConfigVersion.cmake"
+    DESTINATION "${YANN_CONFIG_INSTALL_DIR}"
+)

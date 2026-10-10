@@ -8,6 +8,7 @@
 #include <yann/models/Sequential.hpp>
 #include <yann/models/layers/Dense.hpp>
 #include <yann/models/layers/Softmax.hpp>
+#include <yann/models/layers/Linear.hpp>
 #include <yann/models/layers/Input.hpp>
 #include <yann/optimizers/OptimizerBase.hpp>
 #include <yann/logging/LossTracker.hpp>
@@ -191,30 +192,36 @@ int main(int argc, char** argv)
 
     std::println("MNIST loaded");
     std::println("training samples: {} | test samples: {}", train.images.cols(), test.images.cols());
-    std::println("Imgaes: {}x{}", train.images.rows(), train.images.cols());
+    std::println("Images: {}x{}", train.images.rows(), train.images.cols());
     std::println("Labels: {}x{}", train.labels.rows(), train.labels.cols());
 
 
     Sequential model({
         layers::Input::createUnique(28 * 28),
-        layers::Dense::createUnique(256, "leaky_relu"),
-        layers::Dense::createUnique(64, "leaky_relu"),
-        layers::Dense::createUnique(10, "leaky_relu"),
-        layers::Softmax::createUnique(10)
+        layers::Dense::createUnique(128, "sigmoid"),
+        // layers::Dense::createUnique(128, "sigmoid"),
+        // layers::Dense::createUnique(256, "sigmoid"),
+        layers::Dense::createUnique(64, "sigmoid"),
+        // layers::Dense::createUnique(10, "sigmoid"),
+        layers::Linear::createUnique(10),
+        layers::Softmax::createUnique(10, 0)
     });
 
     yann::loss::Loss loss = yann::loss::CategoricalCrossEntropy::create();
-    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.01f);
+    // yann::optimizers::Optimizer optimizer = yann::optimizers::Momentum::create(0.01f, 0.1f);
+    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.0001f);
 
     yann::logging::LossTracker loss_tracker;
     std::array<yann::logging::ITrainingCallback*, 1> callbacks = {
         &loss_tracker
     };
 
-	yann::runtime_config::set_verbosity(2);
+	yann::runtime_config::set_verbosity(1);
 
-    constexpr std::size_t epochs = 8;
-    constexpr std::size_t batch_size = 1024;
+    yann::utils::model_deserialize_from_safetensors(model, "mnist-resolver.safetensors");
+
+    constexpr std::size_t epochs = 64;
+    constexpr std::size_t batch_size = 6000;
     model.fit(train.images, train.labels, *loss, *optimizer, epochs, batch_size, callbacks);
 
     yann::utils::model_serialize_to_safetensors(model, "mnist-resolver.safetensors");

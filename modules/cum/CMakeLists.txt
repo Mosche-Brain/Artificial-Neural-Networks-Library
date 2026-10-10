@@ -97,5 +97,5 @@ endif()
 
 if(BUILD_USE_MKL)
     add_executable(example examples/test.cpp)
-    target_link_libraries(example PRIVATE cum::Core cum::MKL)
+    target_link_libraries(example PRIVATE cum::cum)
 endif()

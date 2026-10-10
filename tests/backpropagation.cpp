@@ -13,6 +13,7 @@
 
 #include <yann/models/layers/Dense.hpp>
 #include <yann/models/layers/Linear.hpp>
+#include <yann/models/layers/Softmax.hpp>
 
 namespace
 {
@@ -89,3 +90,48 @@ TEST_CASE("Dense backward includes the ReLU derivative")
     cum::decum();
 }
 
+TEST_CASE("Softmax backward computes input gradients")
+{
+    cum::cum(cum::DEVICE::CPU);
+
+
+    yann::models::layers::Softmax layer(2, 1);
+    layer.init_parameters(2, 2);
+
+    cum::Tensor input({2, 2}, cum::default_type, cum::layout::IO);
+    set_values(input, {1, 2, 3, 4});
+
+    const cum::Tensor output = layer.forward(input);
+
+    // softmax([1, 2]) = [0.268941, 0.731059]
+    // softmax([3, 4]) = [0.268941, 0.731059]
+    require_values(output, {
+        0.26894142, 0.73105858,
+        0.26894142, 0.73105858
+    });
+
+    cum::Tensor output_gradient({2, 2}, cum::default_type, cum::layout::IO);
+    set_values(output_gradient, {1, 2, 3, 4});
+
+    const cum::Tensor input_gradient = layer.backward(output_gradient);
+
+    // For each row:
+    // dL/dx_i = y_i * (dL/dy_i - sum_j(dL/dy_j * y_j))
+    //
+    // Row 1:
+    // y = [0.268941, 0.731059]
+    // grad = [1, 2]
+    // => dx = [-0.196612, 0.196612]
+    //
+    // Row 2:
+    // y = [0.268941, 0.731059]
+    // grad = [3, 4]
+    // => dx = [-0.196612, 0.196612]
+    require_values(input_gradient, {
+        -0.19661193, 0.19661193,
+        -0.19661193, 0.19661193
+    });
+
+    cum::decum();
+
+}

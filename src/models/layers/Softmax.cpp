@@ -39,7 +39,7 @@ namespace yann::models::layers
         YANN_LOG(3, "Y = softmax(X) over {} axis |", axis_);
         // cum::neural_primitives::softmax(cache.a, cache.x, axis_);
         cache.a = cache.x.softmax(axis_);
-        YANN_LOG(3, "pońćzochy", "");
+        YANN_LOG(2, "softmax outputs sum: {}", cache.a.sum());
         return cache.a;
     }
 

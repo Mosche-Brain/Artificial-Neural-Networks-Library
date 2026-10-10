@@ -44,9 +44,11 @@ namespace yann::loss
             {
                 constexpr cum::cumeric_t epsilon = 1e-5;
 
-                loss.value = -target.multiply(predicted.clamp(epsilon, 1 - epsilon).log()).sum();
+                cum::Tensor P = predicted.clamp(epsilon, 1 - epsilon);
 
-                loss.gradient = -(target / predicted);
+                loss.value = -target.multiply(P.log()).sum();
+
+                loss.gradient = -(target / P);
             }
             else
             {

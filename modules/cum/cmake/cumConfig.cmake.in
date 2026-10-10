@@ -1,0 +1,15 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+if(@BUILD_USE_MKL@)
+    find_dependency(TBB CONFIG)
+    find_dependency(MKL CONFIG)
+    find_dependency(oneDPL CONFIG)
+    if(NOT TARGET DNNL::dnnl)
+        find_dependency(dnnl CONFIG PATHS "@CUM_ONEDNN_INSTALL_DIR@/lib/cmake/dnnl" NO_DEFAULT_PATH)
+    endif()
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/cumTargets.cmake")
+check_required_components(cum)
