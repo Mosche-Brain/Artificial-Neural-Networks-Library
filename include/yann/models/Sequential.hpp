@@ -38,6 +38,7 @@
 #include "yann/optimizers/OptimizerBase.hpp"
 #include "yann/loss/LossBase.hpp"
 #include "yann/Parameter.hpp"
+#include <span>
 
 namespace yann::models
 {

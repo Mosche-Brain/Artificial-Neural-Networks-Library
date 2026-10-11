@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include <functional>
+#include <iostream>
 
 #include "cum/runtime.hpp"
 

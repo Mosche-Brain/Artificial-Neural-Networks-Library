@@ -10,6 +10,7 @@
 #include "cum/detail/vendor/oneapi/conversion_helpers.hpp"
 
 #include "cum/neural_primitives/Descriptor.hpp"
+#include <numeric>
 
 namespace cum::neural_primitives
 {

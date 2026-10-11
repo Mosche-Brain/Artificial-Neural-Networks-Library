@@ -6,10 +6,6 @@
 #include <stdfloat>
 #include <vector>
 
-#if CUM_USE_MKL
-    #include <sycl/sycl.hpp>
-    #include <sycl/ext/oneapi/bfloat16.hpp>
-#endif
 
 #include "cum/experimental/__event__.hpp"
 #include "cum/layout.hpp"

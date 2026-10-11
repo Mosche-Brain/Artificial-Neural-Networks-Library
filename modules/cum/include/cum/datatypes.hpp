@@ -16,11 +16,12 @@
 
 
 
-#if CUM_USE_MKL
+
+
+#if defined(SYCL_LANGUAGE_VERSION)
 #include <sycl/sycl.hpp>
 #include <sycl/ext/oneapi/bfloat16.hpp>
 #endif
-
 
 #if !CUM_USE_FP64 && \
 !CUM_USE_FP32 && \
@@ -49,27 +50,15 @@ namespace cum
 {
     using float64 = double;
     using float32 = float;
-#if CUM_USE_MKL
-    // using float16 = sycl::half;
-    // using bfloat16 = sycl::ext::oneapi::bfloat16;
-    // using float16 = std::float16_t;
-    // using bfloat16 = std::bfloat16_t;;
-    using float16 = uint16_t;
-    using bfloat16 = uint16_t;
+#if defined(SYCL_LANGUAGE_VERSION)
+    using float16 = sycl::half;
+    using bfloat16 = sycl::ext::oneapi::bfloat16;
+#elif defined(__STDCPP_FLOAT16_T__) && defined(__STDCPP_BFLOAT16_T__)
+    using float16 = std::float16_t;
+    using bfloat16 = std::bfloat16_t;
 #else
-#ifdef __STDCPP_FLOAT16_T__
-    using float16 = std::float16;
-    using bfloat16 = std::bfloat16;
-#else
-    using float16 = float;
-#warning float16 not supported by compiler, fallback to float32
-#endif
-#ifdef __STDCPP_BFLOAT16_T__
-    using bfloat16 = std::bfloat16;
-#else
-    using bfloat16 = float;
-#warning bfloat16 not supported by compiler, fallback to float32
-#endif
+    struct float16 { uint16_t raw; };
+    struct bfloat16 { uint16_t raw; };
 #endif
 
     using float8 = fp8_e4_3m_impl;

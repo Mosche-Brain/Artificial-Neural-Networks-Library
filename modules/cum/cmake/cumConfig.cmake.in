@@ -2,12 +2,16 @@
 
 include(CMakeFindDependencyMacro)
 
-if(@BUILD_USE_MKL@)
-    find_dependency(TBB CONFIG)
-    find_dependency(MKL CONFIG)
-    find_dependency(oneDPL CONFIG)
-    if(NOT TARGET DNNL::dnnl)
-        find_dependency(dnnl CONFIG PATHS "@CUM_ONEDNN_INSTALL_DIR@/lib/cmake/dnnl" NO_DEFAULT_PATH)
+# If cum is built as STATIC, consumers must link oneAPI directly.
+# If cum is built as SHARED, oneAPI is privately linked inside the .so.
+if(NOT @CUM_BUILD_SHARED@)
+    if(@BUILD_USE_MKL@)
+        find_dependency(TBB CONFIG)
+        find_dependency(MKL CONFIG)
+        find_dependency(oneDPL CONFIG)
+        if(NOT TARGET DNNL::dnnl)
+            find_dependency(dnnl CONFIG PATHS "@CUM_ONEDNN_INSTALL_DIR@/lib/cmake/dnnl" NO_DEFAULT_PATH)
+        endif()
     endif()
 endif()
 

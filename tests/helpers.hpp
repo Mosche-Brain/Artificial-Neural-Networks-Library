@@ -7,6 +7,7 @@
 #include "cum/Core.hpp"
 #include "cum/memory.hpp"
 #include "cum/functions/various.hpp"
+#include <iostream>
 
 struct TEST_DATA
 {

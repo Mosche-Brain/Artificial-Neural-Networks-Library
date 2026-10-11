@@ -14,6 +14,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Build options
 option(BUILD_SHARED_LIBS "Build project as shared library" ON)
+option(CUM_BUILD_SHARED "Build CUM library as shared library" ON)
 option(BUILD_EXAMPLES "Build example programs" ON)
 option(BUILD_TESTS "Build tests for library" ON)
 option(BUILD_TOOLS "Build tools for library" OFF)

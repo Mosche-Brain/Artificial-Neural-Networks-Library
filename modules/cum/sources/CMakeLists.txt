@@ -1,6 +1,6 @@
 include(GNUInstallDirs)
 
-add_library(${CUM_PROJECT_NAME}_Core STATIC Core.cpp)
+add_library(${CUM_PROJECT_NAME}_Core ${CUM_LIBRARY_TYPE} Core.cpp)
 
 target_include_directories(${CUM_PROJECT_NAME}_Core
         PUBLIC
@@ -16,9 +16,19 @@ set_target_properties(${CUM_PROJECT_NAME}_Core PROPERTIES EXPORT_NAME Core)
 if(BUILD_USE_MKL)
     target_compile_definitions(${CUM_PROJECT_NAME}_Core PUBLIC BUILD_USE_MKL)
 
-    target_compile_options(${CUM_PROJECT_NAME}_Core PUBLIC
-            $<$<COMPILE_LANGUAGE:CXX>:-fsycl>)
-    target_link_options(${CUM_PROJECT_NAME}_Core PUBLIC -fsycl)
+    if(CUM_BUILD_SHARED)
+        target_compile_options(${CUM_PROJECT_NAME}_Core PRIVATE
+                $<$<COMPILE_LANGUAGE:CXX>:-fsycl>)
+        target_link_options(${CUM_PROJECT_NAME}_Core PRIVATE -fsycl)
+        set_target_properties(${CUM_PROJECT_NAME}_Core PROPERTIES
+            INSTALL_RPATH "$ORIGIN:${CMAKE_INSTALL_FULL_LIBDIR}"
+            INSTALL_RPATH_USE_LINK_PATH TRUE
+        )
+    else()
+        target_compile_options(${CUM_PROJECT_NAME}_Core PUBLIC
+                $<$<COMPILE_LANGUAGE:CXX>:-fsycl>)
+        target_link_options(${CUM_PROJECT_NAME}_Core PUBLIC -fsycl)
+    endif()
 
     add_subdirectory(Backends/MKL)
 elseif(BUILD_USE_CBLAS)
