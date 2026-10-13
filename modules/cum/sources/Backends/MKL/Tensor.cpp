@@ -28,6 +28,8 @@
 
 #include "cum/Tensor.hpp"
 
+#include <ranges>
+
 /*
  * This implementation has a lot of redundant code.
  * We plan to move significant part to other .cpp files
@@ -1155,25 +1157,16 @@ namespace cum
 
 	Tensor Tensor::matmul(const Tensor& other) const
 	{
-		if (this->cols() != other.rows())
+		auto reversed_shape_a = this->shape() | std::views::reverse;
+		auto reversed_shape_b = other.shape() | std::views::reverse;
+		if (*reversed_shape_a.begin() != *std::next(reversed_shape_b.begin()))
 		{
-			throw std::invalid_argument("A cols != B rows");
+			throw std::invalid_argument("Tensor::matmul(): A cols != B rows");
 		}
 
-		Shape result_shape = {};
-		switch (this->format()) // Temporary solution, later we should check two last dimensions
-		{
-			case layout::BA:
-			case layout::AB:
-			{
-				result_shape = {this->rows(), other.cols()};
-				break;
-			}
-		default:
-			{
-				throw std::invalid_argument("Unsupported format for tensor matmul");
-			}
-		}
+		Shape result_shape = this->shape();
+		result_shape[this->rank() - 2] = this->rows();
+		result_shape[this->rank() - 1] = other.cols();
 
 		Tensor C(result_shape, type(), format());
 

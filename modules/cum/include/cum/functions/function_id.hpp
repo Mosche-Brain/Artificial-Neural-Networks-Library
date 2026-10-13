@@ -33,9 +33,9 @@ namespace cum::functions
         sigmoid
     };
 
-    typedef cumeric_t (*function_t)(cumeric_t);
+    typedef cumeric_t (*function_t)(cumeric_t); // not uset
 
-    typedef struct
+    typedef struct // not used
     {
         function_id name;
         function_t function;

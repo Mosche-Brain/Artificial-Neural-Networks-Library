@@ -39,22 +39,20 @@ namespace yann::models::layers
 
         void resize(cum::dim_t in_features, cum::dim_t out_features, cum::dim_t batch_size)
         {
-            x   = cum::Tensor::make_matrix(in_features, batch_size);
-            z   = cum::Tensor::make_matrix(out_features, batch_size);
-            a   = cum::Tensor::make_matrix(out_features, batch_size);
-            dz  = cum::Tensor::make_matrix(out_features, batch_size);
+            x   = cum::Tensor::make_matrix(batch_size, in_features);
+            z   = cum::Tensor::make_matrix(batch_size, out_features);
+            a   = cum::Tensor::make_matrix(batch_size, out_features);
+            dz  = cum::Tensor::make_matrix(batch_size, out_features);
         }
 
         void resise(const cum::Shape& input_shape, const cum::Shape& output_shape, cum::dim_t batch_size)
         {
             cum::Shape in_shape = input_shape;
-            cum::Shape out_shape = input_shape;
+            cum::Shape out_shape = output_shape;
 
-            if(batch_size > 1)
-            {
-                in_shape.insert(input_shape.begin(), batch_size);
-                out_shape.insert(output_shape.begin(), batch_size);
-            }
+            // batch is always the first (0) dimension
+            in_shape.insert(in_shape.begin(), batch_size);
+            out_shape.insert(out_shape.begin(), batch_size);
 
             x   = cum::Tensor(in_shape);
             z   = cum::Tensor(out_shape);

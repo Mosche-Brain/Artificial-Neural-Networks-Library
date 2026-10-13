@@ -53,12 +53,12 @@ TEST_CASE("Linear forward computes affine transformation")
     set_linear_parameters(layer);
 
     cum::Tensor input({2, 2}, cum::default_type, cum::layout::AB);
-    set_values(input, {2, -1, 1, 4});
+    set_values(input, {2, 1, -1, 4}); // [batch, features]
 
     const cum::Tensor output = layer.forward(input);
 
     REQUIRE(output.shape() == (cum::Shape{2, 2}));
-    require_values(output, {0.25, -8.75, 3.5, 11});
+    require_values(output, {0.25, 3.5, -8.75, 11});
     cum::decum();
 }
 
@@ -71,10 +71,10 @@ TEST_CASE("Dense forward applies affine transformation and ReLU")
     set_linear_parameters(layer);
 
     cum::Tensor input({2, 2}, cum::default_type, cum::layout::IO);
-    set_values(input, {2, -1, 1, 4});
+    set_values(input, {2, 1, -1, 4}); // [batch, features]
 
     const cum::Tensor output = layer.forward(input);
 
     REQUIRE(output.shape() == (cum::Shape{2, 2}));
-    require_values(output, {0.25, 0, 3.5, 11});
+    require_values(output, {0.25, 3.5, 0, 11});
 }

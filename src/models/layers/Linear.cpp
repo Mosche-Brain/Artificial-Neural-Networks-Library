@@ -26,10 +26,10 @@ namespace yann::models::layers
     void Linear::init_parameters(int output_features, int input_features)
     {
         this->weights_      = Parameter::Uniform(output_features, input_features);   /* neurons * input_length */
-        this->biases_       = Parameter::Zeros(output_features, 1);               /* Column-Vector */
-        this->cache.x       = cum::Tensor({input_features, 1}, cum::default_type, cum::layout::IO);   /* Column-Vector */
-        this->cache.a       = cum::Tensor({output_features, 1}, cum::default_type, cum::layout::IO);
-        this->cache.dz      = cum::Tensor::Ones({output_features, 1}, cum::default_type, cum::layout::IO);
+        this->biases_       = Parameter::Zeros(1, output_features);               /* Row-Vector */
+        this->cache.x       = cum::Tensor({1, input_features}, cum::default_type, cum::layout::IO);
+        this->cache.a       = cum::Tensor({1, output_features}, cum::default_type, cum::layout::IO);
+        this->cache.dz      = cum::Tensor::Ones({1, output_features}, cum::default_type, cum::layout::IO);
         this->_initialized_ = true;
     }
 
@@ -57,9 +57,9 @@ namespace yann::models::layers
             if constexpr(YANN_LINEAR_FORWARD_REFERENCE_PATH)
             {
 
-                YANN_LOG(3, "cache.a = weights_.values * input", "");
+                YANN_LOG(3, "cache.a = input * weights_.values^T", "");
                 YANN_LOG(4, "X: {}x{}, | W: {}x{}", input.rows(), input.cols(), weights_.values.rows(), weights_.values.cols());
-                cache.a = weights_.values * input;
+                cache.a = input * weights_.values.transpose();
 
 
                 YANN_LOG(3, "cache.a = cache.z + biases_.values", "");
@@ -98,16 +98,13 @@ namespace yann::models::layers
                 YANN_LOG(4, "dL/dZ = deltaOutput * ones", "");
                 cache.dz = deltaOutput;
 
-                YANN_LOG(4, "dL/B = cache.dz * cache.x.transpose()", "");
-                if (cache.dz.cols() == 1)
-                    biases_.gradient += cache.dz;
-                else
-                    biases_.gradient += cache.dz.rowwise_sum();
+                YANN_LOG(4, "dL/dB = sum of cache.dz over batch axis", "");
+                biases_.gradient += cache.dz.sum(0, true);
 
-                YANN_LOG(4, "dL/dW = cache.dz * cache.x.transpose()", "");
-                weights_.gradient += cache.dz * cache.x.transpose();
+                YANN_LOG(4, "dL/dW = cache.dz^T * cache.x", "");
+                weights_.gradient += cache.dz.transpose() * cache.x;
 
-                return weights_.values.transpose() * cache.dz;
+                return cache.dz * weights_.values;
             }
             else
             {

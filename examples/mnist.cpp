@@ -32,8 +32,8 @@ class MnistDataLoader
 public:
     struct Dataset
     {
-        cum::Tensor images; // 784 x samples, normalized to [0, 1]
-        cum::Tensor labels; // 10 x samples, one-hot encoded
+        cum::Tensor images; // samples x 784, normalized to [0, 1]
+        cum::Tensor labels; // samples x 10, one-hot encoded
     };
 
     static Dataset load(const std::string& directory, const std::string& split)
@@ -84,7 +84,7 @@ public:
             {
                 for (std::size_t feature = 0; feature < image_size; ++feature)
                 {
-                    image_data[feature * image_count + sample] =
+                    image_data[sample * image_size + feature] =
                         static_cast<cum::cumeric_t>(
                             pixels[sample * image_size + feature]) / 255.0f;
                 }
@@ -96,15 +96,15 @@ public:
             {
                 if (labels[sample] >= 10)
                     throw std::runtime_error("MNIST label is outside [0, 9]");
-                label_data[labels[sample] * label_count + sample] = 1.0f;
+                label_data[sample * 10 + labels[sample]] = 1.0f;
             }
 
             gzclose(images_file);
             gzclose(labels_file);
             return
             {
-                cum::Tensor::copy_memory({static_cast<cum::dim_t>(image_size), image_count}, image_data.data()),
-                cum::Tensor::copy_memory({10, label_count}, label_data.data())
+                cum::Tensor::copy_memory({image_count, static_cast<cum::dim_t>(image_size)}, image_data.data()),
+                cum::Tensor::copy_memory({label_count, 10}, label_data.data())
             };
         }
         catch (...)
@@ -191,7 +191,7 @@ int main(int argc, char** argv)
 
 
     std::println("MNIST loaded");
-    std::println("training samples: {} | test samples: {}", train.images.cols(), test.images.cols());
+    std::println("training samples: {} | test samples: {}", train.images.rows(), test.images.rows());
     std::println("Images: {}x{}", train.images.rows(), train.images.cols());
     std::println("Labels: {}x{}", train.labels.rows(), train.labels.cols());
 
@@ -204,7 +204,7 @@ int main(int argc, char** argv)
         layers::Dense::createUnique(64, "sigmoid"),
         // layers::Dense::createUnique(10, "sigmoid"),
         layers::Linear::createUnique(10),
-        layers::Softmax::createUnique(10, 0)
+        layers::Softmax::createUnique(10, 1)
     });
 
     yann::loss::Loss loss = yann::loss::CategoricalCrossEntropy::create();

@@ -28,17 +28,17 @@ TEST_CASE("MLP binary classifier for XOR")
         yann::models::layers::Dense::createUnique(1, "sigmoid"),
     });
 
-    cum::Tensor X(2, 4, cum::default_type, cum::layout::AB);
-    X.at({0, 0}) = 0; X.at({1, 0}) = 0;;
-    X.at({0, 1}) = 0; X.at({1, 1}) = 1;
-    X.at({0, 2}) = 1; X.at({1, 2}) = 0;
-    X.at({0, 3}) = 1; X.at({1, 3}) = 1;
+    cum::Tensor X(4, 2, cum::default_type, cum::layout::AB);
+    X.at({0, 0}) = 0; X.at({0, 1}) = 0;;
+    X.at({1, 0}) = 0; X.at({1, 1}) = 1;
+    X.at({2, 0}) = 1; X.at({2, 1}) = 0;
+    X.at({3, 0}) = 1; X.at({3, 1}) = 1;
 
-    cum::Tensor Y(1, 4, cum::default_type, cum::layout::AB);
+    cum::Tensor Y(4, 1, cum::default_type, cum::layout::AB);
     Y.at({0, 0}) = 0;
-    Y.at({0, 1}) = 1;
-    Y.at({0, 2}) = 1;
-    Y.at({0, 3}) = 0;
+    Y.at({1, 0}) = 1;
+    Y.at({2, 0}) = 1;
+    Y.at({3, 0}) = 0;
 
     yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.1);
     yann::loss::Loss loss = yann::loss::BinaryCrossEntropy::create();
@@ -47,21 +47,21 @@ TEST_CASE("MLP binary classifier for XOR")
 
     cum::Tensor Y_pred = sequential.forward(X);
 
-    // for (int i = 0 ; i < X.cols() ; i++)
-        // std::println("[{}, {}] -> {}", X(0, i), X(1, i), Y_pred(0, i));
+    // for (int i = 0 ; i < X.rows() ; i++)
+        // std::println("[{}, {}] -> {}", X(i, 0), X(i, 1), Y_pred(i, 0));
 
 
     sequential.fit(X, Y, *loss, *optimizer, 500, 4);
     // std::println("---------------------------------------");
     cum::Tensor Y_pred_2 = sequential.forward(X);
 
-    // for (int i = 0 ; i < X.cols() ; i++)
-        // std::println("[{}, {}] -> {}", X(0, i), X(1, i), Y_pred_2(0, i));
+    // for (int i = 0 ; i < X.rows() ; i++)
+        // std::println("[{}, {}] -> {}", X(i, 0), X(i, 1), Y_pred_2(i, 0));
 
     REQUIRE(static_cast<int>(std::round(Y_pred_2(0, 0))) == 0);
-    REQUIRE(static_cast<int>(std::round(Y_pred_2(0, 1))) == 1);
-    REQUIRE(static_cast<int>(std::round(Y_pred_2(0, 2))) == 1);
-    REQUIRE(static_cast<int>(std::round(Y_pred_2(0, 3))) == 0);
+    REQUIRE(static_cast<int>(std::round(Y_pred_2(1, 0))) == 1);
+    REQUIRE(static_cast<int>(std::round(Y_pred_2(2, 0))) == 1);
+    REQUIRE(static_cast<int>(std::round(Y_pred_2(3, 0))) == 0);
 }
 
 TEST_CASE("MLP reggresion")

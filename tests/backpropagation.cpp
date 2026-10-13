@@ -55,14 +55,14 @@ TEST_CASE("Linear backward computes input and parameter gradients")
     const auto parameters = set_linear_parameters(layer);
 
     cum::Tensor input({2, 2}, cum::default_type, cum::layout::IO);
-    set_values(input, {2, -1, 1, 4});
+    set_values(input, {2, 1, -1, 4}); // [batch, features]
     layer.forward(input);
 
     cum::Tensor output_gradient({2, 2}, cum::default_type, cum::layout::IO);
-    set_values(output_gradient, {2, -1, 3, 4});
+    set_values(output_gradient, {2, 3, -1, 4}); // [batch, features]
     const cum::Tensor input_gradient = layer.backward(output_gradient);
 
-    require_values(input_gradient, {3.5, 1, 5, 14});
+    require_values(input_gradient, {3.5, 5, 1, 14});
     require_values(parameters[0]->gradient, {5, -2, 2, 19});
     require_values(parameters[1]->gradient, {1, 7});
     cum::decum();
@@ -77,14 +77,14 @@ TEST_CASE("Dense backward includes the ReLU derivative")
     const auto parameters = set_linear_parameters(layer);
 
     cum::Tensor input({2, 2}, cum::default_type, cum::layout::IO);
-    set_values(input, {2, -1, 1, 4});
+    set_values(input, {2, 1, -1, 4}); // [batch, features]
     layer.forward(input);
 
     cum::Tensor output_gradient({2, 2}, cum::default_type, cum::layout::IO);
-    set_values(output_gradient, {2, -1, 3, 4});
+    set_values(output_gradient, {2, 3, -1, 4}); // [batch, features]
     const cum::Tensor input_gradient = layer.backward(output_gradient);
 
-    require_values(input_gradient, {3.5, 2, 5, 12});
+    require_values(input_gradient, {3.5, 5, 2, 12});
     require_values(parameters[0]->gradient, {4, 2, 2, 19});
     require_values(parameters[1]->gradient, {2, 7});
     cum::decum();

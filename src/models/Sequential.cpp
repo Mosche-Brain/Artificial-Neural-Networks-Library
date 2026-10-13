@@ -105,11 +105,11 @@ namespace yann::models
 
     void Sequential::fit(const cum::Tensor& X, const cum::Tensor& Y, loss::LossBase& loss, optimizers::OptimizerBase& optimizer, cum::dim_t epochs, cum::dim_t batch_size, std::span<logging::ITrainingCallback*> callbacks)
     {
-        constexpr cum::dim_t batch_axis = 1; // tymczasowo fixed
+        constexpr cum::dim_t batch_axis = 0; // tymczasowo fixed
 
         if (batch_size == 0)
             throw std::invalid_argument("batch_size must be greater than zero");
-        if (X.shape()[1] != Y.shape()[1])
+        if (X.shape()[batch_axis] != Y.shape()[batch_axis])
             throw std::invalid_argument("X and Y must contain the same number of samples");
 
         std::vector<Parameter*> params = this->parameters();
@@ -133,14 +133,14 @@ namespace yann::models
             cum::Shape output_shape = topology.back()->output_shape();
 
 
-            input_shape.push_back(batch_size);
-            output_shape.push_back(batch_size);
+            input_shape.insert(input_shape.begin(), batch_size);
+            output_shape.insert(output_shape.begin(), batch_size);
 
 
             cum::Tensor x(input_shape, cum::default_type);
             cum::Tensor y(output_shape, cum::default_type);
 
-            cum::dim_t n = X.cols(); // assuming batch last logic layout, and 2D tensors
+            cum::dim_t n = X.shape()[batch_axis]; // batch-first layout: [samples, ...]
             cum::dim_t batches = n / batch_size;
             n % batch_size > 0 ? batches++ : NULL;
             for (batch = 0; batch < batches; batch++)
@@ -150,7 +150,7 @@ namespace yann::models
                 YANN_LOG(3, "batch: {}", batch);
 
                 cum::Shape input_batch_shape = input_shape;
-                input_batch_shape.at(input_batch_shape.size() - 1) = num_samples;
+                input_batch_shape.at(batch_axis) = num_samples;
 
                 cum::Shape input_batch_indices(input_shape.size(), 0);
                 input_batch_indices[batch_axis] = sample_idx;
@@ -159,7 +159,7 @@ namespace yann::models
                 YANN_LOG(3, "X: Sample: {}x{}", x.rows(), x.cols());
 
                 cum::Shape target_batch_shape = output_shape;
-                target_batch_shape.at(target_batch_shape.size() - 1) = num_samples;
+                target_batch_shape.at(batch_axis) = num_samples;
 
                 cum::Shape target_batch_indices(target_batch_shape.size(), 0);
                 target_batch_indices.at(batch_axis) = sample_idx;

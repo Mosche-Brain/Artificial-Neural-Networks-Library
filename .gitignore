@@ -7,6 +7,7 @@
 /modules/cum/bindings/python/dist
 /modules/cum/bindings/python/src/cumpy.egg-info
 /build/
+install
 thirdparty/*
 thirdparty/Easy3D
 thirdparty/imgui

@@ -33,7 +33,7 @@ namespace yann::loss
                 if (axis != target.shape()[index])
                     throw std::invalid_argument("MeanSquaredError::compute: result and target dimensions must match");
             
-            const cum::dim_t N = predicted.cols();
+            const cum::dim_t N = predicted.shape()[0]; // batch axis
 
             cum::Tensor diff = predicted - target;
 
