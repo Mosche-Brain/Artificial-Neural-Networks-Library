@@ -3,7 +3,6 @@
 /.archive/
 /.datasets/
 /.external/
-/modules/cum/
 /modules/cum/build/
 /modules/cum/bindings/python/dist
 /modules/cum/bindings/python/src/cumpy.egg-info
