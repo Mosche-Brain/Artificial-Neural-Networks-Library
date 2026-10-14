@@ -35,6 +35,8 @@ namespace cum
         Tensor(const Shape& shape, datatype dtype = default_type, layout layout = layout::ANY); // FP32, ANY
         Tensor() = default;
 
+        Tensor( neural_primitives::Descriptor& descriptor);
+
         Tensor(cumeric_t value, datatype dtype = default_type, layout layout = layout::A); // scalar constructor
         Tensor(dim_t lenght, datatype dtype = default_type, layout layout = layout::A); // vector constructor
         Tensor(dim_t rows, dim_t cols, datatype dtype = default_type, layout layout = layout::AB); // Matrix Constructor
@@ -84,21 +86,13 @@ namespace cum
         dim_t rank() const;
         dim_t dims() const;
         dim_t lenght() const;
+        dim_t elements() const;
         Shape shape() const;
         layout format() const;
         datatype type() const;
 
         bool is_scalar() const;
-        // bool is_vector();
-        // bool is_matrix();
-        // bool has(Axis axis) const;
-        // dim_t extent(Axis axis) const;
 
-        // dim_t batches() const;
-        // dim_t channels() const;
-        // dim_t depth() const;
-        // dim_t height() const;
-        // dim_t width() const;
         dim_t rows() const;    // alias height()
         dim_t cols() const;    // alias width()
 
@@ -124,7 +118,7 @@ namespace cum
         template<typename T>
         const T& at(const Shape& indices) const;
 
-        const void* data() const; // I should add templated data getter
+        const void* data() const;
         void* data();
 
         cumeric_t& at(const Shape& indices);
@@ -151,7 +145,7 @@ namespace cum
         Tensor reshape(const Shape& shape) const;
         Tensor& reshape_in_place(const Shape& shape);
 
-        Tensor transpose();
+        Tensor transpose() const;
         Tensor& transpose_in_place();
 
         /* reductions */

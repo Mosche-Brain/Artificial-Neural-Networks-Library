@@ -40,7 +40,7 @@ TEST_CASE("MLP binary classifier for XOR")
     Y.at({2, 0}) = 1;
     Y.at({3, 0}) = 0;
 
-    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.1);
+    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.4); // BatchMean loss scaling: lr * batch_size (4) keeps the previous step size
     yann::loss::Loss loss = yann::loss::BinaryCrossEntropy::create();
 
     yann::runtime_config::set_verbosity(1);

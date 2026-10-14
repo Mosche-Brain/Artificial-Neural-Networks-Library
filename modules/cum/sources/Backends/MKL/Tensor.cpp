@@ -89,6 +89,18 @@ namespace cum
 		_memr_ = std::make_unique<Memory>(*_desc_, _data);
 	}
 
+	Tensor::Tensor( Descriptor& descriptor)
+		: _desc_(std::make_unique<Descriptor>(descriptor)),
+		  _data(sycl::malloc_shared<byte>(_desc_->size(), internal::device(), internal::sycl_context()))
+	{
+		if(_data == nullptr)
+		{
+			std::println("sex: {}", _desc_->size());
+			throw std::bad_alloc();
+		}
+		_memr_ = std::make_unique<Memory>(*_desc_, _data);
+	}
+
 	Tensor::Tensor(const Tensor& tensor)
 		: _desc_(std::make_unique<Descriptor>(
 			tensor.shape(), tensor.type(),
@@ -339,6 +351,12 @@ namespace cum
 		return _desc_->size() / datatype_size(_desc_->type());
     }
 
+
+	dim_t Tensor::elements() const
+	{
+		return lenght();
+	}
+
 	Shape Tensor::shape() const
     {
 	    return _desc_->shape();
@@ -587,36 +605,42 @@ namespace cum
     }
 
 
-	Tensor Tensor::transpose()
+	Tensor Tensor::transpose() const
 	{
-		// Tensor result = *this;
-
-		if(is_scalar())
+		if (this->is_scalar())
 			return *this;
 
-		if(rank() != 2)
-			throw std::invalid_argument("transpose requires a two-dimensional tensor");
+		if (this->rank() < 2)
+			throw std::invalid_argument("transpose requires at least two-dimensional tensor");
 
-		Tensor result({shape()[1], shape()[0]}, type(), format());
+		Shape transposed_shape = this->shape();
+		auto shape_rev = transposed_shape | std::views::reverse;
+		std::swap(shape_rev[0], shape_rev[1]);
 
-		layout permuted_format = this->format() == layout::BA ? layout::AB : layout::BA;
+		std::vector<int> perm(this->rank());
+		std::iota(perm.begin(), perm.end(), 0);
 
-		dnnl::memory::desc& src_md = _desc_->handle().desc;
+		auto perm_rev = perm | std::views::reverse;
+		std::swap(perm_rev[0], perm_rev[1]);
 
-		Descriptor dst_md(this->shape(), this->type(), permuted_format);
+		Tensor result(transposed_shape, type(), format());
+
+		dnnl::memory::desc permuted_src_md = _desc_->handle().desc.permute_axes(perm);
+		dnnl::memory::desc& dst_md = result._desc_->handle().desc;
+
 		dnnl::reorder::primitive_desc primitive_desc(
 			internal::engine(),
-			src_md,
+			permuted_src_md,
 			internal::engine(),
-			dst_md.handle().desc
+			dst_md
 		);
 
-		dnnl::memory& src_mem = _memr_->handle().memory;
+		dnnl::memory src_mem(permuted_src_md, internal::engine(), _memr_->handle().memory.get_data_handle());
 		dnnl::memory& dst_mem = result._memr_->handle().memory;
 
 		dnnl::reorder(primitive_desc).execute(
-		internal::stream(),
-	{
+			internal::stream(),
+			{
 				{ DNNL_ARG_SRC, src_mem },
 				{ DNNL_ARG_DST, dst_mem }
 			}

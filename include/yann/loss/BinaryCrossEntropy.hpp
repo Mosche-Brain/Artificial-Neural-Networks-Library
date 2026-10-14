@@ -15,8 +15,10 @@ namespace yann::loss
     class BinaryCrossEntropy : public LossBase
     {
     public:
-        void compute(const cum::Tensor& predicted, const cum::Tensor& target) override;
         static std::unique_ptr<LossBase> create();
+
+    protected:
+        void compute_sum(const cum::Tensor& predicted, const cum::Tensor& target) override;
     };
 
 

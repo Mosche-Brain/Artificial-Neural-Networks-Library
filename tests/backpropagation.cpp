@@ -40,7 +40,7 @@ namespace
         std::vector<yann::Parameter*> parameters;
         layer.collect_parameters(parameters);
         REQUIRE(parameters.size() == 2);
-        set_values(parameters[0]->values, {1, -2, 0.5, 3});
+        set_values(parameters[0]->values, {1, 0.5, -2, 3} /* [in, out] */);
         set_values(parameters[1]->values, {0.25, -0.5});
         return parameters;
     }
@@ -63,7 +63,7 @@ TEST_CASE("Linear backward computes input and parameter gradients")
     const cum::Tensor input_gradient = layer.backward(output_gradient);
 
     require_values(input_gradient, {3.5, 5, 1, 14});
-    require_values(parameters[0]->gradient, {5, -2, 2, 19});
+    require_values(parameters[0]->gradient, {5, 2, -2, 19});
     require_values(parameters[1]->gradient, {1, 7});
     cum::decum();
 }

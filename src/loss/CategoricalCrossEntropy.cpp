@@ -18,14 +18,10 @@ namespace yann::loss
 
     }
 
-    void CategoricalCrossEntropy::compute(const cum::Tensor& predicted, const cum::Tensor& target)
+    void CategoricalCrossEntropy::compute_sum(const cum::Tensor& predicted, const cum::Tensor& target)
     {
         constexpr bool YANN_CCE_FUSED_PATH = false;
         constexpr bool YANN_CCE_REFERENCE_PATH = true; // It will be moved to cmake config
-
-        for (auto [index, axis] : predicted.shape() | std::ranges::views::enumerate)
-            if (axis != target.shape()[index])
-                throw std::invalid_argument("CategoricalCrossEntropy::compute: result and target dimensions must match");
 
         if(runtime_config::fused_kernels())
         {

@@ -1,7 +1,7 @@
 //! @file Linear.hpp
 //! @brief Linear (fully connected) layer without activation specification in constructor.
 //!
-//! The Linear layer implements a linear transformation y = Wx + b without applying
+//! The Linear layer implements a linear transformation y = xW + b without applying
 //! an activation function. This makes it distinct from the Dense layer which requires
 //! an activation function to be specified at construction time.
 //!
@@ -11,15 +11,15 @@
 //! @defgroup yann_layers Linear Layer
 //! @{
 
-//! @brief Linear layer implementing y = Wx + b without activation.
+//! @brief Linear layer implementing y = xW + b without activation.
 //!
 //! The Linear layer performs a linear transformation of the input:
-//! @f[y = Wx + b@f]
+//! @f[y = xW + b@f]
 //!
 //! Where:
-//! - @f$W@f$ is the weight matrix of shape (@f$output\_features \times input\_features@f$)
-//! - @f$b@f$ is the bias vector of shape (@f$output\_features@f$)
-//! - @f$x@f$ is the input vector
+//! - @f$W@f$ is the weight matrix of shape (@f$input\_features \times output\_features@f$)
+//! - @f$b@f$ is the bias row vector of shape (@f$1 \times output\_features@f$)
+//! - @f$x@f$ is the input batch of shape (@f$batch\_size \times input\_features@f$)
 //!
 //! Unlike Dense, the activation function is not specified at construction but can be
 //! applied separately in the network architecture if needed.
@@ -52,13 +52,13 @@ namespace yann::models::layers
         //!
         //! @note Weights are initialized using uniform distribution in range [-0.1, 0.1].
         //!       Biases are initialized to zeros. The weights matrix has dimensions
-        //!       (output_features, input_features), and biases have dimensions (output_features, 1).
+        //!       (input_features, output_features), and biases have dimensions (1, output_features).
         void init_parameters(int output_features, int input_features) override;
 
         //! @brief Compute the forward pass (linear transformation only).
         //!
         //! @param input Input tensor of shape (batch_size, input_features).
-        //!              The last dimension must match the weight matrix's column count.
+        //!              The last dimension must match the weight matrix's row count.
         //! @return Output tensor of shape (batch_size, output_features)
         //!         resulting from the linear transformation Wx + b.
         //!

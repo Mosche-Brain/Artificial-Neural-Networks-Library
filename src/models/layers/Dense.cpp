@@ -75,7 +75,7 @@ namespace yann::models::layers
 
     void Dense::init_parameters(int output_features, int input_features)
     {
-        this->weights_      = Parameter::Uniform(output_features, input_features);   /* neurons * input_length */
+        this->weights_      = Parameter::Uniform(input_features, output_features);   /* input_length * neurons */
         this->biases_       = Parameter::Zeros(1, output_features);                  /* Row-Vector */
         this->cache.a       = cum::Tensor(cum::Shape{output_features}, cum::default_type);
         this->cache.z   	= cum::Tensor(cum::Shape{output_features}, cum::default_type);
@@ -91,12 +91,12 @@ namespace yann::models::layers
         constexpr bool YANN_DENSE_FORWARD_FUSED_PATH = false;
         constexpr bool YANN_DENSE_FORWARD_REFERENCE_PATH = true;
 
-        // check if number of weights cols is equal to number of input features (input is [batch, features])
+        // check if number of weights rows is equal to number of input features (input is [batch, features])
         if constexpr(ENABLE_RUNTIME_CHECKS)
         {
-            if(input.cols() != weights_.cols())
+            if(input.cols() != weights_.rows())
             {
-                throw std::runtime_error("Input dimension mismatch: " + std::to_string(input.cols()) + " != " + std::to_string(weights_.cols()));
+                throw std::runtime_error("Input dimension mismatch: " + std::to_string(input.cols()) + " != " + std::to_string(weights_.rows()));
             }
         }
 
@@ -118,9 +118,9 @@ namespace yann::models::layers
         {
             if constexpr(YANN_DENSE_FORWARD_REFERENCE_PATH)
             {
-                YANN_LOG(3, "cache.z = input * weights_.values^T | X: {}x{}, | W: {}x{}", input.rows(), input.cols(), weights_.values.rows(), weights_.values.cols());
-                // cache.z = input * weights_.values.transpose();
-                cache.z = input.matmul(weights_.values.transpose());
+                YANN_LOG(3, "cache.z = input * weights_.values | X: {}x{}, | W: {}x{}", input.rows(), input.cols(), weights_.values.rows(), weights_.values.cols());
+                // cache.z = input * weights_.values;
+                cache.z = input.matmul(weights_.values);
 
                 YANN_LOG(3, "cache.z = cache.z + biases_.values | Z: {}x{} | B: {}x{}", cache.z.rows(), cache.z.cols(), biases_.values.rows(), biases_.values.cols());
                 cache.z = cache.z + biases_.values; // with broadcast
@@ -166,11 +166,11 @@ namespace yann::models::layers
                 YANN_LOG(3, "dL/dB = sum of cache.dz over batch axis", "");
                 biases_.gradient += cache.dz.sum(0, true);
 
-                YANN_LOG(3, "dL/dW = cache.dz^T * cache.x | dZ: {}x{} | X: {}x{}", cache.dz.rows(), cache.dz.cols(), cache.x.rows(), cache.x.cols());
-                weights_.gradient += cache.dz.transpose() * cache.x;
+                YANN_LOG(3, "dL/dW = cache.x^T * cache.dz | dZ: {}x{} | X: {}x{}", cache.dz.rows(), cache.dz.cols(), cache.x.rows(), cache.x.cols());
+                weights_.gradient += cache.x.transpose() * cache.dz;
 
-                YANN_LOG(3, "dL/dX = cache.dz * weights | W: {}x{}, | dZ: {}x{}", weights_.values.rows(), weights_.values.cols(), cache.dz.rows(), cache.dz.cols());
-                return cache.dz * weights_.values;
+                YANN_LOG(3, "dL/dX = cache.dz * weights^T | W: {}x{}, | dZ: {}x{}", weights_.values.rows(), weights_.values.cols(), cache.dz.rows(), cache.dz.cols());
+                return cache.dz * weights_.values.transpose();
             }
             else
             {

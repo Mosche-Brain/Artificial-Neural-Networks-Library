@@ -17,8 +17,9 @@ namespace yann::loss
     public:
         CategoricalCrossEntropy(bool from_logits = false);
 
-        void compute(const cum::Tensor& predicted, const cum::Tensor& target) override;
         static std::unique_ptr<CategoricalCrossEntropy> create(bool from_logits = false);
+    protected:
+        void compute_sum(const cum::Tensor& predicted, const cum::Tensor& target) override;
     private:
         bool from_logits_;
     };

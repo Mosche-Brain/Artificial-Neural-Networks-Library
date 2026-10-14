@@ -8,7 +8,7 @@
 
 namespace yann::loss
 {
-    void MeanAbsoluteError::compute(const cum::Tensor& predicted, const cum::Tensor& target)
+    void MeanAbsoluteError::compute_sum(const cum::Tensor& predicted, const cum::Tensor& target)
     {
         constexpr bool fused_kernels = false;
 
@@ -19,13 +19,6 @@ namespace yann::loss
         else
         {
             // if (predicted.rows() != target.rows())
-            for (auto [index, axis] : predicted.shape() | std::ranges::views::enumerate)
-            {
-                if (axis != target.shape()[index])
-                    throw std::invalid_argument(
-                        "binary_cross_entropy: result and target dimensions must match"
-                    );
-            }
             // if (predicted.rows() != target.rows() || predicted.cols() != target.cols())
             // {
             //     throw std::runtime_error("Matrix dimensions do not match: result(" +
@@ -36,15 +29,15 @@ namespace yann::loss
             // if (predicted.cols() == 0)
                 // throw std::runtime_error("Number of columns in result is zero");
 
-            const std::size_t N = predicted.rows();
             // if (!result.allFinite() || !target.allFinite()) {
             //     throw std::runtime_error("Input matrices contain NaN or inf values");
             // }
 
             cum::Tensor diff = predicted - target;
 
-            loss.value = diff.squaredNorm() / static_cast<cum::cumeric_t>(N);
-            loss.gradient = (diff * 2) / static_cast<cum::cumeric_t>(N);
+            // sum over features and batch, scaling is applied by LossBase::compute
+            loss.value = diff.squaredNorm();
+            loss.gradient = diff * 2;
         }
     }
 

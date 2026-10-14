@@ -6,19 +6,19 @@
 //! using the cum computational backend.
 //!
 //! @note This layer expects 2D tensor inputs with shape (batch_size, input_features).
-//!       The weights matrix has dimensions (output_features, input_features).
+//!       The weights matrix has dimensions (input_features, output_features).
 
 //! @defgroup yann_layers Dense Layer
 //! @{
 
 //! @brief Fully connected (dense) neural network layer.
 //! @details The Dense layer implements a linear transformation followed by an activation function:
-//! @f[y = \sigma(Wx + b)@]
+//! @f[y = \sigma(xW + b)@]
 //!
 //! Where:
-//! - @f$W@f$ is the weight matrix of shape (@f$output\_features \times input\_features@f$)
-//! - @f$b@f$ is the bias vector of shape (@f$output\_features@f$)
-//! - @f$x@f$ is the input vector
+//! - @f$W@f$ is the weight matrix of shape (@f$input\_features \times output\_features@f$)
+//! - @f$b@f$ is the bias row vector of shape (@f$1 \times output\_features@f$)
+//! - @f$x@f$ is the input batch of shape (@f$batch\_size \times input\_features@f$)
 //! - @f$\sigma@f$ is the activation function
 //!
 //! The layer maintains internal cache for storing intermediate values needed during
@@ -33,7 +33,7 @@ namespace yann::models::layers
     //! @brief Fully connected (dense) neural network layer.
     //!
     //! The Dense layer implements a linear transformation followed by an activation function:
-    //! @f[y = \sigma(Wx + b)@]
+    //! @f[y = \sigma(xW + b)@]
     //!
     //! @see LayerBase
     //!
@@ -60,16 +60,16 @@ namespace yann::models::layers
         //! @param input_features Number of input features (determines weight matrix width).
         //!
         //! @note This method overrides the pure virtual function from LayerBase.
-        //!       The weights matrix has dimensions (output_features, input_features),
-        //!       and biases have dimensions (output_features, 1).
+        //!       The weights matrix has dimensions (input_features, output_features),
+        //!       and biases have dimensions (1, output_features).
         void init_parameters(int output_features, int input_features) override;
 
         //! @brief Compute the forward pass of the dense layer.
         //!
-        //! Performs the transformation: @f$z = Wx + b@f$ followed by activation: @f$a = \sigma(z)@f$.
+        //! Performs the transformation: @f$z = xW + b@f$ followed by activation: @f$a = \sigma(z)@f$.
         //!
         //! @param input Input tensor of shape (@f$batch\_size \times input\_features@f$).
-        //!              The last dimension must match the weight matrix's column count (@f$input\_features@f$).
+        //!              The last dimension must match the weight matrix's row count (@f$input\_features@f$).
         //! @return Output tensor of shape (@f$batch\_size \times output\_features@f$),
         //!         after applying the activation function.
         //!

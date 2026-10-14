@@ -39,7 +39,7 @@ namespace
         std::vector<yann::Parameter*> parameters;
         layer.collect_parameters(parameters);
         REQUIRE(parameters.size() == 2);
-        set_values(parameters[0]->values, {1, -2, 0.5, 3});
+        set_values(parameters[0]->values, {1, 0.5, -2, 3} /* [in, out] */);
         set_values(parameters[1]->values, {0.25, -0.5});
     }
 }
