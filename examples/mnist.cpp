@@ -4,7 +4,7 @@
 
 #include <yann/loss/CategoricalCrossEntropy.hpp>
 #include <yann/optimizers/SGD.hpp>
-#include <yann/optimizers/Momentum.hpp>
+#include <yann/optimizers/ADAM.hpp>
 #include <yann/models/Sequential.hpp>
 #include <yann/models/layers/Dense.hpp>
 #include <yann/models/layers/Softmax.hpp>
@@ -182,34 +182,33 @@ using namespace yann::models;
 
 int main(int argc, char** argv)
 {
-    cum::cum(cum::DEVICE::GPU);
+    cum::cum(cum::DEVICE::CPU);
 
     const std::string mnist_directory = argc > 1 ? argv[1] : "/home/jaro/Development/Yann/Assets/mnist";
 
-    const auto train = MnistDataLoader::load(mnist_directory, "train");
-    const auto test = MnistDataLoader::load(mnist_directory, "test");
+    auto train = MnistDataLoader::load(mnist_directory, "train");
+    auto test = MnistDataLoader::load(mnist_directory, "test");
 
+    train.images /= static_cast<cum::cumeric_t>(255);
+    test.images /= static_cast<cum::cumeric_t>(255);
 
     std::println("MNIST loaded");
     std::println("training samples: {} | test samples: {}", train.images.rows(), test.images.rows());
-    std::println("Images: {}x{}", train.images.rows(), train.images.cols());
+    std::println("Images: {}x{} | {}", train.images.rows(), train.images.cols(), train.images(9, 9));
     std::println("Labels: {}x{}", train.labels.rows(), train.labels.cols());
 
 
     Sequential model({
         layers::Input::createUnique(28 * 28),
-        layers::Dense::createUnique(128, "sigmoid"),
-        // layers::Dense::createUnique(128, "sigmoid"),
-        // layers::Dense::createUnique(256, "sigmoid"),
-        layers::Dense::createUnique(64, "sigmoid"),
-        // layers::Dense::createUnique(10, "sigmoid"),
+        layers::Dense::createUnique(256, "gelu"),
+        layers::Dense::createUnique(128, "gelu"),
+        layers::Dense::createUnique(64, "tanh"),
         layers::Linear::createUnique(10),
         layers::Softmax::createUnique(10, 1)
     });
 
     yann::loss::Loss loss = yann::loss::CategoricalCrossEntropy::create();
-    // yann::optimizers::Optimizer optimizer = yann::optimizers::Momentum::create(0.01f, 0.1f);
-    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.02f);
+    yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.01f);
 
     yann::logging::LossTracker loss_tracker;
     std::array<yann::logging::ITrainingCallback*, 1> callbacks = {
@@ -218,13 +217,13 @@ int main(int argc, char** argv)
 
 	yann::runtime_config::set_verbosity(1);
 
-    yann::utils::model_deserialize_from_safetensors(model, "mnist-resolver.safetensors");
+    // yann::utils::model_deserialize_from_safetensors(model, "mnist-resolver-adam.safetensors");
 
     constexpr std::size_t epochs = 64;
-    constexpr std::size_t batch_size = 6000;
+    constexpr std::size_t batch_size = 128;
     model.fit(train.images, train.labels, *loss, *optimizer, epochs, batch_size, callbacks);
 
-    yann::utils::model_serialize_to_safetensors(model, "mnist-resolver.safetensors");
+    yann::utils::model_serialize_to_safetensors(model, "mnist-resolver-adam-2.safetensors");
 
     const auto loss_history = loss_tracker.getLossHistory();
     std::vector<double> epoch_range(loss_history.size());

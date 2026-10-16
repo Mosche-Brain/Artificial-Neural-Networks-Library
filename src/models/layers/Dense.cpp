@@ -167,7 +167,7 @@ namespace yann::models::layers
                 biases_.gradient += cache.dz.sum(0, true);
 
                 YANN_LOG(3, "dL/dW = cache.x^T * cache.dz | dZ: {}x{} | X: {}x{}", cache.dz.rows(), cache.dz.cols(), cache.x.rows(), cache.x.cols());
-                weights_.gradient += cache.x.transpose() * cache.dz;
+                weights_.gradient += cache.x.transpose().matmul(cache.dz);
 
                 YANN_LOG(3, "dL/dX = cache.dz * weights^T | W: {}x{}, | dZ: {}x{}", weights_.values.rows(), weights_.values.cols(), cache.dz.rows(), cache.dz.cols());
                 return cache.dz * weights_.values.transpose();

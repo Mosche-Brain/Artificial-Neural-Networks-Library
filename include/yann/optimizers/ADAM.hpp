@@ -21,13 +21,14 @@ namespace yann::optimizers
 
 		static std::unique_ptr<ADAM> create(cum::cumeric_t learning_rate, cum::cumeric_t b1=0.9, cum::cumeric_t b2=0.999);
     private:
-		std::size_t current_step;
+		// std::size_t current_step;
         cum::cumeric_t b1;
         cum::cumeric_t b2;
-        // std::vector<cum::Matrix> momentum;
-		// std::vector<cum::Matrix> second_momentum;
+
+
         std::unordered_map<Parameter*, cum::Tensor> momentum;
 		std::unordered_map<Parameter*, cum::Tensor> second_momentum;
+		std::unordered_map<Parameter*, cum::dim_t> steps_count;
     };
 } // yann
 
