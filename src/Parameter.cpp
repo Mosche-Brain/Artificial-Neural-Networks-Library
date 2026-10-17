@@ -36,7 +36,6 @@ namespace yann
         gradient = cum::Tensor(shape, cum::default_type, cum::layout::IO);
     }
 
-
     Parameter Parameter::Uniform(const cum::dim_t rows, const cum::dim_t cols)
     {
         constexpr cum::cumeric_t ampl = 0.5;

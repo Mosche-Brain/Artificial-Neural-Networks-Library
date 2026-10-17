@@ -38,7 +38,7 @@ namespace yann::loss
         {
             if constexpr (YANN_CCE_REFERENCE_PATH)
             {
-                constexpr cum::cumeric_t epsilon = 1e-5;
+                constexpr cum::cumeric_t epsilon = 1e-7;
 
                 cum::Tensor P = predicted.clamp(epsilon, 1 - epsilon);
 

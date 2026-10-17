@@ -60,7 +60,7 @@ namespace yann::optimizers
 				{
 					// second_momentum.emplace(param, cum::Tensor::Zeros(param->shape(), param->type(), param->format()));
 					second_momentum.emplace(param, cum::Tensor(param->shape(), param->type()));
-					momentum.at(param).fill(0);
+					second_momentum.at(param).fill(0);
 				}
 				if (!steps_count.contains(param))
 					steps_count.emplace(param, 0);

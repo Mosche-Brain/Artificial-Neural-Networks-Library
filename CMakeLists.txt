@@ -83,7 +83,7 @@ add_library(yann_compiler_flags INTERFACE)
 target_compile_options(yann_compiler_flags INTERFACE
     -Wall
     -Wextra
-    $<$<CXX_COMPILER_ID:Clang,IntelLLVM>:-Wno-deprecated-literal-operator -Wno-macro-redefined>
+#    $<$<CXX_COMPILER_ID:Clang,IntelLLVM>:-Wno-deprecated-literal-operator -Wno-macro-redefined>
     -march=native
     $<$<CONFIG:Release>:-O3 -ffast-math>
     $<$<CONFIG:Debug>:-g -O0>
@@ -92,7 +92,10 @@ target_compile_options(yann_compiler_flags INTERFACE
 find_package(OpenMP REQUIRED)
 find_package(nlohmann_json 3.12.0 REQUIRED)
 
-add_subdirectory(modules/cum)
+#add_subdirectory(modules/cum)
+
+find_package(cum REQUIRED)
+
 #add_subdirectory(modules/safetensors.cpp)
 add_subdirectory(src)
 
