@@ -27,158 +27,166 @@
 #include <numeric>
 #include <array>
 
-class MnistDataLoader
-{
-public:
-    struct Dataset
-    {
-        cum::Tensor images; // samples x 784, normalized to [0, 1]
-        cum::Tensor labels; // samples x 10, one-hot encoded
-    };
+#include "helpers/MnistDataLoader.hpp"
 
-    static Dataset load(const std::string& directory, const std::string& split)
-    {
-        const std::string image_name =
-            split == "train" ? "train-images-idx3-ubyte" : "t10k-images-idx3-ubyte";
-        const std::string label_name =
-            split == "train" ? "train-labels-idx1-ubyte" : "t10k-labels-idx1-ubyte";
-
-        const std::string images_path = findFile(directory, image_name);
-        const std::string labels_path = findFile(directory, label_name);
-
-        gzFile images_file = gzopen(images_path.c_str(), "rb");
-        gzFile labels_file = gzopen(labels_path.c_str(), "rb");
-        if (images_file == nullptr)
-            throw std::runtime_error("Cannot open MNIST images file: " + images_path);
-        if (labels_file == nullptr)
-        {
-            gzclose(images_file);
-            throw std::runtime_error("Cannot open MNIST labels file: " + labels_path);
-        }
-
-        try
-        {
-            const std::uint32_t image_magic = readU32(images_file, images_path);
-            const std::uint32_t image_count = readU32(images_file, images_path);
-            const std::uint32_t image_rows = readU32(images_file, images_path);
-            const std::uint32_t image_cols = readU32(images_file, images_path);
-
-            if (image_magic != 2051 || image_rows != 28 || image_cols != 28)
-                throw std::runtime_error("Invalid MNIST image IDX header: " + images_path);
-
-            const std::uint32_t label_magic = readU32(labels_file, labels_path);
-            const std::uint32_t label_count = readU32(labels_file, labels_path);
-            if (label_magic != 2049 || label_count != image_count)
-                throw std::runtime_error("Invalid MNIST label IDX header: " + labels_path);
-
-            const std::size_t image_size =
-                static_cast<std::size_t>(image_rows) * image_cols;
-            std::vector<cum::cumeric_t> image_data(
-                static_cast<std::size_t>(image_count) * image_size);
-            std::vector<cum::cumeric_t> label_data(
-                static_cast<std::size_t>(label_count) * 10, 0.0f);
-
-            std::vector<std::uint8_t> pixels(image_data.size());
-            readBytes(images_file, pixels.data(), pixels.size(), images_path);
-            for (std::size_t sample = 0; sample < image_count; ++sample)
-            {
-                for (std::size_t feature = 0; feature < image_size; ++feature)
-                {
-                    image_data[sample * image_size + feature] =
-                        static_cast<cum::cumeric_t>(
-                            pixels[sample * image_size + feature]) / 255.0f;
-                }
-            }
-
-            std::vector<std::uint8_t> labels(label_count);
-            readBytes(labels_file, labels.data(), labels.size(), labels_path);
-            for (std::size_t sample = 0; sample < labels.size(); ++sample)
-            {
-                if (labels[sample] >= 10)
-                    throw std::runtime_error("MNIST label is outside [0, 9]");
-                label_data[sample * 10 + labels[sample]] = 1.0f;
-            }
-
-            gzclose(images_file);
-            gzclose(labels_file);
-            return
-            {
-                cum::Tensor::copy_memory({image_count, static_cast<cum::dim_t>(image_size)}, image_data.data()),
-                cum::Tensor::copy_memory({label_count, 10}, label_data.data())
-            };
-        }
-        catch (...)
-        {
-            gzclose(images_file);
-            gzclose(labels_file);
-            throw;
-        }
-    }
-
-private:
-    static std::string findFile(
-        const std::string& directory,
-        const std::string& name)
-    {
-        const std::string dotted =
-            name.find("-idx") == std::string::npos
-                ? name
-                : name.substr(0, name.find("-idx")) + ".idx" +
-                  name.substr(name.find("-idx") + 4);
-
-        const std::vector<std::string> candidates = {
-            directory + "/" + name,
-            directory + "/" + name + ".gz",
-            directory + "/" + dotted,
-            directory + "/" + dotted + ".gz"
-        };
-
-        for (const std::string& path : candidates)
-        {
-            if (!std::filesystem::is_regular_file(path))
-                continue;
-
-            gzFile file = gzopen(path.c_str(), "rb");
-            if (file != nullptr)
-            {
-                gzclose(file);
-                return path;
-            }
-        }
-
-        throw std::runtime_error("Cannot find MNIST IDX file for: " + name);
-    }
-    static std::uint32_t readU32(gzFile file, const std::string& path)
-    {
-        std::uint8_t bytes[4]{};
-        readBytes(file, bytes, sizeof(bytes), path);
-        return (static_cast<std::uint32_t>(bytes[0]) << 24) |
-               (static_cast<std::uint32_t>(bytes[1]) << 16) |
-               (static_cast<std::uint32_t>(bytes[2]) << 8) |
-               static_cast<std::uint32_t>(bytes[3]);
-    }
-
-    static void readBytes(
-        gzFile file,
-        void* destination,
-        std::size_t size,
-        const std::string& path)
-    {
-        auto* bytes = static_cast<unsigned char*>(destination);
-        std::size_t read = 0;
-        while (read < size)
-        {
-            const unsigned int chunk = static_cast<unsigned int>(
-                std::min<std::size_t>(size - read, 1u << 20));
-            const int count = gzread(file, bytes + read, chunk);
-            if (count <= 0)
-                throw std::runtime_error("Unexpected end of MNIST IDX file: " + path);
-            read += static_cast<std::size_t>(count);
-        }
-    }
-};
+using helpers::MnistDataLoader;
 
 using namespace yann::models;
+
+#include <raylib.h>
+#include <vector>
+#include <cmath>
+#include <algorithm>
+
+void raylib_demo(Sequential& model)
+{
+    constexpr int GRID_SIZE = 28;
+    constexpr int CELL_SCALE = 16;
+    constexpr int CANVAS_SIZE = GRID_SIZE * CELL_SCALE; // 448 px
+    constexpr int PADDING = 20;
+
+    constexpr int SCREEN_WIDTH = CANVAS_SIZE + 380 + PADDING * 3; // 888 px
+    constexpr int SCREEN_HEIGHT = CANVAS_SIZE + PADDING * 2 + 40; // 528 px
+
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "YANN - MNIST Interactive Demo");
+    SetTargetFPS(60);
+
+    std::vector<float> canvas(GRID_SIZE * GRID_SIZE, 0.0f);
+    std::vector<float> probabilities(10, 0.0f);
+    int top_digit = -1;
+    bool dirty = true;
+
+    auto run_inference = [&]() {
+        // Tensor wejściowy dla sieci: batch 1, 784 cechy
+        cum::Tensor input(cum::Shape{1, GRID_SIZE * GRID_SIZE});
+
+        for (int64_t i = 0; i < GRID_SIZE * GRID_SIZE; ++i) {
+            input.at({0, i}) = canvas[i];
+        }
+
+        // Forward przez Sequential
+        cum::Tensor output = model.forward(input);
+
+        top_digit = 0;
+        float max_prob = -1.0f;
+        for (int64_t i = 0; i < 10; ++i) {
+            // Bezpieczny odczyt wartości przez at({0, i}) lub at({i})
+            float prob = static_cast<float>(output.at({0, i}));
+            probabilities[i] = prob;
+            if (prob > max_prob) {
+                max_prob = prob;
+                top_digit = static_cast<int>(i);
+            }
+        }
+    };
+
+    while (!WindowShouldClose())
+    {
+        Vector2 mouse = GetMousePosition();
+        bool left_down = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
+        bool right_down = IsMouseButtonDown(MOUSE_BUTTON_RIGHT);
+
+        // Obsługa rysowania na płótnie
+        if (mouse.x >= PADDING && mouse.x < PADDING + CANVAS_SIZE &&
+            mouse.y >= PADDING && mouse.y < PADDING + CANVAS_SIZE)
+        {
+            if (left_down || right_down) {
+                float gx = (mouse.x - PADDING) / CELL_SCALE;
+                float gy = (mouse.y - PADDING) / CELL_SCALE;
+                float brush_radius = 1.35f;
+
+                int min_x = std::max(0, static_cast<int>(gx - brush_radius));
+                int max_x = std::min(GRID_SIZE - 1, static_cast<int>(gx + brush_radius));
+                int min_y = std::max(0, static_cast<int>(gy - brush_radius));
+                int max_y = std::min(GRID_SIZE - 1, static_cast<int>(gy + brush_radius));
+
+                for (int y = min_y; y <= max_y; ++y) {
+                    for (int x = min_x; x <= max_x; ++x) {
+                        float dist = std::hypot(x + 0.5f - gx, y + 0.5f - gy);
+                        if (dist < brush_radius) {
+                            float factor = (brush_radius - dist) / brush_radius;
+                            int idx = y * GRID_SIZE + x;
+                            if (left_down) {
+                                canvas[idx] = std::clamp(canvas[idx] + factor * 0.45f, 0.0f, 1.0f);
+                            } else {
+                                canvas[idx] = std::clamp(canvas[idx] - factor * 0.70f, 0.0f, 1.0f);
+                            }
+                            dirty = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (IsKeyPressed(KEY_C)) {
+            std::fill(canvas.begin(), canvas.end(), 0.0f);
+            dirty = true;
+        }
+
+        if (dirty) {
+            run_inference();
+            dirty = false;
+        }
+
+        BeginDrawing();
+        ClearBackground(Color{24, 26, 31, 255});
+
+        // 1. Siatka pikseli 28x28
+        for (int y = 0; y < GRID_SIZE; ++y) {
+            for (int x = 0; x < GRID_SIZE; ++x) {
+                unsigned char val = static_cast<unsigned char>(canvas[y * GRID_SIZE + x] * 255.0f);
+                DrawRectangle(
+                    PADDING + x * CELL_SCALE,
+                    PADDING + y * CELL_SCALE,
+                    CELL_SCALE,
+                    CELL_SCALE,
+                    Color{val, val, val, 255}
+                );
+            }
+        }
+        DrawRectangleLines(PADDING - 1, PADDING - 1, CANVAS_SIZE + 2, CANVAS_SIZE + 2, DARKGRAY);
+
+        // 2. Słupki prawdopodobieństw klas (0-9)
+        const int panel_x = PADDING * 2 + CANVAS_SIZE;
+        const int bar_max_width = 200;
+        DrawText("Predictions", panel_x, PADDING, 22, WHITE);
+
+        for (int i = 0; i < 10; ++i) {
+            int row_y = PADDING + 45 + i * 36;
+            bool is_best = (i == top_digit && probabilities[i] > 0.15f);
+
+            DrawText(TextFormat("%d:", i), panel_x, row_y + 2, 20, is_best ? GREEN : LIGHTGRAY);
+
+            // Tło paska
+            DrawRectangle(panel_x + 30, row_y, bar_max_width, 22, Color{45, 48, 55, 255});
+
+            // Wypełnienie
+            int filled_w = static_cast<int>(probabilities[i] * bar_max_width);
+            Color bar_col = is_best ? Color{50, 205, 50, 255} : Color{70, 130, 180, 255};
+            DrawRectangle(panel_x + 30, row_y, filled_w, 22, bar_col);
+
+            // Wartość %
+            DrawText(TextFormat("%5.1f%%", probabilities[i] * 100.0f), panel_x + 30 + bar_max_width + 10, row_y + 3, 16, RAYWHITE);
+        }
+
+        // Najbardziej prawdopodobna cyfra
+        if (top_digit >= 0 && probabilities[top_digit] > 0.05f) {
+            DrawText(
+                TextFormat("Digit: %d (%2.0f%%)", top_digit, probabilities[top_digit] * 100.0f),
+                panel_x,
+                PADDING + 45 + 10 * 36 + 10,
+                24,
+                GREEN
+            );
+        }
+
+        DrawText("LPM: Rysuj  |  PPM: Gumka  |  [C]: Wyczyść", PADDING, CANVAS_SIZE + PADDING + 12, 16, GRAY);
+
+        EndDrawing();
+    }
+
+    CloseWindow();
+}
 
 int main(int argc, char** argv)
 {
@@ -219,11 +227,13 @@ int main(int argc, char** argv)
 
     // yann::utils::model_deserialize_from_safetensors(model, "mnist-resolver-adam.safetensors");
 
-    constexpr std::size_t epochs = 64;
+    constexpr std::size_t epochs = 8;
     constexpr std::size_t batch_size = 128;
     model.fit(train.images, train.labels, *loss, *optimizer, epochs, batch_size, callbacks);
 
     yann::utils::model_serialize_to_safetensors(model, "mnist-resolver-adam-2.safetensors");
+
+    raylib_demo(model);
 
     const auto loss_history = loss_tracker.getLossHistory();
     std::vector<double> epoch_range(loss_history.size());

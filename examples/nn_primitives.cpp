@@ -30,7 +30,6 @@ int main()
 
     Tensor Y = Z;
 
-    neural_primitives::tanh(Y);
 
 
     std::println("W.sum() = {}", W.sum());

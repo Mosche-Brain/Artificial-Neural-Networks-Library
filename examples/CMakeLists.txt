@@ -17,6 +17,7 @@ foreach(EXAMPLE_SOURCE ${EXAMPLE_SOURCES})
 
     if(EXAMPLE_NAME STREQUAL "mnist")
         find_package(ZLIB REQUIRED)
-        target_link_libraries(${EXAMPLE_NAME} PRIVATE ZLIB::ZLIB)
+        find_package(raylib 3.0 REQUIRED)
+        target_link_libraries(${EXAMPLE_NAME} PRIVATE ZLIB::ZLIB raylib)
     endif()
 endforeach()
