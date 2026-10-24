@@ -1,6 +1,9 @@
-//
-// Created by jaro on 8/31/26.
-//
+/**
+ * @file models.hpp
+ * @author jaro
+ * @brief Umbrella header for all model architectures available in YANN.
+ * @date 2026-08-31
+ */
 
 #ifndef YANN_MODELS_HPP
 #define YANN_MODELS_HPP

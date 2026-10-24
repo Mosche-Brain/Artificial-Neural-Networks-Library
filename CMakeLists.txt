@@ -96,7 +96,9 @@ find_package(nlohmann_json 3.12.0 REQUIRED)
 
 find_package(cum REQUIRED)
 
-#add_subdirectory(modules/safetensors.cpp)
+set(SAFETENSORS_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(SAFETENSORS_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+add_subdirectory(modules/safetensors.cpp)
 add_subdirectory(src)
 
 if(BUILD_EXAMPLES)

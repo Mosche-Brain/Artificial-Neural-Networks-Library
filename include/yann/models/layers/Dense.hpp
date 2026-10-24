@@ -13,7 +13,7 @@
 
 //! @brief Fully connected (dense) neural network layer.
 //! @details The Dense layer implements a linear transformation followed by an activation function:
-//! @f[y = \sigma(xW + b)@]
+//! @f[y = \sigma(xW + b)@f]
 //!
 //! Where:
 //! - @f$W@f$ is the weight matrix of shape (@f$input\_features \times output\_features@f$)
@@ -33,7 +33,7 @@ namespace yann::models::layers
     //! @brief Fully connected (dense) neural network layer.
     //!
     //! The Dense layer implements a linear transformation followed by an activation function:
-    //! @f[y = \sigma(xW + b)@]
+    //! @f[y = \sigma(xW + b)@f]
     //!
     //! @see LayerBase
     //!
@@ -118,7 +118,12 @@ namespace yann::models::layers
         //! @see createUnique is a convenience factory for creating layers in ownership-transfer contexts.
         static std::unique_ptr<LayerBase> createUnique(int layerSize, const char* func);
 
+        //! @brief Get reference to the weights tensor.
+        //! @return Reference to weights tensor values.
         cum::Tensor& weights() override { return weights_.values; };
+
+        //! @brief Get reference to the biases tensor.
+        //! @return Reference to biases tensor values.
         cum::Tensor& biases() override { return biases_.values; };
 
     private:

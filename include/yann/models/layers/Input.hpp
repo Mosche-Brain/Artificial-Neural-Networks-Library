@@ -20,7 +20,7 @@
 //!
 //! @note This layer is typically not used directly in code; instead, the first
 //!       Dense or Linear layer's input shape is inferred from the data. However,
-//!! it can be explicitly added to specify the expected input dimensionality.
+//! it can be explicitly added to specify the expected input dimensionality.
 //!
 //! @see LayerBase
 //! @see Dense

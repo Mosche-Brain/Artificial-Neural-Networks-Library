@@ -1,3 +1,8 @@
+/**
+ * @file OneHot.hpp
+ * @brief Utilities for one-hot vector encoding and decoding in YANN.
+ */
+
 #pragma once
 
 #include <cum/cum.hpp>
