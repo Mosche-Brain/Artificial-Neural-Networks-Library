@@ -13,6 +13,9 @@
 
 #include <yann/models/layers/Dense.hpp>
 #include <yann/models/layers/Linear.hpp>
+#include <yann/models/layers/Input.hpp>
+#include <yann/models/layers/Flatten.hpp>
+#include <yann/models/Sequential.hpp>
 
 namespace
 {
@@ -77,4 +80,41 @@ TEST_CASE("Dense forward applies affine transformation and ReLU")
 
     REQUIRE(output.shape() == (cum::Shape{2, 2}));
     require_values(output, {0.25, 3.5, 0, 11});
+    cum::decum();
+}
+
+TEST_CASE("Sequential propagates cum::Shape across layers during build")
+{
+    cum::cum(cum::DEVICE::CPU);
+
+    yann::models::Sequential model({
+        yann::models::layers::Input::createUnique(cum::Shape{2, 4}),
+        yann::models::layers::Flatten::createUnique(),
+        yann::models::layers::Dense::createUnique(16, "relu"),
+        yann::models::layers::Dense::createUnique(2, "sigmoid")
+    });
+
+    REQUIRE(model.getLayersCount() == 4);
+
+    // Layer 0: Input shape is {2, 4}, output shape is {2, 4}
+    REQUIRE(model.getLayer(0)->input_shape() == (cum::Shape{2, 4}));
+    REQUIRE(model.getLayer(0)->output_shape() == (cum::Shape{2, 4}));
+
+    // Layer 1: Flatten input is {2, 4}, output is {8}
+    REQUIRE(model.getLayer(1)->input_shape() == (cum::Shape{2, 4}));
+    REQUIRE(model.getLayer(1)->output_shape() == (cum::Shape{8}));
+
+    // Layer 2: Dense input is {8}, output is {16}
+    REQUIRE(model.getLayer(2)->input_shape() == (cum::Shape{8}));
+    REQUIRE(model.getLayer(2)->output_shape() == (cum::Shape{16}));
+    REQUIRE(model.getWeights(2).rows() == 8);
+    REQUIRE(model.getWeights(2).cols() == 16);
+
+    // Layer 3: Dense input is {16}, output is {2}
+    REQUIRE(model.getLayer(3)->input_shape() == (cum::Shape{16}));
+    REQUIRE(model.getLayer(3)->output_shape() == (cum::Shape{2}));
+    REQUIRE(model.getWeights(3).rows() == 16);
+    REQUIRE(model.getWeights(3).cols() == 2);
+
+    cum::decum();
 }

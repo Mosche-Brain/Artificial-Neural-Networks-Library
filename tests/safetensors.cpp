@@ -16,6 +16,7 @@
 
 #include <cum/cum.hpp>
 
+#include "yann/Parameter.hpp"
 #include "yann/utils/safetensors.hpp"
 
 namespace
@@ -392,4 +393,59 @@ TEST_CASE("Safetensors: debug clone failures", "[safetensors][debug]")
         std::println("CLONED explicit AB");
         REQUIRE(clone.shape() == tensor.shape());
     }
+}
+
+TEST_CASE("Parameter: save and load safetensors without gradient")
+{
+    cum::cum(cum::DEVICE::CPU);
+
+    TempFile file("yann_param_no_grad.safetensors");
+
+    yann::Parameter original = yann::Parameter::Zeros(2, 3);
+    original.values = make_matrix();
+    original.gradient.fill(5.0f);
+
+    original.save_safetensors(file.path.string(), false, "weights");
+
+    auto raw_map = yann::utils::load_safetensors(file.path.string());
+    REQUIRE(raw_map.size() == 1);
+    REQUIRE(raw_map.contains("weights"));
+    REQUIRE(!raw_map.contains("weights.grad"));
+
+    yann::Parameter loaded = yann::Parameter::FromSafetensors(file.path.string(), "weights", false);
+    require_same_tensor(original.values, loaded.values);
+    REQUIRE(loaded.gradient.shape() == original.values.shape());
+    REQUIRE(loaded.gradient.at<float>({0, 0}) == 0.0f);
+    REQUIRE(loaded.gradient.at<float>({1, 2}) == 0.0f);
+
+    cum::decum();
+}
+
+TEST_CASE("Parameter: save and load safetensors with gradient")
+{
+    cum::cum(cum::DEVICE::CPU);
+
+    TempFile file("yann_param_with_grad.safetensors");
+
+    yann::Parameter original = yann::Parameter::Zeros(2, 3);
+    original.values = make_matrix();
+    original.gradient.at<float>({0, 0}) = 0.25f;
+    original.gradient.at<float>({0, 1}) = -0.5f;
+    original.gradient.at<float>({0, 2}) = 1.5f;
+    original.gradient.at<float>({1, 0}) = 2.0f;
+    original.gradient.at<float>({1, 1}) = -3.0f;
+    original.gradient.at<float>({1, 2}) = 4.25f;
+
+    original.save_safetensors(file.path.string(), true, "weights");
+
+    auto raw_map = yann::utils::load_safetensors(file.path.string());
+    REQUIRE(raw_map.size() == 2);
+    REQUIRE(raw_map.contains("weights"));
+    REQUIRE(raw_map.contains("weights.grad"));
+
+    yann::Parameter loaded = yann::Parameter::FromSafetensors(file.path.string(), "weights", true);
+    require_same_tensor(original.values, loaded.values);
+    require_same_tensor(original.gradient, loaded.gradient);
+
+    cum::decum();
 }

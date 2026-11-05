@@ -22,10 +22,23 @@ namespace yann::models::layers
         // Flatten(int rows, int cols);
 
         /**
+         * @brief Construct a Flatten layer (input shape inferred during build).
+         */
+        Flatten();
+
+        /**
          * @brief Construct a Flatten layer with the expected input shape.
-         * @param shape Input tensor shape (excluding or including dimensions).
+         * @param shape Input tensor shape (excluding batch dimension).
          */
         Flatten(const cum::Shape& shape);
+
+        void init_parameters(int output_features, int input_features) override;
+        void init_parameters(const cum::Shape& input_shape, const cum::Shape& output_shape) override;
+
+        void collect_parameters(std::vector<Parameter*>& params) override {};
+
+        static std::unique_ptr<LayerBase> createUnique();
+        static std::unique_ptr<LayerBase> createUnique(const cum::Shape& shape);
 
         /**
          * @brief Compute forward flattening pass.

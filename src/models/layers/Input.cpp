@@ -14,27 +14,34 @@
 
 namespace yann::models::layers
 {
-    Input::Input(int layerSize)
+    Input::Input(int layerSize) : Input(cum::Shape{layerSize})
+    {
+    }
+
+    Input::Input(const cum::Shape& shape)
     {
         #if defined(ENABLE_DEBUG_OUTPUT)
-        YANN_LOG(3, "Initializing Input layer with {} neurons...", layerSize);
+        YANN_LOG(3, "Initializing Input layer with shape...", "");
         #endif
 
-        // cum::functions::get_function_by_name(&this->activation, "linear");
-
-        // this->weights = cum::Matrix(2, 1, 1);
-        // this->weights = Parameter::Ones(layerSize, 1);
-
-        // this->biases  = Parameter::Zeros(layerSize, 1);
-        this->input_shape_ = cum::Shape{layerSize};
-        this->_layerSize_   = layerSize;
+        this->input_shape_ = shape;
+        this->output_shape_ = shape;
         this->_layerType_   = LayerType::Input;
         this->_initialized_ = true;
     }
 
     void Input::init_parameters(int output_features, int input_features)
     {
+        this->input_shape_ = cum::Shape{input_features};
+        this->output_shape_ = cum::Shape{output_features};
+        this->_initialized_ = true;
+    }
 
+    void Input::init_parameters(const cum::Shape& input_shape, const cum::Shape& output_shape)
+    {
+        this->input_shape_ = input_shape;
+        this->output_shape_ = output_shape.empty() ? input_shape : output_shape;
+        this->_initialized_ = true;
     }
 
     cum::Tensor Input::forward(const cum::Tensor& input)
@@ -60,9 +67,6 @@ namespace yann::models::layers
     cum::Tensor Input::backward(const cum::Tensor& deltaOutput)
     {
         return deltaOutput;
-        // return cum::Matrix::Zeros(_layerSize_, 1);
-        // return cum::Matrix(_layerSize_, 1, 1._c);
-        // return cum::Matrix(_layerSize_, 1, 1._c);
     }
 
     void Input::collect_parameters(std::vector<Parameter*>& params)
@@ -73,5 +77,10 @@ namespace yann::models::layers
     std::unique_ptr<LayerBase> Input::createUnique(int layerSize)
     {
         return std::make_unique<Input>(layerSize);
+    }
+
+    std::unique_ptr<LayerBase> Input::createUnique(const cum::Shape& shape)
+    {
+        return std::make_unique<Input>(shape);
     }
 }

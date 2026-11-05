@@ -43,6 +43,10 @@ namespace yann::models::layers
         //!       The layerSize parameter defines the expected input dimensionality.
         Input(int layerSize);
 
+        //! @brief Construct an Input layer with a specified multidimensional shape.
+        //! @param shape Expected tensor input shape.
+        Input(const cum::Shape& shape);
+
         //! @brief Initialize parameters (no-op for Input layer).
         //!
         //! @param output_features Not used for Input layer (maintained for interface compatibility).
@@ -51,6 +55,11 @@ namespace yann::models::layers
         //! @note This method overrides the pure virtual function from LayerBase but does
         //!       nothing since Input layers don't have trainable parameters.
         void init_parameters(int output_features, int input_features) override;
+
+        //! @brief Initialize parameters given multidimensional shapes.
+        //! @param input_shape Shape of the input tensor.
+        //! @param output_shape Shape of the output tensor.
+        void init_parameters(const cum::Shape& input_shape, const cum::Shape& output_shape) override;
 
         //! @brief Compute the forward pass (identity mapping).
         //!
@@ -84,6 +93,7 @@ namespace yann::models::layers
         //! @param layerSize Number of input features for the layer.
         //! @return Unique pointer to the created Input layer.
         static std::unique_ptr<LayerBase> createUnique(int layerSize);
+        static std::unique_ptr<LayerBase> createUnique(const cum::Shape& shape);
     };
 }
 //! @}

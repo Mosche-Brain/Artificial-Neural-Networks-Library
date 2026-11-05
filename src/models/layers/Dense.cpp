@@ -66,15 +66,25 @@ namespace yann::models::layers
     {
         YANN_LOG(1, "Initializing Dense layer with {} neurons and {} activation function...", layerSize, func);
         cum::functions::get_function_by_name(&activation, func);
-        _layerSize_ = layerSize;
 
         output_shape_ = { layerSize };
 
         this->_layerType_ = LayerType::Dense;
     }
 
+    void Dense::init_parameters(const cum::Shape& input_shape, const cum::Shape& output_shape)
+    {
+        this->input_shape_ = input_shape;
+        this->output_shape_ = output_shape;
+        cum::dim_t input_features = input_shape.empty() ? 1 : input_shape.back();
+        cum::dim_t output_features = output_shape.empty() ? 1 : output_shape.back();
+        init_parameters(static_cast<int>(output_features), static_cast<int>(input_features));
+    }
+
     void Dense::init_parameters(int output_features, int input_features)
     {
+        this->input_shape_  = cum::Shape{input_features};
+        this->output_shape_ = cum::Shape{output_features};
         this->weights_      = Parameter::Uniform(input_features, output_features);   /* input_length * neurons */
         this->biases_       = Parameter::Zeros(1, output_features);                  /* Row-Vector */
         this->cache.a       = cum::Tensor(cum::Shape{output_features}, cum::default_type);
@@ -146,7 +156,7 @@ namespace yann::models::layers
         {
             if constexpr(YANN_DENSE_BACKWARD_FUSED_PATH)
             {
-                // todo: implement this
+                throw std::logic_error("YANN_DENSE_BACKWARD_FUSED_PATH not implemented");
             }
             else
             {

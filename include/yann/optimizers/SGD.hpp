@@ -30,16 +30,6 @@ namespace yann::optimizers
          */
         SGD(cum::cumeric_t learning_rate);
 
-        // void step() override;
-        // void step(cum::Matrix& params, cum::Matrix& grad) override;
-
-        /**
-         * @brief Update raw tensor parameters using raw tensor gradients.
-         * @param params Parameter tensor to update in-place.
-         * @param grad Gradient tensor.
-         */
-        void step(cum::Tensor& params, cum::Tensor& grad) override;
-
         /**
          * @brief Update a single Parameter instance.
          * @param param Parameter instance holding values and gradient.

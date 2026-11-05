@@ -13,8 +13,6 @@
 
 #include "Parameter.hpp"
 
-namespace cum { class Matrix; }
-
 namespace yann::optimizers
 {
     /**
@@ -35,36 +33,24 @@ namespace yann::optimizers
 
         virtual ~OptimizerBase() = default;
 
-        // virtual void step(cum::Matrix& params, cum::Matrix& grad) {};
-
-        /**
-         * @brief Perform an optimization step on raw matrix parameters and gradients.
-         * @param params Parameter matrix to update in-place.
-         * @param grad Gradient matrix.
-         */
-        virtual void step(cum::Matrix& params, cum::Matrix& grad) {};
-
-        /**
-         * @brief Perform an optimization step on raw tensor parameters and gradients.
-         * @param params Parameter tensor to update in-place.
-         * @param grad Gradient tensor.
-         */
-        virtual void step(cum::Tensor& params, cum::Tensor& grad) {};
-
         /**
          * @brief Perform an optimization step on a single Parameter object.
+         *
+         * Pure virtual method implementing the core parameter update algorithm.
+         *
          * @param param Parameter instance containing values and gradients.
          */
-        virtual void step(Parameter& param) {};
+        virtual void step(Parameter& param) = 0;
 
         /**
          * @brief Perform an optimization step on a collection of trainable parameters.
          *
-         * Pure virtual method implemented by specific optimizer algorithms.
+         * Iterates over all non-null parameters and delegates to step(Parameter&).
+         * Derived optimizers may override this to implement batched / multi-tensor kernels.
          *
          * @param params Vector of pointers to Parameter instances to update.
          */
-        virtual void step(std::vector<Parameter*>& params) = 0;
+        virtual void step(std::vector<Parameter*>& params);
 
         /**
          * @brief Scale gradients across a vector of parameters by a scalar multiplier.

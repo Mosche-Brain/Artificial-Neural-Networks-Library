@@ -42,17 +42,46 @@ namespace yann::models
         this->build();
     }
 
-    void Sequential::build()
+    void Sequential::build(const cum::Shape& input_shape)
     {
-        topology[0]->init_parameters(topology[0]->size(), 1);
+        if (topology.empty())
+            return;
 
-        for(auto [index, layer] : topology | std::views::enumerate)
+        cum::Shape current_shape = input_shape;
+
+        // If no explicit input_shape passed, infer from the first layer
+        if (current_shape.empty())
         {
-            if (index == 0) continue;
+            if (!topology.front()->input_shape().empty())
+                current_shape = topology.front()->input_shape();
+            else if (!topology.front()->output_shape().empty())
+                current_shape = topology.front()->output_shape();
+        }
 
-            int previous_layer_size = topology[index - 1]->size();
+        for (auto [index, layer] : topology | std::views::enumerate)
+        {
+            if (index == 0)
+            {
+                if (layer->layerType() == layers::LayerType::Input)
+                {
+                    if (!current_shape.empty())
+                        layer->init_parameters(current_shape, current_shape);
+                    current_shape = layer->output_shape();
+                    continue;
+                }
+                else
+                {
+                    if (current_shape.empty())
+                        current_shape = cum::Shape{1};
+                    layer->init_parameters(current_shape, layer->output_shape());
+                }
+            }
+            else
+            {
+                layer->init_parameters(current_shape, layer->output_shape());
+            }
 
-            layer->init_parameters(layer->size(), previous_layer_size);
+            current_shape = layer->output_shape();
         }
     }
 
@@ -80,10 +109,10 @@ namespace yann::models
         return result;
     }
 
-    void Sequential::backward(const cum::Tensor& d_output)
+    cum::Tensor Sequential::backward(const cum::Tensor& d_output)
     {
-        if (topology.empty()) return;
-
+        if (topology.empty())
+            return d_output;
 
         cum::Tensor curr_gradient = d_output;
         for (auto [index, layer] : topology | std::views::enumerate | std::views::reverse)
@@ -96,6 +125,8 @@ namespace yann::models
             curr_gradient = std::move(next_gradient);
             // YANN_LOG(2, "||dL/dX||: {},\t mean|dL/dX|: {}", curr_gradient.norm(), curr_gradient.abs().mean());
         }
+
+        return curr_gradient;
     }
 
     /* TODO: (obsolete)
@@ -220,9 +251,11 @@ namespace yann::models
         return topology[layer]->activation;
     }
 
-    auto Sequential::getLayer(size_t layer) const -> LayerPtr // currently not used
+    layers::LayerBase* Sequential::getLayer(size_t layer) const
     {
-        // return std::move(topology[layer]);
+        if (layer >= topology.size())
+            throw std::out_of_range("Sequential::getLayer: index out of range");
+        return topology[layer].get();
     }
 
     auto Sequential::getTopology() const -> const Topology&

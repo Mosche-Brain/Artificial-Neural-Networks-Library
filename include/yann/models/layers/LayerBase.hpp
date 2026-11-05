@@ -100,14 +100,14 @@ namespace yann::models::layers
          * @param output_features Number of output features / neurons.
          * @param input_features Number of input features.
          */
-        virtual void init_parameters(int output_features, int input_features) = 0; // I will swap output and input festures order
+        virtual void init_parameters(int output_features, int input_features);
 
         /**
          * @brief Initialize trainable layer parameters given multi-dimensional shapes.
          * @param input_shape Input tensor shape specification.
          * @param output_shape Output tensor shape specification.
          */
-        virtual void init_parameters(const cum::Shape& input_shape, const cum::Shape& output_shape) {};
+        virtual void init_parameters(const cum::Shape& input_shape, const cum::Shape& output_shape);
 
         /**
          * @brief Get the configured input shape for this layer.
@@ -203,9 +203,6 @@ namespace yann::models::layers
 
         cum::Shape input_shape_;  /**< Shape of inputs accepted by the layer. */
         cum::Shape output_shape_; /**< Shape of outputs produced by the layer. */
-
-        [[deprecated("No longer used")]]
-        int _layerSize_; /**< Legacy layer size attribute. */
 
         bool _initialized_ = false; /**< Initialization status flag. */
         LayerType _layerType_;      /**< Layer type enumeration value. */

@@ -30,12 +30,11 @@ namespace yann::models::layers
          * @param input_shape Shape of the input tensor [C, H, W].
          * @param kernels_n Number of output convolution kernels / feature maps.
          * @param kernel_size Spatial dimensions of the kernel [Kh, Kw].
-         * @param activation Name of the activation function to apply.
          * @param stride Stride step size along spatial dimensions (default: 1).
          * @param padding Spatial zero-padding size (default: 1).
-         * @param dilatation Dilation factor for atrous convolution (default: 1).
+         * @param dilatation Dilation factor for atrous convolution (default: 1). (not works yet)
          */
-        Conv2D(const cum::Shape& input_shape, cum::dim_t kernels_n, const cum::Shape& kernel_size, const char* activation, cum::dim_t stride=1, cum::dim_t padding=1, cum::dim_t dilatation=1);
+        Conv2D(const cum::Shape& input_shape, cum::dim_t kernels_n, const cum::Shape& kernel_size, cum::dim_t stride=1, cum::dim_t padding=1, cum::dim_t dilatation=1);
 
         /**
          * @brief Destructor.
@@ -48,6 +47,8 @@ namespace yann::models::layers
          * @param input_features Number of input features.
          */
         void init_parameters(int output_features, int input_features) override {};
+        // void init_parameters(const cum::Shape& input_shape, const cum::Shape& output_shape) override;
+        void init_parameters(const cum::Shape& input_shape, const cum::Shape& output_shape) override;
 
         /**
          * @brief Compute forward convolution pass.
@@ -77,25 +78,26 @@ namespace yann::models::layers
          * @param input_shape Shape of input [C, H, W].
          * @param kernels_n Number of output kernels.
          * @param kernel_size Kernel dimensions [Kh, Kw].
-         * @param activation Activation function name.
          * @param stride Stride along spatial dimensions (default: 1).
          * @param padding Padding along spatial dimensions (default: 1).
          * @param dilatation Dilation rate (default: 1).
          * @return std::unique_ptr<LayerBase> Newly created Conv2D layer.
          */
-        std::unique_ptr<LayerBase> createUnique(cum::Shape input_shape, cum::dim_t kernels_n, cum::Shape kernel_size, const char* activation, cum::dim_t stride=1, cum::dim_t padding=1, cum::dim_t dilatation=1);
+        std::unique_ptr<LayerBase> createUnique(cum::Shape input_shape, cum::dim_t kernels_n, cum::Shape kernel_size, cum::dim_t stride=1, cum::dim_t padding=1, cum::dim_t dilatation=1);
 
     private:
-        struct Config 
-        { 
+        enum class AxisTag {N, C, H, W};
+        struct Config {
             cum::dim_t kernels_n;     /**< Number of output kernels. */
             cum::Shape kernel_size;   /**< Kernel spatial dimensions. */
             cum::dim_t stride;        /**< Stride step size. */
             cum::dim_t padding;       /**< Zero-padding size. */
             cum::dim_t dilatation;    /**< Dilation factor. */
         } config;
-
+        const std::unordered_map<cum::dim_t, AxisTag> axis = { {0, AxisTag::N}, {1, AxisTag::C}, {2, AxisTag::H}, {3, AxisTag::W}};
+        LayerCache cache;
         Parameter kernels;
+        Parameter biases;
         // std::vector<Parameter> kernels;
     };
 } // yann::models::layers

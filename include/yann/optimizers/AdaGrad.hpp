@@ -48,7 +48,7 @@ namespace yann::optimizers
          * @param eps Numerical stability constant @f$\epsilon@f$.
          * @return std::unique_ptr<AdaGrad> Newly created optimizer.
          */
-        std::unique_ptr<AdaGrad> create(cum::cumeric_t rate, cum::cumeric_t eps = 1e-8);
+        static std::unique_ptr<AdaGrad> create(cum::cumeric_t rate, cum::cumeric_t eps = 1e-8);
 
     private:
         cum::cumeric_t eps;                                     /**< Numerical stability epsilon. */

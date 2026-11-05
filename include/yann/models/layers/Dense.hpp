@@ -64,6 +64,11 @@ namespace yann::models::layers
         //!       and biases have dimensions (1, output_features).
         void init_parameters(int output_features, int input_features) override;
 
+        //! @brief Initialize layer parameters using multidimensional shapes.
+        //! @param input_shape Shape of the input tensor.
+        //! @param output_shape Shape of the output tensor.
+        void init_parameters(const cum::Shape& input_shape, const cum::Shape& output_shape) override;
+
         //! @brief Compute the forward pass of the dense layer.
         //!
         //! Performs the transformation: @f$z = xW + b@f$ followed by activation: @f$a = \sigma(z)@f$.
@@ -122,9 +127,17 @@ namespace yann::models::layers
         //! @return Reference to weights tensor values.
         cum::Tensor& weights() override { return weights_.values; };
 
+        //! @brief Get reference to the weight gradients tensor.
+        //! @return Reference to weight gradients tensor values.
+        cum::Tensor& weights_grad() override { return weights_.gradient; }
+
         //! @brief Get reference to the biases tensor.
         //! @return Reference to biases tensor values.
         cum::Tensor& biases() override { return biases_.values; };
+
+        //! @brief Get reference to the bias gradients tensor.
+        //! @return Reference to bias gradients tensor values.
+        cum::Tensor& biases_grad() override { return biases_.gradient; }
 
     private:
         Parameter weights_;

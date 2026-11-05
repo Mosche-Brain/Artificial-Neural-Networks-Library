@@ -95,8 +95,9 @@ namespace yann::models
         //! @brief Clear all layers from the topology.
         void clear();
 
-        //! @brief Build the model topology (reinitialize shapes/parameters).
-        void build();
+        //! @brief Build the model topology by propagating shapes and initializing parameters.
+        //! @param input_shape Optional initial input shape. If omitted, inferred from the first layer.
+        void build(const cum::Shape& input_shape = {});
 
         //! @brief Get weights of a specific layer.
         //!
@@ -130,8 +131,8 @@ namespace yann::models
         //! @brief Get a specific layer by index.
         //!
         //! @param layer Index of the layer in the topology.
-        //! @return Unique pointer to the layer at the specified position.
-        auto getLayer(size_t layer) const -> LayerPtr;
+        //! @return Non-owning pointer to the layer at the specified position.
+        layers::LayerBase* getLayer(size_t layer) const;
 
         //! @brief Get the number of layers in the topology.
         //!
@@ -149,13 +150,14 @@ namespace yann::models
         //! @return Vector of Parameter pointers containing weights and biases from all layers.
         std::vector<Parameter*> parameters();
 
-    protected:
         //! @brief Backward pass through all layers.
         //!
-        //! @param d_output Gradient from the loss function with respect to the output.
+        //! @param d_output Gradient from the loss function or subsequent model with respect to the output.
+        //! @return Gradient with respect to the input of the first layer in the model.
         //! @note Gradients are propagated in reverse order through all layers.
-        void backward(const cum::Tensor& d_output);
+        cum::Tensor backward(const cum::Tensor& d_output);
 
+    protected:
         Topology topology;
     };
 } // yann::models

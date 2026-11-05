@@ -17,24 +17,16 @@ namespace yann::optimizers
     {
     }
 
-    void SGD::step(cum::Tensor& params, cum::Tensor& grad)
-    {
-    }
-
     void SGD::step(Parameter& param)
     {
+        YANN_LOG(3, "values norm: {} | grad norm: {}", param.values.norm(), param.gradient.norm());
         param.values -= param.gradient * learning_rate;
         param.clear_gradient();
     }
 
     void SGD::step(std::vector<Parameter*>& params)
     {
-        for (Parameter* param : params)
-        {
-            YANN_LOG(2, "values norm: {} | grad norm: {}", param->values.norm(), param->gradient.norm());
-            param->values -= param->gradient * learning_rate;
-            param->clear_gradient();
-        }
+        OptimizerBase::step(params);
     }
 
     std::unique_ptr<SGD> SGD::create(cum::cumeric_t learning_rate)

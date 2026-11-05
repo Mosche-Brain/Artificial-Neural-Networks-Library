@@ -29,6 +29,8 @@ namespace yann::models::layers
 
     void Softmax::init_parameters(const cum::Shape& input_shape, const cum::Shape& output_shape)
     {
+        this->input_shape_ = input_shape;
+        this->output_shape_ = output_shape.empty() ? input_shape : output_shape;
         _initialized_ = true;
     }
 

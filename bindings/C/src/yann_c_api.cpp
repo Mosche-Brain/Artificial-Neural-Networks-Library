@@ -1,7 +1,16 @@
-// Central C API entry point.
-// Currently used only to ensure the library is built as a single unit.
-// All actual implementation is in the other .cpp files in this directory.
-
 #include "yann_internal.hpp"
+#include "yann/runtime_config.hpp"
 
-// This file can be used later for global initialization / shutdown if needed.
+extern "C" {
+
+const char* yann_get_last_error(void)
+{
+    return g_last_error.c_str();
+}
+
+void yann_set_verbosity(unsigned char level)
+{
+    yann::runtime_config::set_verbosity(level);
+}
+
+} // extern "C"

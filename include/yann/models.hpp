@@ -8,6 +8,7 @@
 #ifndef YANN_MODELS_HPP
 #define YANN_MODELS_HPP
 
+#include "yann/models/Chain.hpp"
 #include "yann/models/ModelBase.hpp"
 #include "yann/models/NGram.hpp"
 #include "yann/models/Perceptron.hpp"

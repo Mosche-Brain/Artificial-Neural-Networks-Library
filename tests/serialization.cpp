@@ -49,6 +49,8 @@ TEST_CASE("serializing and deserializing sequential model")
 
     for (const auto [layer_a, layer_b] : std::views::zip(model_a.getTopology(), model_b.getTopology()))
     {
+        if (layer_a->layerType() == layers::LayerType::Input)
+            continue;
         REQUIRE(layer_a->weights() == layer_b->weights());
         REQUIRE(layer_a->biases() == layer_b->biases());
     }

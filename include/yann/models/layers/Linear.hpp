@@ -55,6 +55,11 @@ namespace yann::models::layers
         //!       (input_features, output_features), and biases have dimensions (1, output_features).
         void init_parameters(int output_features, int input_features) override;
 
+        //! @brief Initialize layer parameters using multidimensional shapes.
+        //! @param input_shape Shape of the input tensor.
+        //! @param output_shape Shape of the output tensor.
+        void init_parameters(const cum::Shape& input_shape, const cum::Shape& output_shape) override;
+
         //! @brief Compute the forward pass (linear transformation only).
         //!
         //! @param input Input tensor of shape (batch_size, input_features).

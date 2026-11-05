@@ -34,6 +34,7 @@ target_sources(${CYANN_TARGET}
         src/yann_context.cpp
         src/yann_matrix.cpp
         src/yann_model.cpp
+        src/yann_tensor.cpp
 )
 
 target_include_directories(${CYANN_TARGET}
@@ -43,7 +44,7 @@ target_include_directories(${CYANN_TARGET}
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/include/YANN
+        ${CMAKE_SOURCE_DIR}/include/yann
         ${CMAKE_SOURCE_DIR}/src
 )
 
@@ -58,8 +59,7 @@ target_link_libraries(${CYANN_TARGET}
 
 if(UNIX AND NOT APPLE)
     set_target_properties(${CYANN_TARGET} PROPERTIES
-        CXX_VISIBILITY_PRESET hidden
-        VISIBILITY_INLINES_HIDDEN ON
+        CXX_VISIBILITY_PRESET default
     )
 endif()
 
@@ -70,8 +70,9 @@ install(TARGETS ${CYANN_TARGET}
     RUNTIME DESTINATION bin
 )
 
-install(FILES include/yann.h
+install(DIRECTORY include/
     DESTINATION include/yann
+    FILES_MATCHING PATTERN "*.h"
 )
 
 if(BUILD_EXAMPLES)

@@ -1,6 +1,5 @@
 #include "yann/optimizers/AdaGrad.hpp"
 #include "Parameter.hpp"
-#include "cum/Matrix.hpp"
 
 namespace yann::optimizers
 {
@@ -12,7 +11,7 @@ namespace yann::optimizers
 	void AdaGrad::step(Parameter& param)
 	{
 		if(!sum_sq_g.contains(&param))
-			sum_sq_g.emplace(&param, cum::Tensor({param.rows(), param.cols()}, param.type(), param.format()).fill(eps));
+			sum_sq_g.emplace(&param, cum::Tensor(param.shape(), param.type(), param.format()).fill(eps));
 
 		cum::Tensor& w = param.values;
 		cum::Tensor& g = param.gradient;
@@ -21,28 +20,15 @@ namespace yann::optimizers
 		v += g.square();
 
 		w -= learning_rate / v.sqrt() * g;
+		param.clear_gradient();
 	}
 
-	void AdaGrad::step(std::vector<Parameter*>& params) // yes, this is redundant
+	void AdaGrad::step(std::vector<Parameter*>& params)
 	{
-		if(sum_sq_g.empty())
-			for(Parameter* param : params)
-				if(!sum_sq_g.contains(param))
-					sum_sq_g.emplace(param, cum::Tensor({param->rows(), param->cols()}, param->type(), param->format()).fill(eps));
-		
-		for(Parameter* param : params)
-		{
-			cum::Tensor& w = param->values;
-			cum::Tensor& g = param->gradient;
-			cum::Tensor& v = sum_sq_g[param];
-
-			v += g.square();
-
-			w -= learning_rate / v.sqrt() * g;
-		}
+		OptimizerBase::step(params);
 	}
 
-	std::unique_ptr<AdaGrad> create(const cum::cumeric_t rate, const cum::cumeric_t eps)
+	std::unique_ptr<AdaGrad> AdaGrad::create(const cum::cumeric_t rate, const cum::cumeric_t eps)
 	{
 		return std::make_unique<AdaGrad>(rate, eps);
 	}

@@ -33,9 +33,9 @@ namespace yann::optimizers
 
         /**
          * @brief Perform an optimization step on a single parameter.
-         * @param params Parameter instance to update.
+         * @param param Parameter instance to update.
          */
-        void step(Parameter& params) override;
+        void step(Parameter& param) override;
 
         /**
          * @brief Perform an optimization step across multiple parameters.

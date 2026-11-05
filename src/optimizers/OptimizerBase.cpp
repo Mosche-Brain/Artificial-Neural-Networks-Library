@@ -6,6 +6,15 @@
 
 namespace yann::optimizers
 {
+    void OptimizerBase::step(std::vector<Parameter*>& params)
+    {
+        for (Parameter* param : params)
+        {
+            if (param)
+                this->step(*param);
+        }
+    }
+
     void OptimizerBase::scale_grads(std::vector<Parameter*>& params, const cum::cumeric_t scalar)
     {
         for (auto param : params)

@@ -13,6 +13,9 @@
 
 #include <yann/Parameter.hpp>
 #include <yann/optimizers/ADAM.hpp>
+#include <yann/optimizers/SGD.hpp>
+#include <yann/optimizers/Momentum.hpp>
+#include <yann/optimizers/AdaGrad.hpp>
 
 namespace
 {
@@ -164,6 +167,97 @@ TEST_CASE("ADAM keeps independent state for every parameter")
         REQUIRE_THAT(get(a.values, 0), Catch::Matchers::WithinAbs(wa[0], tolerance));
         REQUIRE_THAT(get(b.values, 0), Catch::Matchers::WithinAbs(wb[0], tolerance));
     }
+
+    cum::decum();
+}
+
+TEST_CASE("ADAM::step(Parameter&) updates a single parameter and clears gradient")
+{
+    cum::cum(cum::DEVICE::CPU);
+
+    yann::Parameter param = yann::Parameter::Zeros(1, 2);
+    set_row(param.values, {1.0, -1.0});
+    set_row(param.gradient, {0.5, -2.0});
+
+    yann::optimizers::ADAM adam(0.1);
+    adam.step(param);
+
+    REQUIRE_THAT(get(param.values, 0), Catch::Matchers::WithinAbs(0.9, tolerance));
+    REQUIRE_THAT(get(param.values, 1), Catch::Matchers::WithinAbs(-0.9, tolerance));
+    REQUIRE_THAT(get(param.gradient, 0), Catch::Matchers::WithinAbs(0.0, tolerance));
+    REQUIRE_THAT(get(param.gradient, 1), Catch::Matchers::WithinAbs(0.0, tolerance));
+
+    cum::decum();
+}
+
+TEST_CASE("SGD::step(Parameter&) and SGD::step(vector<Parameter*>&) update parameters correctly")
+{
+    cum::cum(cum::DEVICE::CPU);
+
+    yann::Parameter param = yann::Parameter::Zeros(1, 2);
+    set_row(param.values, {2.0, 3.0});
+    set_row(param.gradient, {1.0, -2.0});
+
+    yann::optimizers::SGD sgd(0.1);
+    sgd.step(param);
+
+    // values = values - lr * gradient: 2.0 - 0.1 * 1.0 = 1.9; 3.0 - 0.1 * (-2.0) = 3.2
+    REQUIRE_THAT(get(param.values, 0), Catch::Matchers::WithinAbs(1.9, tolerance));
+    REQUIRE_THAT(get(param.values, 1), Catch::Matchers::WithinAbs(3.2, tolerance));
+    REQUIRE_THAT(get(param.gradient, 0), Catch::Matchers::WithinAbs(0.0, tolerance));
+    REQUIRE_THAT(get(param.gradient, 1), Catch::Matchers::WithinAbs(0.0, tolerance));
+
+    // Test vector overload delegation
+    set_row(param.gradient, {1.0, 1.0});
+    std::vector<yann::Parameter*> params = {&param};
+    sgd.step(params);
+
+    REQUIRE_THAT(get(param.values, 0), Catch::Matchers::WithinAbs(1.8, tolerance));
+    REQUIRE_THAT(get(param.values, 1), Catch::Matchers::WithinAbs(3.1, tolerance));
+    REQUIRE_THAT(get(param.gradient, 0), Catch::Matchers::WithinAbs(0.0, tolerance));
+    REQUIRE_THAT(get(param.gradient, 1), Catch::Matchers::WithinAbs(0.0, tolerance));
+
+    cum::decum();
+}
+
+TEST_CASE("Momentum::step(Parameter&) updates velocity and clears gradient")
+{
+    cum::cum(cum::DEVICE::CPU);
+
+    yann::Parameter param = yann::Parameter::Zeros(1, 2);
+    set_row(param.values, {5.0, 5.0});
+    set_row(param.gradient, {2.0, -4.0});
+
+    // lr = 0.1, beta = 0.5
+    // v = 0.5 * 0 + 0.5 * g = {1.0, -2.0}
+    // w = w - lr * v = {5.0 - 0.1 * 1.0, 5.0 - 0.1 * (-2.0)} = {4.9, 5.2}
+    yann::optimizers::Momentum momentum(0.1, 0.5);
+    momentum.step(param);
+
+    REQUIRE_THAT(get(param.values, 0), Catch::Matchers::WithinAbs(4.9, tolerance));
+    REQUIRE_THAT(get(param.values, 1), Catch::Matchers::WithinAbs(5.2, tolerance));
+    REQUIRE_THAT(get(param.gradient, 0), Catch::Matchers::WithinAbs(0.0, tolerance));
+    REQUIRE_THAT(get(param.gradient, 1), Catch::Matchers::WithinAbs(0.0, tolerance));
+
+    cum::decum();
+}
+
+TEST_CASE("AdaGrad::step(Parameter&) accumulates squared gradients and clears gradient")
+{
+    cum::cum(cum::DEVICE::CPU);
+
+    yann::Parameter param = yann::Parameter::Zeros(1, 1);
+    set_row(param.values, {1.0});
+    set_row(param.gradient, {2.0});
+
+    // lr = 0.1, eps = 1e-8
+    // v = eps + g^2 = 4.0 (ignoring eps)
+    // w = 1.0 - 0.1 / sqrt(4.0) * 2.0 = 1.0 - 0.1 = 0.9
+    yann::optimizers::AdaGrad adagrad(0.1);
+    adagrad.step(param);
+
+    REQUIRE_THAT(get(param.values, 0), Catch::Matchers::WithinAbs(0.9, 1e-4));
+    REQUIRE_THAT(get(param.gradient, 0), Catch::Matchers::WithinAbs(0.0, tolerance));
 
     cum::decum();
 }

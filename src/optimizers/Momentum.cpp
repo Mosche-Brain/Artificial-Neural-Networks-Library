@@ -21,27 +21,21 @@ namespace yann::optimizers
 	{
 		if(!momentum.contains(&param))
 			momentum.emplace(&param, cum::Tensor::Zeros(param.shape(), param.type(), param.format()));
+
+		cum::Tensor& w = param.values;
+		cum::Tensor& g = param.gradient;
+		cum::Tensor& v = momentum.at(&param);
+
+		v = b * v + (1 - b) * g;
+
+		w -= learning_rate * v;
+
+		param.clear_gradient();
 	}
 
 	void Momentum::step(std::vector<Parameter*>& params)
 	{
-		if(momentum.empty())
-			for(Parameter* param : params)
-				if(!momentum.contains(param))
-					momentum.emplace(param, cum::Tensor::Zeros(param->shape(), param->type(), param->format()));
-
-		for(Parameter* param : params)
-		{
-			cum::Tensor& w = param->values;
-			cum::Tensor& g = param->gradient;
-			cum::Tensor& v = momentum.at(param);
-
-			v = b * v + (1 - b) * g;
-
-			w -= v;
-
-			param->clear_gradient();
-		}
+		OptimizerBase::step(params);
 	}
 
 	std::unique_ptr<Momentum> Momentum::create(const cum::cumeric_t rate, const cum::cumeric_t beta)

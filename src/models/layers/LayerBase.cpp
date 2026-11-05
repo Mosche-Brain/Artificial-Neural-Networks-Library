@@ -1,24 +1,25 @@
+#include <stdexcept>
 #include "LayerBase.hpp"
 
 namespace yann::models::layers
 {
-    // void LayerBase::initParameters(int layerSize, int inputLenght)
-    // {
-        // this->weights       = Parameter::Uniform(layerSize, inputLenght);   /* neurons * input_length */
-        // this->biases        = Parameter::Zeros(layerSize, 1);               /* Column-Vector */
-        // this->cache.a       = cum::Matrix::Zeros(layerSize, 1);             /* Column-Vector */
-        // this->cache.z   	= cum::Matrix::Zeros(layerSize, 1);             /* Column-Vector */
-        // this->cache.x       = cum::Matrix::Zeros(inputLenght, 1);   /* Column-Vector */
-        // // this->cache.x        = cum::Matrix::Zeros(layerSize, inputLenght);   /* Column-Vector */
-        // this->_initialized_ = true;
-    // }
+    void LayerBase::init_parameters(int output_features, int input_features)
+    {
+        init_parameters(cum::Shape{static_cast<cum::dim_t>(input_features)},
+                        cum::Shape{static_cast<cum::dim_t>(output_features)});
+    }
 
+    void LayerBase::init_parameters(const cum::Shape& input_shape, const cum::Shape& output_shape)
+    {
+        this->input_shape_ = input_shape;
+        this->output_shape_ = output_shape;
+        this->_initialized_ = true;
+    }
 
     bool LayerBase::initialized()
     {
         return this->_initialized_;
     }
-
 
     const cum::Shape& LayerBase::input_shape() const
     {
@@ -32,39 +33,39 @@ namespace yann::models::layers
 
     int LayerBase::size()
     {
-        return this->_layerSize_;
+        if (output_shape_.empty())
+            return 0;
+        return static_cast<int>(output_shape_.back());
     }
 
     cum::Tensor& LayerBase::Outputs()
     {
-        // return this->outputs;
         return this->cache.a;
     }
 
     cum::Tensor& LayerBase::Inputs()
     {
-        // return this->inputs;
         return this->cache.x;
     }
     
     cum::Tensor& LayerBase::weights()
     {
-        // return this->weights();
+        throw std::logic_error("Layer does not have trainable weights");
     }
 
     cum::Tensor& LayerBase::weights_grad()
     {
-        // return this->weights.gradient;
+        throw std::logic_error("Layer does not have trainable weight gradients");
     }
 
     cum::Tensor& LayerBase::biases()
     {
-        // return this->biases();
+        throw std::logic_error("Layer does not have trainable biases");
     }
 
     cum::Tensor& LayerBase::biases_grad()
     {
-        // return this->biases.gradient;
+        throw std::logic_error("Layer does not have trainable bias gradients");
     }
 
     LayerType LayerBase::layerType()
