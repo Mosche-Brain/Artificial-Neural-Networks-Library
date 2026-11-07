@@ -74,6 +74,12 @@ namespace yann::models::layers
         void collect_parameters(std::vector<Parameter*>& params) override {};
 
         /**
+         * @brief Returns formated informations about internal params
+         * @return std::string
+         */
+        std::string info();
+
+        /**
          * @brief Factory method creating a unique instance of Conv2D.
          * @param input_shape Shape of input [C, H, W].
          * @param kernels_n Number of output kernels.
@@ -84,7 +90,6 @@ namespace yann::models::layers
          * @return std::unique_ptr<LayerBase> Newly created Conv2D layer.
          */
         std::unique_ptr<LayerBase> createUnique(cum::Shape input_shape, cum::dim_t kernels_n, cum::Shape kernel_size, cum::dim_t stride=1, cum::dim_t padding=1, cum::dim_t dilatation=1);
-
     private:
         enum class AxisTag {N, C, H, W};
         struct Config {

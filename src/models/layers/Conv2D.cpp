@@ -12,6 +12,8 @@
 
 #include "yann/models/layers/Conv2D.hpp"
 
+#include <print>
+
 namespace cum::nn { using namespace cum::neural_primitives; }
 
 namespace yann::models::layers
@@ -61,7 +63,7 @@ namespace yann::models::layers
 
         kernels = Parameter::Uniform({
             config.kernels_n,
-            input_shape[1],
+            input_shape[0],
             config.kernel_size[0],
             config.kernel_size[1],
         }, cum::layout::OIHW);
@@ -82,26 +84,29 @@ namespace yann::models::layers
         if (input.dims() == 3)
             shape = extend_shape(input_shape_);
         else if (input.dims() == 4)
-            shape = input_shape_;
+            shape = input.shape();
         else
             throw std::runtime_error("Conv2D::forward: invalid input tensor shape");
 
         cache.x = input;
 
-        cum::nn::Memory::Descriptor in_md(shape, input.type(), input.format());
-        cum::nn::Memory::Descriptor out_md(extend_shape(output_shape_, shape[0]), input.type(), input.format());
+        cum::nn::Memory::Descriptor in_md(shape, input.type(), cum::layout::NCHW);
+        cum::nn::Memory::Descriptor out_md(extend_shape(output_shape_, shape[0]), input.type(), cum::layout::NCHW);
 
         cache.z = cum::Tensor(out_md);
 
+        YANN_LOG(3, "Creating convolution primitive descriptor", "");
         auto pd = cum::nn::PrimitiveDescriptor::Conv2D(
             cum::nn::Algo::convolution,
             out_md, in_md,
             *kernels.values.descriptor(), *biases.values.descriptor(),
-            {config.stride}, {config.padding},
+            {config.stride, config.stride}, {config.padding, config.padding},
             cum::nn::Purpose::forward_inference
         );
 
+        YANN_LOG(3, "Creating convolution primitive", "");
         cum::nn::Primitive primitive(pd);
+        YANN_LOG(3, "Executing convolution primitive", "");
         primitive.execute({
             {cum::nn::Primitive::Argument::src, *cache.x.memory()},
             {cum::nn::Primitive::Argument::weights, *kernels.values.memory()},
@@ -115,6 +120,11 @@ namespace yann::models::layers
     cum::Tensor Conv2D::backward(const cum::Tensor& input)
     {
         throw std::logic_error("Conv2D::backward not yet implemented");
+    }
+
+    std::string Conv2D::info()
+    {
+        return std::format("kernels dims: {}\nbiases dims: {}\n", kernels.values.descriptor()->shape(), biases.values.descriptor()->shape());
     }
 
     std::unique_ptr<LayerBase> Conv2D::createUnique(const cum::Shape input_shape, const cum::dim_t kernels_n, const cum::Shape kernel_size, const cum::dim_t stride, const cum::dim_t padding, const cum::dim_t dilatation)
