@@ -16,15 +16,24 @@
 
 namespace yann::models::layers
 {
+    struct Conv2DCache : LayerCache
+    {
+        cum::Tensor z;
+        cum::Tensor dz;
+
+        Conv2DCache() = default;
+    };
+
     /**
      * @class Conv2D
      * @brief Two-dimensional spatial convolutional layer assuming NCHW tensor layout.
      *
      * Computes 2D cross-correlation over spatial feature maps using learned convolution kernels.
      */
-    class Conv2D : public LayerBase // NCHW layout
+    class Conv2D : public LayerBase
     {
     public:
+        using Cache = Conv2DCache;
         /**
          * @brief Construct a Conv2D layer.
          * @param input_shape Shape of the input tensor [C, H, W].
@@ -77,7 +86,7 @@ namespace yann::models::layers
          * @brief Returns formated informations about internal params
          * @return std::string
          */
-        std::string info();
+        std::string info() const;
 
         /**
          * @brief Factory method creating a unique instance of Conv2D.
@@ -89,7 +98,7 @@ namespace yann::models::layers
          * @param dilatation Dilation rate (default: 1).
          * @return std::unique_ptr<LayerBase> Newly created Conv2D layer.
          */
-        std::unique_ptr<LayerBase> createUnique(cum::Shape input_shape, cum::dim_t kernels_n, cum::Shape kernel_size, cum::dim_t stride=1, cum::dim_t padding=1, cum::dim_t dilatation=1);
+        static std::unique_ptr<LayerBase> createUnique(cum::Shape input_shape, cum::dim_t kernels_n, cum::Shape kernel_size, cum::dim_t stride=1, cum::dim_t padding=1, cum::dim_t dilatation=1);
     private:
         enum class AxisTag {N, C, H, W};
         struct Config {
@@ -100,7 +109,7 @@ namespace yann::models::layers
             cum::dim_t dilatation;    /**< Dilation factor. */
         } config;
         const std::unordered_map<cum::dim_t, AxisTag> axis = { {0, AxisTag::N}, {1, AxisTag::C}, {2, AxisTag::H}, {3, AxisTag::W}};
-        LayerCache cache;
+        Cache cache;
         Parameter kernels;
         Parameter biases;
         // std::vector<Parameter> kernels;

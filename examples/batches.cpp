@@ -2,8 +2,10 @@
 // Created by jaro on 7/31/26.
 //
 
-#include <yann/models/Sequential.hpp>
+#include <cum/Tensor.hpp>
+#include <cum/Vector.hpp>
 #include <cum/cum.hpp>
+#include <cum/Matrix.hpp>
 
 #include <time.h>
 
@@ -11,12 +13,13 @@
 
 #include <matplot/matplot.h>
 
+import yann;
+
 namespace plt = matplot;
 
 int main()
 {
     cum::cum(cum::DEVICE::GPU);
-
 
     yann::models::Sequential sequential({
         yann::models::layers::Input::createUnique(8),
@@ -35,7 +38,6 @@ int main()
         // yann::models::layers::Dense::createUnique(16, "tanh"),
         yann::models::layers::Dense::createUnique(1, "sigmoid")
     });
-
 
     size_t samples_count = 128;
     size_t input_size = 8;
@@ -75,7 +77,6 @@ int main()
     std::vector<double> y = {time1, time2};
     plt::bar(y);
     plt::gca()->x_axis().ticklabels({"batche", "pojedyńcze"});
-
 
     plt::show();
 

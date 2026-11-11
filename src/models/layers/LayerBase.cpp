@@ -13,12 +13,12 @@ namespace yann::models::layers
     {
         this->input_shape_ = input_shape;
         this->output_shape_ = output_shape;
-        this->_initialized_ = true;
+        this->_initialized = true;
     }
 
     bool LayerBase::initialized()
     {
-        return this->_initialized_;
+        return this->_initialized;
     }
 
     const cum::Shape& LayerBase::input_shape() const
@@ -40,12 +40,12 @@ namespace yann::models::layers
 
     cum::Tensor& LayerBase::Outputs()
     {
-        return this->cache.a;
+        // return this->cache.a;
     }
 
     cum::Tensor& LayerBase::Inputs()
     {
-        return this->cache.x;
+        // return this->cache.x;
     }
     
     cum::Tensor& LayerBase::weights()
@@ -68,8 +68,8 @@ namespace yann::models::layers
         throw std::logic_error("Layer does not have trainable bias gradients");
     }
 
-    LayerType LayerBase::layerType()
+    Kind LayerBase::layerType()
     {
-        return _layerType_;
+        return _kind;
     }
 }

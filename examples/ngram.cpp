@@ -1,6 +1,12 @@
-#include <yann/models/NGram.hpp>
 
+#include <cum/Tensor.hpp>
+#include <cum/Matrix.hpp>
+#include <cum/Vector.hpp>
 #include <iostream>
+#include <fstream>
+#include <string>
+
+import yann;
 
 int main()
 {
@@ -11,8 +17,6 @@ int main()
     {
         data += line;
     }
-
-
 
     yann::models::NGram model;
     model.fit(data);

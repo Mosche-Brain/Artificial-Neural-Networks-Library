@@ -1,0 +1,45 @@
+/*
+ * @author: jaro
+ * @name:   utils
+ * @file:   include/yann/utils.ccm
+ * @date:   11 November 2026
+ */
+
+module;
+
+#include "yann/utils/filesystem.hpp"
+#include "yann/utils/formating.hpp"
+#include "yann/utils/OneHot.hpp"
+#include "yann/utils/safetensors.hpp"
+#include "yann/utils/serialize.hpp"
+
+export module yann:utils;
+
+export namespace yann::utils
+{
+    using yann::utils::TensorInfo;
+    using yann::utils::SafeTensors;
+    using yann::utils::load_safetensors;
+    using yann::utils::save_safetensors;
+    using yann::utils::load;
+    using yann::utils::save;
+    using yann::utils::load_safetensor;
+    using yann::utils::save_safetensor;
+    using yann::utils::model_serialize_to_safetensors;
+    using yann::utils::model_deserialize_from_safetensors;
+}
+
+export namespace yann::utils::filesystem
+{
+    using yann::utils::filesystem::DTYPE;
+    using yann::utils::filesystem::MatrixHeader;
+    using yann::utils::filesystem::dtype_bytes_count;
+    using yann::utils::filesystem::dump_matrix;
+}
+
+export namespace yann::utils::formating
+{
+    using yann::utils::formating::show_matrix_dimensions;
+    using yann::utils::formating::matrixToString;
+    using yann::utils::formating::matricesWithArrowToString;
+}

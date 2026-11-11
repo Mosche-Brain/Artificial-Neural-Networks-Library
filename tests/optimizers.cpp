@@ -11,11 +11,11 @@
 
 #include <cum/cum.hpp>
 
-#include <yann/Parameter.hpp>
-#include <yann/optimizers/ADAM.hpp>
-#include <yann/optimizers/SGD.hpp>
-#include <yann/optimizers/Momentum.hpp>
-#include <yann/optimizers/AdaGrad.hpp>
+#include <cum/Tensor.hpp>
+#include <cum/Matrix.hpp>
+#include <cum/Vector.hpp>
+
+import yann;
 
 namespace
 {

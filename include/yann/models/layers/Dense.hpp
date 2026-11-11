@@ -26,10 +26,23 @@
 
 #pragma once
 
+#include "Activaton.hpp"
+
 #include "LayerBase.hpp"
 
 namespace yann::models::layers
 {
+    struct DenseCache : LayerBase::Cache
+    {
+        cum::Tensor z;  /**< Pre-activation output tensor (z = Wx + b). */
+        cum::Tensor a;  /**< Post-activation output tensor (a = sigma(z)). */
+        cum::Tensor dz; /**< Gradient with respect to pre-activation z (dL/dz). */
+        cum::Tensor da; /**< Gradient with respect to post-activation a (dL/da). */
+
+        DenseCache() = default;
+        DenseCache(int input_features, int output_features, cum::datatype dtype = cum::default_type);
+    };
+
     //! @brief Fully connected (dense) neural network layer.
     //!
     //! The Dense layer implements a linear transformation followed by an activation function:
@@ -40,16 +53,29 @@ namespace yann::models::layers
     class Dense : public LayerBase
     {
     public:
+        using Cache = DenseCache;
+
         //! @brief Construct a Dense layer with the specified size and activation function.
         //!
-        //! @param layerSize Number of neurons (output features) in this layer.
-        //! @param func Name of the activation function to use (e.g., "relu", "sigmoid", "tanh").
-        //!             The function must be registered with cum::functions::get_function_by_name.
+        //! @param size Number of neurons (output features) in this layer.
+        //! @param activation Activation function to use (e.g., "relu", "sigmoid", "tanh").
+        //!             The function must be registered in Activation::Tag.
         //!
         //! @note The activation function is looked up at construction time and stored for
         //!       use in forward/backward passes. Invalid function names will cause runtime errors
         //!       during forward computation.
-        Dense(int layerSize, const char* func);
+        Dense(int size, const Activation& activation);
+
+        //! @brief Construct a Dense layer with the specified size and activation function.
+        //!
+        //! @param size Number of neurons (output features) in this layer.
+        //! @param activation Activation function to use (e.g., "relu", "sigmoid", "tanh").
+        //!             The function must be registered in Activation::Tag.
+        //!
+        //! @note The activation function is looked up at construction time and stored for
+        //!       use in forward/backward passes. Invalid function names will cause runtime errors
+        //!       during forward computation.
+        Dense(int input_features, int output_features, const Activation& activation);
 
         //! @brief Initialize the layer's parameters (weights and biases).
         //!
@@ -117,11 +143,11 @@ namespace yann::models::layers
         //! Factory method to create a Dense layer wrapped in std::unique_ptr.
         //!
         //! @param layerSize Number of neurons (output features) in the layer.
-        //! @param func Name of the activation function.
+        //! @param activation Activation of the layer.
         //! @return std::unique_ptr<LayerBase> Owned pointer to the created Dense layer.
         //!
         //! @see createUnique is a convenience factory for creating layers in ownership-transfer contexts.
-        static std::unique_ptr<LayerBase> createUnique(int layerSize, const char* func);
+        static std::unique_ptr<LayerBase> createUnique(int layerSize, const Activation& activation);
 
         //! @brief Get reference to the weights tensor.
         //! @return Reference to weights tensor values.
@@ -142,6 +168,8 @@ namespace yann::models::layers
     private:
         Parameter weights_;
         Parameter biases_;
+        Activation _activation;
+        Cache cache;
     };
 } // yann::models::layers
 //! @}

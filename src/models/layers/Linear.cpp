@@ -15,12 +15,21 @@
 
 namespace yann::models::layers
 {
+    Linear::Cache::LinearCache(int input_features, int output_features, cum::datatype dtype)
+    {
+        this->z       = cum::Tensor(cum::Shape{output_features}, dtype);
+        this->dz      = cum::Tensor(cum::Shape{output_features}, dtype);
+
+        owned = { &z, &dz };
+    }
+
+
     Linear::Linear(const int layerSize)
     {
         YANN_LOG(1, "Initializing Linear layer with {} neurons...", layerSize);
         output_shape_ = { layerSize };
 
-        this->_layerType_ = LayerType::Linear;
+        this->_kind = Kind::Linear;
     }
 
     void Linear::init_parameters(const cum::Shape& input_shape, const cum::Shape& output_shape)
@@ -39,9 +48,8 @@ namespace yann::models::layers
         this->weights_      = Parameter::Uniform(input_features, output_features);   /* input_length * neurons */
         this->biases_       = Parameter::Zeros(1, output_features);               /* Row-Vector */
         this->cache.x       = cum::Tensor({1, input_features}, cum::default_type, cum::layout::IO);
-        this->cache.a       = cum::Tensor({1, output_features}, cum::default_type, cum::layout::IO);
         this->cache.dz      = cum::Tensor::Ones({1, output_features}, cum::default_type, cum::layout::IO);
-        this->_initialized_ = true;
+        this->_initialized = true;
     }
 
     cum::Tensor Linear::forward(const cum::Tensor& input)
@@ -56,7 +64,7 @@ namespace yann::models::layers
             if constexpr(YANN_LINEAR_FORWARD_FUSED_PATH)
             {
                 // todo: implement this
-                return cache.a;
+                return cache.z;
             }
             else
             {
@@ -70,14 +78,14 @@ namespace yann::models::layers
 
                 YANN_LOG(3, "cache.a = input * weights_.values", "");
                 YANN_LOG(4, "X: {}x{}, | W: {}x{}", input.rows(), input.cols(), weights_.values.rows(), weights_.values.cols());
-                cache.a = input * weights_.values;
+                cache.z = input * weights_.values;
 
 
                 YANN_LOG(3, "cache.a = cache.z + biases_.values", "");
-                YANN_LOG(4, "A: {}x{} | B: {}x{}", cache.a.rows(), cache.a.cols(), biases_.values.rows(), biases_.values.cols());
-                cache.a = cache.a + biases_.values; // with broadcast
+                YANN_LOG(4, "A: {}x{} | B: {}x{}", cache.z.rows(), cache.z.cols(), biases_.values.rows(), biases_.values.cols());
+                cache.z = cache.z + biases_.values; // with broadcast
 
-                return cache.a;
+                return cache.z;
             }
             else
             {

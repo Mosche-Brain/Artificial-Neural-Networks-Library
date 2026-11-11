@@ -6,6 +6,7 @@
 #pragma once
 
 #include <memory>
+#include <unordered_set>
 #include <vector>
 
 #include <cum/Matrix.hpp>
@@ -14,7 +15,7 @@
 #include <cum/functions.hpp>
 #include <cum/Tensor.hpp>
 
-#include "yann/models/layers/LayerType.hpp"
+#include "yann/models/layers/Kind.hpp"
 #include "yann/Parameter.hpp"
 
 /*
@@ -22,6 +23,11 @@
  * ForwardCache name may not be relevant due to storing dz and da, more general name like a `LayerCache` may be better
  * TODO: Do not implicitly reserve memory necessary for training (da, dz, etc)
  */
+
+namespace cum::neural_primitives
+{
+    enum class Purpose;
+}
 
 namespace yann::models::layers
 {
@@ -31,22 +37,29 @@ namespace yann::models::layers
      */
     struct LayerCache
     {
+        std::unordered_set<cum::Tensor*> owned;
         cum::Tensor x;  /**< Input tensor to the layer. */
-        cum::Tensor z;  /**< Pre-activation output tensor (z = Wx + b). */
-        cum::Tensor a;  /**< Post-activation output tensor (a = sigma(z)). */
-        cum::Tensor dz; /**< Gradient with respect to pre-activation z (dL/dz). */
-        cum::Tensor da; /**< Gradient with respect to post-activation a (dL/da). */
+
+        LayerCache() = default;
 
         /**
          * @brief Fill all cached tensors with zeros.
          */
         void clear()
         {
-            x.fill(0);
-            z.fill(0);
-            a.fill(0);
-            da.fill(0);
-            dz.fill(0);
+            for (auto& tensor : owned)
+            {
+                tensor->fill(0);
+            }
+        }
+
+        /**
+         * @brief cash
+         */
+        void cast(cum::datatype dtype)
+        {
+            for (auto& tensor : owned)
+                tensor->cast(dtype);
         }
 
         /**
@@ -57,10 +70,10 @@ namespace yann::models::layers
          */
         void resize(cum::dim_t in_features, cum::dim_t out_features, cum::dim_t batch_size)
         {
-            x   = cum::Tensor::make_matrix(batch_size, in_features);
-            z   = cum::Tensor::make_matrix(batch_size, out_features);
-            a   = cum::Tensor::make_matrix(batch_size, out_features);
-            dz  = cum::Tensor::make_matrix(batch_size, out_features);
+            // x   = cum::Tensor::make_matrix(batch_size, in_features);
+            // z   = cum::Tensor::make_matrix(batch_size, out_features);
+            // a   = cum::Tensor::make_matrix(batch_size, out_features);
+            // dz  = cum::Tensor::make_matrix(batch_size, out_features);
         }
 
         /**
@@ -71,18 +84,18 @@ namespace yann::models::layers
          */
         void resise(const cum::Shape& input_shape, const cum::Shape& output_shape, cum::dim_t batch_size)
         {
-            cum::Shape in_shape = input_shape;
-            cum::Shape out_shape = output_shape;
-
-            // batch is always the first (0) dimension
-            in_shape.insert(in_shape.begin(), batch_size);
-            out_shape.insert(out_shape.begin(), batch_size);
-
-            x   = cum::Tensor(in_shape);
-            z   = cum::Tensor(out_shape);
-            a   = cum::Tensor(out_shape);
-            dz  = cum::Tensor(out_shape);
-            da  = cum::Tensor(out_shape);
+            // cum::Shape in_shape = input_shape;
+            // cum::Shape out_shape = output_shape;
+            //
+            // // batch is always the first (0) dimension
+            // in_shape.insert(in_shape.begin(), batch_size);
+            // out_shape.insert(out_shape.begin(), batch_size);
+            //
+            // x   = cum::Tensor(in_shape);
+            // z   = cum::Tensor(out_shape);
+            // a   = cum::Tensor(out_shape);
+            // dz  = cum::Tensor(out_shape);
+            // da  = cum::Tensor(out_shape);
         }
     };
 
@@ -93,6 +106,8 @@ namespace yann::models::layers
     class LayerBase
     {
     public:
+        enum class Mode { inference, training };
+
         virtual ~LayerBase() = default;
 
         /**
@@ -113,13 +128,13 @@ namespace yann::models::layers
          * @brief Get the configured input shape for this layer.
          * @return Const reference to input cum::Shape.
          */
-        virtual const cum::Shape& input_shape() const;
+        [[nodiscard]] virtual const cum::Shape& input_shape() const;
 
         /**
          * @brief Get the configured output shape produced by this layer.
          * @return Const reference to output cum::Shape.
          */
-        virtual const cum::Shape& output_shape() const;
+        [[nodiscard]] virtual const cum::Shape& output_shape() const;
 
         /**
          * @brief Compute the forward propagation through the layer.
@@ -195,16 +210,18 @@ namespace yann::models::layers
          * @brief Get the concrete layer type discriminator.
          * @return LayerType enum value identifying this layer.
          */
-        LayerType layerType();
+        Kind layerType();
 
+        using Cache = LayerCache;
     protected:
         friend class Sequential;
-        LayerCache cache; /**< Forward and backward computation cache. */
+
+        Mode _mode = Mode::training;
 
         cum::Shape input_shape_;  /**< Shape of inputs accepted by the layer. */
         cum::Shape output_shape_; /**< Shape of outputs produced by the layer. */
 
-        bool _initialized_ = false; /**< Initialization status flag. */
-        LayerType _layerType_;      /**< Layer type enumeration value. */
+        bool _initialized = false; /**< Initialization status flag. */
+        Kind _kind;      /**< Layer type enumeration value. */
     };
 } // yann::models::layers

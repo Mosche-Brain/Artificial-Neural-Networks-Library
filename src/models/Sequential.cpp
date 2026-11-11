@@ -9,7 +9,7 @@
 #include "utils/formating.hpp"
 #endif
 
-#include "yann/models/layers/LayerType.hpp"
+#include "yann/models/layers/Kind.hpp"
 
 #include "yann/loss/LossBase.hpp"
 #include "yann/runtime_config.hpp"
@@ -62,7 +62,7 @@ namespace yann::models
         {
             if (index == 0)
             {
-                if (layer->layerType() == layers::LayerType::Input)
+                if (layer->layerType() == layers::Kind::Input)
                 {
                     if (!current_shape.empty())
                         layer->init_parameters(current_shape, current_shape);
@@ -117,7 +117,7 @@ namespace yann::models
         cum::Tensor curr_gradient = d_output;
         for (auto [index, layer] : topology | std::views::enumerate | std::views::reverse)
         {
-            if (layer->layerType() == layers::LayerType::Input)
+            if (layer->layerType() == layers::Kind::Input)
                 break;
 
             cum::Tensor next_gradient = layer->backward(curr_gradient);

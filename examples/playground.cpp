@@ -1,24 +1,24 @@
 
+#include <cum/Matrix.hpp>
+#include <cum/Vector.hpp>
 #include <cum/cum.hpp>
+#include <cum/Tensor.hpp>
+#include <cum/neural_primitives/Primitive.hpp>
 
-#include <yann/models/layers/Conv2D.hpp>
-
-namespace cum::dnn
-{
-	using namespace cum::neural_primitives;
-}
+import yann;
 
 int main()
 {
-	cum::cum(cum::DEVICE::GPU);
+	cum::cum(yann::DEVICE::GPU);
 
-	cum::dnn::Memory::Descriptor md({6, 7}, cum::datatype::U8, cum::layout::AB);
+	yann::models::Sequential model({
+		yann::models::layers::Input::createUnique({28, 28}),
+		yann::models::layers::Conv2D::createUnique({3, 28, 28}, 3, {4, 4})
+	});
 
-	yann::models::layers::Conv2D layer({3, 16, 16}, 3, {4, 4});
-
-	cum::Tensor temsor = cum::Tensor::Random({1, 3, 16, 16}, -1, 1, cum::datatype::FP32, cum::layout::NCHW);
-
-	layer.forward(temsor);
+	yann::runtime_config::set_verbosity(3);
+	
+	yann::Tensor temsor = yann::Tensor::Random({1, 3, 16, 16}, -1, 1, cum::datatype::FP16, cum::layout::NCHW);
 
 	return 0;
 }

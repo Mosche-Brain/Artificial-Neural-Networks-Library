@@ -1,14 +1,8 @@
+#include <cum/Tensor.hpp>
+#include <cum/Vector.hpp>
 #include <cum/cum.hpp>
 #include <cum/Matrix.hpp>
 #include <cum/runtime.hpp>
-
-#include <yann/models/Sequential.hpp>
-#include <yann/optimizers/SGD.hpp>
-#include <yann/optimizers/ADAM.hpp>
-#include <yann/loss/MeanSquaredError.hpp>
-#include <yann/logging/LossTracker.hpp>
-#include <yann/logging/GradientTracker.hpp>
-#include <yann/runtime_config.hpp>
 
 #include <matplot/matplot.h>
 
@@ -16,6 +10,8 @@
 #include <numeric>
 
 #include "helpers/conversion_helpers.hpp"
+
+import yann;
 
 namespace plt = matplot;
 
@@ -61,7 +57,6 @@ int main()
 
     yann::loss::Loss loss = yann::loss::MeanSquaredError::create();
     yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.001);
-
 
     yann::logging::LossTracker loss_tracker = yann::logging::LossTracker();
     yann::logging::GradientTracker grad_tracker = yann::logging::GradientTracker();

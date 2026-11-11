@@ -5,7 +5,9 @@
  * @date:   28 September 2026 14:35:30
  */
 
-
+#include <cum/Tensor.hpp>
+#include <cum/Matrix.hpp>
+#include <cum/Vector.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <filesystem>
@@ -16,8 +18,7 @@
 
 #include <cum/cum.hpp>
 
-#include "yann/Parameter.hpp"
-#include "yann/utils/safetensors.hpp"
+import yann;
 
 namespace
 {

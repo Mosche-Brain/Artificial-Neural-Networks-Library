@@ -2,22 +2,15 @@
 // Created by jaro on 8/31/26.
 //
 
+#include <cum/Tensor.hpp>
+#include <cum/Vector.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <print>
 
 #include <cum/Matrix.hpp>
 #include <cum/cum.hpp>
 
-#include <yann/models/layers/Dense.hpp>
-#include <yann/models/layers/Input.hpp>
-
-#include <yann/models/Chain.hpp>
-#include <yann/models/Sequential.hpp>
-#include <yann/runtime_config.hpp>
-
-#include <yann/loss/BinaryCrossEntropy.hpp>
-#include <yann/optimizers/SGD.hpp>
-
+import yann;
 
 TEST_CASE("MLP binary classifier for XOR")
 {
@@ -50,7 +43,6 @@ TEST_CASE("MLP binary classifier for XOR")
 
     // for (int i = 0 ; i < X.rows() ; i++)
         // std::println("[{}, {}] -> {}", X(i, 0), X(i, 1), Y_pred(i, 0));
-
 
     sequential.fit(X, Y, *loss, *optimizer, 500, 4);
     // std::println("---------------------------------------");

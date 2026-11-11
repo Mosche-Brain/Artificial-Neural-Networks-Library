@@ -8,10 +8,10 @@
 namespace yann::models::layers
 {    
     /**
-     * @enum LayerType
+     * @enum Kind
      * @brief Discriminator enum identifying specific layer implementations.
      */
-    enum class LayerType
+    enum class Kind
     {
         Input,   /**< Input placeholder layer. */
         Linear,  /**< Fully connected linear layer (without activation). */

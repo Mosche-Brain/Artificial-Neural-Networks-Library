@@ -5,6 +5,9 @@
  * @date:   29 September 2026 15:51:08
  */
 
+#include <cum/Tensor.hpp>
+#include <cum/Matrix.hpp>
+#include <cum/Vector.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <filesystem>
@@ -16,10 +19,7 @@
 
 #include <cum/cum.hpp>
 
-#include "yann/utils/serialize.hpp"
-#include "yann/models/Sequential.hpp"
-#include "yann/models/layers/Dense.hpp"
-#include "yann/models/layers/Input.hpp"
+import yann;
 
 using namespace yann::utils;
 using namespace yann::models;
@@ -49,7 +49,7 @@ TEST_CASE("serializing and deserializing sequential model")
 
     for (const auto [layer_a, layer_b] : std::views::zip(model_a.getTopology(), model_b.getTopology()))
     {
-        if (layer_a->layerType() == layers::LayerType::Input)
+        if (layer_a->layerType() == layers::Kind::Input)
             continue;
         REQUIRE(layer_a->weights() == layer_b->weights());
         REQUIRE(layer_a->biases() == layer_b->biases());

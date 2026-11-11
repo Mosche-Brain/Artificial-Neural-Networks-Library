@@ -1,0 +1,40 @@
+/*
+ * @author: jaro
+ * @name:   layers
+ * @file:   include/yann/models/layers/layers.ccm
+ * @date:   11 November 2026
+ */
+
+module;
+
+#include "yann/models/layers/Kind.hpp"
+#include "yann/models/layers/LayerBase.hpp"
+#include "yann/models/layers/Input.hpp"
+#include "yann/models/layers/Linear.hpp"
+#include "yann/models/layers/Dense.hpp"
+#include "yann/models/layers/Conv2D.hpp"
+#include "yann/models/layers/Pool.hpp"
+#include "yann/models/layers/Flatten.hpp"
+#include "yann/models/layers/Normalize.hpp"
+#include "yann/models/layers/Softmax.hpp"
+
+export module yann:layers;
+
+export namespace yann::models::layers
+{
+    using yann::models::layers::Kind;
+    using yann::models::layers::LayerCache;
+    using yann::models::layers::LayerBase;
+    using yann::models::layers::Input;
+    using yann::models::layers::LinearCache;
+    using yann::models::layers::Linear;
+    using yann::models::layers::DenseCache;
+    using yann::models::layers::Dense;
+    using yann::models::layers::Conv2DCache;
+    using yann::models::layers::Conv2D;
+    using yann::models::layers::Pool;
+    using yann::models::layers::Flatten;
+    using yann::models::layers::Normalize;
+    using yann::models::layers::SoftmaxCache;
+    using yann::models::layers::Softmax;
+}

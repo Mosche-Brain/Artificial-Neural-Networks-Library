@@ -1,0 +1,28 @@
+/*
+ * @author: jaro
+ * @name:   loss
+ * @file:   include/yann/loss.ccm
+ * @date:   11 November 2026
+ */
+
+module;
+
+#include "yann/loss/LossBase.hpp"
+#include "yann/loss/MeanAbsoluteError.hpp"
+#include "yann/loss/MeanSquaredError.hpp"
+#include "yann/loss/BinaryCrossEntropy.hpp"
+#include "yann/loss/CategoricalCrossEntropy.hpp"
+
+export module yann:loss;
+
+export namespace yann::loss
+{
+    using yann::loss::loss_t;
+    using yann::loss::Reduction;
+    using yann::loss::LossBase;
+    using yann::loss::Loss;
+    using yann::loss::MeanAbsoluteError;
+    using yann::loss::MeanSquaredError;
+    using yann::loss::BinaryCrossEntropy;
+    using yann::loss::CategoricalCrossEntropy;
+}

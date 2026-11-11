@@ -2,9 +2,13 @@
 // Created by jaro on 6/25/26.
 //
 
-#include <yann/utils/formating.hpp>
-
+#include <cum/Tensor.hpp>
+#include <cum/Vector.hpp>
 #include <cum/Matrix.hpp>
+
+#include <iostream>
+
+import yann;
 
 int main()
 {

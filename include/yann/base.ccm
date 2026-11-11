@@ -1,0 +1,41 @@
+/*
+ * @author: jaro
+ * @name:   base
+ * @file:   include/yann/base.ccm
+ * @date:   11 November 2026
+ */
+
+module;
+
+#include "yann/common.hpp"
+#include "yann/Parameter.hpp"
+#include "yann/Activaton.hpp"
+#include "yann/runtime_config.hpp"
+
+export module yann:base;
+
+export namespace yann
+{
+    using yann::Parameter;
+    using yann::Activation;
+    using yann::RuntimeConfig;
+    using yann::logger;
+    using cum::Tensor;
+    using cum::Matrix;
+    using cum::Vector;
+    using cum::DEVICE;
+}
+
+export namespace yann::runtime_config
+{
+    using yann::runtime_config::verbosity_level;
+    using yann::runtime_config::set_verbosity;
+    using yann::runtime_config::async_mode;
+    using yann::runtime_config::set_async_mode;
+    using yann::runtime_config::fused_kernels;
+    using yann::runtime_config::set_fused_kernels;
+    using yann::runtime_config::cached_preactivations;
+    using yann::runtime_config::set_cached_preactivations;
+    using yann::runtime_config::telemetry_enabled;
+    using yann::runtime_config::enable_telemetry;
+}

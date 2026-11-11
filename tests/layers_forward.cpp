@@ -11,11 +11,11 @@
 
 #include <cum/cum.hpp>
 
-#include <yann/models/layers/Dense.hpp>
-#include <yann/models/layers/Linear.hpp>
-#include <yann/models/layers/Input.hpp>
-#include <yann/models/layers/Flatten.hpp>
-#include <yann/models/Sequential.hpp>
+#include <cum/Tensor.hpp>
+#include <cum/Matrix.hpp>
+#include <cum/Vector.hpp>
+
+import yann;
 
 namespace
 {

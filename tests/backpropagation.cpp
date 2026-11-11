@@ -4,6 +4,9 @@
  * @file:   tests/backpropagation.cpp
  */
 
+#include <cum/Tensor.hpp>
+#include <cum/Matrix.hpp>
+#include <cum/Vector.hpp>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -11,9 +14,7 @@
 
 #include <cum/cum.hpp>
 
-#include <yann/models/layers/Dense.hpp>
-#include <yann/models/layers/Linear.hpp>
-#include <yann/models/layers/Softmax.hpp>
+import yann;
 
 namespace
 {
@@ -93,7 +94,6 @@ TEST_CASE("Dense backward includes the ReLU derivative")
 TEST_CASE("Softmax backward computes input gradients")
 {
     cum::cum(cum::DEVICE::CPU);
-
 
     yann::models::layers::Softmax layer(2, 1);
     layer.init_parameters(2, 2);

@@ -3,6 +3,23 @@ file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS "*.cpp")
 add_library(${PROJECT_NAME} ${PROJECT_SOURCES})
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
+# C++ modules: primary interface `yann` and its partitions.
+# Interfaces wrap the existing headers (global module fragment), so the headers remain usable.
+target_sources(${PROJECT_NAME}
+    PUBLIC
+        FILE_SET yann_modules TYPE CXX_MODULES
+        BASE_DIRS ${CMAKE_SOURCE_DIR}/include
+        FILES
+            ${CMAKE_SOURCE_DIR}/include/yann.ixx
+            ${CMAKE_SOURCE_DIR}/include/yann/base.ccm
+            ${CMAKE_SOURCE_DIR}/include/yann/logging.ccm
+            ${CMAKE_SOURCE_DIR}/include/yann/utils.ccm
+            ${CMAKE_SOURCE_DIR}/include/yann/loss.ccm
+            ${CMAKE_SOURCE_DIR}/include/yann/optimizers.ccm
+            ${CMAKE_SOURCE_DIR}/include/yann/models/layers/layers.ccm
+            ${CMAKE_SOURCE_DIR}/include/yann/models.ccm
+)
+
 target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/yann>
@@ -44,6 +61,7 @@ install(TARGETS ${PROJECT_NAME}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    FILE_SET yann_modules DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/modules
 )
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
@@ -57,6 +75,7 @@ install(EXPORT ${PROJECT_NAME}Targets
     FILE ${PROJECT_NAME}Targets.cmake
     NAMESPACE ${PROJECT_NAME}::
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+    CXX_MODULES_DIRECTORY ${PROJECT_NAME}-modules
 )
 
 include(CMakePackageConfigHelpers)

@@ -1,0 +1,25 @@
+/*
+ * @author: jaro
+ * @name:   models
+ * @file:   include/yann/models.ccm
+ * @date:   11 November 2026
+ */
+
+module;
+
+#include "yann/models/ModelBase.hpp"
+#include "yann/models/Chain.hpp"
+#include "yann/models/NGram.hpp"
+#include "yann/models/Perceptron.hpp"
+#include "yann/models/Sequential.hpp"
+
+export module yann:models;
+
+export namespace yann::models
+{
+    using yann::models::ModelBase;
+    using yann::models::Chain;
+    using yann::models::NGram;
+    using yann::models::Perceptron;
+    using yann::models::Sequential;
+}

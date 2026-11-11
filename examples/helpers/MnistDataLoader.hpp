@@ -6,6 +6,7 @@
  */
 
 
+#include <cum/Tensor.hpp>
 #include <algorithm>
 #include <print>
 #include <cstdint>

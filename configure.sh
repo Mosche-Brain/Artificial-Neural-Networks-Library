@@ -1,1 +1,1 @@
-cmake -B build
+/usr/bin/cmake -B build

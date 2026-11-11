@@ -1,7 +1,11 @@
 
 // #define fsycl
-#include <yann/models/Perceptron.hpp>
+#include <cum/Tensor.hpp>
 #include <cum/cum.hpp>
+#include <cum/Matrix.hpp>
+#include <cum/Vector.hpp>
+
+import yann;
 
 int main()
 {

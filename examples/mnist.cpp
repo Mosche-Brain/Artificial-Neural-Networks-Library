@@ -1,19 +1,8 @@
+#include <cum/Tensor.hpp>
+#include <cum/Vector.hpp>
 #include <cum/cum.hpp>
 #include <cum/Matrix.hpp>
 #include <cum/runtime.hpp>
-
-#include <yann/loss/CategoricalCrossEntropy.hpp>
-#include <yann/optimizers/SGD.hpp>
-#include <yann/optimizers/ADAM.hpp>
-#include <yann/models/Sequential.hpp>
-#include <yann/models/layers/Dense.hpp>
-#include <yann/models/layers/Softmax.hpp>
-#include <yann/models/layers/Linear.hpp>
-#include <yann/models/layers/Input.hpp>
-#include <yann/optimizers/OptimizerBase.hpp>
-#include <yann/logging/LossTracker.hpp>
-#include <yann/utils/serialize.hpp>
-#include <yann/runtime_config.hpp>
 
 #include <matplot/matplot.h>
 
@@ -29,6 +18,8 @@
 
 #include "helpers/MnistDataLoader.hpp"
 
+import yann;
+
 using helpers::MnistDataLoader;
 
 using namespace yann::models;
@@ -37,6 +28,7 @@ using namespace yann::models;
 #include <vector>
 #include <cmath>
 #include <algorithm>
+
 
 void raylib_demo(Sequential& model)
 {
@@ -205,7 +197,6 @@ int main(int argc, char** argv)
     std::println("Images: {}x{} | {}", train.images.rows(), train.images.cols(), train.images(9, 9));
     std::println("Labels: {}x{}", train.labels.rows(), train.labels.cols());
 
-
     Sequential model({
         layers::Input::createUnique(28 * 28),
         layers::Dense::createUnique(256, "gelu"),
@@ -246,8 +237,6 @@ int main(int argc, char** argv)
     matplot::ylabel("loss");
     figure->size(1200, 800);
     matplot::show();
-
-
 
     cum::decum();
     return 0;

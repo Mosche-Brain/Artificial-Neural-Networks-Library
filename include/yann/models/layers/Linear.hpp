@@ -34,9 +34,20 @@
 
 namespace yann::models::layers
 {
+    struct LinearCache : LayerCache
+    {
+        cum::Tensor z;
+        cum::Tensor dz;
+
+        LinearCache() = default;
+        LinearCache(int input_features, int output_features, cum::datatype dtype);
+    };
+
     class Linear : public LayerBase
     {
     public:
+        using Cache = LinearCache;
+
         //! @brief Construct a Linear layer with the specified size.
         //!
         //! @param layerSize Number of neurons (output features) in this layer.
@@ -121,6 +132,7 @@ namespace yann::models::layers
     private:
         Parameter weights_;
         Parameter biases_;
+        Cache cache;
     };
 }
 //! @}

@@ -1,6 +1,7 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.28)
 project(YANN LANGUAGES CXX VERSION 0.1.0)
 include(GNUInstallDirs)
+include(cmake/YannCxxModules.cmake)
 
 # Protect CMAKE_INSTALL_PREFIX from being overwritten by thirdparty subprojects
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -31,6 +32,9 @@ target_compile_options(yann_compiler_flags INTERFACE
     $<$<CONFIG:Release>:-O3 -ffast-math>
     $<$<CONFIG:Debug>:-g -O0>
 )
+
+# Required in the export set because the YANN target links it privately (needed by C++ modules usage requirements)
+install(TARGETS yann_compiler_flags EXPORT YANNTargets)
 
 find_package(OpenMP REQUIRED)
 find_package(nlohmann_json 3.12.0 REQUIRED)

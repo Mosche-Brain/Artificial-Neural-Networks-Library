@@ -13,13 +13,14 @@
 
 namespace yann::models::layers
 {
+
     Softmax::Softmax(const cum::dim_t lenght, const cum::dim_t axis) : Softmax(cum::Shape{lenght}, axis)
     { }
 
     Softmax::Softmax(const cum::Shape& shape ,const cum::dim_t axis) : axis_(axis)
     {
         output_shape_ = shape;
-        _layerType_ = LayerType::Softmax;
+        _kind = Kind::Softmax;
     }
 
     void Softmax::init_parameters(int output_features, int input_features)
@@ -31,7 +32,7 @@ namespace yann::models::layers
     {
         this->input_shape_ = input_shape;
         this->output_shape_ = output_shape.empty() ? input_shape : output_shape;
-        _initialized_ = true;
+        _initialized = true;
     }
 
     cum::Tensor Softmax::forward(const cum::Tensor& input)

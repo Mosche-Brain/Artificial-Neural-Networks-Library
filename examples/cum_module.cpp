@@ -1,8 +1,11 @@
+#include <cum/Tensor.hpp>
+#include <cum/Vector.hpp>
 #include <cum/Matrix.hpp>
 #include <cum/cum.hpp>
 
-#include <yann/utils/formating.hpp>
 #include <iostream>
+
+import yann;
 
 int main()
 {

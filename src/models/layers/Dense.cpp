@@ -15,6 +15,8 @@
 
 #include "Dense.hpp"
 
+#include <cum/neural_primitives/Primitive.hpp>
+
 #define ENABLE_RUNTIME_CHECKS true
 #define USE_FUSED_KERNELS false
 #define ENABLE_CACHED_PREACTIVATION true
@@ -28,48 +30,27 @@
  * Brak niejawnej alokacji cache potrzebnego tylko do treningu
  */
 
+namespace cum::dl { using namespace cum::neural_primitives; }
+
 namespace yann::models::layers
 {
-
-    /*
-    static void dump_tensor(std::string_view name, const cum::Tensor& t, bool show_values = true)
+    Dense::Cache::DenseCache(int input_features, int output_features, cum::datatype dtype)
     {
-        std::println("=== DUMP: {} ===", name);
-        const cum::Shape shape = t.shape();
-        std::print("  Shape: [");
-        for (size_t i = 0; i < shape.size(); ++i)
-        {
-            std::print("{}{}", (i > 0 ? " x " : ""), shape[i]);
-        }
-        std::println("]");
-        std::println("  Mean: {}", t.mean());
-        std::println("  Norm: {}", t.norm());
+        this->z       = cum::Tensor(cum::Shape{output_features}, dtype);
+        this->a       = cum::Tensor(cum::Shape{output_features}, dtype);
+        this->dz      = cum::Tensor(cum::Shape{output_features}, dtype);
+        this->da      = cum::Tensor(cum::Shape{output_features}, dtype);
 
-        if (show_values)
-        {
-            std::println("  Values:");
-            for (int64_t r = 0; r < static_cast<int64_t>(t.rows()); ++r)
-            {
-                std::print("   [");
-                for (int64_t c = 0; c < static_cast<int64_t>(t.cols()); ++c)
-                {
-                    std::print("{}{:8.4f}", (c > 0 ? ", " : ""), t.at(cum::Shape{r, c}));
-                }
-                std::println("]");
-            }
-        }
-        std::println("==================");
+        owned = { &z, &a, &da, &dz };
     }
-    */
 
-    Dense::Dense(const int layerSize, const char* func)
+    Dense::Dense(const int size, const Activation& activation) : _activation(activation)
     {
-        YANN_LOG(1, "Initializing Dense layer with {} neurons and {} activation function...", layerSize, func);
-        cum::functions::get_function_by_name(&activation, func);
+        YANN_LOG(1, "Initializing Dense layer with {} neurons and {} activation function...", size, activation.label);
+        // cum::functions::get_function_by_name(&activation, func);
 
-        output_shape_ = { layerSize };
+        output_shape_ = { size };
 
-        this->_layerType_ = LayerType::Dense;
     }
 
     void Dense::init_parameters(const cum::Shape& input_shape, const cum::Shape& output_shape)
@@ -87,18 +68,17 @@ namespace yann::models::layers
         this->output_shape_ = cum::Shape{output_features};
         this->weights_      = Parameter::Uniform(input_features, output_features);   /* input_length * neurons */
         this->biases_       = Parameter::Zeros(1, output_features);                  /* Row-Vector */
-        this->cache.a       = cum::Tensor(cum::Shape{output_features}, cum::default_type);
-        this->cache.z   	= cum::Tensor(cum::Shape{output_features}, cum::default_type);
-        this->cache.x       = cum::Tensor(cum::Shape{input_features}, cum::default_type);
-        this->cache.da      = cum::Tensor(cum::Shape{output_features}, cum::default_type);
-        this->_initialized_ = true;
+
+        this->cache = Cache(input_features, output_features);
+
+        this->_initialized = true;
     }
 
     
     cum::Tensor Dense::forward(const cum::Tensor& input) // temporary implementation for compatibility
     {
         // those const expresions will be moved to build config
-        constexpr bool YANN_DENSE_FORWARD_FUSED_PATH = false;
+        constexpr bool YANN_DENSE_FORWARD_FUSED_PATH = true;
         constexpr bool YANN_DENSE_FORWARD_REFERENCE_PATH = true;
 
         // check if number of weights rows is equal to number of input features (input is [batch, features])
@@ -116,7 +96,37 @@ namespace yann::models::layers
         {
             if constexpr(YANN_DENSE_FORWARD_FUSED_PATH)
             {
-                // todo: implement this
+                const auto mm_pd = cum::dl::Primitive::Descriptor::Matmul(*cache.z.descriptor(), *cache.x.descriptor(), *weights_.values.descriptor());
+
+                const auto bb_pd = cum::dl::Primitive::Descriptor::Binary(
+                    cum::dl::Algo::binary_add, *cache.z.descriptor(), *cache.z.descriptor(), *biases_.values.descriptor()
+                );
+
+                const auto unary_pd = cum::dl::Primitive::Descriptor::Elementwise(
+                    _activation.fwd, *cache.a.descriptor(), *cache.z.descriptor(), _mode == Mode::training ? cum::dl::Purpose::forward_training : cum::dl::Purpose::forward_inference
+                );
+
+                const auto mm = cum::dl::Primitive(mm_pd);
+                const auto bb = cum::dl::Primitive(bb_pd);
+                const auto unary = cum::dl::Primitive(unary_pd);
+
+                mm.execute({
+                    { cum::dl::Primitive::Argument::dst, *cache.z.memory() },
+                    { cum::dl::Primitive::Argument::src, *cache.x.memory() },
+                    { cum::dl::Primitive::Argument::weights, *weights_.values.memory() },
+                });
+
+                bb.execute({
+                    { cum::dl::Primitive::Argument::dst0, *cache.z.memory()},
+                    { cum::dl::Primitive::Argument::src0, *cache.z.memory()},
+                    { cum::dl::Primitive::Argument::src1, *biases_.values.memory()}
+                });
+
+                unary.execute({
+                  { cum::dl::Primitive::Argument::dst, *cache.a.memory() },
+                  { cum::dl::Primitive::Argument::dst, *cache.a.memory() }
+                });
+
                 return cache.a;
             }
             else    
@@ -195,8 +205,8 @@ namespace yann::models::layers
         params.push_back(&biases_);
     }
 
-    std::unique_ptr<LayerBase> Dense::createUnique(int layerSize, const char* func)
+    std::unique_ptr<LayerBase> Dense::createUnique(int layerSize, const Activation& activation)
     {
-        return std::make_unique<Dense>(layerSize, func);
+        return std::make_unique<Dense>(layerSize, activation);
     }
 }

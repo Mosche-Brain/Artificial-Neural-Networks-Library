@@ -1,4 +1,6 @@
 #define ENABLE_DEBUG_OUTPUT
+#include <cum/Tensor.hpp>
+#include <cum/Vector.hpp>
 #include <iostream>
 #include <iomanip>
 #include <cmath>
@@ -8,7 +10,7 @@
 #include <cum/Matrix.hpp>
 #include <cum/random.hpp>
 
-#include <yann/utils/formating.hpp>
+import yann;
 
 static void print_matrix_info(const std::string& name, cum::Matrix& m)
 {

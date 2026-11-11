@@ -26,22 +26,22 @@ namespace yann::models::layers
 
         this->input_shape_ = shape;
         this->output_shape_ = shape;
-        this->_layerType_   = LayerType::Input;
-        this->_initialized_ = true;
+        this->_kind   = Kind::Input;
+        this->_initialized = true;
     }
 
     void Input::init_parameters(int output_features, int input_features)
     {
         this->input_shape_ = cum::Shape{input_features};
         this->output_shape_ = cum::Shape{output_features};
-        this->_initialized_ = true;
+        this->_initialized = true;
     }
 
     void Input::init_parameters(const cum::Shape& input_shape, const cum::Shape& output_shape)
     {
         this->input_shape_ = input_shape;
         this->output_shape_ = output_shape.empty() ? input_shape : output_shape;
-        this->_initialized_ = true;
+        this->_initialized = true;
     }
 
     cum::Tensor Input::forward(const cum::Tensor& input)

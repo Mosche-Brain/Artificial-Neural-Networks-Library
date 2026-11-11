@@ -14,7 +14,7 @@ namespace yann::models::layers
 {
     Flatten::Flatten()
     {
-        this->_layerType_ = LayerType::Flatten;
+        this->_kind = Kind::Flatten;
     }
 
     Flatten::Flatten(const cum::Shape& shape)
@@ -24,7 +24,7 @@ namespace yann::models::layers
         #endif
 
         init_parameters(shape, {});
-        this->_layerType_ = LayerType::Flatten;
+        this->_kind = Kind::Flatten;
     }
 
     void Flatten::init_parameters(int output_features, int input_features)
@@ -47,7 +47,7 @@ namespace yann::models::layers
                 total *= d;
             this->output_shape_ = cum::Shape{total};
         }
-        this->_initialized_ = true;
+        this->_initialized = true;
     }
 
     cum::Tensor Flatten::forward(const cum::Tensor& input)

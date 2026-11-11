@@ -14,6 +14,12 @@
 
 namespace yann::models::layers
 {
+    struct SoftmaxCache : LayerCache
+    {
+        cum::Tensor a;
+        cum::Tensor da;
+    };
+
     /**
      * @class Softmax
      * @brief Computes the softmax activation over an input tensor along a specified axis:
@@ -24,6 +30,8 @@ namespace yann::models::layers
     class Softmax : public LayerBase
     {
     public:
+        using Cache = SoftmaxCache;
+
         /**
          * @brief Construct a Softmax layer with feature length and target axis.
          * @param lenght Dimension length along feature axis.
@@ -89,7 +97,7 @@ namespace yann::models::layers
         static std::unique_ptr<LayerBase> createUnique(const cum::Shape& shape, cum::dim_t axis = -1);
 
     private:
-        LayerCache cache;   /**< Internal cache for forward activations during backward propagation. */
         cum::dim_t axis_;   /**< Normalization axis index. */
+        Cache cache;        /**< Internal cache for forward activations during backward propagation. */
     };
 } // yann::models::layers

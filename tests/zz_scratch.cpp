@@ -1,10 +1,12 @@
+#include <cum/Matrix.hpp>
+#include <cum/Vector.hpp>
 #include <cstdio>
 #include <vector>
 #include <catch2/catch_test_macros.hpp>
 #include <cum/cum.hpp>
 #include <cum/Tensor.hpp>
-#include <yann/Parameter.hpp>
-#include <yann/optimizers/ADAM.hpp>
+
+import yann;
 
 static void run(cum::dim_t cols, float g0)
 {

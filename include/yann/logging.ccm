@@ -1,0 +1,24 @@
+/*
+ * @author: jaro
+ * @name:   logging
+ * @file:   include/yann/logging.ccm
+ * @date:   11 November 2026
+ */
+
+module;
+
+#include "yann/logging/ITrainingCallback.hpp"
+#include "yann/logging/Logger.hpp"
+#include "yann/logging/LossTracker.hpp"
+#include "yann/logging/GradientTracker.hpp"
+
+export module yann:logging;
+
+export namespace yann::logging
+{
+    using yann::logging::TrainingContext;
+    using yann::logging::ITrainingCallback;
+    using yann::logging::Logger;
+    using yann::logging::LossTracker;
+    using yann::logging::GradientTracker;
+}

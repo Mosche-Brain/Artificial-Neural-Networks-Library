@@ -1,11 +1,7 @@
+#include <cum/Tensor.hpp>
+#include <cum/Matrix.hpp>
+#include <cum/Vector.hpp>
 #include <cum/cum.hpp>
-
-#include <yann/loss/BinaryCrossEntropy.hpp>
-#include <yann/models/Sequential.hpp>
-#include <yann/models/layers/Dense.hpp>
-#include <yann/models/layers/Input.hpp>
-#include <yann/optimizers/SGD.hpp>
-#include <yann/runtime_config.hpp>
 
 #include <print>
 #include <numeric>
@@ -14,6 +10,7 @@
 
 #include "serialize.hpp"
 
+import yann;
 
 int main()
 {
@@ -46,7 +43,6 @@ int main()
 
     for (int i = 0 ; i < X.rows() ; i++)
         std::println("[{}, {}] -> {}", X(i, 0), X(i, 1), Y_pred(i, 0));
-
 
     sequential.fit(X, Y, *loss, *optimizer, 500, 4);
     std::println("---------------------------------------");

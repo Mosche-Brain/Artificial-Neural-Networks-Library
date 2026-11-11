@@ -2,14 +2,17 @@
 // Created by jaro on 7/5/26.
 //
 
-#include <yann/models/Sequential.hpp>
+#include <cum/Tensor.hpp>
+#include <cum/Matrix.hpp>
+#include <cum/Vector.hpp>
 #include <cum/cum.hpp>
 #include <cum/random.hpp>
 
 #include <cmath>
 
-#include "runtime_config.hpp"
 #include "helpers/surface_visualisation.hpp"
+
+import yann;
 
 using cum::cumeric_t;
 using cum::Matrix;
