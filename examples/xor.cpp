@@ -37,9 +37,10 @@ int main()
     yann::optimizers::Optimizer optimizer = yann::optimizers::SGD::create(0.4); // BatchMean loss scaling: lr * batch_size (4) keeps the previous step size
     yann::loss::Loss loss = yann::loss::BinaryCrossEntropy::create();
 
-    yann::runtime_config::set_verbosity(0);
+    yann::runtime_config::set_verbosity(1);
 
     cum::Tensor Y_pred = sequential.forward(X);
+    yann::runtime_config::set_verbosity(0);
 
     for (int i = 0 ; i < X.rows() ; i++)
         std::println("[{}, {}] -> {}", X(i, 0), X(i, 1), Y_pred(i, 0));

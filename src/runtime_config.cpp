@@ -22,7 +22,7 @@ namespace yann
 {
     static RuntimeConfig* runtime_config_instance = nullptr;
 
-    RuntimeConfig::RuntimeConfig() : async_mode(false), fused_kernels(false), cached_preactivations(true), enable_telemetry(true)
+    RuntimeConfig::RuntimeConfig() : async_mode(false), fused_kernels(true), cached_preactivations(true), enable_telemetry(true)
     {
 
     };

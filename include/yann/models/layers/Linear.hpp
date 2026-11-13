@@ -39,8 +39,10 @@ namespace yann::models::layers
         cum::Tensor z;
         cum::Tensor dz;
 
+        Primitive::Descriptor matmul_pd;
+
         LinearCache() = default;
-        LinearCache(int input_features, int output_features, cum::datatype dtype);
+        LinearCache(int input_features, int output_features, cum::datatype dtype=cum::datatype::FP32);
     };
 
     class Linear : public LayerBase

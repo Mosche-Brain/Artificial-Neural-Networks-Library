@@ -27,6 +27,7 @@
 #pragma once
 
 #include "Activaton.hpp"
+#include "common.hpp"
 
 #include "LayerBase.hpp"
 
@@ -38,6 +39,9 @@ namespace yann::models::layers
         cum::Tensor a;  /**< Post-activation output tensor (a = sigma(z)). */
         cum::Tensor dz; /**< Gradient with respect to pre-activation z (dL/dz). */
         cum::Tensor da; /**< Gradient with respect to post-activation a (dL/da). */
+
+        Primitive::Descriptor unary_pd;
+        Primitive::Descriptor matmul_pd;
 
         DenseCache() = default;
         DenseCache(int input_features, int output_features, cum::datatype dtype = cum::default_type);
@@ -114,7 +118,7 @@ namespace yann::models::layers
         //!
         //! Calculates gradients of the loss with respect to weights, biases, and input.
         //!
-        //! @param deltaOutput Gradient of the loss with respect to the layer's output,
+        //! @param dL_dY Gradient of the loss with respect to the layer's output,
         //!                    of shape (@f$batch\_size \times output\_features@f$).
         //! @return Gradient tensor with respect to the layer's input,
         //!         of shape (@f$batch\_size \times input\_features@f$).
@@ -125,7 +129,7 @@ namespace yann::models::layers
         //!       - @f$\partial L / \partial x@f$ (input gradient for previous layer)
         //!
         //! @see forward() for the corresponding forward pass.
-        cum::Tensor backward(const cum::Tensor& deltaOutput) override;
+        cum::Tensor backward(const cum::Tensor& dL_dY) override;
 
         //! @brief Collect layer parameters for optimization.
         //!

@@ -17,6 +17,7 @@
 
 #include "yann/models/layers/Kind.hpp"
 #include "yann/Parameter.hpp"
+#include "yann/common.hpp"
 
 /*
  * Activation should be moved to declaration of specyfic layer due to it is not universal feature for all layer types

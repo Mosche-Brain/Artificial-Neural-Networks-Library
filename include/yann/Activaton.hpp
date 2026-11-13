@@ -17,10 +17,13 @@ namespace yann
         enum class Tag { relu, gelu, elu, sigmoid, tanh, undef };
 
         Activation(const std::string&);
+        Activation(const char*);
+        Activation(std::string_view);
         Activation(Tag);
         Activation(cum::neural_primitives::Algo fwd, cum::neural_primitives::Algo bwd, Tag tag, const std::string& label);
 
-        static Activation from_name(const std::string& label);
+        // static Activation from_name(const std::string& label);
+        static Activation from_name(std::string_view label);
         static Activation from_tag(Tag tag);
         static Activation relu();
         static Activation gelu();
@@ -31,6 +34,6 @@ namespace yann
         cum::neural_primitives::Algo fwd;
         cum::neural_primitives::Algo bwd;
         Tag tag = Tag::undef;
-        std::string label = "";
+        std::string label;
     };
 }

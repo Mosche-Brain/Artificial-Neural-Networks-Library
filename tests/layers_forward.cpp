@@ -5,6 +5,7 @@
  */
 
 #include <vector>
+#include <print>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
@@ -13,7 +14,6 @@
 
 #include <cum/Tensor.hpp>
 #include <cum/Matrix.hpp>
-#include <cum/Vector.hpp>
 
 import yann;
 
@@ -23,6 +23,7 @@ namespace
     {
         REQUIRE(tensor.lenght() == static_cast<cum::dim_t>(values.size()));
         auto value = values.begin();
+        std::println("tu jest ok");
         for (cum::dim_t row = 0; row < tensor.rows(); ++row)
             for (cum::dim_t col = 0; col < tensor.cols(); ++col)
                 tensor.at<cum::cumeric_t>({row, col}) = *value++;
@@ -55,10 +56,12 @@ TEST_CASE("Linear forward computes affine transformation")
     layer.init_parameters(2, 2);
     set_linear_parameters(layer);
 
-    cum::Tensor input({2, 2}, cum::default_type, cum::layout::AB);
+    cum::Tensor input({2, 2}, cum::default_type, cum::layout::IO);
     set_values(input, {2, 1, -1, 4}); // [batch, features]
 
+    std::println("ok");
     const cum::Tensor output = layer.forward(input);
+    std::println("po");
 
     REQUIRE(output.shape() == (cum::Shape{2, 2}));
     require_values(output, {0.25, 3.5, -8.75, 11});

@@ -8,6 +8,7 @@
 #pragma once
 
 #include <cum/Tensor.hpp>
+#include <cum/neural_primitives/Primitive.hpp>
 
 namespace yann
 {
@@ -15,4 +16,11 @@ namespace yann
     using cum::Matrix;
     using cum::Vector;
     using cum::DEVICE;
+    using cum::neural_primitives::Primitive;
+    using cum::neural_primitives::PrimitiveDescriptor;
+}
+
+namespace yann::primitives
+{
+    using namespace  cum::neural_primitives;
 }

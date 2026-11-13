@@ -16,6 +16,16 @@ namespace yann
         *this = from_name(label);
     }
 
+    Activation::Activation(const char* label)
+    {
+        *this = from_name(label ? label : "");
+    }
+
+    Activation::Activation(std::string_view label)
+    {
+        *this = from_name(label);
+    }
+
     Activation::Activation(Tag)
     {
         *this = from_tag(tag);
@@ -25,7 +35,8 @@ namespace yann
         : fwd(fwd), bwd(bwd), tag(tag), label(label)
     { }
 
-    Activation Activation::from_name(const std::string& label)
+    // Activation Activation::from_name(const std::string& label)
+    Activation Activation::from_name(std::string_view label)
     {
         if (label == "relu") return relu();
         if (label == "gelu") return gelu();

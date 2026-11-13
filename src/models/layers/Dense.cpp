@@ -47,7 +47,6 @@ namespace yann::models::layers
     Dense::Dense(const int size, const Activation& activation) : _activation(activation)
     {
         YANN_LOG(1, "Initializing Dense layer with {} neurons and {} activation function...", size, activation.label);
-        // cum::functions::get_function_by_name(&activation, func);
 
         output_shape_ = { size };
 
@@ -75,7 +74,7 @@ namespace yann::models::layers
     }
 
     
-    cum::Tensor Dense::forward(const cum::Tensor& input) // temporary implementation for compatibility
+    Tensor Dense::forward(const Tensor& input) // temporary implementation for compatibility
     {
         // those const expresions will be moved to build config
         constexpr bool YANN_DENSE_FORWARD_FUSED_PATH = true;
@@ -90,42 +89,40 @@ namespace yann::models::layers
             }
         }
 
-        this->cache.x = input;
+        cache.x = input;
+
+        /* We can cache most common shapes in future */
+        cache.z = Tensor(input.rows(), weights_.cols());
+        cache.a = Tensor(input.rows(), weights_.cols());
+        cache.da = Tensor(input.rows(), weights_.cols());
 
         if(runtime_config::fused_kernels())
         {
             if constexpr(YANN_DENSE_FORWARD_FUSED_PATH)
             {
-                const auto mm_pd = cum::dl::Primitive::Descriptor::Matmul(*cache.z.descriptor(), *cache.x.descriptor(), *weights_.values.descriptor());
-
-                const auto bb_pd = cum::dl::Primitive::Descriptor::Binary(
-                    cum::dl::Algo::binary_add, *cache.z.descriptor(), *cache.z.descriptor(), *biases_.values.descriptor()
+                cache.matmul_pd = Primitive::Descriptor::Matmul(
+                    *cache.z.descriptor(), *cache.x.descriptor(), *weights_.values.descriptor(), *biases_.values.descriptor()
                 );
 
-                const auto unary_pd = cum::dl::Primitive::Descriptor::Elementwise(
+                cache.unary_pd = Primitive::Descriptor::Elementwise(
                     _activation.fwd, *cache.a.descriptor(), *cache.z.descriptor(), _mode == Mode::training ? cum::dl::Purpose::forward_training : cum::dl::Purpose::forward_inference
                 );
 
-                const auto mm = cum::dl::Primitive(mm_pd);
-                const auto bb = cum::dl::Primitive(bb_pd);
-                const auto unary = cum::dl::Primitive(unary_pd);
+                const auto matmul = Primitive(cache.matmul_pd);
+                const auto unary  = Primitive(cache.unary_pd);
 
-                mm.execute({
-                    { cum::dl::Primitive::Argument::dst, *cache.z.memory() },
-                    { cum::dl::Primitive::Argument::src, *cache.x.memory() },
-                    { cum::dl::Primitive::Argument::weights, *weights_.values.memory() },
-                });
+                matmul.execute({
+                    { Primitive::Argument::dst, *cache.z.memory() },
+                    { Primitive::Argument::src, *cache.x.memory() },
+                    { Primitive::Argument::weights, *weights_.values.memory() },
+                    { Primitive::Argument::bias, *biases_.values.memory() } ,
+                }).wait();
 
-                bb.execute({
-                    { cum::dl::Primitive::Argument::dst0, *cache.z.memory()},
-                    { cum::dl::Primitive::Argument::src0, *cache.z.memory()},
-                    { cum::dl::Primitive::Argument::src1, *biases_.values.memory()}
-                });
-
+                YANN_LOG(1, "{} activation", _activation.label);
                 unary.execute({
-                  { cum::dl::Primitive::Argument::dst, *cache.a.memory() },
-                  { cum::dl::Primitive::Argument::dst, *cache.a.memory() }
-                });
+                  { Primitive::Argument::dst, *cache.a.memory() },
+                  { Primitive::Argument::src, *cache.z.memory() }
+                }).wait();
 
                 return cache.a;
             }
@@ -157,31 +154,48 @@ namespace yann::models::layers
         }
     }
 
-    cum::Tensor Dense::backward(const cum::Tensor& deltaOutput)
+    Tensor Dense::backward(const Tensor& dL_dY)
     {
         constexpr bool YANN_DENSE_BACKWARD_FUSED_PATH = false;
         constexpr bool YANN_DENSE_BACKWARD_REFERENCE_PATH = true;
 
-        if(runtime_config::fused_kernels())
+        // if(false)
+        // {
+        //     if constexpr(YANN_DENSE_BACKWARD_FUSED_PATH)
+        //     {
+        //         // Primitive::Descriptor d
+        //         // throw std::logic_error("YANN_DENSE_BACKWARD_FUSED_PATH not implemented");
+        //     }
+        //     else
+        //     {
+        //         goto reference_path; // silent fallback
+        //         // throw std::runtime_error("YANN_DENSE_BACKWARD_FUSED_PATH weren't compiled");
+        //     }
+        // }
+        // else // ta ścieżka jest używana
         {
-            if constexpr(YANN_DENSE_BACKWARD_FUSED_PATH)
-            {
-                throw std::logic_error("YANN_DENSE_BACKWARD_FUSED_PATH not implemented");
-            }
-            else
-            {
-                throw std::runtime_error("YANN_DENSE_BACKWARD_FUSED_PATH weren't compiled");
-            }
-        }
-        else // ta ścieżka jest używana
-        {
+            reference_path:
             if constexpr(YANN_DENSE_BACKWARD_REFERENCE_PATH) // We may move transpositions to compute kernel, but for now it's fine
             {
                 YANN_LOG(3, "dA/dZ = cache.z.elementwise_diff(activation.name)", "");
-                cache.da = cache.z.elementwise_diff(activation.name);
+                std::println("sex sex sex");
+                // cache.da = cache.z.elementwise_diff(activation.name);
+                const auto da_dz_pd = Primitive::Descriptor::ElementwiseBackward(
+                    _activation.bwd, *cache.a.descriptor(), *cache.da.descriptor(), *cache.z.descriptor(), cache.unary_pd
+                );
+
+                Tensor ones = Tensor::Ones(cache.z.shape());
+
+                Primitive(da_dz_pd).execute({
+                    { Primitive::Argument::diff_dst, *ones.memory() },
+                    { Primitive::Argument::diff_src, *cache.da.memory() },
+                    { Primitive::Argument::src, *cache.z.memory() },
+                }).wait();
+
+                YANN_LOG(1, "da mean {}", cache.da.mean());
 
                 YANN_LOG(3, "dL/dZ = deltaOutput * cache.da", "");
-                cache.dz = cache.da.cwiseProduct(deltaOutput);
+                cache.dz = cache.da.cwiseProduct(dL_dY);
 
                 YANN_LOG(3, "dL/dB = sum of cache.dz over batch axis", "");
                 biases_.gradient += cache.dz.sum(0, true);
@@ -194,7 +208,7 @@ namespace yann::models::layers
             }
             else
             {
-                throw std::runtime_error("YANN_DENSE_FORWARD_REFERENCE_PATH weren't compiled");
+                throw std::runtime_error("YANN_DENSE_BACKWARD_REFERENCE_PATH weren't compiled");
             }
         }
     }

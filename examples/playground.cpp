@@ -7,6 +7,7 @@
 
 import yann;
 
+
 int main()
 {
 	cum::cum(yann::DEVICE::GPU);

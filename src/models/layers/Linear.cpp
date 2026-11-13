@@ -9,10 +9,6 @@
 
 #define ENABLE_RUNTIME_CHECKS true
 
-/*
- * This layer should not allocate both cache.a and cache.z
- */
-
 namespace yann::models::layers
 {
     Linear::Cache::LinearCache(int input_features, int output_features, cum::datatype dtype)
@@ -29,7 +25,7 @@ namespace yann::models::layers
         YANN_LOG(1, "Initializing Linear layer with {} neurons...", layerSize);
         output_shape_ = { layerSize };
 
-        this->_kind = Kind::Linear;
+        _kind = Kind::Linear;
     }
 
     void Linear::init_parameters(const cum::Shape& input_shape, const cum::Shape& output_shape)
@@ -47,23 +43,50 @@ namespace yann::models::layers
         this->output_shape_ = cum::Shape{output_features};
         this->weights_      = Parameter::Uniform(input_features, output_features);   /* input_length * neurons */
         this->biases_       = Parameter::Zeros(1, output_features);               /* Row-Vector */
-        this->cache.x       = cum::Tensor({1, input_features}, cum::default_type, cum::layout::IO);
-        this->cache.dz      = cum::Tensor::Ones({1, output_features}, cum::default_type, cum::layout::IO);
+
+        this->cache = Cache(input_features, output_features);
+
         this->_initialized = true;
     }
 
-    cum::Tensor Linear::forward(const cum::Tensor& input)
+    Tensor Linear::forward(const Tensor& input)
     {
         constexpr bool YANN_LINEAR_FORWARD_FUSED_PATH = true;
         constexpr bool YANN_LINEAR_FORWARD_REFERENCE_PATH = true;
 
-        this->cache.x = input;
+        // check if number of weights rows is equal to number of input features (input is [batch, features])
+        if constexpr(ENABLE_RUNTIME_CHECKS)
+        {
+            if(input.cols() != weights_.rows())
+            {
+                throw std::runtime_error("Input dimension mismatch: " + std::to_string(input.cols()) + " != " + std::to_string(weights_.rows()));
+            }
+        }
+
+        cum::dim_t batch = input.shape().at(0);
+
+        cache.x = input;
+        cache.z = Tensor({batch, weights_.cols()}, cache.z.type());
 
         if(runtime_config::fused_kernels())
         {
             if constexpr(YANN_LINEAR_FORWARD_FUSED_PATH)
             {
-                // todo: implement this
+                cache.matmul_pd = Primitive::Descriptor::Matmul(
+                    *cache.z.descriptor(), *cache.x.descriptor(), *weights_.values.descriptor(), *biases_.values.descriptor()
+                );
+
+                const auto matmul = Primitive(cache.matmul_pd);
+
+                YANN_LOG(3, "cache.z = input * weights_.values + biases_.values", "");
+                YANN_LOG(4, "X: {}x{}, | W: {}x{} | B: {}x{}", input.rows(), input.cols(), weights_.values.rows(), weights_.values.cols(), biases_.values.rows(), biases_.values.cols());
+                matmul.execute({
+                    { Primitive::Argument::dst, *cache.z.memory() },
+                    { Primitive::Argument::src, *cache.x.memory() },
+                    { Primitive::Argument::weights, *weights_.values.memory() },
+                    { Primitive::Argument::bias, *biases_.values.memory() } ,
+                }).wait();
+
                 return cache.z;
             }
             else
@@ -96,7 +119,7 @@ namespace yann::models::layers
 
     cum::Tensor Linear::backward(const cum::Tensor& deltaOutput)
     {
-        constexpr bool YANN_LINEAR_BACKWARD_FUSED_PATH = true;
+        constexpr bool YANN_LINEAR_BACKWARD_FUSED_PATH = false;
         constexpr bool YANN_LINEAR_BACKWARD_REFERENCE_PATH = true;
 
         if(runtime_config::fused_kernels())

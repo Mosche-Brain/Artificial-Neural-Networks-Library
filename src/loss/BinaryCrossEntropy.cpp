@@ -21,10 +21,12 @@ namespace yann::loss
 
         if (runtime_config::fused_kernels())
         {
-            throw std::runtime_error("Fused path for BCE weren't compiled");
+            goto ref_path; // silent fallback
+            // throw std::runtime_error("Fused path for BCE weren't compiled");
         }
         else
         {
+            ref_path:
             const cum::cumeric_t eps = 1e-6_c; // epsilon nie powinien być hardcoded wewnątrz funkcji, tylko raczej być globalnym makrem lub zmienną, ale nie dałem to na potrzeby debug
 
             const cum::Tensor P = predicted.clamp(eps, 1 - eps);
