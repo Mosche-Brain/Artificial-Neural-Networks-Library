@@ -23,9 +23,9 @@ A lightweight, modular minimalistic and easy to use C++ library for machine lear
 
 #### Requirements
 
-* CMake
-* oneAPI/OpenMP/~~cuda~~/~~ROCm~~/~~openBLAS~~
-* G++, clang++ or Intel DPC++ compiler for oneAPI backend
+* CMake >=3.28
+* CUM library
+* Any modern C++ compiler (G++, clang++, icpx)
 * CPU with at least one core
 * ~~At least one sexual crime in lifetime~~
 
@@ -42,11 +42,6 @@ cmake -B build [options]
 cmake --build build
 ```
 
-FP16 and oneAPI backend
-```bash
-cmake -B build -DCUM_USE_MKL=ON -DCUM_USE_FP16
-```
-
 ### 🪟 Windows and MacOS
 
 Probably almost, just like in linux and GNU/Linux (I guess).
@@ -58,19 +53,12 @@ Probably almost, just like in linux and GNU/Linux (I guess).
 ### Building project
 ```cmake 
 # CMakeLists.txt
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.28)
 project(gpt69)
 
 add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE YANN cum)
 
-if(BUILD_USE_MKL)
-    target_link_libraries(${PROJECT_NAME} PRIVATE cum::MKL)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE fsycl fPIC)
-    target_compile_options(${PROJECT_NAME} PRIVATE -fsycl -qopenmp)
-else()
-    target_compile_options(${PROJECT_NAME} PRIVATE -fopenmp)
-endif()
 ```
 
 ### Initializing library
@@ -84,15 +72,15 @@ endif()
 
 int main()
 {
-    cum::cum(cum::DEVICE::AUTO);
+    yann::init(cum::DEVICE::AUTO);
     
     /* you can put there some strange code */
     
-    cum::decum(); // Putting this isn't necessary
+    yann::clean(); // Putting this isn't necessary, destructor of context class does it implicitly
 }
 ```
 
-### Manipulating tensors
+### Manipulating tensors (cum)
 
 ```cpp
 #include <cum/Tensor.hpp>
@@ -106,7 +94,7 @@ int main()
     A.fill(67._c);
     B.fill(0.2137_c);
     
-    cum::Tensor C = A * B; // matmul on the last two dims
+    cum::Tensor C = A * B; // elementwide multiply
     
     cum::cumeric_t scalar = C.at({6, 7, 1});
     
@@ -131,7 +119,7 @@ using namespace yann::models;
 
 int main()
 {
-    cum::cum(cum::DEVICE::GPU); // In this case CPU will be much faster
+    yann::init(yann::DEVICE::GPU); // In this case CPU will be much faster
 
     Sequential model({
         layers::Input::createUnique(2),
@@ -203,7 +191,7 @@ int main()
 
 ~~You can find full API documentation [there (currently not avaible)](www.amogus.org)~~
 
-Full documentation will be avaible [here](brain.mosche.dev/docs)
+Full documentation will be avaible [here](brain.mosche.dev/yann/docs)
 
 ## 🔨 Features
 
@@ -212,22 +200,20 @@ Full documentation will be avaible [here](brain.mosche.dev/docs)
 * ✅ Perceptrons
 * ✅ Reasonable design
 * ✅ Working backward pass (Yes, this is insane)
-* ✅ FP16 support
 * ✅ Callbacks system
 * ✅ Runtime device selection
 * ✅ Multicore CPU acceleration
 * ✅ GPU acceleration
 * ✅ Whole math framework
-* ✅ OneAPI support
 * ✅ Compiling code 
+* ✅️ Safetensors support
 * ✅ ND Tensors
-* ⚠️ BF16 support (probably works now)
-* ⚠️ int8&uint8 support (probably)
+* ⚠️ FP16, BF16, U8, S8 support (probably works now)
 * ⚠️ Reasonable unit tests (maybe)
 * ⚠️ Fused kernels for neural networks
 * ⚠️ Dynamic computational graphs
 * ⚠️ Convolutional layers
-* ⚠️ Compile time code traces pruning
+* ⚠️ Compile time unused traces pruning
 * ⚠️ [Dedicated graphical envionment](https://github.com/Mosche-Brain/MLStudio) (work in progress)
 * ❌ CUDA support
 * ❌ ROCm support
@@ -235,7 +221,6 @@ Full documentation will be avaible [here](brain.mosche.dev/docs)
 * ❌ [Python binding](https://pypi.org/project/cumpy/0.1.0/)
 * ❌ C binding 
 * ❌ FP8
-* ❌ Safetensors format
 * ❌ Recurrent Neural Networks
 * ❌ Pooling layers
 * ❌ Normalization layers
@@ -270,4 +255,4 @@ Full documentation will be avaible [here](brain.mosche.dev/docs)
 * Generating boilerplate
 * Basic inline code autocompletion from free github copilot credits
 * I also spend ~~0.05$~~ 2.67\$ for Grok and Kimi tokens
-* Testing Nemotron 3.5 Lightning 30B A3B for generating doxygen
+* Nemotron 3.5 Lightning 30B A3B for generating doxygen
